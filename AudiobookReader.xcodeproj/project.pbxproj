@@ -1,0 +1,572 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXContainerItemProxy section */
+		F13289B22E4DBA6D004EC064 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F132899F2E4DBA6B004EC064;
+			remoteInfo = AudiobookReader;
+		};
+		F13289BC2E4DBA6D004EC064 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F132899F2E4DBA6B004EC064;
+			remoteInfo = AudiobookReader;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		F13289A02E4DBA6B004EC064 /* AudiobookReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudiobookReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F13289C32E4DBA6D004EC064 /* Exceptions for "AudiobookReader" folder in "AudiobookReader" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F132899F2E4DBA6B004EC064 /* AudiobookReader */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		F13289A22E4DBA6B004EC064 /* AudiobookReader */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F13289C32E4DBA6D004EC064 /* Exceptions for "AudiobookReader" folder in "AudiobookReader" target */,
+			);
+			path = AudiobookReader;
+			sourceTree = "<group>";
+		};
+		F13289B42E4DBA6D004EC064 /* AudiobookReaderTests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AudiobookReaderTests;
+			sourceTree = "<group>";
+		};
+		F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = AudiobookReaderUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F132899D2E4DBA6B004EC064 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289AE2E4DBA6D004EC064 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289B82E4DBA6D004EC064 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F13289972E4DBA6B004EC064 = {
+			isa = PBXGroup;
+			children = (
+				F13289A22E4DBA6B004EC064 /* AudiobookReader */,
+				F13289B42E4DBA6D004EC064 /* AudiobookReaderTests */,
+				F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */,
+				F13289A12E4DBA6B004EC064 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F13289A12E4DBA6B004EC064 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F13289A02E4DBA6B004EC064 /* AudiobookReader.app */,
+				F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */,
+				F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F132899F2E4DBA6B004EC064 /* AudiobookReader */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReader" */;
+			buildPhases = (
+				F132899C2E4DBA6B004EC064 /* Sources */,
+				F132899D2E4DBA6B004EC064 /* Frameworks */,
+				F132899E2E4DBA6B004EC064 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F13289A22E4DBA6B004EC064 /* AudiobookReader */,
+			);
+			name = AudiobookReader;
+			packageProductDependencies = (
+			);
+			productName = AudiobookReader;
+			productReference = F13289A02E4DBA6B004EC064 /* AudiobookReader.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F13289B02E4DBA6D004EC064 /* AudiobookReaderTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReaderTests" */;
+			buildPhases = (
+				F13289AD2E4DBA6D004EC064 /* Sources */,
+				F13289AE2E4DBA6D004EC064 /* Frameworks */,
+				F13289AF2E4DBA6D004EC064 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F13289B32E4DBA6D004EC064 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F13289B42E4DBA6D004EC064 /* AudiobookReaderTests */,
+			);
+			name = AudiobookReaderTests;
+			packageProductDependencies = (
+			);
+			productName = AudiobookReaderTests;
+			productReference = F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		F13289BA2E4DBA6D004EC064 /* AudiobookReaderUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReaderUITests" */;
+			buildPhases = (
+				F13289B72E4DBA6D004EC064 /* Sources */,
+				F13289B82E4DBA6D004EC064 /* Frameworks */,
+				F13289B92E4DBA6D004EC064 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				F13289BD2E4DBA6D004EC064 /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */,
+			);
+			name = AudiobookReaderUITests;
+			packageProductDependencies = (
+			);
+			productName = AudiobookReaderUITests;
+			productReference = F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F13289982E4DBA6B004EC064 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					F132899F2E4DBA6B004EC064 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+					F13289B02E4DBA6D004EC064 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = F132899F2E4DBA6B004EC064;
+					};
+					F13289BA2E4DBA6D004EC064 = {
+						CreatedOnToolsVersion = 16.4;
+						TestTargetID = F132899F2E4DBA6B004EC064;
+					};
+				};
+			};
+			buildConfigurationList = F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "AudiobookReader" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F13289972E4DBA6B004EC064;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = F13289A12E4DBA6B004EC064 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F132899F2E4DBA6B004EC064 /* AudiobookReader */,
+				F13289B02E4DBA6D004EC064 /* AudiobookReaderTests */,
+				F13289BA2E4DBA6D004EC064 /* AudiobookReaderUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F132899E2E4DBA6B004EC064 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289AF2E4DBA6D004EC064 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289B92E4DBA6D004EC064 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F132899C2E4DBA6B004EC064 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289AD2E4DBA6D004EC064 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F13289B72E4DBA6D004EC064 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		F13289B32E4DBA6D004EC064 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F132899F2E4DBA6B004EC064 /* AudiobookReader */;
+			targetProxy = F13289B22E4DBA6D004EC064 /* PBXContainerItemProxy */;
+		};
+		F13289BD2E4DBA6D004EC064 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F132899F2E4DBA6B004EC064 /* AudiobookReader */;
+			targetProxy = F13289BC2E4DBA6D004EC064 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		F13289C52E4DBA6D004EC064 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AudiobookReader/AudiobookReader.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudiobookReader/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReader;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F13289C62E4DBA6D004EC064 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = AudiobookReader/AudiobookReader.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudiobookReader/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReader;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		F13289C72E4DBA6D004EC064 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F13289C82E4DBA6D004EC064 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F13289CA2E4DBA6D004EC064 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudiobookReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudiobookReader";
+			};
+			name = Debug;
+		};
+		F13289CB2E4DBA6D004EC064 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudiobookReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudiobookReader";
+			};
+			name = Release;
+		};
+		F13289CD2E4DBA6D004EC064 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = AudiobookReader;
+			};
+			name = Debug;
+		};
+		F13289CE2E4DBA6D004EC064 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = AudiobookReader;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "AudiobookReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F13289C72E4DBA6D004EC064 /* Debug */,
+				F13289C82E4DBA6D004EC064 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReader" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F13289C52E4DBA6D004EC064 /* Debug */,
+				F13289C62E4DBA6D004EC064 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReaderTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F13289CA2E4DBA6D004EC064 /* Debug */,
+				F13289CB2E4DBA6D004EC064 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "AudiobookReaderUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F13289CD2E4DBA6D004EC064 /* Debug */,
+				F13289CE2E4DBA6D004EC064 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F13289982E4DBA6B004EC064 /* Project object */;
+}
