@@ -8,6 +8,8 @@ class GlobalAudioManager: ObservableObject {
     @Published var audioEngine: AudioEngine?
     @Published var multiFileAudioEngine: MultiFileAudioEngine?
     @Published var useMultiFileEngine = false
+    @Published var isLoading = false
+    @Published var isReady = false
     
     private init() {}
     

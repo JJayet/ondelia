@@ -110,6 +110,7 @@ struct LibraryView: View {
             }
             .onReceive(audiobookManager.$audiobookNeedingCover) { audiobook in
                 showingImagePicker = (audiobook != nil)
+                print(showingImagePicker)
             }
             .sheet(isPresented: $showingImagePicker) {
                 if let audiobook = audiobookManager.audiobookNeedingCover {

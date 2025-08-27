@@ -128,7 +128,6 @@ struct PlayerView: View {
             }
             .foregroundColor(.blue)
                     
-            // Speed Control - More compact
             VStack(spacing: 4) {
                 let playbackRate = globalAudioManager.getPlaybackRate()
                 Text("Speed: \(String(format: "%.1fx", playbackRate))")
@@ -155,7 +154,7 @@ struct PlayerView: View {
             }
                 
             // Action Buttons
-            HStack(spacing: 20) {
+            HStack(spacing: 10) {
                 Button("Bookmarks") {
                     showingBookmarks = true
                 }

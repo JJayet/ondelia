@@ -3,14 +3,15 @@ import SwiftUI
 struct EnhancedPlayerView: View {
     let audiobook: Audiobook
     @ObservedObject var statistics: ReadingStatistics
+    @StateObject private var audiobookManager = AudiobookManager()
     @StateObject private var audioEngine = AudioEngine()
     @StateObject private var multiFileAudioEngine = MultiFileAudioEngine()
-    @StateObject private var audiobookManager = AudiobookManager()
     @StateObject private var themeManager = ThemeManager.shared
     @State private var useMultiFileEngine = false
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
     @State private var showingSleepTimer = false
+    @State private var showingChapterList = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
     @State private var sleepTimer: Timer?
@@ -175,8 +176,10 @@ struct EnhancedPlayerView: View {
                                         set: { newValue in
                                             if useMultiFileEngine {
                                                 multiFileAudioEngine.seek(to: newValue)
+                                                multiFileAudioEngine.play()
                                             } else {
                                                 audioEngine.seek(to: newValue)
+                                                audioEngine.play()
                                             }
                                         }
                                     ),
@@ -291,7 +294,7 @@ struct EnhancedPlayerView: View {
                         .padding(.horizontal)
                         
                         // Action Buttons
-                        HStack(spacing: 32) {
+                        HStack(spacing: 22) {
                             ActionButton(icon: "bookmark", title: "Bookmarks", count: bookmarks.count) {
                                 showingBookmarks = true
                             }
@@ -302,7 +305,7 @@ struct EnhancedPlayerView: View {
                             
                             if !chapters.isEmpty {
                                 ActionButton(icon: "list.bullet", title: "Chapters", count: chapters.count) {
-                                    // Show chapters view
+                                    showingChapterList = true
                                 }
                             }
                         }
@@ -346,6 +349,21 @@ struct EnhancedPlayerView: View {
                     )
                     bookmarkTitle = ""
                     bookmarkNote = ""
+                }
+            )
+        }
+        .sheet(isPresented: $showingChapterList) {
+            ChapterListView(
+                chapters: chapters,
+                onChapterTap: { chapter in
+                    if useMultiFileEngine {
+                        multiFileAudioEngine.seek(to: chapter.startTime)
+                        multiFileAudioEngine.play()
+                    } else {
+                        audioEngine.seek(to: chapter.startTime)
+                        audioEngine.play()
+                    }
+                    showingChapterList = false
                 }
             )
         }

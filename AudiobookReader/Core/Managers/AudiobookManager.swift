@@ -182,7 +182,6 @@ class AudiobookManager: ObservableObject {
             if let coverImage = metadata.coverImage {
                 audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
             } else {
-                // Mark this audiobook as needing a cover image
                 audiobookNeedingCover = audiobook
             }
             
