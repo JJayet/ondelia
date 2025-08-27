@@ -1,17 +1,18 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
     @State private var showingFilePicker = false
     @State private var searchText = ""
-    @State private var selectedAudiobook: Audiobook?
+    @State private var navigationPath = NavigationPath()
     
     private var filteredAudiobooks: [Audiobook] {
         audiobookManager.searchAudiobooks(query: searchText)
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $navigationPath) {
             VStack {
                 if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
                     // Empty State
@@ -49,11 +50,7 @@ struct LibraryView: View {
                         }
                         
                         ForEach(filteredAudiobooks, id: \.id) { audiobook in
-                            NavigationLink(
-                                destination: PlayerView(audiobook: audiobook),
-                                tag: audiobook,
-                                selection: $selectedAudiobook
-                            ) {
+                            NavigationLink(value: audiobook) {
                                 AudiobookRowView(audiobook: audiobook)
                             }
                         }
@@ -63,6 +60,9 @@ struct LibraryView: View {
                 }
             }
             .navigationTitle("Library")
+            .navigationDestination(for: Audiobook.self) { audiobook in
+                PlayerView(audiobook: audiobook)
+            }
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Import") {
@@ -72,18 +72,36 @@ struct LibraryView: View {
             }
             .fileImporter(
                 isPresented: $showingFilePicker,
-                allowedContentTypes: [.audio],
+                allowedContentTypes: [.folder, .audio, .mp3],
                 allowsMultipleSelection: true
             ) { result in
                 switch result {
                 case .success(let urls):
                     for url in urls {
                         Task {
-                            await audiobookManager.importAudiobook(from: url)
+                            print("📂 Processing import: \(url.lastPathComponent)")
+                            
+                            // Start accessing security-scoped resource
+                            let accessing = url.startAccessingSecurityScopedResource()
+                            defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+                            
+                            var isDirectory: ObjCBool = false
+                            if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                                if isDirectory.boolValue {
+                                    print("📁 Importing folder: \(url.lastPathComponent)")
+                                    await audiobookManager.importAudiobookFolder(from: url)
+                                } else {
+                                    print("🎵 Importing single file: \(url.lastPathComponent)")
+                                    await audiobookManager.importAudiobook(from: url)
+                                }
+                            } else {
+                                print("🎵 Importing file (fallback): \(url.lastPathComponent)")
+                                await audiobookManager.importAudiobook(from: url)
+                            }
                         }
                     }
                 case .failure(let error):
-                    print("Failed to select files: \(error)")
+                    print("❌ Import failed: \(error.localizedDescription)")
                 }
             }
             .refreshable {

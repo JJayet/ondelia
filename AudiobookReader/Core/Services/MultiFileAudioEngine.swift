@@ -125,7 +125,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 continue
             }
             
-            let asset = AVAsset(url: fileURL)
+            let asset = AVURLAsset(url: fileURL)
             let playerItem = AVPlayerItem(asset: asset)
             let player = AVPlayer(playerItem: playerItem)
             
@@ -172,7 +172,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             }.sorted { $0.lastPathComponent < $1.lastPathComponent }
             
             for (index, fileURL) in audioFiles.enumerated() {
-                let asset = AVAsset(url: fileURL)
+                let asset = AVURLAsset(url: fileURL)
                 let playerItem = AVPlayerItem(asset: asset)
                 let player = AVPlayer(playerItem: playerItem)
                 

@@ -12,7 +12,7 @@ struct AudiobookMetadata {
 
 class MetadataExtractor {
     static func extractMetadata(from url: URL) async -> AudiobookMetadata? {
-        let asset = AVAsset(url: url)
+        let asset = AVURLAsset(url: url)
         
         do {
             let duration = try await asset.load(.duration).seconds

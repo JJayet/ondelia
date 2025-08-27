@@ -22,7 +22,7 @@ struct SettingsView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .onChange(of: themeManager.currentTheme) { newTheme in
+                        .onChange(of: themeManager.currentTheme) { _, newTheme in
                             themeManager.updateTheme(newTheme)
                         }
                     }
@@ -39,7 +39,7 @@ struct SettingsView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .onChange(of: themeManager.accentColor) { newColor in
+                        .onChange(of: themeManager.accentColor) { _, newColor in
                             themeManager.updateAccentColor(newColor)
                         }
                     }
@@ -57,7 +57,7 @@ struct SettingsView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
-                        .onChange(of: themeManager.skipInterval) { newInterval in
+                        .onChange(of: themeManager.skipInterval) { _, newInterval in
                             themeManager.updateSkipInterval(newInterval)
                         }
                     }

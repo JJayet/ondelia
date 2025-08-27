@@ -112,8 +112,17 @@ class AudioEngine: NSObject, ObservableObject {
     // MARK: - Key-Value Observing
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "duration", let item = object as? AVPlayerItem {
-            DispatchQueue.main.async {
-                self.duration = item.duration.seconds.isFinite ? item.duration.seconds : 0
+            Task {
+                do {
+                    let durationCMTime = try await item.asset.load(.duration)
+                    await MainActor.run {
+                        self.duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
+                    }
+                } catch {
+                    await MainActor.run {
+                        self.duration = 0
+                    }
+                }
             }
         } else if keyPath == "status", let item = object as? AVPlayerItem {
             DispatchQueue.main.async {
@@ -133,7 +142,6 @@ class AudioEngine: NSObject, ObservableObject {
     
     // MARK: - Now Playing Info
     private func setupNowPlayingInfo(asset: AVAsset) {
-        var nowPlayingInfo = [String: Any]()
         
         // Extract metadata for now playing info
         Task {
@@ -164,23 +172,44 @@ class AudioEngine: NSObject, ObservableObject {
                     }
                 }
                 
+                let durationCMTime = try await asset.load(.duration)
+                
+                // Capture values to avoid concurrency warnings
+                let capturedTitle = title
+                let capturedArtist = artist
+                let capturedArtwork = artwork
+                
                 await MainActor.run {
-                    nowPlayingInfo[MPMediaItemPropertyTitle] = title
-                    nowPlayingInfo[MPMediaItemPropertyArtist] = artist
-                    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = asset.duration.seconds
+                    var nowPlayingInfo: [String: Any] = [:]
+                    nowPlayingInfo[MPMediaItemPropertyTitle] = capturedTitle
+                    nowPlayingInfo[MPMediaItemPropertyArtist] = capturedArtist
+                    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = durationCMTime.seconds
                     
-                    if let artwork = artwork {
+                    if let artwork = capturedArtwork {
                         nowPlayingInfo[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: artwork.size) { _ in artwork }
                     }
                     
                     MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
                 }
             } catch {
-                await MainActor.run {
-                    nowPlayingInfo[MPMediaItemPropertyTitle] = "Sample Audiobook"
-                    nowPlayingInfo[MPMediaItemPropertyArtist] = "Unknown Author"
-                    nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = asset.duration.seconds
-                    MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+                print("Failed to load metadata: \(error)")
+                do {
+                    let durationCMTime = try await asset.load(.duration)
+                    await MainActor.run {
+                        var nowPlayingInfo: [String: Any] = [:]
+                        nowPlayingInfo[MPMediaItemPropertyTitle] = "Sample Audiobook"
+                        nowPlayingInfo[MPMediaItemPropertyArtist] = "Unknown Author"
+                        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = durationCMTime.seconds
+                        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+                    }
+                } catch {
+                    await MainActor.run {
+                        var nowPlayingInfo: [String: Any] = [:]
+                        nowPlayingInfo[MPMediaItemPropertyTitle] = "Sample Audiobook"
+                        nowPlayingInfo[MPMediaItemPropertyArtist] = "Unknown Author"
+                        nowPlayingInfo[MPMediaItemPropertyPlaybackDuration] = 0
+                        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+                    }
                 }
             }
         }

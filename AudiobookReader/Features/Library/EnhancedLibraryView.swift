@@ -4,7 +4,6 @@ struct EnhancedLibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var statistics = ReadingStatistics()
-    @State private var showingFilePicker = false
     @State private var searchText = ""
     @State private var selectedAudiobook: Audiobook?
     @State private var showingStatistics = false
@@ -101,6 +100,37 @@ struct EnhancedLibraryView: View {
             .map { $0 }
     }
     
+    // MARK: - Import Handler
+    private func handleImport(urls: [URL]) {
+        for url in urls {
+            Task {
+                print("📂 Processing import: \(url.lastPathComponent)")
+                
+                // Start accessing security-scoped resource
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+                
+                var isDirectory: ObjCBool = false
+                if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                    if isDirectory.boolValue {
+                        print("📁 Importing folder: \(url.lastPathComponent)")
+                        await audiobookManager.importAudiobookFolder(from: url)
+                    } else {
+                        print("🎵 Importing single file: \(url.lastPathComponent)")
+                        await audiobookManager.importAudiobook(from: url)
+                    }
+                } else {
+                    print("🎵 Importing file (fallback): \(url.lastPathComponent)")
+                    await audiobookManager.importAudiobook(from: url)
+                }
+                
+                await MainActor.run {
+                    statistics.addListeningTime(0) // Update streak
+                }
+            }
+        }
+    }
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 0) {
@@ -148,7 +178,7 @@ struct EnhancedLibraryView: View {
                             viewMode: $viewMode,
                             sortOption: $sortOption,
                             filterOption: $filterOption,
-                            onImport: { showingFilePicker = true }
+                            onImport: handleImport
                         )
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -156,9 +186,7 @@ struct EnhancedLibraryView: View {
                         
                         // Library Items
                         if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                            EmptyLibraryView {
-                                showingFilePicker = true
-                            }
+                            EmptyLibraryView(onImport: handleImport)
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                         } else {
@@ -232,15 +260,13 @@ struct EnhancedLibraryView: View {
                                     viewMode: $viewMode,
                                     sortOption: $sortOption,
                                     filterOption: $filterOption,
-                                    onImport: { showingFilePicker = true }
+                                    onImport: handleImport
                                 )
                                 .padding(.horizontal)
                                 
                                 // Content
                                 if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                                    EmptyLibraryView {
-                                        showingFilePicker = true
-                                    }
+                                    EmptyLibraryView(onImport: handleImport)
                                     .padding(.horizontal)
                                 } else {
                                     VStack(spacing: 16) {
@@ -287,32 +313,6 @@ struct EnhancedLibraryView: View {
         }
         .accentColor(themeManager.accentColor.color)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .sheet(isPresented: $showingFilePicker) {
-            FileImporterView { urls in
-                for url in urls {
-                    Task {
-                        print(url)
-                        var isDirectory: ObjCBool = false
-                        if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-                            if isDirectory.boolValue {
-                                print("📁 Importing folder: \(url.lastPathComponent)")
-                                await audiobookManager.importAudiobookFolder(from: url)
-                            } else {
-                                print("🎵 Importing single file: \(url.lastPathComponent)")
-                                await audiobookManager.importAudiobook(from: url)
-                            }
-                        } else {
-                            print("🎵 Importing file (fallback): \(url.lastPathComponent)")
-                            await audiobookManager.importAudiobook(from: url)
-                        }
-                        
-                        await MainActor.run {
-                            statistics.addListeningTime(0) // Update streak
-                        }
-                    }
-                }
-            }
-        }
         .sheet(isPresented: $showingStatistics) {
             StatisticsView(statistics: statistics)
         }

@@ -189,7 +189,7 @@ class FolderImporter {
             
             for (index, audioFileURL) in audioFiles.enumerated() {
                 // Extract duration from the audio file
-                let asset = AVAsset(url: audioFileURL)
+                let asset = AVURLAsset(url: audioFileURL)
                 let duration: TimeInterval
                 
                 do {

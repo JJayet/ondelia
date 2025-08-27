@@ -1,10 +1,11 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct LibraryHeaderView: View {
     @Binding var viewMode: EnhancedLibraryView.ViewMode
     @Binding var sortOption: EnhancedLibraryView.SortOption
     @Binding var filterOption: EnhancedLibraryView.FilterOption
-    let onImport: () -> Void
+    let onImport: ([URL]) -> Void
     
     var body: some View {
         VStack(spacing: 12) {
@@ -15,11 +16,8 @@ struct LibraryHeaderView: View {
                 
                 Spacer()
                 
-                Button(action: onImport) {
-                    Image(systemName: "plus")
-                        .font(.title3)
-                        .foregroundColor(.accentColor)
-                }
+                ImportButton(onImport: onImport)
+                    .buttonStyle(.plain)
             }
             
             HStack(spacing: 16) {
@@ -407,7 +405,7 @@ struct ImportingIndicatorView: View {
 }
 
 struct EmptyLibraryView: View {
-    let onImport: () -> Void
+    let onImport: ([URL]) -> Void
     
     var body: some View {
         VStack(spacing: 24) {
@@ -427,40 +425,32 @@ struct EmptyLibraryView: View {
                     .multilineTextAlignment(.center)
             }
             
-            Button("Import Audiobook") {
-                onImport()
-            }
-            .buttonStyle(.borderedProminent)
+            ImportButton(onImport: onImport)
         }
         .padding(32)
     }
 }
 
-struct FileImporterView: UIViewControllerRepresentable {
+// MARK: - Simple Import Button
+struct ImportButton: View {
+    @State private var showingImporter = false
     let onImport: ([URL]) -> Void
     
-    func makeUIViewController(context: Context) -> UIDocumentPickerViewController {
-        let picker = UIDocumentPickerViewController(forOpeningContentTypes: [.audio, .folder], asCopy: false)
-        picker.allowsMultipleSelection = true
-        picker.delegate = context.coordinator
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIDocumentPickerViewController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIDocumentPickerDelegate {
-        let parent: FileImporterView
-        
-        init(_ parent: FileImporterView) {
-            self.parent = parent
+    var body: some View {
+        Button("Import Files") {
+            showingImporter = true
         }
-        
-        func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
-            parent.onImport(urls)
+        .fileImporter(
+            isPresented: $showingImporter,
+            allowedContentTypes: [.folder, .audio, .mp3],
+            allowsMultipleSelection: true
+        ) { result in
+            switch result {
+            case .success(let urls):
+                onImport(urls)
+            case .failure(let error):
+                print("❌ Import failed: \(error.localizedDescription)")
+            }
         }
     }
 }
