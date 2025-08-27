@@ -29,8 +29,7 @@ class AudiobookManager: ObservableObject {
                     validAudiobooks.append(audiobook)
                 } else {
                     print("⚠️ AudiobookManager: File missing for '\(audiobook.title ?? "Unknown")', removing from library")
-                    // Optionally remove the audiobook from Core Data
-                    // persistenceController.context.delete(audiobook)
+                    persistenceController.context.delete(audiobook)
                 }
             }
             

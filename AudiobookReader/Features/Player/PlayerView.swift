@@ -2,13 +2,21 @@ import SwiftUI
 
 struct PlayerView: View {
     let audiobook: Audiobook
-    @StateObject private var globalAudioManager = GlobalAudioManager.shared
+    @ObservedObject var statistics: ReadingStatistics
     @StateObject private var audiobookManager = AudiobookManager()
+    @StateObject private var audioEngine = AudioEngine()
+    @StateObject private var multiFileAudioEngine = MultiFileAudioEngine()
+    @StateObject private var themeManager = ThemeManager.shared
+    @State private var useMultiFileEngine = false
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
+    @State private var showingSleepTimer = false
     @State private var showingChapterList = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
+    @State private var sleepTimer: Timer?
+    @State private var sleepTimeRemaining: TimeInterval = 0
+    @State private var isSeekingManually = false
     @Environment(\.presentationMode) var presentationMode
     
     private var coverImage: UIImage? {
@@ -24,190 +32,314 @@ struct PlayerView: View {
         (audiobook.bookmarks?.allObjects as? [Bookmark] ?? []).sorted { $0.timestamp < $1.timestamp }
     }
     
+    private var currentChapter: Chapter? {
+        let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+        return chapters.first { chapter in
+            currentTime >= chapter.startTime && currentTime < chapter.endTime
+        } ?? chapters.first { chapter in
+            currentTime >= chapter.startTime
+        }
+    }
+    
     var body: some View {
-        VStack(spacing: 16) {
-            // Cover Art - Smaller and more appropriate size
-            Group {
-                if let image = coverImage {
-                    Image(uiImage: image)
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                } else {
-                    Image(systemName: "book.closed")
-                        .font(.system(size: 40))
-                        .foregroundColor(.secondary)
-                }
-            }
-            .frame(width: 180, height: 180)
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(12)
-            .shadow(radius: 4)
-                
-            // Book Info - More compact
-            VStack(spacing: 4) {
-                Text(audiobook.title ?? "Unknown Title")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .multilineTextAlignment(.center)
-                    .lineLimit(2)
-                
-                Text(audiobook.author ?? "Unknown Author")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .lineLimit(1)
-                
-                if let narrator = audiobook.narrator {
-                    Text("Narrated by \(narrator)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .lineLimit(1)
-                }
-            }
-                
-            // Progress Section
-            VStack(spacing: 8) {
-                // Time Slider
-                Slider(
-                    value: Binding(
-                        get: { globalAudioManager.getCurrentTime() },
-                        set: { time in
-                            if globalAudioManager.useMultiFileEngine {
-                                globalAudioManager.multiFileAudioEngine?.seek(to: time)
-                            } else {
-                                globalAudioManager.audioEngine?.seek(to: time)
-                            }
-                        }
-                    ),
-                    in: 0...max(globalAudioManager.getDuration(), 1)
+        GeometryReader { geometry in
+            ZStack {
+                // Background
+                LinearGradient(
+                    colors: [
+                        Color.primaryBackground,
+                        Color.secondaryBackground.opacity(0.3)
+                    ],
+                    startPoint: .top,
+                    endPoint: .bottom
                 )
+                .ignoresSafeArea()
                 
-                HStack {
-                    Text(formatTime(globalAudioManager.getCurrentTime()))
-                    Spacer()
-                    Text(formatTime(globalAudioManager.getDuration()))
-                }
-                .font(.caption)
-                .foregroundColor(.secondary)
-            }
-            .padding(.horizontal)
-                    
-            // Playback Controls
-            HStack(spacing: 40) {
-                Button(action: { 
-                    if globalAudioManager.useMultiFileEngine {
-                        globalAudioManager.multiFileAudioEngine?.skipBackward()
-                    } else {
-                        globalAudioManager.audioEngine?.skipBackward()
-                    }
-                }) {
-                    Image(systemName: "gobackward.15")
-                        .font(.title2)
-                }
-                
-                Button(action: { 
-                    if globalAudioManager.isPlaying() {
-                        globalAudioManager.pausePlayback()
-                    } else {
-                        globalAudioManager.resumePlayback()
-                    }
-                }) {
-                    Image(systemName: globalAudioManager.isPlaying() ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 50))
-                }
-                
-                Button(action: { 
-                    if globalAudioManager.useMultiFileEngine {
-                        globalAudioManager.multiFileAudioEngine?.skipForward()
-                    } else {
-                        globalAudioManager.audioEngine?.skipForward()
-                    }
-                }) {
-                    Image(systemName: "goforward.15")
-                        .font(.title2)
-                }
-            }
-            .foregroundColor(.blue)
-                    
-            VStack(spacing: 4) {
-                let playbackRate = globalAudioManager.getPlaybackRate()
-                Text("Speed: \(String(format: "%.1fx", playbackRate))")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
-                
-                HStack(spacing: 8) {
-                    ForEach([0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { speed in
-                        Button("\(String(format: "%.2fx", speed))") {
-                            if globalAudioManager.useMultiFileEngine {
-                                globalAudioManager.multiFileAudioEngine?.setPlaybackRate(Float(speed))
-                            } else {
-                                globalAudioManager.audioEngine?.setPlaybackRate(Float(speed))
+                ScrollView {
+                    VStack(spacing: 32) {
+                        // Header
+                        HStack {
+                            Button {
+                                presentationMode.wrappedValue.dismiss()
+                            } label: {
+                                Image(systemName: "chevron.down")
+                                    .font(.title2)
+                                    .foregroundColor(.primaryText)
+                            }
+                            
+                            Spacer()
+                            
+                            Button {
+                                showingSleepTimer = true
+                            } label: {
+                                if sleepTimeRemaining > 0 {
+                                    Label(formatTime(sleepTimeRemaining), systemImage: "moon.fill")
+                                        .font(.caption)
+                                        .foregroundColor(.accentColor)
+                                } else {
+                                    Image(systemName: "moon")
+                                        .font(.title2)
+                                        .foregroundColor(.primaryText)
+                                }
                             }
                         }
-                        .font(.caption)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(playbackRate == Float(speed) ? Color.blue : Color.gray.opacity(0.2))
-                        .foregroundColor(playbackRate == Float(speed) ? .white : .primary)
-                        .cornerRadius(6)
+                        .padding(.horizontal)
+                        
+                        // Cover Art with Animation
+                        Group {
+                            if let image = coverImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fit)
+                            } else {
+                                Image(systemName: "book.closed")
+                                    .font(.system(size: 120))
+                                    .foregroundColor(.secondaryText)
+                            }
+                        }
+                        .frame(width: geometry.size.width * 0.7, height: geometry.size.width * 0.7)
+                        .background(Color.secondaryBackground)
+                        .cornerRadius(20)
+                        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                        .scaleEffect((useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying) ? 1.02 : 1.0)
+                        .animation(.easeInOut(duration: 0.3), value: useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying)
+                        .onTapGesture {
+                            withHapticFeedback {
+                                if useMultiFileEngine {
+                                    multiFileAudioEngine.togglePlayback()
+                                } else {
+                                    audioEngine.togglePlayback()
+                                }
+                            }
+                        }
+                        .gesture(
+                            DragGesture()
+                                .onEnded { value in
+                                    if abs(value.translation.width) > 50 {
+                                        withHapticFeedback {
+                                            if value.translation.width > 0 {
+                                                if useMultiFileEngine {
+                                                    multiFileAudioEngine.skipBackward(themeManager.skipInterval.seconds)
+                                                } else {
+                                                    audioEngine.skipBackward(themeManager.skipInterval.seconds)
+                                                }
+                                            } else {
+                                                if useMultiFileEngine {
+                                                    multiFileAudioEngine.skipForward(themeManager.skipInterval.seconds)
+                                                } else {
+                                                    audioEngine.skipForward(themeManager.skipInterval.seconds)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                        )
+                        
+                        // Book Info
+                        VStack(spacing: 8) {
+                            Text(audiobook.title ?? "Unknown Title")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.primaryText)
+                                .multilineTextAlignment(.center)
+                            
+                            Text(audiobook.author ?? "Unknown Author")
+                                .font(.headline)
+                                .foregroundColor(.secondaryText)
+                            
+                            if let narrator = audiobook.narrator {
+                                Text("Narrated by \(narrator)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.secondaryText)
+                            }
+                            
+                            // Current Chapter
+                            if let chapter = currentChapter {
+                                Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
+                                    .font(.caption)
+                                    .foregroundColor(.accentColor)
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 4)
+                                    .background(Color.accentColor.opacity(0.1))
+                                    .cornerRadius(8)
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // Progress Section
+                        VStack(spacing: 16) {
+                            // Time Slider with Custom Style
+                            VStack(spacing: 8) {
+                                CustomSlider(
+                                    value: Binding(
+                                        get: { useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime },
+                                        set: { newValue in
+                                            if useMultiFileEngine {
+                                                multiFileAudioEngine.seek(to: newValue)
+                                                multiFileAudioEngine.play()
+                                            } else {
+                                                audioEngine.seek(to: newValue)
+                                                audioEngine.play()
+                                            }
+                                        }
+                                    ),
+                                    range: 0...max(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration, 1),
+                                    onEditingChanged: { editing in
+                                        isSeekingManually = editing
+                                    }
+                                )
+                                
+                                HStack {
+                                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime))
+                                        .font(.caption)
+                                        .foregroundColor(.secondaryText)
+                                        .monospacedDigit()
+                                    
+                                    Spacer()
+                                    
+                                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration))
+                                        .font(.caption)
+                                        .foregroundColor(.secondaryText)
+                                        .monospacedDigit()
+                                }
+                            }
+                            
+                            // Enhanced Playback Controls
+                            HStack(spacing: 50) {
+                                Button {
+                                    withHapticFeedback {
+                                        if useMultiFileEngine {
+                                            multiFileAudioEngine.skipBackward(themeManager.skipInterval.seconds)
+                                        } else {
+                                            audioEngine.skipBackward(themeManager.skipInterval.seconds)
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: "gobackward.\(Int(themeManager.skipInterval.seconds))")
+                                        .font(.title)
+                                        .foregroundColor(.primaryText)
+                                }
+                                
+                                Button {
+                                    withHapticFeedback(.medium) {
+                                        if useMultiFileEngine {
+                                            multiFileAudioEngine.togglePlayback()
+                                        } else {
+                                            audioEngine.togglePlayback()
+                                        }
+                                    }
+                                } label: {
+                                    let isPlaying = useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying
+                                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                        .font(.system(size: 80))
+                                        .foregroundColor(.accentColor)
+                                }
+                                .scaleEffect((useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying) ? 0.95 : 1.0)
+                                .animation(.easeInOut(duration: 0.1), value: useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying)
+                                
+                                Button {
+                                    withHapticFeedback {
+                                        if useMultiFileEngine {
+                                            multiFileAudioEngine.skipForward(themeManager.skipInterval.seconds)
+                                        } else {
+                                            audioEngine.skipForward(themeManager.skipInterval.seconds)
+                                        }
+                                    }
+                                } label: {
+                                    Image(systemName: "goforward.\(Int(themeManager.skipInterval.seconds))")
+                                        .font(.title)
+                                        .foregroundColor(.primaryText)
+                                }
+                            }
+                            
+                            // Speed Control with Animation
+                            VStack(spacing: 12) {
+                                let playbackRate = useMultiFileEngine ? multiFileAudioEngine.playbackRate : audioEngine.playbackRate
+                                Text("Speed: \(String(format: "%.1fx", playbackRate))")
+                                    .font(.caption)
+                                    .foregroundColor(.secondaryText)
+                                
+                                HStack(spacing: 12) {
+                                    ForEach([0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { speed in
+                                        Button("\(String(format: "%.2fx", speed))") {
+                                            withHapticFeedback {
+                                                if useMultiFileEngine {
+                                                    multiFileAudioEngine.setPlaybackRate(Float(speed))
+                                                } else {
+                                                    audioEngine.setPlaybackRate(Float(speed))
+                                                }
+                                            }
+                                        }
+                                        .font(.caption)
+                                        .fontWeight(playbackRate == Float(speed) ? .bold : .regular)
+                                        .padding(.horizontal, 16)
+                                        .padding(.vertical, 8)
+                                        .background(
+                                            playbackRate == Float(speed) 
+                                                ? Color.accentColor 
+                                                : Color.secondaryBackground
+                                        )
+                                        .foregroundColor(
+                                            playbackRate == Float(speed) 
+                                                ? .white 
+                                                : .primaryText
+                                        )
+                                        .cornerRadius(20)
+                                        .scaleEffect(playbackRate == Float(speed) ? 1.1 : 1.0)
+                                        .animation(.easeInOut(duration: 0.2), value: playbackRate)
+                                    }
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // Action Buttons
+                        HStack(spacing: 22) {
+                            ActionButton(icon: "bookmark", title: "Bookmarks", count: bookmarks.count) {
+                                showingBookmarks = true
+                            }
+                            
+                            ActionButton(icon: "bookmark.circle", title: "Add Bookmark") {
+                                showingAddBookmark = true
+                            }
+                            
+                            if !chapters.isEmpty {
+                                ActionButton(icon: "list.bullet", title: "Chapters", count: chapters.count) {
+                                    showingChapterList = true
+                                }
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        Spacer(minLength: 50)
                     }
+                    .padding(.vertical)
                 }
             }
-                
-            // Action Buttons
-            HStack(spacing: 10) {
-                Button("Bookmarks") {
-                    showingBookmarks = true
-                }
-                .buttonStyle(.bordered)
-                
-                Button("Add Bookmark") {
-                    showingAddBookmark = true
-                }
-                .buttonStyle(.bordered)
-                
-                // Chapters Button (if available)
-                if !chapters.isEmpty {
-                    Button("Chapters (\(chapters.count))") {
-                        print("📖 Chapter button tapped - showing chapter list")
-                        showingChapterList = true
-                    }
-                    .buttonStyle(.bordered)
-                } else {
-                    // Debug: Show even when no chapters for testing
-                    Button("No Chapters (Debug)") {
-                        print("📖 No chapters found for audiobook: \(audiobook.title ?? "Unknown")")
-                        print("📖 Chapters in audiobook: \(audiobook.chapters?.count ?? 0)")
-                    }
-                    .buttonStyle(.bordered)
-                    .opacity(0.5)
-                }
-            }
-            
-            Spacer()
         }
-        .padding()
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarHidden(true)
         .onAppear {
-            globalAudioManager.loadAudiobook(audiobook)
+            loadAudiobook()
         }
-        .onReceive(globalAudioManager.$audioEngine) { _ in
-            // Trigger UI updates when audio engine changes
-        }
-        .onReceive(globalAudioManager.$multiFileAudioEngine) { _ in
-            // Trigger UI updates when multi-file engine changes
+        .onReceive(useMultiFileEngine ? multiFileAudioEngine.$currentTime : audioEngine.$currentTime) { currentTime in
+            if Int(currentTime) % 5 == 0 && !isSeekingManually {
+                audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
+                statistics.addListeningTime(5, playbackRate: useMultiFileEngine ? multiFileAudioEngine.playbackRate : audioEngine.playbackRate)
+                
+                if audiobook.isFinished && !audiobook.isFinished {
+                    statistics.markBookCompleted()
+                }
+            }
         }
         .sheet(isPresented: $showingBookmarks) {
-            // For now, pass a dummy AudioEngine - we'll need to update BookmarksView later
-            if let engine = globalAudioManager.audioEngine {
-                BookmarksView(audiobook: audiobook, audioEngine: engine)
-            }
+            BookmarksView(audiobook: audiobook, audioEngine: audioEngine)
         }
         .sheet(isPresented: $showingAddBookmark) {
-            let currentTime = globalAudioManager.getCurrentTime()
             AddBookmarkView(
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
                 onSave: {
+                    let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
                     audiobookManager.createBookmark(
                         for: audiobook,
                         at: currentTime,
@@ -223,17 +355,101 @@ struct PlayerView: View {
             ChapterListView(
                 chapters: chapters,
                 onChapterTap: { chapter in
-                    if globalAudioManager.useMultiFileEngine {
-                        globalAudioManager.multiFileAudioEngine?.seek(to: chapter.startTime)
+                    if useMultiFileEngine {
+                        multiFileAudioEngine.seek(to: chapter.startTime)
+                        multiFileAudioEngine.play()
                     } else {
-                        globalAudioManager.audioEngine?.seek(to: chapter.startTime)
+                        audioEngine.seek(to: chapter.startTime)
+                        audioEngine.play()
                     }
                     showingChapterList = false
                 }
             )
         }
+        .actionSheet(isPresented: $showingSleepTimer) {
+            ActionSheet(
+                title: Text("Sleep Timer"),
+                message: Text("Choose when to stop playback"),
+                buttons: [
+                    .default(Text("5 minutes")) { setSleepTimer(300) },
+                    .default(Text("10 minutes")) { setSleepTimer(600) },
+                    .default(Text("15 minutes")) { setSleepTimer(900) },
+                    .default(Text("30 minutes")) { setSleepTimer(1800) },
+                    .default(Text("End of chapter")) { setSleepTimerEndOfChapter() },
+                    .destructive(Text("Cancel timer")) { cancelSleepTimer() },
+                    .cancel()
+                ]
+            )
+        }
+        .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        .accentColor(themeManager.accentColor.color)
     }
     
+    private func loadAudiobook() {
+        guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
+            print("No file path found for audiobook: \(audiobook.title ?? "Unknown")")
+            return
+        }
+        
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
+            print("Audio file/folder not found at path: \(filePath)")
+            return
+        }
+        
+        if isDirectory.boolValue {
+            print("📁 Loading multi-file audiobook from folder: \(filePath)")
+            useMultiFileEngine = true
+            multiFileAudioEngine.loadMultiFileAudiobook(audiobook)
+            
+            // Resume from last position
+            if audiobook.currentPosition > 0 {
+                multiFileAudioEngine.seek(to: audiobook.currentPosition)
+            }
+        } else {
+            print("📄 Loading single audio file: \(filePath)")
+            useMultiFileEngine = false
+            let fileURL = URL(fileURLWithPath: filePath)
+            audioEngine.loadAudio(url: fileURL)
+            
+            // Resume from last position
+            if audiobook.currentPosition > 0 {
+                audioEngine.seek(to: audiobook.currentPosition)
+            }
+        }
+    }
+    
+    private func setSleepTimer(_ seconds: TimeInterval) {
+        cancelSleepTimer()
+        sleepTimeRemaining = seconds
+        
+        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
+            sleepTimeRemaining -= 1
+            
+            if sleepTimeRemaining <= 0 {
+                if useMultiFileEngine {
+                    multiFileAudioEngine.pause()
+                } else {
+                    audioEngine.pause()
+                }
+                timer.invalidate()
+                sleepTimer = nil
+            }
+        }
+    }
+    
+    private func setSleepTimerEndOfChapter() {
+        guard let currentChapter = currentChapter else { return }
+        let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+        let remainingTime = currentChapter.endTime - currentTime
+        setSleepTimer(max(remainingTime, 60)) // Minimum 1 minute
+    }
+    
+    private func cancelSleepTimer() {
+        sleepTimer?.invalidate()
+        sleepTimer = nil
+        sleepTimeRemaining = 0
+    }
     
     private func formatTime(_ time: TimeInterval) -> String {
         let hours = Int(time) / 3600
@@ -246,82 +462,113 @@ struct PlayerView: View {
             return String(format: "%d:%02d", minutes, seconds)
         }
     }
-}
-
-struct ChapterListView: View {
-    let chapters: [Chapter]
-    let onChapterTap: (Chapter) -> Void
-    @Environment(\.presentationMode) var presentationMode
     
-    var body: some View {
-        NavigationView {
-            List {
-                ForEach(chapters, id: \.id) { chapter in
-                    ChapterRowView(chapter: chapter) {
-                        onChapterTap(chapter)
-                    }
-                }
-            }
-            .navigationTitle("Chapters")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
-        }
+    private func withHapticFeedback<T>(_ intensity: UIImpactFeedbackGenerator.FeedbackStyle = .light, _ action: () -> T) -> T {
+        let impact = UIImpactFeedbackGenerator(style: intensity)
+        impact.prepare()
+        let result = action()
+        impact.impactOccurred()
+        return result
     }
 }
 
-struct ChapterRowView: View {
-    let chapter: Chapter
-    let onTap: () -> Void
+struct ActionButton: View {
+    let icon: String
+    let title: String
+    var count: Int? = nil
+    let action: () -> Void
     
     var body: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
+        Button(action: action) {
+            VStack(spacing: 8) {
+                ZStack {
+                    Image(systemName: icon)
+                        .font(.title3)
+                        .foregroundColor(.accentColor)
+                    
+                    if let count = count, count > 0 {
+                        Text("\(count)")
+                            .font(.caption2)
+                            .fontWeight(.bold)
+                            .foregroundColor(.white)
+                            .padding(4)
+                            .background(Color.red)
+                            .clipShape(Circle())
+                            .offset(x: 12, y: -12)
+                    }
+                }
                 
-                Text(formatTime(chapter.startTime))
+                Text(title)
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(.primaryText)
             }
-            
-            Spacer()
-            
-            Image(systemName: "play.fill")
-                .font(.caption)
-                .foregroundColor(.blue)
         }
-        .padding(.vertical, 8)
-        .padding(.horizontal, 4)
-        .contentShape(Rectangle()) // Make entire area tappable
-        .onTapGesture {
-            print("📖 Chapter tapped: \(chapter.title ?? "Chapter \(chapter.chapterNumber)") at \(formatTime(chapter.startTime))")
-            onTap()
-        }
+        .buttonStyle(PlainButtonStyle())
     }
+}
+
+struct CustomSlider: View {
+    @Binding var value: Double
+    let range: ClosedRange<Double>
+    let onEditingChanged: (Bool) -> Void
+    @State private var isDragging = false
+    @State private var localValue: Double = 0
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
+    var body: some View {
+        GeometryReader { geometry in
+            let percentage = (isDragging ? localValue : value - range.lowerBound) / (range.upperBound - range.lowerBound)
+            let clampedPercentage = min(max(percentage, 0), 1)
+            
+            ZStack(alignment: .leading) {
+                // Track
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.secondaryBackground)
+                    .frame(height: 4)
+                
+                // Progress
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(Color.accentColor)
+                    .frame(width: geometry.size.width * clampedPercentage, height: 4)
+                
+                // Thumb
+                Circle()
+                    .fill(Color.accentColor)
+                    .frame(width: isDragging ? 24 : 20, height: isDragging ? 24 : 20)
+                    .offset(x: geometry.size.width * clampedPercentage - (isDragging ? 12 : 10))
+                    .animation(.easeInOut(duration: 0.1), value: isDragging)
+            }
+            .contentShape(Rectangle())
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { gesture in
+                        if !isDragging {
+                            isDragging = true
+                            localValue = value - range.lowerBound
+                            onEditingChanged(true)
+                        }
+                        
+                        let percentage = max(0, min(1, gesture.location.x / geometry.size.width))
+                        localValue = (range.upperBound - range.lowerBound) * percentage
+                        value = range.lowerBound + localValue
+                    }
+                    .onEnded { _ in
+                        isDragging = false
+                        onEditingChanged(false)
+                    }
+            )
+            .onTapGesture { location in
+                let percentage = max(0, min(1, location.x / geometry.size.width))
+                let newValue = range.lowerBound + (range.upperBound - range.lowerBound) * percentage
+                value = newValue
+            }
+        }
+        .frame(height: 44) // Larger touch target
+        .onAppear {
+            localValue = value - range.lowerBound
         }
     }
 }
 
 #Preview {
-    NavigationView {
-        PlayerView(audiobook: Audiobook())
-    }
+    PlayerView(audiobook: Audiobook(), statistics: ReadingStatistics())
 }

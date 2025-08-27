@@ -15,7 +15,7 @@ struct MainTabView: View {
                 .tag(0)
             
             // Library Tab
-            EnhancedLibraryView()
+            LibraryView()
                 .tabItem {
                     Image(systemName: "books.vertical.fill")
                     Text("Library")
@@ -161,7 +161,7 @@ struct HomeView: View {
                                     .multilineTextAlignment(.center)
                             }
                             
-                            NavigationLink(destination: EnhancedLibraryView()) {
+                            NavigationLink(destination: LibraryView()) {
                                 Text("Browse Library")
                                     .font(.headline)
                                     .foregroundColor(.white)
@@ -185,7 +185,7 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(item: $selectedAudiobook) { audiobook in
-            EnhancedPlayerView(audiobook: audiobook, statistics: statistics)
+            PlayerView(audiobook: audiobook, statistics: statistics)
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)

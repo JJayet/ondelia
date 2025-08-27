@@ -2,9 +2,9 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct LibraryHeaderView: View {
-    @Binding var viewMode: EnhancedLibraryView.ViewMode
-    @Binding var sortOption: EnhancedLibraryView.SortOption
-    @Binding var filterOption: EnhancedLibraryView.FilterOption
+    @Binding var viewMode: LibraryView.ViewMode
+    @Binding var sortOption: LibraryView.SortOption
+    @Binding var filterOption: LibraryView.FilterOption
     let onImport: ([URL]) -> Void
     
     var body: some View {
@@ -23,7 +23,7 @@ struct LibraryHeaderView: View {
             HStack(spacing: 16) {
                 // Filter Options
                 Menu {
-                    ForEach(EnhancedLibraryView.FilterOption.allCases, id: \.rawValue) { option in
+                    ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
                         Button(option.rawValue) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 filterOption = option
@@ -47,7 +47,7 @@ struct LibraryHeaderView: View {
                 
                 // Sort Options
                 Menu {
-                    ForEach(EnhancedLibraryView.SortOption.allCases, id: \.rawValue) { option in
+                    ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
                         Button(option.rawValue) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 sortOption = option
@@ -88,7 +88,7 @@ struct LibraryHeaderView: View {
 
 struct LibraryContentView: View {
     let audiobooks: [Audiobook]
-    let viewMode: EnhancedLibraryView.ViewMode
+    let viewMode: LibraryView.ViewMode
     let isImporting: Bool
     let onSelect: (Audiobook) -> Void
     let onDelete: (Audiobook) -> Void
