@@ -2,15 +2,13 @@ import SwiftUI
 
 struct PlayerView: View {
     let audiobook: Audiobook
-    @StateObject private var audioEngine = AudioEngine()
-    @StateObject private var multiFileAudioEngine = MultiFileAudioEngine()
+    @StateObject private var globalAudioManager = GlobalAudioManager.shared
     @StateObject private var audiobookManager = AudiobookManager()
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
     @State private var showingChapterList = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
-    @State private var useMultiFileEngine = false
     @Environment(\.presentationMode) var presentationMode
     
     private var coverImage: UIImage? {
@@ -71,22 +69,22 @@ struct PlayerView: View {
                 // Time Slider
                 Slider(
                     value: Binding(
-                        get: { useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime },
+                        get: { globalAudioManager.getCurrentTime() },
                         set: { time in
-                            if useMultiFileEngine {
-                                multiFileAudioEngine.seek(to: time)
+                            if globalAudioManager.useMultiFileEngine {
+                                globalAudioManager.multiFileAudioEngine?.seek(to: time)
                             } else {
-                                audioEngine.seek(to: time)
+                                globalAudioManager.audioEngine?.seek(to: time)
                             }
                         }
                     ),
-                    in: 0...max(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration, 1)
+                    in: 0...max(globalAudioManager.getDuration(), 1)
                 )
                 
                 HStack {
-                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime))
+                    Text(formatTime(globalAudioManager.getCurrentTime()))
                     Spacer()
-                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration))
+                    Text(formatTime(globalAudioManager.getDuration()))
                 }
                 .font(.caption)
                 .foregroundColor(.secondary)
@@ -96,10 +94,10 @@ struct PlayerView: View {
             // Playback Controls
             HStack(spacing: 40) {
                 Button(action: { 
-                    if useMultiFileEngine {
-                        multiFileAudioEngine.skipBackward()
+                    if globalAudioManager.useMultiFileEngine {
+                        globalAudioManager.multiFileAudioEngine?.skipBackward()
                     } else {
-                        audioEngine.skipBackward()
+                        globalAudioManager.audioEngine?.skipBackward()
                     }
                 }) {
                     Image(systemName: "gobackward.15")
@@ -107,22 +105,21 @@ struct PlayerView: View {
                 }
                 
                 Button(action: { 
-                    if useMultiFileEngine {
-                        multiFileAudioEngine.togglePlayback()
+                    if globalAudioManager.isPlaying() {
+                        globalAudioManager.pausePlayback()
                     } else {
-                        audioEngine.togglePlayback()
+                        globalAudioManager.resumePlayback()
                     }
                 }) {
-                    let isPlaying = useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying
-                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                    Image(systemName: globalAudioManager.isPlaying() ? "pause.circle.fill" : "play.circle.fill")
                         .font(.system(size: 50))
                 }
                 
                 Button(action: { 
-                    if useMultiFileEngine {
-                        multiFileAudioEngine.skipForward()
+                    if globalAudioManager.useMultiFileEngine {
+                        globalAudioManager.multiFileAudioEngine?.skipForward()
                     } else {
-                        audioEngine.skipForward()
+                        globalAudioManager.audioEngine?.skipForward()
                     }
                 }) {
                     Image(systemName: "goforward.15")
@@ -133,7 +130,7 @@ struct PlayerView: View {
                     
             // Speed Control - More compact
             VStack(spacing: 4) {
-                let playbackRate = useMultiFileEngine ? multiFileAudioEngine.playbackRate : audioEngine.playbackRate
+                let playbackRate = globalAudioManager.getPlaybackRate()
                 Text("Speed: \(String(format: "%.1fx", playbackRate))")
                     .font(.caption)
                     .foregroundColor(.secondary)
@@ -141,10 +138,10 @@ struct PlayerView: View {
                 HStack(spacing: 8) {
                     ForEach([0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { speed in
                         Button("\(String(format: "%.2fx", speed))") {
-                            if useMultiFileEngine {
-                                multiFileAudioEngine.setPlaybackRate(Float(speed))
+                            if globalAudioManager.useMultiFileEngine {
+                                globalAudioManager.multiFileAudioEngine?.setPlaybackRate(Float(speed))
                             } else {
-                                audioEngine.setPlaybackRate(Float(speed))
+                                globalAudioManager.audioEngine?.setPlaybackRate(Float(speed))
                             }
                         }
                         .font(.caption)
@@ -172,9 +169,18 @@ struct PlayerView: View {
                 // Chapters Button (if available)
                 if !chapters.isEmpty {
                     Button("Chapters (\(chapters.count))") {
+                        print("📖 Chapter button tapped - showing chapter list")
                         showingChapterList = true
                     }
                     .buttonStyle(.bordered)
+                } else {
+                    // Debug: Show even when no chapters for testing
+                    Button("No Chapters (Debug)") {
+                        print("📖 No chapters found for audiobook: \(audiobook.title ?? "Unknown")")
+                        print("📖 Chapters in audiobook: \(audiobook.chapters?.count ?? 0)")
+                    }
+                    .buttonStyle(.bordered)
+                    .opacity(0.5)
                 }
             }
             
@@ -183,23 +189,22 @@ struct PlayerView: View {
         .padding()
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            loadAudiobook()
+            globalAudioManager.loadAudiobook(audiobook)
         }
-        .onReceive(useMultiFileEngine ? multiFileAudioEngine.$currentTime : audioEngine.$currentTime) { currentTime in
-            // Auto-save progress every 10 seconds
-            if Int(currentTime) % 10 == 0 {
-                audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
-            }
+        .onReceive(globalAudioManager.$audioEngine) { _ in
+            // Trigger UI updates when audio engine changes
+        }
+        .onReceive(globalAudioManager.$multiFileAudioEngine) { _ in
+            // Trigger UI updates when multi-file engine changes
         }
         .sheet(isPresented: $showingBookmarks) {
-            if useMultiFileEngine {
-                BookmarksView(audiobook: audiobook, audioEngine: audioEngine) // Pass single engine for compatibility
-            } else {
-                BookmarksView(audiobook: audiobook, audioEngine: audioEngine)
+            // For now, pass a dummy AudioEngine - we'll need to update BookmarksView later
+            if let engine = globalAudioManager.audioEngine {
+                BookmarksView(audiobook: audiobook, audioEngine: engine)
             }
         }
         .sheet(isPresented: $showingAddBookmark) {
-            let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+            let currentTime = globalAudioManager.getCurrentTime()
             AddBookmarkView(
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
@@ -219,49 +224,14 @@ struct PlayerView: View {
             ChapterListView(
                 chapters: chapters,
                 onChapterTap: { chapter in
-                    if useMultiFileEngine {
-                        multiFileAudioEngine.seek(to: chapter.startTime)
+                    if globalAudioManager.useMultiFileEngine {
+                        globalAudioManager.multiFileAudioEngine?.seek(to: chapter.startTime)
                     } else {
-                        audioEngine.seek(to: chapter.startTime)
+                        globalAudioManager.audioEngine?.seek(to: chapter.startTime)
                     }
                     showingChapterList = false
                 }
             )
-        }
-    }
-    
-    private func loadAudiobook() {
-        guard let filePath = audiobook.fileURL, !filePath.isEmpty else { 
-            print("No file path found for audiobook: \(audiobook.title ?? "Unknown")")
-            return 
-        }
-        
-        // Check if it's a folder (multi-file audiobook) or single file
-        var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
-            print("Audio file/folder not found at path: \(filePath)")
-            return
-        }
-        
-        if isDirectory.boolValue {
-            print("📁 Loading multi-file audiobook from folder: \(filePath)")
-            useMultiFileEngine = true
-            multiFileAudioEngine.loadMultiFileAudiobook(audiobook)
-            
-            // Resume from last position
-            if audiobook.currentPosition > 0 {
-                multiFileAudioEngine.seek(to: audiobook.currentPosition)
-            }
-        } else {
-            print("📄 Loading single audio file: \(filePath)")
-            useMultiFileEngine = false
-            let fileURL = URL(fileURLWithPath: filePath)
-            audioEngine.loadAudio(url: fileURL)
-            
-            // Resume from last position
-            if audiobook.currentPosition > 0 {
-                audioEngine.seek(to: audiobook.currentPosition)
-            }
         }
     }
     
@@ -311,28 +281,31 @@ struct ChapterRowView: View {
     let onTap: () -> Void
     
     var body: some View {
-        Button(action: onTap) {
-            HStack {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primary)
-                    
-                    Text(formatTime(chapter.startTime))
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                }
+        HStack {
+            VStack(alignment: .leading, spacing: 2) {
+                Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primary)
                 
-                Spacer()
-                
-                Image(systemName: "play.fill")
+                Text(formatTime(chapter.startTime))
                     .font(.caption)
-                    .foregroundColor(.blue)
+                    .foregroundColor(.secondary)
             }
-            .padding(.vertical, 4)
+            
+            Spacer()
+            
+            Image(systemName: "play.fill")
+                .font(.caption)
+                .foregroundColor(.blue)
         }
-        .buttonStyle(PlainButtonStyle())
+        .padding(.vertical, 8)
+        .padding(.horizontal, 4)
+        .contentShape(Rectangle()) // Make entire area tappable
+        .onTapGesture {
+            print("📖 Chapter tapped: \(chapter.title ?? "Chapter \(chapter.chapterNumber)") at \(formatTime(chapter.startTime))")
+            onTap()
+        }
     }
     
     private func formatTime(_ time: TimeInterval) -> String {

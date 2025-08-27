@@ -4,6 +4,7 @@ import UniformTypeIdentifiers
 struct LibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
     @State private var showingFilePicker = false
+    @State private var showingImagePicker = false
     @State private var searchText = ""
     @State private var navigationPath = NavigationPath()
     
@@ -106,6 +107,16 @@ struct LibraryView: View {
             }
             .refreshable {
                 audiobookManager.fetchAudiobooks()
+            }
+            .onReceive(audiobookManager.$audiobookNeedingCover) { audiobook in
+                showingImagePicker = (audiobook != nil)
+            }
+            .sheet(isPresented: $showingImagePicker) {
+                if let audiobook = audiobookManager.audiobookNeedingCover {
+                    ImagePickerView(audiobook: audiobook) { selectedImage in
+                        audiobookManager.updateCoverImage(for: audiobook, with: selectedImage)
+                    }
+                }
             }
         }
     }

@@ -7,6 +7,7 @@ class AudiobookManager: ObservableObject {
     
     @Published var audiobooks: [Audiobook] = []
     @Published var isImporting = false
+    @Published var audiobookNeedingCover: Audiobook?
     
     init() {
         fetchAudiobooks()
@@ -180,6 +181,9 @@ class AudiobookManager: ObservableObject {
             
             if let coverImage = metadata.coverImage {
                 audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
+            } else {
+                // Mark this audiobook as needing a cover image
+                audiobookNeedingCover = audiobook
             }
             
             // Add chapters
@@ -196,6 +200,18 @@ class AudiobookManager: ObservableObject {
             persistenceController.save()
             fetchAudiobooks()
             isImporting = false
+        }
+    }
+    
+    // MARK: - Cover Image Management
+    func updateCoverImage(for audiobook: Audiobook, with image: UIImage) {
+        audiobook.coverImageData = image.jpegData(compressionQuality: 0.8)
+        persistenceController.save()
+        fetchAudiobooks()
+        
+        // Clear the needing cover flag if this was the audiobook that needed it
+        if audiobookNeedingCover?.objectID == audiobook.objectID {
+            audiobookNeedingCover = nil
         }
     }
     
