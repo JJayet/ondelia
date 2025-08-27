@@ -14,6 +14,7 @@ class AudioEngine: NSObject, ObservableObject {
     private var player: AVPlayer?
     private var playerItem: AVPlayerItem?
     private var timeObserver: Any?
+    private var hasAddedObservers = false
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -27,9 +28,7 @@ class AudioEngine: NSObject, ObservableObject {
     }
     
     deinit {
-        if let observer = timeObserver {
-            player?.removeTimeObserver(observer)
-        }
+        cleanup()
     }
     
     // MARK: - Audio Session Setup
@@ -43,10 +42,34 @@ class AudioEngine: NSObject, ObservableObject {
         }
     }
     
+    // MARK: - Cleanup
+    private func cleanup() {
+        // Remove time observer from current player
+        if let observer = timeObserver, let currentPlayer = player {
+            currentPlayer.removeTimeObserver(observer)
+            timeObserver = nil
+        }
+        
+        // Remove KVO observers if they were added
+        if hasAddedObservers, let item = playerItem {
+            item.removeObserver(self, forKeyPath: "duration")
+            item.removeObserver(self, forKeyPath: "status")
+            hasAddedObservers = false
+        }
+        
+        // Clear references
+        player = nil
+        playerItem = nil
+        isPlaying = false
+    }
+    
     // MARK: - Load Audio File
     func loadAudio(url: URL) {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
+        
+        // Clean up existing player before creating new one
+        cleanup()
         
         let asset = AVURLAsset(url: url)
         playerItem = AVPlayerItem(asset: asset)
@@ -61,6 +84,7 @@ class AudioEngine: NSObject, ObservableObject {
         // Observe duration and status
         playerItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
         playerItem?.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+        hasAddedObservers = true
         
         // Setup now playing info
         setupNowPlayingInfo(asset: asset)
