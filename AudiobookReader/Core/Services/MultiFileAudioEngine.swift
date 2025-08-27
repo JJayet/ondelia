@@ -9,6 +9,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     private var timeObserver: Any?
     private var chapters: [Chapter] = []
     private var audiobook: Audiobook?
+    private var hasAddedObservers: Set<AVPlayerItem> = []
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -25,9 +26,6 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     deinit {
-        if let observer = timeObserver {
-            players.forEach { $0.removeTimeObserver(observer) }
-        }
         cleanup()
     }
     
@@ -87,6 +85,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         
         // Observe player item status
         playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+        hasAddedObservers.insert(playerItem)
         
         print("✅ MultiFileAudioEngine: Single file loaded successfully")
     }
@@ -138,6 +137,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             
             // Observe player item status
             playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+            hasAddedObservers.insert(playerItem)
             
             print("📖 MultiFileAudioEngine: Loaded chapter \(index + 1): \(fileName)")
         }
@@ -180,6 +180,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 playerItems.append(playerItem)
                 
                 playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+                hasAddedObservers.insert(playerItem)
                 
                 print("📖 MultiFileAudioEngine: Loaded file \(index + 1): \(fileURL.lastPathComponent)")
             }
@@ -440,18 +441,23 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-        if let observer = timeObserver {
-            players.forEach { $0.removeTimeObserver(observer) }
+        // Remove time observer only from the current player that has it
+        if let observer = timeObserver, currentPlayerIndex < players.count {
+            players[currentPlayerIndex].removeTimeObserver(observer)
             timeObserver = nil
         }
         
-        playerItems.forEach { item in
+        // Remove KVO observers only from items we added them to
+        for item in hasAddedObservers {
             item.removeObserver(self, forKeyPath: "status")
         }
+        hasAddedObservers.removeAll()
         
         players.removeAll()
         playerItems.removeAll()
         chapters.removeAll()
+        currentPlayerIndex = 0
+        isPlaying = false
     }
     
     // MARK: - Utility
