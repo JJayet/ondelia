@@ -96,7 +96,7 @@ struct TranscriptionView: View {
                 ToolbarItem(placement: .navigationBarLeading) {
                     Button("Done") {
                         presentationMode.wrappedValue.dismiss()
-                    }
+                    }.glassEffect()
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -181,7 +181,7 @@ struct TranscriptionView: View {
     
     private func getChapterTitle(for audiobook: Audiobook, chapterIndex: Int) -> String {
         guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
-            return "Chapter \(chapterIndex + 1)"
+            return "Chapter \(chapterIndex)"
         }
         
         let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
@@ -190,7 +190,7 @@ struct TranscriptionView: View {
               let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let chaptersData = manifest["chapters"] as? [[String: Any]],
               chapterIndex < chaptersData.count else {
-            return "Chapter \(chapterIndex + 1)"
+            return "Chapter \(chapterIndex)"
         }
         
         let chapterData = chaptersData[chapterIndex]
@@ -200,9 +200,9 @@ struct TranscriptionView: View {
             return title
         } else if let fileName = chapterData["fileName"] as? String {
             let nameWithoutExtension = (fileName as NSString).deletingPathExtension
-            return nameWithoutExtension.isEmpty ? "Chapter \(chapterIndex + 1)" : nameWithoutExtension
+            return nameWithoutExtension.isEmpty ? "Chapter \(chapterIndex)" : nameWithoutExtension
         } else {
-            return "Chapter \(chapterIndex + 1)"
+            return "Chapter \(chapterIndex)"
         }
     }
     
@@ -300,12 +300,6 @@ struct TranscriptionHeaderView: View {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.accentColor)
                 }
-                
-                Spacer()
-                
-                Text("Chapter \(currentChapterIndex + 1)")
-                    .font(.headline)
-                    .foregroundColor(.primaryText)
                 
                 Spacer()
                 

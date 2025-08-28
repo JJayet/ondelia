@@ -7,8 +7,8 @@ class GoogleImageSearchService {
     // Google Custom Search API configuration
     // Note: You'll need to set up a Google Custom Search Engine and get these keys
     // For development, we'll provide fallback mock data if API keys aren't configured
-    private let apiKey = "" // Add your Google API key here
-    private let searchEngineId = "" // Add your Custom Search Engine ID here
+    private let apiKey = "AIzaSyAUwupZP47x816pqRZH7BGWMjSVII3n5XQ" // Add your Google API key here
+    private let searchEngineId = "b626822d80f5c4c44" // Add your Custom Search Engine ID here
     
     private init() {}
     

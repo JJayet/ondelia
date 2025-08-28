@@ -36,7 +36,6 @@ struct MainTabView: View {
             .accentColor(themeManager.accentColor.color)
             .environment(\.theme, themeManager)
             
-            // Floating Mini Player
             MiniPlayerView()
         }
     }

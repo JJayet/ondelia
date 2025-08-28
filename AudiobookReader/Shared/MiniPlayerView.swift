@@ -4,8 +4,6 @@ struct MiniPlayerView: View {
     @ObservedObject var globalAudioManager = GlobalAudioManager.shared
     @ObservedObject var statistics = ReadingStatistics()
     @State private var selectedAudiobook: Audiobook?
-    @State private var isDragging = false
-    @State private var dragOffset: CGSize = .zero
     
     private var coverImage: UIImage? {
         guard let data = globalAudioManager.currentAudiobook?.coverImageData else { return nil }
@@ -43,27 +41,11 @@ struct MiniPlayerView: View {
             VStack(spacing: 0) {
                 Spacer()
                 
-                HStack(spacing: 0) {
+                HStack(spacing: 50) {
                     Spacer()
                     
-                    // Mini Player Card
                     VStack(spacing: 0) {
-                        // Progress Bar
-                        GeometryReader { geometry in
-                            ZStack(alignment: .leading) {
-                                Rectangle()
-                                    .fill(Color.gray.opacity(0.3))
-                                    .frame(height: 2)
-                                
-                                Rectangle()
-                                    .fill(Color.accentColor)
-                                    .frame(width: geometry.size.width * progress, height: 2)
-                            }
-                        }
-                        .frame(height: 2)
-                        
-                        // Main Content
-                        HStack(spacing: 12) {
+                        HStack {
                             // Cover Art
                             Group {
                                 if let image = coverImage {
@@ -76,13 +58,13 @@ struct MiniPlayerView: View {
                                         .foregroundColor(.secondaryText)
                                 }
                             }
-                            .frame(width: 50, height: 50)
-                            .background(Color.secondaryBackground)
+                            .frame(width: 30, height: 30)
                             .cornerRadius(8)
                             .clipped()
+                            .padding(.leading, 8)
                             
                             // Book Info
-                            VStack(alignment: .leading, spacing: 2) {
+                            VStack(alignment: .leading, spacing: 4) {
                                 Text(audiobook.title ?? "Unknown Title")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
@@ -97,7 +79,6 @@ struct MiniPlayerView: View {
                             
                             Spacer()
                             
-                            // Play/Pause Button
                             Button {
                                 withAnimation(.easeInOut(duration: 0.1)) {
                                     if isPlaying {
@@ -114,69 +95,22 @@ struct MiniPlayerView: View {
                                     .font(.title2)
                                     .foregroundColor(.accentColor)
                             }
-                            
-                            // Close Button
-                            Button {
-                                withAnimation(.easeInOut(duration: 0.3)) {
-                                    globalAudioManager.showMiniPlayer = false
-                                }
-                            } label: {
-                                Image(systemName: "xmark")
-                                    .font(.caption)
-                                    .foregroundColor(.secondaryText)
-                            }
+                            .controlSize(.large)
+                            .padding(.trailing, 12)
                         }
                         .padding(.horizontal, 16)
-                        .padding(.vertical, 12)
-                        .background(Color.cardBackground)
+                        .padding(.vertical, 8)
                         .onTapGesture {
                             selectedAudiobook = audiobook
                         }
+                        .glassEffect()
                     }
-                    .cornerRadius(16)
-//                    .background(
-//                        Group {
-//                            if #available(iOS 26.0, *) {
-//                                Color.clear.glassEffect(.regular.interactive())
-//                            } else {
-//                                Color.clear
-//                            }
-//                        }
-//                    )
                     .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
-                    .offset(x: dragOffset.width, y: dragOffset.height)
-                    .scaleEffect(isDragging ? 0.95 : 1.0)
-                    .animation(.spring(response: 0.3, dampingFraction: 0.8), value: isDragging)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                isDragging = true
-                                dragOffset = CGSize(
-                                    width: max(-50, min(50, value.translation.width)),
-                                    height: max(-100, min(20, value.translation.height))
-                                )
-                            }
-                            .onEnded { value in
-                                isDragging = false
-                                
-                                // Dismiss if dragged down significantly
-                                if value.translation.height > 80 {
-                                    withAnimation(.easeInOut(duration: 0.3)) {
-                                        globalAudioManager.showMiniPlayer = false
-                                    }
-                                }
-                                
-                                // Reset position
-                                withAnimation(.spring(response: 0.4, dampingFraction: 0.8)) {
-                                    dragOffset = .zero
-                                }
-                            }
-                    )
                     
-                    Spacer().frame(width: 16)
+                    Spacer().frame(width: 10)
                 }
                 
-                Spacer().frame(height: 100) // Bottom safe area
+                Spacer().frame(height: 60)
             }
             .fullScreenCover(item: $selectedAudiobook) { audiobook in
                 PlayerView(audiobook: audiobook, statistics: statistics)

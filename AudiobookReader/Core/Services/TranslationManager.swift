@@ -1,7 +1,6 @@
 import Foundation
 import Translation
 
-@available(iOS 17.4, *)
 class TranslationManager: ObservableObject {
     static let shared = TranslationManager()
     
@@ -20,19 +19,16 @@ class TranslationManager: ObservableObject {
     ///   - sourceLanguage: Source language code (e.g., "en")
     ///   - targetLanguage: Target language code (e.g., "es")
     /// - Returns: Translated text
-    @available(iOS 17.4, *)
     func translateText(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String {
         guard !text.isEmpty else { return text }
         
         await MainActor.run {
             isTranslating = true
-            translationProgress = 0
         }
         
         defer {
             Task { @MainActor in
                 isTranslating = false
-                translationProgress = 0
             }
         }
         
@@ -40,24 +36,15 @@ class TranslationManager: ObservableObject {
             print("🔄 TranslationManager: Starting translation from \(sourceLanguage) to \(targetLanguage)")
             
             // Create translation session
-            let configuration = TranslationSession.Configuration(
-                source: Locale.Language(identifier: sourceLanguage),
+            let session = TranslationSession(
+                installedSource: Locale.Language(identifier: sourceLanguage),
                 target: Locale.Language(identifier: targetLanguage)
             )
             
-            let session = TranslationSession(configuration: configuration)
-            
-            await MainActor.run {
-                translationProgress = 0.5
-            }
+            try await session.prepareTranslation()
             
             // Perform translation
-            let request = TranslationSession.Request(sourceText: text)
-            let response = try await session.translate(request)
-            
-            await MainActor.run {
-                translationProgress = 1.0
-            }
+            let response = try await session.translate(text)
             
             print("✅ TranslationManager: Translation completed")
             return response.targetText
@@ -71,7 +58,6 @@ class TranslationManager: ObservableObject {
     /// Translate transcription result using settings
     /// - Parameter transcriptionResult: The transcription to translate
     /// - Returns: Translated transcription result
-    @available(iOS 17.4, *)
     func translateTranscriptionResult(_ transcriptionResult: TranscriptionResult) async throws -> TranscriptionResult {
         guard themeManager.enableTranslation else {
             return transcriptionResult
@@ -129,18 +115,31 @@ class TranslationManager: ObservableObject {
     ///   - sourceLanguage: Source language code
     ///   - targetLanguage: Target language code
     /// - Returns: Whether translation is available
-    @available(iOS 17.4, *)
     func isTranslationAvailable(from sourceLanguage: String, to targetLanguage: String) async -> Bool {
         guard sourceLanguage != targetLanguage else { return true }
         
-        // Simplified availability check - in a real implementation,
-        // you would use LanguageAvailability
-        return true
+        do {
+            let targetLocale = Locale.Language(identifier: targetLanguage)
+            
+            let availability = LanguageAvailability()
+            let status = try await availability.status(for: sourceLanguage, to: targetLocale)
+            
+            switch status {
+            case .installed, .supported:
+                return true
+            case .unsupported:
+                return false
+            @unknown default:
+                return false
+            }
+        } catch {
+            print("❌ TranslationManager: Error checking availability: \(error)")
+            return false
+        }
     }
     
     /// Get available translation language pairs
     /// - Returns: Array of supported language pairs
-    @available(iOS 17.4, *)
     func getAvailableLanguagePairs() async -> [(source: TranscriptionLanguage, target: TranscriptionLanguage)] {
         var pairs: [(source: TranscriptionLanguage, target: TranscriptionLanguage)] = []
         
@@ -181,12 +180,14 @@ enum TranslationError: Error, LocalizedError {
 }
 
 // MARK: - iOS Version Compatibility
+@available(iOS 26.0, *)
 extension TranslationManager {
     static var isAvailable: Bool {
-        if #available(iOS 17.4, *) {
+        if #available(iOS 26, *) {
             return true
         } else {
             return false
         }
     }
 }
+
