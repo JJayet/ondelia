@@ -326,6 +326,12 @@ struct PlayerView: View {
         .navigationBarHidden(true)
         .onAppear {
             loadAudiobook()
+            // Auto-play when entering the player
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if !globalAudioManager.isPlaying {
+                    globalAudioManager.play()
+                }
+            }
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
             if !isSeekingManually && isPlaying {

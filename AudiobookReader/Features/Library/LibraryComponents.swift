@@ -1,11 +1,9 @@
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct LibraryHeaderView: View {
     @Binding var viewMode: LibraryView.ViewMode
     @Binding var sortOption: LibraryView.SortOption
     @Binding var filterOption: LibraryView.FilterOption
-    let onImport: ([URL]) -> Void
     
     var body: some View {
         VStack(spacing: 12) {
@@ -15,9 +13,6 @@ struct LibraryHeaderView: View {
                     .fontWeight(.bold)
                 
                 Spacer()
-                
-                ImportButton(onImport: onImport)
-                    .buttonStyle(.plain)
             }
             
             HStack(spacing: 16) {
@@ -405,8 +400,6 @@ struct ImportingIndicatorView: View {
 }
 
 struct EmptyLibraryView: View {
-    let onImport: ([URL]) -> Void
-    
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "books.vertical")
@@ -419,38 +412,13 @@ struct EmptyLibraryView: View {
                     .fontWeight(.bold)
                     .foregroundColor(.primaryText)
                 
-                Text("Import your first audiobook to start building your library")
+                Text("Import your first audiobook using the + button in the toolbar")
                     .font(.body)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
             }
-            
-            ImportButton(onImport: onImport)
         }
         .padding(32)
     }
 }
 
-// MARK: - Simple Import Button
-struct ImportButton: View {
-    @State private var showingImporter = false
-    let onImport: ([URL]) -> Void
-    
-    var body: some View {
-        Button(action: {showingImporter = true}) {
-            Image(systemName: "plus.circle")
-        }
-        .fileImporter(
-            isPresented: $showingImporter,
-            allowedContentTypes: [.folder, .audio, .mp3],
-            allowsMultipleSelection: true
-        ) { result in
-            switch result {
-            case .success(let urls):
-                onImport(urls)
-            case .failure(let error):
-                print("❌ Import failed: \(error.localizedDescription)")
-            }
-        }
-    }
-}

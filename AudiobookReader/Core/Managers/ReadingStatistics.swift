@@ -107,6 +107,14 @@ class ReadingStatistics: ObservableObject {
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
         saveStatistics()
+        
+        // Recalculate monthly progress to update UI immediately
+        calculateCurrentMonthProgress()
+        
+        // Force UI update by updating the @Published property
+        DispatchQueue.main.async { [weak self] in
+            self?.objectWillChange.send()
+        }
     }
     
     // MARK: - Computed Properties

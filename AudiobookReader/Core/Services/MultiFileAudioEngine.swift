@@ -21,6 +21,9 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     private var isTransitioning = false
     
+    // Serial queue for thread-safe player operations
+    private let playerQueue = DispatchQueue(label: "com.audiobookreader.player", qos: .userInteractive)
+    
     override init() {
         super.init()
         // Defer audio session and remote control setup until needed
@@ -257,6 +260,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     private func unloadChapterPlayer(_ chapterIndex: Int) {
+        // This method is called from playerQueue, so it's already thread-safe
         guard let player = players[chapterIndex],
               let playerItem = playerItems[chapterIndex] else { return }
         
@@ -281,32 +285,45 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Playback Controls
     func play() {
-        // Ensure current chapter is loaded
-        loadChapterPlayer(currentPlayerIndex)
-        
-        guard let currentPlayer = players[currentPlayerIndex] else { return }
-        
-        currentPlayer.rate = playbackRate
-        currentPlayer.play()
-        
-        isPlaying = true
-        updateNowPlayingInfo()
-        
-        // Preload adjacent chapters and unload distant ones
-        preloadAdjacentChapters()
-        unloadDistantChapters()
-        
-        print("▶️ MultiFileAudioEngine: Playing chapter \(currentPlayerIndex + 1)")
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Ensure current chapter is loaded
+            self.loadChapterPlayer(self.currentPlayerIndex)
+            
+            guard let currentPlayer = self.players[self.currentPlayerIndex] else { return }
+            
+            currentPlayer.rate = self.playbackRate
+            currentPlayer.play()
+            
+            DispatchQueue.main.async {
+                self.isPlaying = true
+                self.updateNowPlayingInfo()
+            }
+            
+            // Preload adjacent chapters and unload distant ones
+            self.preloadAdjacentChapters()
+            self.unloadDistantChapters()
+            
+            print("▶️ MultiFileAudioEngine: Playing chapter \(self.currentPlayerIndex + 1)")
+        }
     }
     
     func pause() {
-        for player in players.values {
-            player.pause()
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            for player in self.players.values {
+                player.pause()
+            }
+            
+            DispatchQueue.main.async {
+                self.isPlaying = false
+                self.updateNowPlayingInfo()
+            }
+            
+            print("⏸️ MultiFileAudioEngine: Paused")
         }
-        isPlaying = false
-        updateNowPlayingInfo()
-        
-        print("⏸️ MultiFileAudioEngine: Paused")
     }
     
     func togglePlayback() {
@@ -318,32 +335,36 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     func seek(to time: TimeInterval) {
-        guard !chapterFiles.isEmpty else { return }
-        
-        // Find which chapter this time belongs to
-        let targetChapterIndex = findChapterIndex(for: time)
-        let targetChapter = chapters[safe: targetChapterIndex]
-        
-        let chapterStartTime = targetChapter?.startTime ?? 0
-        let timeWithinChapter = time - chapterStartTime
-        
-        // Switch to the correct chapter if needed
-        if targetChapterIndex != currentPlayerIndex {
-            switchToChapter(targetChapterIndex)
+        playerQueue.async { [weak self] in
+            guard let self = self, !self.chapterFiles.isEmpty else { return }
+            
+            // Find which chapter this time belongs to
+            let targetChapterIndex = self.findChapterIndex(for: time)
+            let targetChapter = self.chapters[safe: targetChapterIndex]
+            
+            let chapterStartTime = targetChapter?.startTime ?? 0
+            let timeWithinChapter = time - chapterStartTime
+            
+            // Switch to the correct chapter if needed
+            if targetChapterIndex != self.currentPlayerIndex {
+                self.switchToChapter(targetChapterIndex)
+            }
+            
+            // Ensure the target chapter is loaded
+            self.loadChapterPlayer(targetChapterIndex)
+            
+            // Seek within the current chapter
+            guard let currentPlayer = self.players[self.currentPlayerIndex] else { return }
+            let cmTime = CMTime(seconds: timeWithinChapter, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            currentPlayer.seek(to: cmTime)
+            
+            DispatchQueue.main.async {
+                self.currentTime = time
+                self.updateNowPlayingInfo()
+            }
+            
+            print("⏭️ MultiFileAudioEngine: Seeked to \(self.formatTime(time)) (Chapter \(targetChapterIndex + 1))")
         }
-        
-        // Ensure the target chapter is loaded
-        loadChapterPlayer(targetChapterIndex)
-        
-        // Seek within the current chapter
-        guard let currentPlayer = players[currentPlayerIndex] else { return }
-        let cmTime = CMTime(seconds: timeWithinChapter, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        currentPlayer.seek(to: cmTime)
-        
-        currentTime = time
-        updateNowPlayingInfo()
-        
-        print("⏭️ MultiFileAudioEngine: Seeked to \(formatTime(time)) (Chapter \(targetChapterIndex + 1))")
     }
     
     func skipForward(_ seconds: TimeInterval = 15) {
@@ -366,18 +387,29 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Chapter Management
     private func switchToChapter(_ chapterIndex: Int) {
+        // This method is called from playerQueue, so it's already thread-safe
         guard chapterIndex >= 0 && chapterIndex < chapterFiles.count else { return }
+        
+        // Clean up current player's time observer first
+        if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.removeTimeObserver(observer)
+            timeObserver = nil
+        }
         
         // Pause current player
         if let currentPlayer = players[currentPlayerIndex] {
             currentPlayer.pause()
         }
         
+        // Update indices atomically
         currentPlayerIndex = chapterIndex
         currentChapterIndex = chapterIndex
         
         // Load the new chapter if not already loaded
         loadChapterPlayer(chapterIndex)
+        
+        // Set up time observer for the new player
+        setupTimeObserver()
         
         // Preload adjacent chapters and unload distant ones
         preloadAdjacentChapters()
@@ -418,6 +450,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     private func updateCurrentTime(_ time: CMTime) {
+        // This method is already called on the main queue from the time observer
         guard !isTransitioning else { return }
         
         let currentChapterTime = time.seconds
@@ -429,7 +462,10 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         // Check if we need to transition to the next chapter
         if let currentChapter = chapter,
            currentChapterTime >= currentChapter.endTime - currentChapter.startTime - 0.1 { // 0.1 second buffer
-            transitionToNextChapter()
+            // Perform chapter transition on player queue to avoid blocking UI
+            playerQueue.async { [weak self] in
+                self?.safeTransitionToNextChapter()
+            }
         }
     }
     
@@ -437,28 +473,52 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         guard !isTransitioning,
               currentPlayerIndex < chapterFiles.count - 1 else { return }
         
+        // Set transitioning flag atomically
         isTransitioning = true
         
         let nextChapterIndex = currentPlayerIndex + 1
         
         print("🔄 MultiFileAudioEngine: Transitioning to chapter \(nextChapterIndex + 1)")
         
-        // Pause current player
+        // Step 1: Clean up current player's time observer
+        if let observer = timeObserver, 
+           let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.removeTimeObserver(observer)
+            timeObserver = nil
+        }
+        
+        // Step 2: Pause current player
         if let currentPlayer = players[currentPlayerIndex] {
             currentPlayer.pause()
         }
         
-        // Switch to next chapter
-        switchToChapter(nextChapterIndex)
+        // Step 3: Switch to next chapter atomically
+        currentPlayerIndex = nextChapterIndex
+        currentChapterIndex = nextChapterIndex
         
-        // Setup time observer for new player
+        // Step 4: Load the new chapter if not already loaded
+        loadChapterPlayer(nextChapterIndex)
+        
+        // Step 5: Set up time observer for new player
         setupTimeObserver()
         
-        // Resume playback if we were playing
+        // Step 6: Resume playback if we were playing and notify UI on main queue
         if isPlaying {
-            play()
+            if let newPlayer = players[nextChapterIndex] {
+                newPlayer.rate = playbackRate
+                newPlayer.play()
+                
+                DispatchQueue.main.async { [weak self] in
+                    self?.updateNowPlayingInfo()
+                }
+            }
         }
         
+        // Step 7: Manage memory efficiently
+        preloadAdjacentChapters()
+        unloadDistantChapters()
+        
+        // Step 8: Reset transitioning flag
         isTransitioning = false
     }
     
@@ -531,12 +591,19 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     // MARK: - Key-Value Observing
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "status", let item = object as? AVPlayerItem {
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                
                 switch item.status {
                 case .readyToPlay:
                     print("✅ MultiFileAudioEngine: Player item ready")
                 case .failed:
-                    print("❌ MultiFileAudioEngine: Player item failed: \(item.error?.localizedDescription ?? "Unknown error")")
+                    let errorDescription = item.error?.localizedDescription ?? "Unknown error"
+                    print("❌ MultiFileAudioEngine: Player item failed: \(errorDescription)")
+                    
+                    // Attempt recovery for failed player items
+                    self.recoverFromPlayerFailure(item: item)
+                    
                 case .unknown:
                     print("⚠️ MultiFileAudioEngine: Player item status unknown")
                 @unknown default:
@@ -546,27 +613,99 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
     }
     
+    private func recoverFromPlayerFailure(item: AVPlayerItem) {
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Find which player failed
+            for (index, playerItem) in self.playerItems {
+                if playerItem === item {
+                    print("🔧 MultiFileAudioEngine: Attempting to recover failed chapter \(index + 1)")
+                    
+                    // Remove the failed player
+                    if self.hasAddedObservers.contains(playerItem) {
+                        playerItem.removeObserver(self, forKeyPath: "status")
+                        self.hasAddedObservers.remove(playerItem)
+                    }
+                    
+                    // Remove from collections
+                    self.players.removeValue(forKey: index)
+                    self.playerItems.removeValue(forKey: index)
+                    
+                    // If this was the current player, try to reload it
+                    if index == self.currentPlayerIndex {
+                        print("🔄 MultiFileAudioEngine: Reloading current chapter after failure")
+                        self.loadChapterPlayer(index)
+                        
+                        // If we were playing, try to resume
+                        if self.isPlaying {
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                self.play()
+                            }
+                        }
+                    } else {
+                        // For non-current players, just mark for lazy reload
+                        print("📝 MultiFileAudioEngine: Non-current chapter \(index + 1) will be reloaded when needed")
+                    }
+                    
+                    break
+                }
+            }
+        }
+    }
+
+    // MARK: - Safety Mechanisms
+    private func validatePlayerState() -> Bool {
+        // Ensure current indices are within bounds
+        guard currentPlayerIndex >= 0 && currentPlayerIndex < chapterFiles.count else {
+            print("⚠️ MultiFileAudioEngine: Invalid currentPlayerIndex: \(currentPlayerIndex), resetting to 0")
+            currentPlayerIndex = 0
+            currentChapterIndex = 0
+            return false
+        }
+        
+        guard currentChapterIndex >= 0 && currentChapterIndex < chapters.count else {
+            print("⚠️ MultiFileAudioEngine: Invalid currentChapterIndex: \(currentChapterIndex), resetting to 0")
+            currentChapterIndex = 0
+            return false
+        }
+        
+        return true
+    }
+    
+    private func safeTransitionToNextChapter() {
+        guard validatePlayerState() else { return }
+        transitionToNextChapter()
+    }
+    
     // MARK: - Cleanup
     private func cleanup() {
-        // Remove time observer only from the current player that has it
-        if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
-            currentPlayer.removeTimeObserver(observer)
-            timeObserver = nil
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Remove time observer only from the current player that has it
+            if let observer = self.timeObserver, let currentPlayer = self.players[self.currentPlayerIndex] {
+                currentPlayer.removeTimeObserver(observer)
+                self.timeObserver = nil
+            }
+            
+            // Remove KVO observers only from items we added them to
+            for item in self.hasAddedObservers {
+                item.removeObserver(self, forKeyPath: "status")
+            }
+            self.hasAddedObservers.removeAll()
+            
+            self.players.removeAll()
+            self.playerItems.removeAll()
+            self.chapters.removeAll()
+            self.chapterFiles.removeAll()
+            self.folderURL = nil
+            self.currentPlayerIndex = 0
+            
+            DispatchQueue.main.async {
+                self.isPlaying = false
+            }
         }
-        
-        // Remove KVO observers only from items we added them to
-        for item in hasAddedObservers {
-            item.removeObserver(self, forKeyPath: "status")
-        }
-        hasAddedObservers.removeAll()
-        
-        players.removeAll()
-        playerItems.removeAll()
-        chapters.removeAll()
-        chapterFiles.removeAll()
-        folderURL = nil
-        currentPlayerIndex = 0
-        isPlaying = false
     }
     
     // MARK: - Utility

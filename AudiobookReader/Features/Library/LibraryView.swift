@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct LibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
@@ -12,6 +13,7 @@ struct LibraryView: View {
     @State private var viewMode: ViewMode = .list
     @State private var sortOption: SortOption = .lastPlayed
     @State private var filterOption: FilterOption = .all
+    @State private var showingImporter = false
     
     enum ViewMode: String, CaseIterable {
         case list = "List"
@@ -178,8 +180,7 @@ struct LibraryView: View {
                         LibraryHeaderView(
                             viewMode: $viewMode,
                             sortOption: $sortOption,
-                            filterOption: $filterOption,
-                            onImport: handleImport
+                            filterOption: $filterOption
                         )
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -187,7 +188,7 @@ struct LibraryView: View {
                         
                         // Library Items
                         if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                            EmptyLibraryView(onImport: handleImport)
+                            EmptyLibraryView()
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
                         } else {
@@ -270,14 +271,13 @@ struct LibraryView: View {
                                 LibraryHeaderView(
                                     viewMode: $viewMode,
                                     sortOption: $sortOption,
-                                    filterOption: $filterOption,
-                                    onImport: handleImport
+                                    filterOption: $filterOption
                                 )
                                 .padding(.horizontal)
                                 
                                 // Content
                                 if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                                    EmptyLibraryView(onImport: handleImport)
+                                    EmptyLibraryView()
                                     .padding(.horizontal)
                                 } else {
                                     VStack(spacing: 16) {
@@ -321,10 +321,31 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { }) {
+                    Button(action: { showingImporter = true }) {
                         Image(systemName: "plus.circle")
+                            .font(.title3)
+                            .foregroundColor(.accentColor)
                     }
-//                    ImportButton()
+                    .accessibilityLabel("Import Audiobook")
+                    .accessibilityIdentifier(AccessibilityIdentifiers.Library.importButton)
+                }
+            }
+            .fileImporter(
+                isPresented: $showingImporter,
+                allowedContentTypes: [.folder, .audio, .mp3],
+                allowsMultipleSelection: true
+            ) { result in
+                switch result {
+                case .success(let urls):
+                    handleImport(urls: urls)
+                case .failure(let error):
+                    print("❌ Import failed: \(error.localizedDescription)")
+                }
+            }
+            .onAppear {
+                // Fetch audiobooks when the view first appears
+                if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {
+                    audiobookManager.fetchAudiobooks()
                 }
             }
         }
