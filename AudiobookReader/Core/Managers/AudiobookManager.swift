@@ -597,6 +597,33 @@ class AudiobookManager: ObservableObject {
         fetchAudiobooks()
     }
     
+    func renameAudiobook(_ audiobook: Audiobook, newTitle: String) {
+        guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+        
+        audiobook.title = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
+        persistenceController.save()
+        fetchAudiobooks()
+        
+        print("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
+    }
+    
+    func markAsRead(_ audiobook: Audiobook) {
+        audiobook.isFinished = true
+        audiobook.currentPosition = audiobook.duration // Set to end
+        persistenceController.save()
+        fetchAudiobooks()
+        
+        print("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
+    }
+    
+    func markAsUnread(_ audiobook: Audiobook) {
+        audiobook.isFinished = false
+        persistenceController.save()
+        fetchAudiobooks()
+        
+        print("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")
+    }
+    
     func searchAudiobooks(query: String) -> [Audiobook] {
         guard !query.isEmpty else { return audiobooks }
         

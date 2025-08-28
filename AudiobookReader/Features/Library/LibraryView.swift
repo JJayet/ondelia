@@ -10,6 +10,9 @@ struct LibraryView: View {
     @State private var showingStatistics = false
     @State private var showingImagePicker = false
     @State private var audiobookForImagePicker: Audiobook?
+    @State private var showingRenameAlert = false
+    @State private var audiobookToRename: Audiobook?
+    @State private var newAudiobookTitle = ""
     @State private var viewMode: ViewMode = .list
     @State private var sortOption: SortOption = .lastPlayed
     @State private var filterOption: FilterOption = .all
@@ -225,7 +228,40 @@ struct LibraryView: View {
                                     }
                                     .tint(.red)
                                 }
+                                .swipeActions(edge: .leading) {
+                                    Button(audiobook.isFinished ? "Mark Unread" : "Mark Read") {
+                                        withAnimation(.easeInOut(duration: 0.3)) {
+                                            if audiobook.isFinished {
+                                                audiobookManager.markAsUnread(audiobook)
+                                            } else {
+                                                audiobookManager.markAsRead(audiobook)
+                                            }
+                                        }
+                                    }
+                                    .tint(audiobook.isFinished ? .orange : .green)
+                                    
+                                    Button("Rename") {
+                                        audiobookToRename = audiobook
+                                        newAudiobookTitle = audiobook.title ?? ""
+                                        showingRenameAlert = true
+                                    }
+                                    .tint(.blue)
+                                }
                                 .contextMenu {
+                                    Button("Rename") {
+                                        audiobookToRename = audiobook
+                                        newAudiobookTitle = audiobook.title ?? ""
+                                        showingRenameAlert = true
+                                    }
+                                    
+                                    Button(audiobook.isFinished ? "Mark as Unread" : "Mark as Read") {
+                                        if audiobook.isFinished {
+                                            audiobookManager.markAsUnread(audiobook)
+                                        } else {
+                                            audiobookManager.markAsRead(audiobook)
+                                        }
+                                    }
+                                    
                                     Button("Change Cover Image") {
                                         audiobookForImagePicker = audiobook
                                         showingImagePicker = true
@@ -306,6 +342,20 @@ struct LibraryView: View {
                                                     selectedAudiobook = audiobook
                                                 }
                                                 .contextMenu {
+                                                    Button("Rename") {
+                                                        audiobookToRename = audiobook
+                                                        newAudiobookTitle = audiobook.title ?? ""
+                                                        showingRenameAlert = true
+                                                    }
+                                                    
+                                                    Button(audiobook.isFinished ? "Mark as Unread" : "Mark as Read") {
+                                                        if audiobook.isFinished {
+                                                            audiobookManager.markAsUnread(audiobook)
+                                                        } else {
+                                                            audiobookManager.markAsRead(audiobook)
+                                                        }
+                                                    }
+                                                    
                                                     Button("Change Cover Image") {
                                                         audiobookForImagePicker = audiobook
                                                         showingImagePicker = true
@@ -386,6 +436,32 @@ struct LibraryView: View {
                 audiobookForImagePicker = audiobook
                 showingImagePicker = true
             }
+        }
+        .alert("Rename Audiobook", isPresented: $showingRenameAlert) {
+            TextField("New title", text: $newAudiobookTitle)
+                .onSubmit {
+                    if let audiobook = audiobookToRename, !newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                        audiobookManager.renameAudiobook(audiobook, newTitle: newAudiobookTitle)
+                        audiobookToRename = nil
+                        newAudiobookTitle = ""
+                    }
+                }
+            
+            Button("Cancel", role: .cancel) {
+                audiobookToRename = nil
+                newAudiobookTitle = ""
+            }
+            
+            Button("Save") {
+                if let audiobook = audiobookToRename, !newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                    audiobookManager.renameAudiobook(audiobook, newTitle: newAudiobookTitle)
+                }
+                audiobookToRename = nil
+                newAudiobookTitle = ""
+            }
+            .disabled(newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        } message: {
+            Text("Enter a new title for '\(audiobookToRename?.title ?? "")'")
         }
     }
 }
