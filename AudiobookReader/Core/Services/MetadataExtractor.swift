@@ -12,11 +12,27 @@ struct AudiobookMetadata {
 
 class MetadataExtractor {
     static func extractMetadata(from url: URL) async -> AudiobookMetadata? {
+        print("🎵 MetadataExtractor: Starting metadata extraction for: \(url.lastPathComponent)")
+        
+        // Ensure we have access to the security-scoped resource if needed
+        let hasAccess = url.startAccessingSecurityScopedResource()
+        defer { 
+            if hasAccess { 
+                url.stopAccessingSecurityScopedResource() 
+                print("🔓 MetadataExtractor: Released security-scoped resource access")
+            }
+        }
+        
         let asset = AVURLAsset(url: url)
         
         do {
+            print("   Loading duration...")
             let duration = try await asset.load(.duration).seconds
+            print("   Duration loaded: \(duration)s")
+            
+            print("   Loading metadata...")
             let metadata = try await asset.load(.metadata)
+            print("   Found \(metadata.count) metadata items")
             
             var title = url.deletingPathExtension().lastPathComponent
             var author = "Unknown Author"
@@ -64,12 +80,20 @@ class MetadataExtractor {
             )
             
         } catch {
-            print("Failed to extract metadata: \(error)")
+            print("❌ MetadataExtractor: Failed to extract metadata from \(url.lastPathComponent): \(error)")
             return nil
         }
     }
     
     static func extractChapters(from url: URL) async -> [ChapterInfo] {
+        // Ensure we have access to the security-scoped resource if needed
+        let hasAccess = url.startAccessingSecurityScopedResource()
+        defer { 
+            if hasAccess { 
+                url.stopAccessingSecurityScopedResource() 
+            }
+        }
+        
         let asset = AVURLAsset(url: url)
         
         do {

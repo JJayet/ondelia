@@ -15,6 +15,17 @@ struct LibraryView: View {
     @State private var filterOption: FilterOption = .all
     @State private var showingImporter = false
     
+    private var allowedFileTypes: [UTType] {
+        var types: [UTType] = [.folder, .audio, .mp3, .zip]
+        if let m4a = UTType(filenameExtension: "m4a") {
+            types.append(m4a)
+        }
+        if let m4b = UTType(filenameExtension: "m4b") {
+            types.append(m4b)
+        }
+        return types
+    }
+    
     enum ViewMode: String, CaseIterable {
         case list = "List"
         case grid = "Grid"
@@ -332,7 +343,7 @@ struct LibraryView: View {
             }
             .fileImporter(
                 isPresented: $showingImporter,
-                allowedContentTypes: [.folder, .audio, .mp3],
+                allowedContentTypes: allowedFileTypes,
                 allowsMultipleSelection: true
             ) { result in
                 switch result {

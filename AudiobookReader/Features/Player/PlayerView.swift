@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct PlayerView: View {
     let audiobook: Audiobook
@@ -10,6 +11,7 @@ struct PlayerView: View {
     @State private var showingAddBookmark = false
     @State private var showingSleepTimer = false
     @State private var showingChapterList = false
+    @State private var showingTranscription = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
     @State private var sleepTimer: Timer?
@@ -55,7 +57,7 @@ struct PlayerView: View {
     private var playbackRate: Float {
         globalAudioManager.getPlaybackRate()
     }
-    
+
     var body: some View {
         GeometryReader { geometry in
             ZStack {
@@ -300,13 +302,17 @@ struct PlayerView: View {
                         .padding(.horizontal)
                         
                         // Action Buttons
-                        HStack(spacing: 22) {
+                        HStack(spacing: 18) {
                             ActionButton(icon: "bookmark", title: "Bookmarks", count: bookmarks.count) {
                                 showingBookmarks = true
                             }
                             
                             ActionButton(icon: "bookmark.circle", title: "Add Bookmark") {
                                 showingAddBookmark = true
+                            }
+                            
+                            ActionButton(icon: "doc.text", title: "Transcription") {
+                                showingTranscription = true
                             }
                             
                             if !chapters.isEmpty {
@@ -328,8 +334,8 @@ struct PlayerView: View {
             loadAudiobook()
             // Auto-play when entering the player
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if !globalAudioManager.isPlaying {
-                    globalAudioManager.play()
+                if globalAudioManager.playbackState != .playing {
+                    globalAudioManager.startPlayback()
                 }
             }
         }
@@ -374,6 +380,13 @@ struct PlayerView: View {
                     globalAudioManager.startPlayback()
                     showingChapterList = false
                 }
+            )
+        }
+        .sheet(isPresented: $showingTranscription) {
+            TranscriptionView(
+                audiobook: audiobook,
+                currentChapterIndex: Int(currentChapter?.chapterNumber ?? 0),
+                currentTime: currentTime
             )
         }
         .actionSheet(isPresented: $showingSleepTimer) {

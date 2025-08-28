@@ -125,18 +125,24 @@ class AudiobookManager: ObservableObject {
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
                 
-                var isDirectory: ObjCBool = false
-                if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-                    if isDirectory.boolValue {
-                        print("📁 Importing folder: \(url.lastPathComponent)")
-                        await self.importAudiobookFolder(from: url)
+                // Check if it's a ZIP file
+                if url.pathExtension.lowercased() == "zip" {
+                    print("📦 Importing ZIP file: \(url.lastPathComponent)")
+                    await self.importZIPAudiobook(from: url)
+                } else {
+                    var isDirectory: ObjCBool = false
+                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                        if isDirectory.boolValue {
+                            print("📁 Importing folder: \(url.lastPathComponent)")
+                            await self.importAudiobookFolder(from: url)
+                        } else {
+                            print("🎵 Importing single file: \(url.lastPathComponent)")
+                            await self.importAudiobook(from: url)
+                        }
                     } else {
-                        print("🎵 Importing single file: \(url.lastPathComponent)")
+                        print("🎵 Importing file (fallback): \(url.lastPathComponent)")
                         await self.importAudiobook(from: url)
                     }
-                } else {
-                    print("🎵 Importing file (fallback): \(url.lastPathComponent)")
-                    await self.importAudiobook(from: url)
                 }
             }
         }
@@ -156,6 +162,31 @@ class AudiobookManager: ObservableObject {
         for i in imports {
             processImport(urls: i.urls, completion: i.completion)
         }
+    }
+    
+    func importZIPAudiobook(from zipURL: URL) async {
+        await MainActor.run {
+            isImporting = true
+        }
+        
+        print("📦 AudiobookManager: Starting ZIP audiobook import from: \(zipURL.lastPathComponent)")
+        
+        // Extract and validate ZIP content
+        guard let extractedFolderURL = await ZIPImporter.importZIPFile(from: zipURL) else {
+            await MainActor.run {
+                isImporting = false
+            }
+            return
+        }
+        
+        // Import the extracted folder using existing folder import logic
+        await importAudiobookFolder(from: extractedFolderURL)
+        
+        // Clean up temporary extraction directory
+        let tempDirectory = extractedFolderURL.deletingLastPathComponent().deletingLastPathComponent()
+        ZIPImporter.cleanupDirectory(at: tempDirectory)
+        
+        print("✅ AudiobookManager: ZIP audiobook import completed")
     }
     
     func importAudiobookFolder(from folderURL: URL) async {
@@ -228,6 +259,24 @@ class AudiobookManager: ObservableObject {
             isImporting = true
         }
         
+        print("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
+        print("   File extension: \(url.pathExtension)")
+        print("   File path: \(url.path)")
+        
+        // Check if file exists and get size
+        let fileManager = FileManager.default
+        if fileManager.fileExists(atPath: url.path) {
+            do {
+                let attributes = try fileManager.attributesOfItem(atPath: url.path)
+                let fileSize = attributes[.size] as? Int64 ?? 0
+                print("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
+            } catch {
+                print("   ⚠️ Could not get file attributes: \(error)")
+            }
+        } else {
+            print("   ❌ File does not exist at path!")
+        }
+        
         // Ensure we have security-scoped resource access
         let hasAccess = url.startAccessingSecurityScopedResource()
         
@@ -237,13 +286,20 @@ class AudiobookManager: ObservableObject {
             }
         }
         
+        print("🎵 AudiobookManager: Extracting metadata...")
         // Extract metadata
         guard let metadata = await MetadataExtractor.extractMetadata(from: url) else {
+            print("❌ AudiobookManager: Failed to extract metadata from file")
             await MainActor.run {
                 isImporting = false
             }
             return
         }
+        
+        print("✅ AudiobookManager: Metadata extracted successfully:")
+        print("   Title: \(metadata.title)")
+        print("   Author: \(metadata.author)")
+        print("   Duration: \(metadata.duration)s")
         
         // Copy file to documents directory
         guard let localURL = await copyFileToDocuments(from: url) else {
@@ -317,6 +373,15 @@ class AudiobookManager: ObservableObject {
         
         print("🎵 AudiobookManager: Copying file from: \(sourceURL.path)")
         
+        // Ensure we have access to the security-scoped resource
+        let hasAccess = sourceURL.startAccessingSecurityScopedResource()
+        defer { 
+            if hasAccess { 
+                sourceURL.stopAccessingSecurityScopedResource() 
+                print("🔓 AudiobookManager: Released security-scoped resource access")
+            }
+        }
+        
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             print("❌ AudiobookManager: Failed to get documents directory")
             return nil
@@ -371,6 +436,15 @@ class AudiobookManager: ObservableObject {
         let fileManager = FileManager.default
         
         print("📁 AudiobookManager: Copying folder from: \(sourceFolderURL.path)")
+        
+        // Ensure we have access to the security-scoped resource
+        let hasAccess = sourceFolderURL.startAccessingSecurityScopedResource()
+        defer { 
+            if hasAccess { 
+                sourceFolderURL.stopAccessingSecurityScopedResource() 
+                print("🔓 AudiobookManager: Released folder security-scoped resource access")
+            }
+        }
         
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             print("❌ AudiobookManager: Failed to get documents directory")
