@@ -8,7 +8,6 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedAudiobook: Audiobook?
     @State private var showingStatistics = false
-    @State private var showingImagePicker = false
     @State private var audiobookForImagePicker: Audiobook?
     @State private var showingRenameAlert = false
     @State private var audiobookToRename: Audiobook?
@@ -264,7 +263,6 @@ struct LibraryView: View {
                                     
                                     Button("Change Cover Image") {
                                         audiobookForImagePicker = audiobook
-                                        showingImagePicker = true
                                     }
                                     
                                     Button("Delete", role: .destructive) {
@@ -358,7 +356,6 @@ struct LibraryView: View {
                                                     
                                                     Button("Change Cover Image") {
                                                         audiobookForImagePicker = audiobook
-                                                        showingImagePicker = true
                                                     }
                                                     
                                                     Button("Delete", role: .destructive) {
@@ -423,18 +420,15 @@ struct LibraryView: View {
                 audiobookManager.fetchAudiobooks()
             }
         }
-        .sheet(isPresented: $showingImagePicker) {
-            if let audiobook = audiobookForImagePicker {
-                ImagePickerView(audiobook: audiobook) { image in
-                    audiobookManager.updateCoverImage(for: audiobook, with: image)
-                    audiobookForImagePicker = nil
-                }
+        .sheet(item: $audiobookForImagePicker) { audiobook in
+            ImagePickerView(audiobook: audiobook) { image in
+                audiobookManager.updateCoverImage(for: audiobook, with: image)
+                audiobookForImagePicker = nil
             }
         }
         .onReceive(audiobookManager.$audiobookNeedingCover) { audiobook in
             if let audiobook = audiobook {
                 audiobookForImagePicker = audiobook
-                showingImagePicker = true
             }
         }
         .alert("Rename Audiobook", isPresented: $showingRenameAlert) {
