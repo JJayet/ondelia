@@ -71,7 +71,7 @@ struct PlayerView: View {
                 .ignoresSafeArea()
                 
                 ScrollView {
-                    VStack(spacing: 32) {
+                    VStack(spacing: 24) {
                         // Header
                         HStack {
                             Button {
@@ -100,7 +100,7 @@ struct PlayerView: View {
                         }
                         .padding(.horizontal)
                         
-                        // Cover Art with Animation
+                        // Cover Art with Animation - Made smaller for compact layout
                         Group {
                             if let image = coverImage {
                                 Image(uiImage: image)
@@ -108,14 +108,14 @@ struct PlayerView: View {
                                     .aspectRatio(contentMode: .fit)
                             } else {
                                 Image(systemName: "book.closed")
-                                    .font(.system(size: 120))
+                                    .font(.system(size: 80))
                                     .foregroundColor(.secondaryText)
                             }
                         }
-                        .frame(width: geometry.size.width * 0.7, height: geometry.size.width * 0.7)
+                        .frame(width: geometry.size.width * 0.5, height: geometry.size.width * 0.5)
                         .background(Color.secondaryBackground)
-                        .cornerRadius(20)
-                        .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
+                        .cornerRadius(16)
+                        .shadow(color: Color.black.opacity(0.15), radius: 15, x: 0, y: 8)
                         .scaleEffect(isPlaying ? 1.02 : 1.0)
                         .animation(.easeInOut(duration: 0.3), value: isPlaying)
                         .onTapGesture {
@@ -145,18 +145,18 @@ struct PlayerView: View {
                         // Book Info
                         VStack(spacing: 8) {
                             Text(audiobook.title ?? "Unknown Title")
-                                .font(.title2)
+                                .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                             
                             Text(audiobook.author ?? "Unknown Author")
-                                .font(.headline)
+                                .font(.subheadline)
                                 .foregroundColor(.secondaryText)
                             
                             if let narrator = audiobook.narrator {
                                 Text("Narrated by \(narrator)")
-                                    .font(.subheadline)
+                                    .font(.caption)
                                     .foregroundColor(.secondaryText)
                             }
                             
@@ -217,7 +217,7 @@ struct PlayerView: View {
                             }
                             
                             // Enhanced Playback Controls
-                            HStack(spacing: 50) {
+                            HStack(spacing: 40) {
                                 Button {
                                     withHapticFeedback {
                                         globalAudioManager.skipBackward(themeManager.skipInterval.seconds)
@@ -238,16 +238,16 @@ struct PlayerView: View {
                                     Group {
                                         if globalAudioManager.playbackState == .loading {
                                             ProgressView()
-                                                .scaleEffect(2.0)
+                                                .scaleEffect(1.8)
                                                 .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
                                         } else {
                                             Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                                .font(.system(size: 80))
+                                                .font(.system(size: 70))
                                                 .foregroundColor(.accentColor)
                                         }
                                     }
                                 }
-                                .frame(width: 80, height: 80)
+                                .frame(width: 70, height: 70)
                                 .scaleEffect(isPlaying && globalAudioManager.playbackState != .loading ? 0.95 : 1.0)
                                 .animation(.easeInOut(duration: 0.1), value: isPlaying)
                                 .disabled(globalAudioManager.playbackState == .loading)
@@ -317,7 +317,7 @@ struct PlayerView: View {
                         }
                         .padding(.horizontal)
                         
-                        Spacer(minLength: 50)
+                        Spacer(minLength: 30)
                     }
                     .padding(.vertical)
                 }
