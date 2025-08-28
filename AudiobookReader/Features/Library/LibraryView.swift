@@ -7,7 +7,6 @@ struct LibraryView: View {
     @State private var searchText = ""
     @State private var selectedAudiobook: Audiobook?
     @State private var showingStatistics = false
-    @State private var showingSettings = false
     @State private var showingImagePicker = false
     @State private var audiobookForImagePicker: Audiobook?
     @State private var viewMode: ViewMode = .list
@@ -70,28 +69,28 @@ struct LibraryView: View {
     }
     
     private var filteredAudiobooks: [Audiobook] {
-        var books = audiobookManager.audiobooks
-        
-        // Apply search filter
+        let searchedBooks: [Audiobook]
         if !searchText.isEmpty {
-            books = audiobookManager.searchAudiobooks(query: searchText)
+            searchedBooks = audiobookManager.searchAudiobooks(query: searchText)
+        } else {
+            searchedBooks = audiobookManager.audiobooks
         }
-        
-        // Apply category filter
+
+        let filteredBooks: [Audiobook]
         if let predicate = filterOption.predicate() {
-            books = books.filter { book in
+            filteredBooks = searchedBooks.filter { book in
                 predicate.evaluate(with: book)
             }
+        } else {
+            filteredBooks = searchedBooks
         }
-        
-        // Apply sorting
-        books.sort { book1, book2 in
-            let descriptor = sortOption.descriptor
-            let result = descriptor.compare(book1, to: book2)
-            return result == .orderedAscending
+
+        let descriptor = sortOption.descriptor
+        let sortedBooks = filteredBooks.sorted { book1, book2 in
+            descriptor.compare(book1, to: book2) == .orderedAscending
         }
-        
-        return books
+
+        return sortedBooks
     }
     
     private var continueReadingBooks: [Audiobook] {
@@ -322,9 +321,10 @@ struct LibraryView: View {
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(action: { showingSettings = true }) {
-                        Image(systemName: "gear")
+                    Button(action: { }) {
+                        Image(systemName: "plus.circle")
                     }
+//                    ImportButton()
                 }
             }
         }
@@ -332,9 +332,6 @@ struct LibraryView: View {
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .sheet(isPresented: $showingStatistics) {
             StatisticsView(statistics: statistics)
-        }
-        .sheet(isPresented: $showingSettings) {
-            SettingsView()
         }
         .fullScreenCover(item: $selectedAudiobook) { audiobook in
             PlayerView(audiobook: audiobook, statistics: statistics)

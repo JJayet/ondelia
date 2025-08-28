@@ -134,6 +134,15 @@ struct MiniPlayerView: View {
                         }
                     }
                     .cornerRadius(16)
+//                    .background(
+//                        Group {
+//                            if #available(iOS 26.0, *) {
+//                                Color.clear.glassEffect(.regular.interactive())
+//                            } else {
+//                                Color.clear
+//                            }
+//                        }
+//                    )
                     .shadow(color: Color.black.opacity(0.15), radius: 12, x: 0, y: 4)
                     .offset(x: dragOffset.width, y: dragOffset.height)
                     .scaleEffect(isDragging ? 0.95 : 1.0)

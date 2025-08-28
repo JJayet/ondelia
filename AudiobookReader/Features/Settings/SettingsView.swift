@@ -31,13 +31,14 @@ struct SettingsView: View {
                         Label("Accent Color", systemImage: "circle.fill")
                             .foregroundColor(themeManager.accentColor.color)
                         Spacer()
-                        Picker("Accent Color", selection: $themeManager.accentColor) {
+                        Picker("", selection: $themeManager.accentColor) {
                             ForEach(AccentColor.allCases, id: \.rawValue) { color in
                                 Label(color.displayName, systemImage: "circle.fill")
-                                    .foregroundColor(color.color)
+                                    .tint(color.color)
                                     .tag(color)
                             }
                         }
+                        .labelsHidden()
                         .pickerStyle(MenuPickerStyle())
                         .onChange(of: themeManager.accentColor) { _, newColor in
                             themeManager.updateAccentColor(newColor)
@@ -66,7 +67,7 @@ struct SettingsView: View {
                 // Goals Section
                 Section("Reading Goals") {
                     Button {
-                        tempGoal = statistics.monthlyGoal
+                        tempGoal = statistics.monthlyGoal / 3600
                         showingGoalEditor = true
                     } label: {
                         HStack {
@@ -128,13 +129,6 @@ struct SettingsView: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .alert("Monthly Goal", isPresented: $showingGoalEditor) {
                 TextField("Hours", value: $tempGoal, format: .number)
                     .keyboardType(.decimalPad)

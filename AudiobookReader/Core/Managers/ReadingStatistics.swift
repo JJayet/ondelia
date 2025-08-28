@@ -131,9 +131,12 @@ class ReadingStatistics: ObservableObject {
         let hours = Int(time) / 3600
         let minutes = (Int(time) % 3600) / 60
         
-        if hours > 0 {
+        if hours > 0 && minutes > 0 {
             return "\(hours)h \(minutes)m"
-        } else {
+        } else if hours > 0 {
+            return "\(hours)h"
+        }
+        else {
             return "\(minutes)m"
         }
     }

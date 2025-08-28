@@ -437,8 +437,8 @@ struct ImportButton: View {
     let onImport: ([URL]) -> Void
     
     var body: some View {
-        Button("Import Files") {
-            showingImporter = true
+        Button(action: {showingImporter = true}) {
+            Image(systemName: "plus.circle")
         }
         .fileImporter(
             isPresented: $showingImporter,

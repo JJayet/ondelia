@@ -108,7 +108,7 @@ struct PlayerView: View {
                                     .aspectRatio(contentMode: .fit)
                             } else {
                                 Image(systemName: "book.closed")
-                                    .font(.system(size: 80))
+                                    .font(.system(size: 120))
                                     .foregroundColor(.secondaryText)
                             }
                         }
@@ -216,7 +216,7 @@ struct PlayerView: View {
                                 }
                             }
                             
-                            // Enhanced Playback Controls
+                            Spacer()
                             HStack(spacing: 40) {
                                 Button {
                                     withHapticFeedback {

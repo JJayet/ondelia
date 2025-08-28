@@ -7,7 +7,10 @@ class AudiobookManager: ObservableObject {
     
     @Published var audiobooks: [Audiobook] = []
     @Published var isImporting = false
+    @Published var isLoadingLibrary = false
     @Published var audiobookNeedingCover: Audiobook?
+    
+    private var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
     
     init() {
         // Don't fetch audiobooks immediately during initialization
@@ -16,11 +19,24 @@ class AudiobookManager: ObservableObject {
     
     // MARK: - Fetch Operations
     func fetchAudiobooks() {
+        // Prevent multiple concurrent fetch operations
+        guard !isLoadingLibrary else { return }
+        
         // Perform fetch on background queue to avoid blocking UI
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.isLoadingLibrary = true
+            }
+            
             let request: NSFetchRequest<Audiobook> = Audiobook.fetchRequest()
             request.sortDescriptors = [NSSortDescriptor(keyPath: \Audiobook.lastPlayed, ascending: false),
                                      NSSortDescriptor(keyPath: \Audiobook.dateAdded, ascending: false)]
+            
+            // Optimize fetch with prefetching relationships
+            request.relationshipKeyPathsForPrefetching = ["chapters", "bookmarks"]
+            request.returnsObjectsAsFaults = false
             
             do {
                 let fetchedAudiobooks = try self.persistenceController.context.fetch(request)
@@ -41,6 +57,10 @@ class AudiobookManager: ObservableObject {
                 // Update UI on main queue
                 DispatchQueue.main.async {
                     self.audiobooks = validAudiobooks
+                    self.isLoadingLibrary = false
+                    
+                    // Process any pending imports now that library is loaded
+                    self.processPendingImports()
                 }
                 
                 // Handle deletions and saving on background context
@@ -62,6 +82,9 @@ class AudiobookManager: ObservableObject {
                 }
             } catch {
                 print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
+                DispatchQueue.main.async {
+                    self.isLoadingLibrary = false
+                }
             }
         }
     }
@@ -81,6 +104,60 @@ class AudiobookManager: ObservableObject {
     }
     
     // MARK: - Import Operations
+    func handleImportRequest(urls: [URL], completion: (() -> Void)? = nil) {
+        // If library is still loading, queue the import operation
+        if isLoadingLibrary {
+            print("📚 AudiobookManager: Library still loading, queueing import operation")
+            pendingImports.append((urls: urls, completion: completion))
+            return
+        }
+        
+        // Process immediately if library is loaded
+        processImport(urls: urls, completion: completion)
+    }
+    
+    private func processImport(urls: [URL], completion: (() -> Void)? = nil) {
+        for url in urls {
+            Task {
+                print("📂 Processing import: \(url.lastPathComponent)")
+                
+                // Start accessing security-scoped resource
+                let accessing = url.startAccessingSecurityScopedResource()
+                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
+                
+                var isDirectory: ObjCBool = false
+                if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                    if isDirectory.boolValue {
+                        print("📁 Importing folder: \(url.lastPathComponent)")
+                        await self.importAudiobookFolder(from: url)
+                    } else {
+                        print("🎵 Importing single file: \(url.lastPathComponent)")
+                        await self.importAudiobook(from: url)
+                    }
+                } else {
+                    print("🎵 Importing file (fallback): \(url.lastPathComponent)")
+                    await self.importAudiobook(from: url)
+                }
+            }
+        }
+        
+        // Call completion handler if provided
+        completion?()
+    }
+    
+    private func processPendingImports() {
+        guard !pendingImports.isEmpty else { return }
+        
+        print("📚 AudiobookManager: Processing \(pendingImports.count) pending import(s)")
+        
+        let imports = pendingImports
+        pendingImports.removeAll()
+        
+        for i in imports {
+            processImport(urls: i.urls, completion: i.completion)
+        }
+    }
+    
     func importAudiobookFolder(from folderURL: URL) async {
         await MainActor.run {
             isImporting = true
