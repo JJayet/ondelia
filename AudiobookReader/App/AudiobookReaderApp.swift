@@ -15,8 +15,21 @@ struct AudiobookReaderApp: App {
     
     var body: some Scene {
         WindowGroup {
-            // Show a loading view until Core Data is ready
-            if persistenceController.isLoaded {
+            // Show a loading view only during initial Core Data loading
+            if persistenceController.isLoading {
+                // Optimized loading view that doesn't block
+                VStack(spacing: 16) {
+                    ProgressView()
+                        .scaleEffect(1.2)
+                        .progressViewStyle(CircularProgressViewStyle())
+                    Text("Starting up...")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color(.systemBackground))
+            } else {
+                // Main app content - loads immediately once Core Data setup is complete
                 MainTabView()
                     .environment(\.managedObjectContext, persistenceController.context)
                     .environment(\.theme, ThemeManager.shared)
@@ -27,19 +40,6 @@ struct AudiobookReaderApp: App {
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
                         handleAppDidBecomeActive()
                     }
-            } else {
-                // Simple loading view while Core Data initializes
-                VStack {
-                    ProgressView()
-                        .scaleEffect(1.5)
-                    Text("Loading...")
-                        .padding()
-                        .foregroundColor(.secondary)
-                }
-                .onAppear {
-                    // Trigger lazy loading of Core Data
-                    let _ = persistenceController.context
-                }
             }
         }
     }

@@ -40,7 +40,8 @@ struct PlayerView: View {
     }
     
     private var isPlaying: Bool {
-        globalAudioManager.isPlaying()
+        // Use the published playback state for better UI responsiveness
+        return globalAudioManager.playbackState == .playing
     }
     
     private var currentTime: TimeInterval {
@@ -229,15 +230,27 @@ struct PlayerView: View {
                                 
                                 Button {
                                     withHapticFeedback(.medium) {
-                                        globalAudioManager.togglePlayback()
+                                        if globalAudioManager.playbackState != .loading {
+                                            globalAudioManager.togglePlayback()
+                                        }
                                     }
                                 } label: {
-                                    Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                                        .font(.system(size: 80))
-                                        .foregroundColor(.accentColor)
+                                    Group {
+                                        if globalAudioManager.playbackState == .loading {
+                                            ProgressView()
+                                                .scaleEffect(2.0)
+                                                .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
+                                        } else {
+                                            Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                                                .font(.system(size: 80))
+                                                .foregroundColor(.accentColor)
+                                        }
+                                    }
                                 }
-                                .scaleEffect(isPlaying ? 0.95 : 1.0)
+                                .frame(width: 80, height: 80)
+                                .scaleEffect(isPlaying && globalAudioManager.playbackState != .loading ? 0.95 : 1.0)
                                 .animation(.easeInOut(duration: 0.1), value: isPlaying)
+                                .disabled(globalAudioManager.playbackState == .loading)
                                 
                                 Button {
                                     withHapticFeedback {

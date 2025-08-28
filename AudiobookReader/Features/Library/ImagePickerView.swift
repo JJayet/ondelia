@@ -138,39 +138,41 @@ struct ImagePickerView: View {
         isLoading = true
         errorMessage = nil
         
-        // Create search query
-        let author = audiobook.author ?? ""
-        let _ = "\(title) \(author) audiobook cover".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        
-        // For now, create mock results since we can't directly access Google Images API
-        // In a real implementation, you'd use a service like Unsplash API, Pixabay API, or similar
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            createMockSearchResults()
-            isLoading = false
+        Task {
+            // Create search query
+            let author = audiobook.author ?? ""
+            let searchQuery = "\(title) \(author) audiobook cover"
+            
+            let result = await GoogleImageSearchService.shared.searchImages(query: searchQuery)
+            
+            await MainActor.run {
+                switch result {
+                case .success(let results):
+                    searchResults = results
+                    if searchResults.isEmpty {
+                        errorMessage = "No images found for this audiobook"
+                    }
+                case .failure(let error):
+                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    searchResults = []
+                }
+                isLoading = false
+            }
         }
     }
     
-    private func createMockSearchResults() {
-        // Mock search results with placeholder images
-        // In reality, you'd integrate with an image search API
-        searchResults = [
-            ImageSearchResult(id: "1", thumbnailUrl: "https://via.placeholder.com/150x200/FF6B6B/FFFFFF?text=Book+1", fullUrl: "https://via.placeholder.com/300x400/FF6B6B/FFFFFF?text=Book+1"),
-            ImageSearchResult(id: "2", thumbnailUrl: "https://via.placeholder.com/150x200/4ECDC4/FFFFFF?text=Book+2", fullUrl: "https://via.placeholder.com/300x400/4ECDC4/FFFFFF?text=Book+2"),
-            ImageSearchResult(id: "3", thumbnailUrl: "https://via.placeholder.com/150x200/45B7D1/FFFFFF?text=Book+3", fullUrl: "https://via.placeholder.com/300x400/45B7D1/FFFFFF?text=Book+3"),
-            ImageSearchResult(id: "4", thumbnailUrl: "https://via.placeholder.com/150x200/96CEB4/FFFFFF?text=Book+4", fullUrl: "https://via.placeholder.com/300x400/96CEB4/FFFFFF?text=Book+4"),
-            ImageSearchResult(id: "5", thumbnailUrl: "https://via.placeholder.com/150x200/FFEAA7/333333?text=Book+5", fullUrl: "https://via.placeholder.com/300x400/FFEAA7/333333?text=Book+5"),
-            ImageSearchResult(id: "6", thumbnailUrl: "https://via.placeholder.com/150x200/DDA0DD/FFFFFF?text=Book+6", fullUrl: "https://via.placeholder.com/300x400/DDA0DD/FFFFFF?text=Book+6")
-        ]
-        
-        if searchResults.isEmpty {
-            errorMessage = "No images found for this audiobook"
-        }
-    }
     
     private func downloadAndSelectImage(_ result: ImageSearchResult) {
         Task {
             do {
-                let (data, _) = try await URLSession.shared.data(from: URL(string: result.fullUrl)!)
+                guard let url = URL(string: result.fullUrl) else {
+                    await MainActor.run {
+                        errorMessage = "Invalid image URL"
+                    }
+                    return
+                }
+                
+                let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
                     await MainActor.run {
                         onImageSelected(image)
@@ -186,11 +188,6 @@ struct ImagePickerView: View {
     }
 }
 
-struct ImageSearchResult {
-    let id: String
-    let thumbnailUrl: String
-    let fullUrl: String
-}
 
 struct PhotoPickerView: UIViewControllerRepresentable {
     let onImageSelected: (UIImage) -> Void
@@ -198,7 +195,12 @@ struct PhotoPickerView: UIViewControllerRepresentable {
     func makeUIViewController(context: Context) -> UIImagePickerController {
         let picker = UIImagePickerController()
         picker.sourceType = .photoLibrary
+        picker.allowsEditing = true // Allow basic editing like cropping
         picker.delegate = context.coordinator
+        
+        // Ensure camera is not available as a source
+        picker.mediaTypes = ["public.image"]
+        
         return picker
     }
     
@@ -216,8 +218,11 @@ struct PhotoPickerView: UIViewControllerRepresentable {
         }
         
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            if let image = info[.originalImage] as? UIImage {
-                parent.onImageSelected(image)
+            // Prefer edited image if available (for cropping), otherwise use original
+            let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage
+            
+            if let selectedImage = image {
+                parent.onImageSelected(selectedImage)
             }
             picker.dismiss(animated: true)
         }

@@ -23,8 +23,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        setupAudioSession()
-        setupRemoteTransportControls()
+        // Defer audio session and remote control setup until needed
     }
     
     deinit {
@@ -45,6 +44,10 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     // MARK: - Load Multi-File Audiobook
     func loadMultiFileAudiobook(_ audiobook: Audiobook) {
         print("🎵 MultiFileAudioEngine: Loading multi-file audiobook: \(audiobook.title ?? "Unknown")")
+        
+        // Setup audio session and remote controls on first load
+        setupAudioSession()
+        setupRemoteTransportControls()
         
         cleanup()
         
@@ -155,7 +158,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         // Only load the current chapter initially (lazy loading)
         loadChapterPlayer(currentPlayerIndex)
         setupTimeObserver()
-        setupNowPlayingInfo(for: audiobook)
+        
+        // Setup now playing info asynchronously
+        DispatchQueue.global(qos: .utility).async {
+            self.setupNowPlayingInfo(for: audiobook)
+        }
         
         print("✅ MultiFileAudioEngine: Multi-file audiobook initialized successfully")
         print("   Total duration: \(formatTime(duration))")
@@ -192,7 +199,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             duration = audiobook.duration
             
             setupTimeObserver()
-            setupNowPlayingInfo(for: audiobook)
+            
+            // Setup now playing info asynchronously
+            DispatchQueue.global(qos: .utility).async {
+                self.setupNowPlayingInfo(for: audiobook)
+            }
             
         } catch {
             print("❌ MultiFileAudioEngine: Failed to load chapter files directly: \(error)")

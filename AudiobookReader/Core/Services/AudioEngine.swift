@@ -23,8 +23,7 @@ class AudioEngine: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        setupAudioSession()
-        setupRemoteTransportControls()
+        // Defer audio session and remote control setup until needed
     }
     
     deinit {
@@ -68,6 +67,10 @@ class AudioEngine: NSObject, ObservableObject {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
         
+        // Setup audio session and remote controls on first load
+        setupAudioSession()
+        setupRemoteTransportControls()
+        
         // Clean up existing player before creating new one
         cleanup()
         
@@ -86,8 +89,10 @@ class AudioEngine: NSObject, ObservableObject {
         playerItem?.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
         hasAddedObservers = true
         
-        // Setup now playing info
-        setupNowPlayingInfo(asset: asset)
+        // Setup now playing info asynchronously to avoid blocking
+        DispatchQueue.global(qos: .utility).async {
+            self.setupNowPlayingInfo(asset: asset)
+        }
     }
     
     // MARK: - Playback Controls

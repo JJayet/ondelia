@@ -11,8 +11,20 @@ class GlobalAudioManager: ObservableObject {
     @Published var isLoading = false
     @Published var isReady = false
     @Published var showMiniPlayer = false
+    @Published var playbackState: PlaybackState = .stopped
     
-    private init() {}
+    enum PlaybackState {
+        case stopped
+        case loading
+        case playing
+        case paused
+        case failed
+    }
+    
+    private init() {
+        // Removed all initialization work to speed up app launch
+        // Audio session setup is now deferred until first audio load
+    }
     
     func loadAudiobook(_ audiobook: Audiobook) {
         // If we're already playing this audiobook, don't reload
@@ -21,6 +33,7 @@ class GlobalAudioManager: ObservableObject {
            (audioEngine != nil || multiFileAudioEngine != nil) {
             print("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
             showMiniPlayer = true
+            playbackState = isPlaying() ? .playing : .paused
             return
         }
         
@@ -30,16 +43,17 @@ class GlobalAudioManager: ObservableObject {
             self.showMiniPlayer = false
             self.isLoading = true
             self.isReady = false
+            self.playbackState = .loading
         }
         
         // Clean up existing engines
-        audioEngine = nil
-        multiFileAudioEngine = nil
+        cleanupEngines()
         
         guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
             print("❌ GlobalAudioManager: No file path found")
             DispatchQueue.main.async {
                 self.isLoading = false
+                self.playbackState = .failed
             }
             return
         }
@@ -52,6 +66,7 @@ class GlobalAudioManager: ObservableObject {
                 print("❌ GlobalAudioManager: File/folder not found at path: \(filePath)")
                 DispatchQueue.main.async {
                     self.isLoading = false
+                    self.playbackState = .failed
                 }
                 return
             }
@@ -60,45 +75,60 @@ class GlobalAudioManager: ObservableObject {
                 if isDirectory.boolValue {
                     print("📁 GlobalAudioManager: Loading multi-file audiobook")
                     self.useMultiFileEngine = true
-                    self.multiFileAudioEngine = MultiFileAudioEngine()
-                    
-                    // Load the audiobook asynchronously
-                    DispatchQueue.global(qos: .userInitiated).async {
-                        self.multiFileAudioEngine?.loadMultiFileAudiobook(audiobook)
-                        
-                        DispatchQueue.main.async {
-                            // Resume from last position
-                            if audiobook.currentPosition > 0 {
-                                self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
-                            }
-                            self.isLoading = false
-                            self.isReady = true
-                        }
-                    }
+                    self.loadMultiFileAudiobook(audiobook, filePath: filePath)
                 } else {
                     print("📄 GlobalAudioManager: Loading single audio file")
                     self.useMultiFileEngine = false
-                    
-                    // Load single file asynchronously
-                    DispatchQueue.global(qos: .userInitiated).async {
-                        let audioEngine = AudioEngine()
-                        let fileURL = URL(fileURLWithPath: filePath)
-                        audioEngine.loadAudio(url: fileURL)
-                        
-                        DispatchQueue.main.async {
-                            self.audioEngine = audioEngine
-                            
-                            // Resume from last position
-                            if audiobook.currentPosition > 0 {
-                                self.audioEngine?.seek(to: audiobook.currentPosition)
-                            }
-                            self.isLoading = false
-                            self.isReady = true
-                        }
-                    }
+                    self.loadSingleFileAudiobook(audiobook, filePath: filePath)
                 }
             }
         }
+    }
+    
+    private func loadMultiFileAudiobook(_ audiobook: Audiobook, filePath: String) {
+        // Create engine asynchronously
+        DispatchQueue.global(qos: .userInitiated).async {
+            let engine = MultiFileAudioEngine()
+            engine.loadMultiFileAudiobook(audiobook)
+            
+            DispatchQueue.main.async {
+                self.multiFileAudioEngine = engine
+                
+                // Resume from last position if needed
+                if audiobook.currentPosition > 0 {
+                    self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
+                }
+                self.isLoading = false
+                self.isReady = true
+                self.playbackState = .paused
+            }
+        }
+    }
+    
+    private func loadSingleFileAudiobook(_ audiobook: Audiobook, filePath: String) {
+        // Create engine asynchronously
+        DispatchQueue.global(qos: .userInitiated).async {
+            let engine = AudioEngine()
+            let fileURL = URL(fileURLWithPath: filePath)
+            engine.loadAudio(url: fileURL)
+            
+            DispatchQueue.main.async {
+                self.audioEngine = engine
+                
+                // Resume from last position if needed
+                if audiobook.currentPosition > 0 {
+                    self.audioEngine?.seek(to: audiobook.currentPosition)
+                }
+                self.isLoading = false
+                self.isReady = true
+                self.playbackState = .paused
+            }
+        }
+    }
+    
+    private func cleanupEngines() {
+        audioEngine = nil
+        multiFileAudioEngine = nil
     }
     
     func pausePlayback() {
@@ -107,6 +137,7 @@ class GlobalAudioManager: ObservableObject {
         } else {
             audioEngine?.pause()
         }
+        playbackState = .paused
     }
     
     func resumePlayback() {
@@ -116,16 +147,19 @@ class GlobalAudioManager: ObservableObject {
             audioEngine?.play()
         }
         showMiniPlayer = true
+        playbackState = .playing
     }
     
     func startPlayback() {
         resumePlayback()
         showMiniPlayer = true
+        playbackState = .playing
     }
     
     func stopPlayback() {
         pausePlayback()
         showMiniPlayer = false
+        playbackState = .stopped
     }
     
     func isPlaying() -> Bool {
@@ -185,14 +219,19 @@ class GlobalAudioManager: ObservableObject {
     }
     
     func togglePlayback() {
+        let wasPlaying = isPlaying()
+        
         if useMultiFileEngine {
             multiFileAudioEngine?.togglePlayback()
         } else {
             audioEngine?.togglePlayback()
         }
         
-        // Update mini player visibility based on playback state
-        if isPlaying() {
+        // Update state based on toggle result
+        if wasPlaying {
+            playbackState = .paused
+        } else {
+            playbackState = .playing
             showMiniPlayer = true
         }
     }

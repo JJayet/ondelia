@@ -9,23 +9,44 @@ class ThemeManager: ObservableObject {
     @Published var skipInterval: SkipInterval = .fifteen
     
     private init() {
-        loadSettings()
+        // Load settings asynchronously to avoid blocking initialization
+        DispatchQueue.global(qos: .utility).async {
+            self.loadSettings()
+        }
     }
     
     private func loadSettings() {
+        let theme: AppTheme
+        let accent: AccentColor
+        let skip: SkipInterval
+        
+        // Load from UserDefaults on background queue
         if let themeRawValue = UserDefaults.standard.object(forKey: "selectedTheme") as? Int,
-           let theme = AppTheme(rawValue: themeRawValue) {
-            currentTheme = theme
+           let loadedTheme = AppTheme(rawValue: themeRawValue) {
+            theme = loadedTheme
+        } else {
+            theme = .system
         }
         
         if let accentRawValue = UserDefaults.standard.object(forKey: "accentColor") as? Int,
-           let accent = AccentColor(rawValue: accentRawValue) {
-            accentColor = accent
+           let loadedAccent = AccentColor(rawValue: accentRawValue) {
+            accent = loadedAccent
+        } else {
+            accent = .blue
         }
         
         if let skipRawValue = UserDefaults.standard.object(forKey: "skipInterval") as? Int,
-           let skip = SkipInterval(rawValue: skipRawValue) {
-            skipInterval = skip
+           let loadedSkip = SkipInterval(rawValue: skipRawValue) {
+            skip = loadedSkip
+        } else {
+            skip = .fifteen
+        }
+        
+        // Update published properties on main queue
+        DispatchQueue.main.async {
+            self.currentTheme = theme
+            self.accentColor = accent
+            self.skipInterval = skip
         }
     }
     

@@ -9,6 +9,7 @@ struct LibraryView: View {
     @State private var showingStatistics = false
     @State private var showingSettings = false
     @State private var showingImagePicker = false
+    @State private var audiobookForImagePicker: Audiobook?
     @State private var viewMode: ViewMode = .list
     @State private var sortOption: SortOption = .lastPlayed
     @State private var filterOption: FilterOption = .all
@@ -213,6 +214,16 @@ struct LibraryView: View {
                                     }
                                     .tint(.red)
                                 }
+                                .contextMenu {
+                                    Button("Change Cover Image") {
+                                        audiobookForImagePicker = audiobook
+                                        showingImagePicker = true
+                                    }
+                                    
+                                    Button("Delete", role: .destructive) {
+                                        audiobookManager.deleteAudiobook(audiobook)
+                                    }
+                                }
                             }
                         }
                     }
@@ -285,6 +296,11 @@ struct LibraryView: View {
                                                     selectedAudiobook = audiobook
                                                 }
                                                 .contextMenu {
+                                                    Button("Change Cover Image") {
+                                                        audiobookForImagePicker = audiobook
+                                                        showingImagePicker = true
+                                                    }
+                                                    
                                                     Button("Delete", role: .destructive) {
                                                         audiobookManager.deleteAudiobook(audiobook)
                                                     }
@@ -326,6 +342,20 @@ struct LibraryView: View {
         .refreshable {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()
+            }
+        }
+        .sheet(isPresented: $showingImagePicker) {
+            if let audiobook = audiobookForImagePicker {
+                ImagePickerView(audiobook: audiobook) { image in
+                    audiobookManager.updateCoverImage(for: audiobook, with: image)
+                    audiobookForImagePicker = nil
+                }
+            }
+        }
+        .onReceive(audiobookManager.$audiobookNeedingCover) { audiobook in
+            if let audiobook = audiobook {
+                audiobookForImagePicker = audiobook
+                showingImagePicker = true
             }
         }
     }

@@ -29,7 +29,8 @@ struct MiniPlayerView: View {
     }
     
     private var isPlaying: Bool {
-        globalAudioManager.isPlaying()
+        // Use the published playback state for better UI responsiveness
+        return globalAudioManager.playbackState == .playing
     }
     
     private var progress: Double {

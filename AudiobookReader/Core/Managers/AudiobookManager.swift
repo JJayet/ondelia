@@ -10,37 +10,59 @@ class AudiobookManager: ObservableObject {
     @Published var audiobookNeedingCover: Audiobook?
     
     init() {
-        fetchAudiobooks()
+        // Don't fetch audiobooks immediately during initialization
+        // This will be called by views when they appear
     }
     
     // MARK: - Fetch Operations
     func fetchAudiobooks() {
-        let request: NSFetchRequest<Audiobook> = Audiobook.fetchRequest()
-        request.sortDescriptors = [NSSortDescriptor(keyPath: \Audiobook.lastPlayed, ascending: false),
-                                 NSSortDescriptor(keyPath: \Audiobook.dateAdded, ascending: false)]
-        
-        do {
-            let fetchedAudiobooks = try persistenceController.context.fetch(request)
+        // Perform fetch on background queue to avoid blocking UI
+        DispatchQueue.global(qos: .userInitiated).async {
+            let request: NSFetchRequest<Audiobook> = Audiobook.fetchRequest()
+            request.sortDescriptors = [NSSortDescriptor(keyPath: \Audiobook.lastPlayed, ascending: false),
+                                     NSSortDescriptor(keyPath: \Audiobook.dateAdded, ascending: false)]
             
-            // Validate file existence and filter out missing files
-            var validAudiobooks: [Audiobook] = []
-            for audiobook in fetchedAudiobooks {
-                if validateAudiobookFile(audiobook) {
-                    validAudiobooks.append(audiobook)
-                } else {
-                    print("⚠️ AudiobookManager: File missing for '\(audiobook.title ?? "Unknown")', removing from library")
-                    persistenceController.context.delete(audiobook)
+            do {
+                let fetchedAudiobooks = try self.persistenceController.context.fetch(request)
+                
+                // Validate file existence and filter out missing files (on background queue)
+                var validAudiobooks: [Audiobook] = []
+                var audiobooksToDelete: [Audiobook] = []
+                
+                for audiobook in fetchedAudiobooks {
+                    if self.validateAudiobookFile(audiobook) {
+                        validAudiobooks.append(audiobook)
+                    } else {
+                        print("⚠️ AudiobookManager: File missing for '\(audiobook.title ?? "Unknown")', removing from library")
+                        audiobooksToDelete.append(audiobook)
+                    }
                 }
+                
+                // Update UI on main queue
+                DispatchQueue.main.async {
+                    self.audiobooks = validAudiobooks
+                }
+                
+                // Handle deletions and saving on background context
+                if !audiobooksToDelete.isEmpty {
+                    let backgroundContext = self.persistenceController.backgroundContext()
+                    backgroundContext.performAndWait {
+                        for audiobook in audiobooksToDelete {
+                            if let objectID = backgroundContext.object(with: audiobook.objectID) as? Audiobook {
+                                backgroundContext.delete(objectID)
+                            }
+                        }
+                        
+                        do {
+                            try backgroundContext.save()
+                        } catch {
+                            print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
+                        }
+                    }
+                }
+            } catch {
+                print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
             }
-            
-            audiobooks = validAudiobooks
-            
-            // Save context if any books were removed
-            if validAudiobooks.count != fetchedAudiobooks.count {
-                persistenceController.save()
-            }
-        } catch {
-            print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
         }
     }
     
