@@ -2,10 +2,12 @@ import SwiftUI
 
 struct MainTabView: View {
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var globalAudioManager = GlobalAudioManager.shared
     @State private var selectedTab = 1 // Start with Library tab
     
     var body: some View {
-        TabView(selection: $selectedTab) {
+        ZStack {
+            TabView(selection: $selectedTab) {
             // Home Tab
             HomeView()
                 .tabItem {
@@ -29,10 +31,14 @@ struct MainTabView: View {
                     Text("Settings")
                 }
                 .tag(2)
+            }
+            .preferredColorScheme(themeManager.currentTheme.colorScheme)
+            .accentColor(themeManager.accentColor.color)
+            .environment(\.theme, themeManager)
+            
+            // Floating Mini Player
+            MiniPlayerView()
         }
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .accentColor(themeManager.accentColor.color)
-        .environment(\.theme, themeManager)
     }
 }
 

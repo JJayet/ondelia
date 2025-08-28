@@ -4,10 +4,8 @@ struct PlayerView: View {
     let audiobook: Audiobook
     @ObservedObject var statistics: ReadingStatistics
     @StateObject private var audiobookManager = AudiobookManager()
-    @StateObject private var audioEngine = AudioEngine()
-    @StateObject private var multiFileAudioEngine = MultiFileAudioEngine()
     @StateObject private var themeManager = ThemeManager.shared
-    @State private var useMultiFileEngine = false
+    @ObservedObject private var globalAudioManager = GlobalAudioManager.shared
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
     @State private var showingSleepTimer = false
@@ -33,12 +31,28 @@ struct PlayerView: View {
     }
     
     private var currentChapter: Chapter? {
-        let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+        let currentTime = globalAudioManager.getCurrentTime()
         return chapters.first { chapter in
             currentTime >= chapter.startTime && currentTime < chapter.endTime
         } ?? chapters.first { chapter in
             currentTime >= chapter.startTime
         }
+    }
+    
+    private var isPlaying: Bool {
+        globalAudioManager.isPlaying()
+    }
+    
+    private var currentTime: TimeInterval {
+        globalAudioManager.getCurrentTime()
+    }
+    
+    private var duration: TimeInterval {
+        globalAudioManager.getDuration()
+    }
+    
+    private var playbackRate: Float {
+        globalAudioManager.getPlaybackRate()
     }
     
     var body: some View {
@@ -101,14 +115,14 @@ struct PlayerView: View {
                         .background(Color.secondaryBackground)
                         .cornerRadius(20)
                         .shadow(color: Color.black.opacity(0.2), radius: 20, x: 0, y: 10)
-                        .scaleEffect((useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying) ? 1.02 : 1.0)
-                        .animation(.easeInOut(duration: 0.3), value: useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying)
+                        .scaleEffect(isPlaying ? 1.02 : 1.0)
+                        .animation(.easeInOut(duration: 0.3), value: isPlaying)
                         .onTapGesture {
                             withHapticFeedback {
-                                if useMultiFileEngine {
-                                    multiFileAudioEngine.togglePlayback()
+                                if isPlaying {
+                                    globalAudioManager.pausePlayback()
                                 } else {
-                                    audioEngine.togglePlayback()
+                                    globalAudioManager.startPlayback()
                                 }
                             }
                         }
@@ -118,17 +132,9 @@ struct PlayerView: View {
                                     if abs(value.translation.width) > 50 {
                                         withHapticFeedback {
                                             if value.translation.width > 0 {
-                                                if useMultiFileEngine {
-                                                    multiFileAudioEngine.skipBackward(themeManager.skipInterval.seconds)
-                                                } else {
-                                                    audioEngine.skipBackward(themeManager.skipInterval.seconds)
-                                                }
+                                                globalAudioManager.skipBackward(themeManager.skipInterval.seconds)
                                             } else {
-                                                if useMultiFileEngine {
-                                                    multiFileAudioEngine.skipForward(themeManager.skipInterval.seconds)
-                                                } else {
-                                                    audioEngine.skipForward(themeManager.skipInterval.seconds)
-                                                }
+                                                globalAudioManager.skipForward(themeManager.skipInterval.seconds)
                                             }
                                         }
                                     }
@@ -172,32 +178,37 @@ struct PlayerView: View {
                             VStack(spacing: 8) {
                                 CustomSlider(
                                     value: Binding(
-                                        get: { useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime },
+                                        get: { currentTime },
                                         set: { newValue in
-                                            if useMultiFileEngine {
-                                                multiFileAudioEngine.seek(to: newValue)
-                                                multiFileAudioEngine.play()
-                                            } else {
-                                                audioEngine.seek(to: newValue)
-                                                audioEngine.play()
-                                            }
+                                            globalAudioManager.seek(to: newValue)
                                         }
                                     ),
-                                    range: 0...max(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration, 1),
+                                    range: 0...max(duration, 1),
                                     onEditingChanged: { editing in
                                         isSeekingManually = editing
                                     }
                                 )
+                                .accessibilityIdentifier(AccessibilityIdentifiers.Player.progressSlider)
+                                .accessibilityLabel("Audio progress")
+                                .accessibilityValue(formatAccessibilityTime(currentTime, duration: duration))
+                                .accessibilityAdjustableAction { direction in
+                                    let increment: TimeInterval = 30
+                                    let newTime = direction == .increment ? 
+                                        min(currentTime + increment, duration) :
+                                        max(currentTime - increment, 0)
+                                    
+                                    globalAudioManager.seek(to: newTime)
+                                }
                                 
                                 HStack {
-                                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime))
+                                    Text(formatTime(currentTime))
                                         .font(.caption)
                                         .foregroundColor(.secondaryText)
                                         .monospacedDigit()
                                     
                                     Spacer()
                                     
-                                    Text(formatTime(useMultiFileEngine ? multiFileAudioEngine.duration : audioEngine.duration))
+                                    Text(formatTime(duration))
                                         .font(.caption)
                                         .foregroundColor(.secondaryText)
                                         .monospacedDigit()
@@ -208,11 +219,7 @@ struct PlayerView: View {
                             HStack(spacing: 50) {
                                 Button {
                                     withHapticFeedback {
-                                        if useMultiFileEngine {
-                                            multiFileAudioEngine.skipBackward(themeManager.skipInterval.seconds)
-                                        } else {
-                                            audioEngine.skipBackward(themeManager.skipInterval.seconds)
-                                        }
+                                        globalAudioManager.skipBackward(themeManager.skipInterval.seconds)
                                     }
                                 } label: {
                                     Image(systemName: "gobackward.\(Int(themeManager.skipInterval.seconds))")
@@ -222,28 +229,19 @@ struct PlayerView: View {
                                 
                                 Button {
                                     withHapticFeedback(.medium) {
-                                        if useMultiFileEngine {
-                                            multiFileAudioEngine.togglePlayback()
-                                        } else {
-                                            audioEngine.togglePlayback()
-                                        }
+                                        globalAudioManager.togglePlayback()
                                     }
                                 } label: {
-                                    let isPlaying = useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying
                                     Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
                                         .font(.system(size: 80))
                                         .foregroundColor(.accentColor)
                                 }
-                                .scaleEffect((useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying) ? 0.95 : 1.0)
-                                .animation(.easeInOut(duration: 0.1), value: useMultiFileEngine ? multiFileAudioEngine.isPlaying : audioEngine.isPlaying)
+                                .scaleEffect(isPlaying ? 0.95 : 1.0)
+                                .animation(.easeInOut(duration: 0.1), value: isPlaying)
                                 
                                 Button {
                                     withHapticFeedback {
-                                        if useMultiFileEngine {
-                                            multiFileAudioEngine.skipForward(themeManager.skipInterval.seconds)
-                                        } else {
-                                            audioEngine.skipForward(themeManager.skipInterval.seconds)
-                                        }
+                                        globalAudioManager.skipForward(themeManager.skipInterval.seconds)
                                     }
                                 } label: {
                                     Image(systemName: "goforward.\(Int(themeManager.skipInterval.seconds))")
@@ -254,7 +252,6 @@ struct PlayerView: View {
                             
                             // Speed Control with Animation
                             VStack(spacing: 12) {
-                                let playbackRate = useMultiFileEngine ? multiFileAudioEngine.playbackRate : audioEngine.playbackRate
                                 Text("Speed: \(String(format: "%.1fx", playbackRate))")
                                     .font(.caption)
                                     .foregroundColor(.secondaryText)
@@ -263,11 +260,7 @@ struct PlayerView: View {
                                     ForEach([0.75, 1.0, 1.25, 1.5, 2.0], id: \.self) { speed in
                                         Button("\(String(format: "%.2fx", speed))") {
                                             withHapticFeedback {
-                                                if useMultiFileEngine {
-                                                    multiFileAudioEngine.setPlaybackRate(Float(speed))
-                                                } else {
-                                                    audioEngine.setPlaybackRate(Float(speed))
-                                                }
+                                                globalAudioManager.setPlaybackRate(Float(speed))
                                             }
                                         }
                                         .font(.caption)
@@ -321,10 +314,11 @@ struct PlayerView: View {
         .onAppear {
             loadAudiobook()
         }
-        .onReceive(useMultiFileEngine ? multiFileAudioEngine.$currentTime : audioEngine.$currentTime) { currentTime in
-            if Int(currentTime) % 5 == 0 && !isSeekingManually {
-                audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
-                statistics.addListeningTime(5, playbackRate: useMultiFileEngine ? multiFileAudioEngine.playbackRate : audioEngine.playbackRate)
+        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
+            if !isSeekingManually && isPlaying {
+                let currentPlaybackTime = globalAudioManager.getCurrentTime()
+                audiobookManager.updateProgress(for: audiobook, currentTime: currentPlaybackTime)
+                statistics.addListeningTime(1, playbackRate: playbackRate)
                 
                 if audiobook.isFinished && !audiobook.isFinished {
                     statistics.markBookCompleted()
@@ -332,18 +326,20 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showingBookmarks) {
-            BookmarksView(audiobook: audiobook, audioEngine: audioEngine)
+            if let audioEngine = globalAudioManager.audioEngine {
+                BookmarksView(audiobook: audiobook, audioEngine: audioEngine)
+            }
         }
         .sheet(isPresented: $showingAddBookmark) {
             AddBookmarkView(
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
                 onSave: {
-                    let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+                    let bookmarkTime = currentTime
                     audiobookManager.createBookmark(
                         for: audiobook,
-                        at: currentTime,
-                        title: bookmarkTitle.isEmpty ? "Bookmark at \(formatTime(currentTime))" : bookmarkTitle,
+                        at: bookmarkTime,
+                        title: bookmarkTitle.isEmpty ? "Bookmark at \(formatTime(bookmarkTime))" : bookmarkTitle,
                         note: bookmarkNote.isEmpty ? nil : bookmarkNote
                     )
                     bookmarkTitle = ""
@@ -355,13 +351,8 @@ struct PlayerView: View {
             ChapterListView(
                 chapters: chapters,
                 onChapterTap: { chapter in
-                    if useMultiFileEngine {
-                        multiFileAudioEngine.seek(to: chapter.startTime)
-                        multiFileAudioEngine.play()
-                    } else {
-                        audioEngine.seek(to: chapter.startTime)
-                        audioEngine.play()
-                    }
+                    globalAudioManager.seek(to: chapter.startTime)
+                    globalAudioManager.startPlayback()
                     showingChapterList = false
                 }
             )
@@ -386,37 +377,7 @@ struct PlayerView: View {
     }
     
     private func loadAudiobook() {
-        guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
-            print("No file path found for audiobook: \(audiobook.title ?? "Unknown")")
-            return
-        }
-        
-        var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
-            print("Audio file/folder not found at path: \(filePath)")
-            return
-        }
-        
-        if isDirectory.boolValue {
-            print("📁 Loading multi-file audiobook from folder: \(filePath)")
-            useMultiFileEngine = true
-            multiFileAudioEngine.loadMultiFileAudiobook(audiobook)
-            
-            // Resume from last position
-            if audiobook.currentPosition > 0 {
-                multiFileAudioEngine.seek(to: audiobook.currentPosition)
-            }
-        } else {
-            print("📄 Loading single audio file: \(filePath)")
-            useMultiFileEngine = false
-            let fileURL = URL(fileURLWithPath: filePath)
-            audioEngine.loadAudio(url: fileURL)
-            
-            // Resume from last position
-            if audiobook.currentPosition > 0 {
-                audioEngine.seek(to: audiobook.currentPosition)
-            }
-        }
+        globalAudioManager.loadAudiobook(audiobook)
     }
     
     private func setSleepTimer(_ seconds: TimeInterval) {
@@ -427,11 +388,7 @@ struct PlayerView: View {
             sleepTimeRemaining -= 1
             
             if sleepTimeRemaining <= 0 {
-                if useMultiFileEngine {
-                    multiFileAudioEngine.pause()
-                } else {
-                    audioEngine.pause()
-                }
+                globalAudioManager.pausePlayback()
                 timer.invalidate()
                 sleepTimer = nil
             }
@@ -440,7 +397,7 @@ struct PlayerView: View {
     
     private func setSleepTimerEndOfChapter() {
         guard let currentChapter = currentChapter else { return }
-        let currentTime = useMultiFileEngine ? multiFileAudioEngine.currentTime : audioEngine.currentTime
+        let currentTime = globalAudioManager.getCurrentTime()
         let remainingTime = currentChapter.endTime - currentTime
         setSleepTimer(max(remainingTime, 60)) // Minimum 1 minute
     }
@@ -469,6 +426,13 @@ struct PlayerView: View {
         let result = action()
         impact.impactOccurred()
         return result
+    }
+    
+    private func formatAccessibilityTime(_ currentTime: TimeInterval, duration: TimeInterval) -> String {
+        let current = formatTime(currentTime)
+        let total = formatTime(duration)
+        let percentage = duration > 0 ? Int((currentTime / duration) * 100) : 0
+        return "\(current) of \(total), \(percentage) percent complete"
     }
 }
 
@@ -513,6 +477,8 @@ struct CustomSlider: View {
     let onEditingChanged: (Bool) -> Void
     @State private var isDragging = false
     @State private var localValue: Double = 0
+    @State private var seekTimer: Timer?
+    @State private var pendingSeekValue: Double?
     
     var body: some View {
         GeometryReader { geometry in
@@ -549,10 +515,25 @@ struct CustomSlider: View {
                         
                         let percentage = max(0, min(1, gesture.location.x / geometry.size.width))
                         localValue = (range.upperBound - range.lowerBound) * percentage
-                        value = range.lowerBound + localValue
+                        let newValue = range.lowerBound + localValue
+                        
+                        // Store the pending value and set up debounced seeking
+                        pendingSeekValue = newValue
+                        scheduleSeek()
                     }
                     .onEnded { _ in
                         isDragging = false
+                        
+                        // Cancel any pending seek timer
+                        seekTimer?.invalidate()
+                        seekTimer = nil
+                        
+                        // Perform final seek if there's a pending value
+                        if let pendingValue = pendingSeekValue {
+                            value = pendingValue
+                            pendingSeekValue = nil
+                        }
+                        
                         onEditingChanged(false)
                     }
             )
@@ -565,6 +546,24 @@ struct CustomSlider: View {
         .frame(height: 44) // Larger touch target
         .onAppear {
             localValue = value - range.lowerBound
+        }
+        .onDisappear {
+            // Clean up timer when view disappears
+            seekTimer?.invalidate()
+            seekTimer = nil
+        }
+    }
+    
+    private func scheduleSeek() {
+        // Cancel previous timer
+        seekTimer?.invalidate()
+        
+        // Use shorter debounce for better responsiveness while still preventing excessive seeks
+        seekTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
+            if let pendingValue = pendingSeekValue {
+                value = pendingValue
+                pendingSeekValue = nil
+            }
         }
     }
 }

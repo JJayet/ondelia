@@ -3,13 +3,15 @@ import AVFoundation
 import MediaPlayer
 
 class MultiFileAudioEngine: NSObject, ObservableObject {
-    private var players: [AVPlayer] = []
-    private var playerItems: [AVPlayerItem] = []
+    private var players: [Int: AVPlayer] = [:] // Sparse array for lazy loading
+    private var playerItems: [Int: AVPlayerItem] = [:] // Sparse array for lazy loading
     private var currentPlayerIndex = 0
     private var timeObserver: Any?
     private var chapters: [Chapter] = []
     private var audiobook: Audiobook?
     private var hasAddedObservers: Set<AVPlayerItem> = []
+    private var chapterFiles: [String] = [] // File paths for each chapter
+    private var folderURL: URL?
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -75,8 +77,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         let playerItem = AVPlayerItem(asset: asset)
         let player = AVPlayer(playerItem: playerItem)
         
-        players = [player]
-        playerItems = [playerItem]
+        players = [0: player]
+        playerItems = [0: playerItem]
         currentPlayerIndex = 0
         duration = audiobook.duration
         
@@ -91,7 +93,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     private func loadChaptersFromFolder(folderPath: String, audiobook: Audiobook) {
-        let folderURL = URL(fileURLWithPath: folderPath)
+        folderURL = URL(fileURLWithPath: folderPath)
         
         // Get chapters from Core Data, sorted by chapter number
         chapters = (audiobook.chapters?.allObjects as? [Chapter] ?? [])
@@ -103,50 +105,46 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
         
         // Load manifest file to get file names
-        let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
-        guard let manifestData = try? Data(contentsOf: manifestURL),
-              let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
-              let chaptersData = manifest["chapters"] as? [[String: Any]] else {
+        let manifestURL = folderURL!.appendingPathComponent("audiobook_manifest.json")
+        if let manifestData = try? Data(contentsOf: manifestURL),
+           let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
+           let chaptersData = manifest["chapters"] as? [[String: Any]] {
+            
+            // Store file names for lazy loading
+            chapterFiles.removeAll()
+            chapterFiles.reserveCapacity(chaptersData.count) // Optimize memory allocation
+            var totalDuration: TimeInterval = 0
+            
+            // Pre-validate all files in batch to avoid repeated file system calls
+            var validChapterFiles: [(fileName: String, duration: TimeInterval)] = []
+            validChapterFiles.reserveCapacity(chaptersData.count)
+            
+            for chapterData in chaptersData {
+                guard let fileName = chapterData["fileName"] as? String else { continue }
+                
+                let fileURL = folderURL!.appendingPathComponent(fileName)
+                guard FileManager.default.fileExists(atPath: fileURL.path) else {
+                    print("⚠️ MultiFileAudioEngine: Chapter file not found: \(fileName)")
+                    continue
+                }
+                
+                let chapterDuration = chapterData["duration"] as? TimeInterval ?? 0
+                validChapterFiles.append((fileName: fileName, duration: chapterDuration))
+                totalDuration += chapterDuration
+            }
+            
+            // Now populate the arrays with validated data
+            chapterFiles = validChapterFiles.map(\.fileName)
+            duration = totalDuration
+            
+            print("✅ MultiFileAudioEngine: Validated \(chapterFiles.count) chapter files")
+        } else {
             print("⚠️ MultiFileAudioEngine: No manifest found, trying to load files directly")
             loadChaptersDirectly(folderPath: folderPath, audiobook: audiobook)
             return
         }
         
-        // Create players for each chapter file
-        var totalDuration: TimeInterval = 0
-        
-        for (index, chapterData) in chaptersData.enumerated() {
-            guard let fileName = chapterData["fileName"] as? String else { continue }
-            
-            let fileURL = folderURL.appendingPathComponent(fileName)
-            guard FileManager.default.fileExists(atPath: fileURL.path) else {
-                print("⚠️ MultiFileAudioEngine: Chapter file not found: \(fileName)")
-                continue
-            }
-            
-            let asset = AVURLAsset(url: fileURL)
-            let playerItem = AVPlayerItem(asset: asset)
-            let player = AVPlayer(playerItem: playerItem)
-            
-            players.append(player)
-            playerItems.append(playerItem)
-            
-            if let chapterDuration = chapterData["duration"] as? TimeInterval {
-                totalDuration += chapterDuration
-            }
-            
-            // Observe player item status
-            playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
-            hasAddedObservers.insert(playerItem)
-            
-            print("📖 MultiFileAudioEngine: Loaded chapter \(index + 1): \(fileName)")
-        }
-        
-        duration = totalDuration
         currentPlayerIndex = 0
-        
-        setupTimeObserver()
-        setupNowPlayingInfo(for: audiobook)
         
         // Find the correct chapter index based on current position
         if audiobook.currentPosition > 0 {
@@ -154,9 +152,14 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             currentPlayerIndex = currentChapterIndex
         }
         
-        print("✅ MultiFileAudioEngine: Multi-file audiobook loaded successfully")
-        print("   Total duration: \(formatTime(totalDuration))")
-        print("   Chapters: \(players.count)")
+        // Only load the current chapter initially (lazy loading)
+        loadChapterPlayer(currentPlayerIndex)
+        setupTimeObserver()
+        setupNowPlayingInfo(for: audiobook)
+        
+        print("✅ MultiFileAudioEngine: Multi-file audiobook initialized successfully")
+        print("   Total duration: \(formatTime(duration))")
+        print("   Chapters: \(chapterFiles.count)")
         print("   Starting chapter: \(currentChapterIndex + 1)")
     }
     
@@ -176,8 +179,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 let playerItem = AVPlayerItem(asset: asset)
                 let player = AVPlayer(playerItem: playerItem)
                 
-                players.append(player)
-                playerItems.append(playerItem)
+                players[index] = player
+                playerItems[index] = playerItem
                 
                 playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
                 hasAddedObservers.insert(playerItem)
@@ -196,22 +199,99 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
     }
     
+    // MARK: - Lazy Loading
+    private func loadChapterPlayer(_ chapterIndex: Int) {
+        guard chapterIndex >= 0 && chapterIndex < chapterFiles.count,
+              players[chapterIndex] == nil,
+              let folderURL = folderURL else { return }
+        
+        let fileName = chapterFiles[chapterIndex]
+        let fileURL = folderURL.appendingPathComponent(fileName)
+        
+        let asset = AVURLAsset(url: fileURL)
+        let playerItem = AVPlayerItem(asset: asset)
+        let player = AVPlayer(playerItem: playerItem)
+        
+        players[chapterIndex] = player
+        playerItems[chapterIndex] = playerItem
+        
+        // Observe player item status
+        playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+        hasAddedObservers.insert(playerItem)
+        
+        print("🔄 MultiFileAudioEngine: Lazy loaded chapter \(chapterIndex + 1): \(fileName)")
+    }
+    
+    private func preloadAdjacentChapters() {
+        // Preload previous chapter
+        if currentPlayerIndex > 0 {
+            loadChapterPlayer(currentPlayerIndex - 1)
+        }
+        
+        // Preload next chapter
+        if currentPlayerIndex < chapterFiles.count - 1 {
+            loadChapterPlayer(currentPlayerIndex + 1)
+        }
+    }
+    
+    private func unloadDistantChapters() {
+        // Unload chapters that are more than 2 positions away
+        let indicesToUnload = players.keys.filter { index in
+            abs(index - currentPlayerIndex) > 2
+        }
+        
+        for index in indicesToUnload {
+            unloadChapterPlayer(index)
+        }
+    }
+    
+    private func unloadChapterPlayer(_ chapterIndex: Int) {
+        guard let player = players[chapterIndex],
+              let playerItem = playerItems[chapterIndex] else { return }
+        
+        // Remove observer
+        if hasAddedObservers.contains(playerItem) {
+            playerItem.removeObserver(self, forKeyPath: "status")
+            hasAddedObservers.remove(playerItem)
+        }
+        
+        // Remove time observer if this is the current player
+        if chapterIndex == currentPlayerIndex, let observer = timeObserver {
+            player.removeTimeObserver(observer)
+            timeObserver = nil
+        }
+        
+        // Clean up
+        players.removeValue(forKey: chapterIndex)
+        playerItems.removeValue(forKey: chapterIndex)
+        
+        print("🗑️ MultiFileAudioEngine: Unloaded distant chapter \(chapterIndex + 1)")
+    }
+    
     // MARK: - Playback Controls
     func play() {
-        guard currentPlayerIndex < players.count else { return }
+        // Ensure current chapter is loaded
+        loadChapterPlayer(currentPlayerIndex)
         
-        let currentPlayer = players[currentPlayerIndex]
+        guard let currentPlayer = players[currentPlayerIndex] else { return }
+        
         currentPlayer.rate = playbackRate
         currentPlayer.play()
         
         isPlaying = true
         updateNowPlayingInfo()
         
+        // Preload adjacent chapters and unload distant ones
+        preloadAdjacentChapters()
+        unloadDistantChapters()
+        
         print("▶️ MultiFileAudioEngine: Playing chapter \(currentPlayerIndex + 1)")
     }
     
     func pause() {
-        players.forEach { $0.pause() }
+        for player in players.values {
+            player.pause()
+        }
         isPlaying = false
         updateNowPlayingInfo()
         
@@ -227,7 +307,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     func seek(to time: TimeInterval) {
-        guard !players.isEmpty else { return }
+        guard !chapterFiles.isEmpty else { return }
         
         // Find which chapter this time belongs to
         let targetChapterIndex = findChapterIndex(for: time)
@@ -241,9 +321,13 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             switchToChapter(targetChapterIndex)
         }
         
+        // Ensure the target chapter is loaded
+        loadChapterPlayer(targetChapterIndex)
+        
         // Seek within the current chapter
+        guard let currentPlayer = players[currentPlayerIndex] else { return }
         let cmTime = CMTime(seconds: timeWithinChapter, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        players[currentPlayerIndex].seek(to: cmTime)
+        currentPlayer.seek(to: cmTime)
         
         currentTime = time
         updateNowPlayingInfo()
@@ -263,23 +347,30 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     func setPlaybackRate(_ rate: Float) {
         playbackRate = rate
-        if isPlaying {
-            players[currentPlayerIndex].rate = rate
+        if isPlaying, let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.rate = rate
         }
         updateNowPlayingInfo()
     }
     
     // MARK: - Chapter Management
     private func switchToChapter(_ chapterIndex: Int) {
-        guard chapterIndex >= 0 && chapterIndex < players.count else { return }
+        guard chapterIndex >= 0 && chapterIndex < chapterFiles.count else { return }
         
         // Pause current player
-        if currentPlayerIndex < players.count {
-            players[currentPlayerIndex].pause()
+        if let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.pause()
         }
         
         currentPlayerIndex = chapterIndex
         currentChapterIndex = chapterIndex
+        
+        // Load the new chapter if not already loaded
+        loadChapterPlayer(chapterIndex)
+        
+        // Preload adjacent chapters and unload distant ones
+        preloadAdjacentChapters()
+        unloadDistantChapters()
         
         print("📖 MultiFileAudioEngine: Switched to chapter \(chapterIndex + 1)")
     }
@@ -297,16 +388,19 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Time Observer
     private func setupTimeObserver() {
-        let interval = CMTime(seconds: 0.1, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+        // Use a longer interval for better performance - UI will be updated by the PlayerView timer
+        let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         
         // Remove existing observer
         if let observer = timeObserver {
-            players.forEach { $0.removeTimeObserver(observer) }
+            for player in players.values {
+                player.removeTimeObserver(observer)
+            }
         }
         
         // Add observer to current player
-        if currentPlayerIndex < players.count {
-            timeObserver = players[currentPlayerIndex].addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+        if let currentPlayer = players[currentPlayerIndex] {
+            timeObserver = currentPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
                 self?.updateCurrentTime(time)
             }
         }
@@ -330,7 +424,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     private func transitionToNextChapter() {
         guard !isTransitioning,
-              currentPlayerIndex < players.count - 1 else { return }
+              currentPlayerIndex < chapterFiles.count - 1 else { return }
         
         isTransitioning = true
         
@@ -339,7 +433,9 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         print("🔄 MultiFileAudioEngine: Transitioning to chapter \(nextChapterIndex + 1)")
         
         // Pause current player
-        players[currentPlayerIndex].pause()
+        if let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.pause()
+        }
         
         // Switch to next chapter
         switchToChapter(nextChapterIndex)
@@ -442,8 +538,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     // MARK: - Cleanup
     private func cleanup() {
         // Remove time observer only from the current player that has it
-        if let observer = timeObserver, currentPlayerIndex < players.count {
-            players[currentPlayerIndex].removeTimeObserver(observer)
+        if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
+            currentPlayer.removeTimeObserver(observer)
             timeObserver = nil
         }
         
@@ -456,6 +552,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         players.removeAll()
         playerItems.removeAll()
         chapters.removeAll()
+        chapterFiles.removeAll()
+        folderURL = nil
         currentPlayerIndex = 0
         isPlaying = false
     }
