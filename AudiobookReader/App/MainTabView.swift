@@ -12,7 +12,7 @@ struct MainTabView: View {
             HomeView()
                 .tabItem {
                     Image(systemName: "house.fill")
-                    Text("Home")
+                    Text(NSLocalizedString("Home", comment: "Home tab title"))
                 }
                 .tag(0)
             
@@ -20,7 +20,7 @@ struct MainTabView: View {
             LibraryView()
                 .tabItem {
                     Image(systemName: "books.vertical.fill")
-                    Text("Library")
+                    Text(NSLocalizedString("Library", comment: "Library tab title"))
                 }
                 .tag(1)
             
@@ -28,7 +28,7 @@ struct MainTabView: View {
             SettingsView()
                 .tabItem {
                     Image(systemName: "gear")
-                    Text("Settings")
+                    Text(NSLocalizedString("Settings", comment: "Settings tab title"))
                 }
                 .tag(2)
             }
@@ -75,7 +75,7 @@ struct HomeView: View {
                                     .font(.title2)
                                     .foregroundColor(.secondaryText)
                                 
-                                Text("Ready to listen?")
+                                Text(NSLocalizedString("Ready to listen?", comment: "Home screen welcome message"))
                                     .font(.largeTitle)
                                     .fontWeight(.bold)
                                     .foregroundColor(.primaryText)
@@ -86,21 +86,21 @@ struct HomeView: View {
                         // Quick Stats
                         HStack(spacing: 20) {
                             QuickStatView(
-                                title: "This Month",
+                                title: NSLocalizedString("This Month", comment: "This month quick stat title"),
                                 value: statistics.formattedMonthlyProgress,
                                 icon: "calendar",
                                 color: .blue
                             )
                             
                             QuickStatView(
-                                title: "Streak",
-                                value: "\(statistics.currentStreak) days",
+                                title: NSLocalizedString("Streak", comment: "Reading streak quick stat title"),
+                                value: "\(statistics.currentStreak) \(NSLocalizedString("days", comment: "Days unit"))",
                                 icon: "flame.fill",
                                 color: .orange
                             )
                             
                             QuickStatView(
-                                title: "Completed",
+                                title: NSLocalizedString("Completed", comment: "Books completed quick stat title"),
                                 value: "\(statistics.booksCompleted)",
                                 icon: "checkmark.circle.fill",
                                 color: .green
@@ -111,7 +111,7 @@ struct HomeView: View {
                     
                     // Continue Reading Section
                     if !continueReading.isEmpty {
-                        HomeSection(title: "Continue Reading", subtitle: "Pick up where you left off") {
+                        HomeSection(title: NSLocalizedString("Continue Reading", comment: "Continue reading section title"), subtitle: NSLocalizedString("Pick up where you left off", comment: "Continue reading section subtitle")) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 LazyHStack(spacing: 16) {
                                     ForEach(continueReading, id: \.id) { audiobook in
@@ -127,7 +127,7 @@ struct HomeView: View {
                     
                     // Recently Played Section
                     if !recentlyPlayed.isEmpty {
-                        HomeSection(title: "Recently Played", subtitle: "Your recent listening history") {
+                        HomeSection(title: NSLocalizedString("Recently Played", comment: "Recently played section title"), subtitle: NSLocalizedString("Your recent listening history", comment: "Recently played section subtitle")) {
                             ScrollView(.horizontal, showsIndicators: false) {
                                 LazyHStack(spacing: 16) {
                                     ForEach(recentlyPlayed, id: \.id) { audiobook in
@@ -142,7 +142,7 @@ struct HomeView: View {
                     }
                     
                     // Monthly Goal Progress
-                    HomeSection(title: "Monthly Goal", subtitle: "Keep up your reading streak") {
+                    HomeSection(title: NSLocalizedString("Monthly Goal", comment: "Monthly goal section title"), subtitle: NSLocalizedString("Keep up your reading streak", comment: "Monthly goal section subtitle")) {
                         MonthlyGoalCardView(statistics: statistics)
                             .padding(.horizontal)
                     }
@@ -155,19 +155,19 @@ struct HomeView: View {
                                 .foregroundColor(.accentColor)
                             
                             VStack(spacing: 12) {
-                                Text("Welcome to Audiobook Reader")
+                                Text(NSLocalizedString("Welcome to Audiobook Reader", comment: "Welcome message for new users"))
                                     .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(.primaryText)
                                 
-                                Text("Start your audiobook journey by importing your first book")
+                                Text(NSLocalizedString("Start your audiobook journey by importing your first book", comment: "Welcome instructions for new users"))
                                     .font(.body)
                                     .foregroundColor(.secondaryText)
                                     .multilineTextAlignment(.center)
                             }
                             
                             NavigationLink(destination: LibraryView()) {
-                                Text("Browse Library")
+                                Text(NSLocalizedString("Browse Library", comment: "Browse library button text"))
                                     .font(.headline)
                                     .foregroundColor(.white)
                                     .padding()
@@ -183,7 +183,7 @@ struct HomeView: View {
                 .padding(.vertical)
             }
             .background(Color.primaryBackground.ignoresSafeArea())
-            .navigationTitle("Home")
+            .navigationTitle(NSLocalizedString("Home", comment: "Home navigation title"))
             .navigationBarTitleDisplayMode(.large)
             .refreshable {
                 audiobookManager.fetchAudiobooks()
@@ -203,13 +203,13 @@ struct HomeView: View {
         let hour = Calendar.current.component(.hour, from: Date())
         switch hour {
         case 5..<12:
-            return "Good morning"
+            return NSLocalizedString("Good morning", comment: "Morning greeting")
         case 12..<17:
-            return "Good afternoon"
+            return NSLocalizedString("Good afternoon", comment: "Afternoon greeting")
         case 17..<22:
-            return "Good evening"
+            return NSLocalizedString("Good evening", comment: "Evening greeting")
         default:
-            return "Good night"
+            return NSLocalizedString("Good night", comment: "Night greeting")
         }
     }
 }
@@ -298,13 +298,13 @@ struct RecentlyPlayedCardView: View {
                 .clipped()
                 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(audiobook.title ?? "Unknown Title")
+                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Unknown title placeholder"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primaryText)
                         .lineLimit(2)
                     
-                    Text(audiobook.author ?? "Unknown Author")
+                    Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Unknown author placeholder"))
                         .font(.caption)
                         .foregroundColor(.secondaryText)
                         .lineLimit(1)
@@ -329,7 +329,7 @@ struct MonthlyGoalCardView: View {
         VStack(spacing: 16) {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Monthly Reading Goal")
+                    Text(NSLocalizedString("Monthly Reading Goal", comment: "Monthly reading goal card title"))
                         .font(.headline)
                         .foregroundColor(.primaryText)
                     

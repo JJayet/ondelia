@@ -9,11 +9,11 @@ struct ContentView: View {
         VStack(spacing: 30) {
             // Header
             VStack {
-                Text("Audiobook Reader")
+                Text(NSLocalizedString("Audiobook Reader", comment: "App title"))
                     .font(.title)
                     .fontWeight(.bold)
                 
-                Text("Phase 1 - Core Audio Engine")
+                Text(NSLocalizedString("Phase 1 - Core Audio Engine", comment: "Development phase subtitle"))
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -27,7 +27,7 @@ struct ContentView: View {
                         .font(.system(size: 60))
                         .foregroundColor(.blue)
                     
-                    Button("Select Audio File") {
+                    Button(NSLocalizedString("Select Audio File", comment: "Select audio file button")) {
                         showingFilePicker = true
                     }
                     .buttonStyle(.borderedProminent)
@@ -39,11 +39,11 @@ struct ContentView: View {
                         .font(.system(size: 80))
                         .foregroundColor(.blue)
                     
-                    Text("Sample Audiobook")
+                    Text(NSLocalizedString("Sample Audiobook", comment: "Sample audiobook title"))
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    Text("Unknown Author")
+                    Text(NSLocalizedString("Unknown Author", comment: "Unknown author placeholder"))
                         .font(.body)
                         .foregroundColor(.secondary)
                 }
@@ -84,7 +84,7 @@ struct ContentView: View {
                 
                 // Playback Speed Control
                 VStack(spacing: 8) {
-                    Text("Playback Speed: \(String(format: "%.1fx", audioEngine.playbackRate))")
+                    Text(String(format: NSLocalizedString("Playback Speed: %.1fx", comment: "Playback speed display"), audioEngine.playbackRate))
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
@@ -101,7 +101,7 @@ struct ContentView: View {
                     }
                 }
                 
-                Button("Change Audio File") {
+                Button(NSLocalizedString("Change Audio File", comment: "Change audio file button")) {
                     showingFilePicker = true
                 }
                 .buttonStyle(.bordered)

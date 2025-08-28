@@ -65,13 +65,13 @@ struct MiniPlayerView: View {
                             
                             // Book Info
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(audiobook.title ?? "Unknown Title")
+                                Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Unknown title placeholder"))
                                     .font(.subheadline)
                                     .fontWeight(.medium)
                                     .foregroundColor(.primaryText)
                                     .lineLimit(1)
                                 
-                                Text(audiobook.author ?? "Unknown Author")
+                                Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Unknown author placeholder"))
                                     .font(.caption)
                                     .foregroundColor(.secondaryText)
                                     .lineLimit(1)

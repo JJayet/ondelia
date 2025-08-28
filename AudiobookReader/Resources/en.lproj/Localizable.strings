@@ -127,6 +127,30 @@
 // MARK: - Library Components
 "%d%% complete" = "%d%% complete";
 
+// MARK: - Content View (Home Screen)
+"Audiobook Reader" = "Audiobook Reader";
+"Phase 1 - Core Audio Engine" = "Phase 1 - Core Audio Engine";
+"Select Audio File" = "Select Audio File";
+"Playback Speed: %.1fx" = "Playback Speed: %.1fx";
+"Change Audio File" = "Change Audio File";
+"Starting up..." = "Starting up...";
+
+// MARK: - Main Tab View & Home Screen
+"Home" = "Home";
+"Ready to listen?" = "Ready to listen?";
+"Streak" = "Streak";
+"Pick up where you left off" = "Pick up where you left off";
+"Your recent listening history" = "Your recent listening history";
+"Keep up your reading streak" = "Keep up your reading streak";
+"Welcome to Audiobook Reader" = "Welcome to Audiobook Reader";
+"Start your audiobook journey by importing your first book" = "Start your audiobook journey by importing your first book";
+"Browse Library" = "Browse Library";
+"Good morning" = "Good morning";
+"Good afternoon" = "Good afternoon";
+"Good evening" = "Good evening";
+"Good night" = "Good night";
+"Monthly Reading Goal" = "Monthly Reading Goal";
+
 // MARK: - Player View
 "Player" = "Player";
 "Bookmarks" = "Bookmarks";

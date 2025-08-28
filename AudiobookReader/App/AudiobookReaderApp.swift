@@ -22,7 +22,7 @@ struct AudiobookReaderApp: App {
                     ProgressView()
                         .scaleEffect(1.2)
                         .progressViewStyle(CircularProgressViewStyle())
-                    Text("Starting up...")
+                    Text(NSLocalizedString("Starting up...", comment: "App startup loading message"))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                 }
