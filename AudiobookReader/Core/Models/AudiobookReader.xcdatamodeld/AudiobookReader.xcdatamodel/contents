@@ -36,7 +36,12 @@
         <attribute name="chapterIndex" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
         <attribute name="dateCreated" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
         <attribute name="id" optional="YES" attributeType="UUID" usesScalarValueType="NO"/>
+        <attribute name="language" optional="YES" attributeType="String"/>
+        <attribute name="segmentsData" optional="YES" attributeType="Binary"/>
+        <attribute name="transcriptionEngine" optional="YES" attributeType="String"/>
         <attribute name="transcriptionText" optional="YES" attributeType="String"/>
+        <attribute name="translatedText" optional="YES" attributeType="String"/>
+        <attribute name="translationLanguage" optional="YES" attributeType="String"/>
         <relationship name="audiobook" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="Audiobook" inverseName="transcriptions" inverseEntity="Audiobook"/>
     </entity>
 </model>

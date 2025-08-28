@@ -3,6 +3,7 @@ import SwiftUI
 struct SettingsView: View {
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var statistics = ReadingStatistics()
+    @StateObject private var whisperManager = WhisperTranscriptionManager.shared
     @Environment(\.presentationMode) var presentationMode
     @State private var showingGoalEditor = false
     @State private var tempGoal: Double = 0
@@ -60,6 +61,106 @@ struct SettingsView: View {
                         .pickerStyle(MenuPickerStyle())
                         .onChange(of: themeManager.skipInterval) { _, newInterval in
                             themeManager.updateSkipInterval(newInterval)
+                        }
+                    }
+                }
+                
+                // Transcription Section
+                Section("Transcription") {
+                    VStack(alignment: .leading) {
+                        HStack {
+                            Label("WhisperKit Model", systemImage: "brain")
+                            Spacer()
+                            Picker("Model", selection: $themeManager.whisperModel) {
+                                ForEach(WhisperModel.allCases, id: \.rawValue) { model in
+                                    VStack(alignment: .leading) {
+                                        Text(model.displayName)
+                                            .font(.body)
+                                        HStack {
+                                            Text(model.sizeDescription)
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                            Text("•")
+                                                .font(.caption)
+                                                .foregroundColor(.secondary)
+                                            HStack(spacing: 2) {
+                                                ForEach(0..<5) { index in
+                                                    Image(systemName: index < model.accuracyRating ? "star.fill" : "star")
+                                                        .font(.system(size: 8))
+                                                        .foregroundColor(index < model.accuracyRating ? .yellow : .secondary)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    .tag(model)
+                                }
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                            .onChange(of: themeManager.whisperModel) { _, newModel in
+                                themeManager.updateWhisperModel(newModel)
+                            }
+                            .disabled(whisperManager.isModelLoading)
+                        }
+                        
+                        // Show loading indicator when model is loading
+                        if whisperManager.isModelLoading {
+                            HStack {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                Text("Downloading \(themeManager.whisperModel.displayName)...")
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                            }
+                            .padding(.top, 4)
+                        }
+                    }
+                    
+                    HStack {
+                        Label("Language", systemImage: "globe")
+                        Spacer()
+                        Picker("Language", selection: $themeManager.transcriptionLanguage) {
+                            ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
+                                Text(language.displayName)
+                                    .tag(language)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .onChange(of: themeManager.transcriptionLanguage) { _, newLanguage in
+                            themeManager.updateTranscriptionLanguage(newLanguage)
+                        }
+                    }
+                    
+                    if TranslationManager.isAvailable {
+                        Toggle(isOn: $themeManager.enableTranslation) {
+                            Label("Enable Translation", systemImage: "translate")
+                        }
+                        .onChange(of: themeManager.enableTranslation) { _, newValue in
+                            themeManager.updateEnableTranslation(newValue)
+                        }
+                        
+                        if themeManager.enableTranslation {
+                            HStack {
+                                Label("Translate To", systemImage: "arrow.right.circle")
+                                Spacer()
+                                Picker("Target Language", selection: $themeManager.translationTargetLanguage) {
+                                    ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
+                                        Text(language.displayName)
+                                            .tag(language)
+                                    }
+                                }
+                                .pickerStyle(MenuPickerStyle())
+                                .onChange(of: themeManager.translationTargetLanguage) { _, newLanguage in
+                                    themeManager.updateTranslationTargetLanguage(newLanguage)
+                                }
+                            }
+                        }
+                    } else {
+                        HStack {
+                            Label("Translation", systemImage: "translate")
+                            Spacer()
+                            Text("Requires iOS 17.4+")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
                     }
                 }

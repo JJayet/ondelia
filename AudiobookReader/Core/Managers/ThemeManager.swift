@@ -8,6 +8,13 @@ class ThemeManager: ObservableObject {
     @Published var accentColor: AccentColor = .blue
     @Published var skipInterval: SkipInterval = .fifteen
     
+    // Transcription Settings
+    @Published var transcriptionEngine: TranscriptionEngine = .whisperKit
+    @Published var whisperModel: WhisperModel = .base
+    @Published var transcriptionLanguage: TranscriptionLanguage = .english
+    @Published var enableTranslation: Bool = false
+    @Published var translationTargetLanguage: TranscriptionLanguage = .english
+    
     private init() {
         // Load settings asynchronously to avoid blocking initialization
         DispatchQueue.global(qos: .utility).async {
@@ -19,6 +26,11 @@ class ThemeManager: ObservableObject {
         let theme: AppTheme
         let accent: AccentColor
         let skip: SkipInterval
+        let engine: TranscriptionEngine
+        let model: WhisperModel
+        let language: TranscriptionLanguage
+        let translation: Bool
+        let targetLanguage: TranscriptionLanguage
         
         // Load from UserDefaults on background queue
         if let themeRawValue = UserDefaults.standard.object(forKey: "selectedTheme") as? Int,
@@ -42,11 +54,47 @@ class ThemeManager: ObservableObject {
             skip = .fifteen
         }
         
+        // Transcription settings
+        if let engineRawValue = UserDefaults.standard.object(forKey: "transcriptionEngine") as? Int,
+           let loadedEngine = TranscriptionEngine(rawValue: engineRawValue) {
+            engine = loadedEngine
+        } else {
+            engine = .whisperKit
+        }
+        
+        if let modelRawValue = UserDefaults.standard.object(forKey: "whisperModel") as? String,
+           let loadedModel = WhisperModel(rawValue: modelRawValue) {
+            model = loadedModel
+        } else {
+            model = .base
+        }
+        
+        if let languageRawValue = UserDefaults.standard.object(forKey: "transcriptionLanguage") as? String,
+           let loadedLanguage = TranscriptionLanguage(rawValue: languageRawValue) {
+            language = loadedLanguage
+        } else {
+            language = .english
+        }
+        
+        translation = UserDefaults.standard.bool(forKey: "enableTranslation")
+        
+        if let targetLanguageRawValue = UserDefaults.standard.object(forKey: "translationTargetLanguage") as? String,
+           let loadedTargetLanguage = TranscriptionLanguage(rawValue: targetLanguageRawValue) {
+            targetLanguage = loadedTargetLanguage
+        } else {
+            targetLanguage = .english
+        }
+        
         // Update published properties on main queue
         DispatchQueue.main.async {
             self.currentTheme = theme
             self.accentColor = accent
             self.skipInterval = skip
+            self.transcriptionEngine = engine
+            self.whisperModel = model
+            self.transcriptionLanguage = language
+            self.enableTranslation = translation
+            self.translationTargetLanguage = targetLanguage
         }
     }
     
@@ -63,6 +111,54 @@ class ThemeManager: ObservableObject {
     func updateSkipInterval(_ interval: SkipInterval) {
         skipInterval = interval
         UserDefaults.standard.set(interval.rawValue, forKey: "skipInterval")
+    }
+    
+    // MARK: - Transcription Settings
+    func updateTranscriptionEngine(_ engine: TranscriptionEngine) {
+        transcriptionEngine = engine
+        UserDefaults.standard.set(engine.rawValue, forKey: "transcriptionEngine")
+        
+        // Auto-download current model when switching to WhisperKit
+        if engine == .whisperKit {
+            Task {
+                do {
+                    try await WhisperTranscriptionManager.shared.switchModel(to: whisperModel)
+                } catch {
+                    print("❌ Failed to switch WhisperKit model: \(error)")
+                }
+            }
+        }
+    }
+    
+    func updateWhisperModel(_ model: WhisperModel) {
+        whisperModel = model
+        UserDefaults.standard.set(model.rawValue, forKey: "whisperModel")
+        
+        // Trigger model download if WhisperKit engine is selected
+        if transcriptionEngine == .whisperKit {
+            Task {
+                do {
+                    try await WhisperTranscriptionManager.shared.switchModel(to: model)
+                } catch {
+                    print("❌ Failed to download WhisperKit model: \(error)")
+                }
+            }
+        }
+    }
+    
+    func updateTranscriptionLanguage(_ language: TranscriptionLanguage) {
+        transcriptionLanguage = language
+        UserDefaults.standard.set(language.rawValue, forKey: "transcriptionLanguage")
+    }
+    
+    func updateEnableTranslation(_ enabled: Bool) {
+        enableTranslation = enabled
+        UserDefaults.standard.set(enabled, forKey: "enableTranslation")
+    }
+    
+    func updateTranslationTargetLanguage(_ language: TranscriptionLanguage) {
+        translationTargetLanguage = language
+        UserDefaults.standard.set(language.rawValue, forKey: "translationTargetLanguage")
     }
 }
 
@@ -133,6 +229,110 @@ enum SkipInterval: Int, CaseIterable {
     
     var seconds: TimeInterval {
         return TimeInterval(rawValue)
+    }
+}
+
+enum TranscriptionEngine: Int, CaseIterable {
+    case whisperKit = 0
+    
+    var displayName: String {
+        switch self {
+        case .whisperKit: return "WhisperKit"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .whisperKit: return "On-device AI transcription with timestamps and translation"
+        }
+    }
+}
+
+enum WhisperModel: String, CaseIterable {
+    case tiny = "openai_whisper-tiny"
+    case base = "openai_whisper-base"
+    case small = "openai_whisper-small"
+    case medium = "openai_whisper-medium"
+    case largeV3 = "openai_whisper-large-v3"
+    
+    var displayName: String {
+        switch self {
+        case .tiny: return "Tiny"
+        case .base: return "Base"
+        case .small: return "Small"
+        case .medium: return "Medium"
+        case .largeV3: return "Large v3"
+        }
+    }
+    
+    var description: String {
+        switch self {
+        case .tiny: return "Fastest (~39 MB) - Basic accuracy"
+        case .base: return "Balanced (~74 MB) - Good accuracy"
+        case .small: return "Better (~244 MB) - High accuracy"
+        case .medium: return "High (~769 MB) - Very high accuracy"
+        case .largeV3: return "Best (~1550 MB) - Highest accuracy"
+        }
+    }
+    
+    var sizeDescription: String {
+        switch self {
+        case .tiny: return "39 MB"
+        case .base: return "74 MB"
+        case .small: return "244 MB"
+        case .medium: return "769 MB"
+        case .largeV3: return "1.5 GB"
+        }
+    }
+    
+    var speedRating: Int {
+        switch self {
+        case .tiny: return 5
+        case .base: return 4
+        case .small: return 3
+        case .medium: return 2
+        case .largeV3: return 1
+        }
+    }
+    
+    var accuracyRating: Int {
+        switch self {
+        case .tiny: return 2
+        case .base: return 3
+        case .small: return 4
+        case .medium: return 4
+        case .largeV3: return 5
+        }
+    }
+}
+
+enum TranscriptionLanguage: String, CaseIterable {
+    case english = "en"
+    case spanish = "es"
+    case french = "fr"
+    case german = "de"
+    case italian = "it"
+    case portuguese = "pt"
+    case japanese = "ja"
+    case korean = "ko"
+    case chinese = "zh"
+    
+    var displayName: String {
+        switch self {
+        case .english: return "English"
+        case .spanish: return "Spanish"
+        case .french: return "French"
+        case .german: return "German"
+        case .italian: return "Italian"
+        case .portuguese: return "Portuguese"
+        case .japanese: return "Japanese"
+        case .korean: return "Korean"
+        case .chinese: return "Chinese"
+        }
+    }
+    
+    var locale: Locale {
+        return Locale(identifier: rawValue)
     }
 }
 

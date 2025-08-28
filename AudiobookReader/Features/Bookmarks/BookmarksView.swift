@@ -2,7 +2,7 @@ import SwiftUI
 
 struct BookmarksView: View {
     let audiobook: Audiobook
-    let audioEngine: AudioEngine
+    @ObservedObject var globalAudioManager: GlobalAudioManager
     @StateObject private var audiobookManager = AudiobookManager()
     @Environment(\.presentationMode) var presentationMode
     
@@ -36,8 +36,13 @@ struct BookmarksView: View {
                             BookmarkRowView(
                                 bookmark: bookmark,
                                 onTap: {
-                                    audioEngine.seek(to: bookmark.timestamp)
-                                    presentationMode.wrappedValue.dismiss()
+                                    print("🔖 Seeking to bookmark at \(bookmark.timestamp) seconds")
+                                    globalAudioManager.seek(to: bookmark.timestamp)
+                                    
+                                    // Dismiss the sheet after a short delay to let the seek complete
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                                        presentationMode.wrappedValue.dismiss()
+                                    }
                                 },
                                 onDelete: {
                                     audiobookManager.deleteBookmark(bookmark)
@@ -174,5 +179,5 @@ struct AddBookmarkView: View {
 }
 
 #Preview {
-    BookmarksView(audiobook: Audiobook(), audioEngine: AudioEngine())
+    BookmarksView(audiobook: Audiobook(), globalAudioManager: GlobalAudioManager.shared)
 }

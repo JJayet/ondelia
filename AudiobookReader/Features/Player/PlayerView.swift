@@ -351,9 +351,7 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showingBookmarks) {
-            if let audioEngine = globalAudioManager.audioEngine {
-                BookmarksView(audiobook: audiobook, audioEngine: audioEngine)
-            }
+            BookmarksView(audiobook: audiobook, globalAudioManager: globalAudioManager)
         }
         .sheet(isPresented: $showingAddBookmark) {
             AddBookmarkView(

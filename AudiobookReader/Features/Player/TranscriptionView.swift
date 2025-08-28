@@ -8,13 +8,22 @@ struct TranscriptionView: View {
     
     @StateObject private var transcriptionManager = TranscriptionManager.shared
     @StateObject private var themeManager = ThemeManager.shared
+    @StateObject private var translationManager = TranslationManager.shared
     @Environment(\.presentationMode) var presentationMode
     
     @State private var transcriptionText = ""
+    @State private var translatedText = ""
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var searchText = ""
     @State private var highlightedRange: Range<String.Index>?
+    @State private var chapterTitle = "Transcription"
+    @State private var showingTranslation = false
+    @State private var isTranslating = false
+    
+    var displayText: String {
+        return showingTranslation && !translatedText.isEmpty ? translatedText : transcriptionText
+    }
     
     var body: some View {
         NavigationView {
@@ -22,9 +31,33 @@ struct TranscriptionView: View {
                 // Header with controls
                 TranscriptionHeaderView(
                     searchText: $searchText,
-                    transcriptionText: $transcriptionText,
+                    transcriptionText: .constant(displayText),
                     highlightedRange: $highlightedRange
                 )
+                
+                // Translation toggle if available
+                if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                    HStack {
+                        Picker("View", selection: $showingTranslation) {
+                            Text("Original").tag(false)
+                            Text("Translation").tag(true)
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .onChange(of: showingTranslation) { _, shouldTranslate in
+                            if shouldTranslate && translatedText.isEmpty {
+                                translateText()
+                            }
+                        }
+                        
+                        if isTranslating {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.vertical, 8)
+                    .background(Color.secondaryBackground)
+                }
                 
                 // Main transcription content
                 ScrollViewReader { proxy in
@@ -38,7 +71,7 @@ struct TranscriptionView: View {
                                 }
                             } else {
                                 TranscriptionTextView(
-                                    text: transcriptionText,
+                                    text: displayText,
                                     searchText: searchText,
                                     highlightedRange: highlightedRange,
                                     currentTime: currentTime
@@ -57,7 +90,7 @@ struct TranscriptionView: View {
                     }
                 }
             }
-            .navigationTitle("Transcription")
+            .navigationTitle(chapterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -68,7 +101,21 @@ struct TranscriptionView: View {
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
-                        if !transcriptionText.isEmpty {
+                        if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                            Button(action: {
+                                if translatedText.isEmpty {
+                                    translateText()
+                                } else {
+                                    showingTranslation.toggle()
+                                }
+                            }) {
+                                Image(systemName: showingTranslation ? "textformat" : "translate")
+                                    .foregroundColor(showingTranslation ? .primary : .accentColor)
+                            }
+                            .disabled(isTranslating)
+                        }
+                        
+                        if !displayText.isEmpty {
                             Button(action: shareTranscription) {
                                 Image(systemName: "square.and.arrow.up")
                             }
@@ -90,7 +137,72 @@ struct TranscriptionView: View {
             Text(errorMessage)
         }
         .onAppear {
+            loadChapterTitle()
             loadTranscription()
+        }
+        .onChange(of: currentChapterIndex) { _, _ in
+            loadChapterTitle()
+            translatedText = "" // Reset translation when chapter changes
+            showingTranslation = false
+        }
+    }
+    
+    private func translateText() {
+        guard !transcriptionText.isEmpty && TranslationManager.isAvailable else { return }
+        
+        isTranslating = true
+        
+        Task {
+            do {
+                let translated = try await translationManager.translateText(
+                    transcriptionText,
+                    from: themeManager.transcriptionLanguage.rawValue,
+                    to: themeManager.translationTargetLanguage.rawValue
+                )
+                
+                await MainActor.run {
+                    translatedText = translated
+                    showingTranslation = true
+                    isTranslating = false
+                }
+            } catch {
+                await MainActor.run {
+                    errorMessage = "Translation failed: \(error.localizedDescription)"
+                    showingError = true
+                    isTranslating = false
+                }
+            }
+        }
+    }
+    
+    private func loadChapterTitle() {
+        chapterTitle = getChapterTitle(for: audiobook, chapterIndex: currentChapterIndex)
+    }
+    
+    private func getChapterTitle(for audiobook: Audiobook, chapterIndex: Int) -> String {
+        guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
+            return "Chapter \(chapterIndex + 1)"
+        }
+        
+        let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
+        
+        guard let manifestData = try? Data(contentsOf: manifestURL),
+              let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
+              let chaptersData = manifest["chapters"] as? [[String: Any]],
+              chapterIndex < chaptersData.count else {
+            return "Chapter \(chapterIndex + 1)"
+        }
+        
+        let chapterData = chaptersData[chapterIndex]
+        
+        // Try to get title, fallback to fileName without extension, then to Chapter N
+        if let title = chapterData["title"] as? String, !title.isEmpty {
+            return title
+        } else if let fileName = chapterData["fileName"] as? String {
+            let nameWithoutExtension = (fileName as NSString).deletingPathExtension
+            return nameWithoutExtension.isEmpty ? "Chapter \(chapterIndex + 1)" : nameWithoutExtension
+        } else {
+            return "Chapter \(chapterIndex + 1)"
         }
     }
     
@@ -128,12 +240,14 @@ struct TranscriptionView: View {
     
     private func refreshTranscription() {
         transcriptionText = ""
+        translatedText = ""
+        showingTranslation = false
         startTranscription()
     }
     
     private func shareTranscription() {
         let activityViewController = UIActivityViewController(
-            activityItems: [transcriptionText],
+            activityItems: [displayText],
             applicationActivities: nil
         )
         
