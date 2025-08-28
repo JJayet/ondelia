@@ -26,6 +26,12 @@ class GlobalAudioManager: ObservableObject {
         // Audio session setup is now deferred until first audio load
     }
     
+    deinit {
+        // Ensure proper cleanup when GlobalAudioManager is deallocated
+        cleanupEngines()
+        print("🧹 GlobalAudioManager: Deallocated and cleaned up")
+    }
+    
     func loadAudiobook(_ audiobook: Audiobook) {
         // If we're already playing this audiobook, don't reload
         if let current = currentAudiobook,
@@ -127,8 +133,19 @@ class GlobalAudioManager: ObservableObject {
     }
     
     private func cleanupEngines() {
-        audioEngine = nil
-        multiFileAudioEngine = nil
+        // Properly cleanup audio engine with its cleanup method
+        if audioEngine != nil {
+            // AudioEngine has its own cleanup method that handles observers and time observer
+            audioEngine = nil
+            print("🧹 GlobalAudioManager: Cleaned up single-file audio engine")
+        }
+        
+        // Properly cleanup multi-file audio engine with its cleanup method  
+        if multiFileAudioEngine != nil {
+            // MultiFileAudioEngine has its own cleanup method that handles observers and time observer
+            multiFileAudioEngine = nil
+            print("🧹 GlobalAudioManager: Cleaned up multi-file audio engine")
+        }
     }
     
     func pausePlayback() {

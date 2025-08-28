@@ -21,6 +21,10 @@ class AudioEngine: NSObject, ObservableObject {
     @Published var duration: TimeInterval = 0
     @Published var playbackRate: Float = 1.0
     
+    // Thread-safe queue for audio operations
+    private let audioQueue = DispatchQueue(label: "com.audiobookreader.audioengine", qos: .userInitiated)
+    private let stateQueue = DispatchQueue(label: "com.audiobookreader.audioengine.state", qos: .utility)
+    
     override init() {
         super.init()
         // Defer audio session and remote control setup until needed
@@ -43,23 +47,30 @@ class AudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-        // Remove time observer from current player
-        if let observer = timeObserver, let currentPlayer = player {
-            currentPlayer.removeTimeObserver(observer)
-            timeObserver = nil
+        audioQueue.sync { [weak self] in
+            guard let self = self else { return }
+            
+            // Remove time observer from current player
+            if let observer = self.timeObserver, let currentPlayer = self.player {
+                currentPlayer.removeTimeObserver(observer)
+                self.timeObserver = nil
+            }
+            
+            // Remove KVO observers if they were added
+            if self.hasAddedObservers, let item = self.playerItem {
+                item.removeObserver(self, forKeyPath: "duration")
+                item.removeObserver(self, forKeyPath: "status")
+                self.hasAddedObservers = false
+            }
+            
+            // Clear references
+            self.player = nil
+            self.playerItem = nil
+            
+            DispatchQueue.main.async {
+                self.isPlaying = false
+            }
         }
-        
-        // Remove KVO observers if they were added
-        if hasAddedObservers, let item = playerItem {
-            item.removeObserver(self, forKeyPath: "duration")
-            item.removeObserver(self, forKeyPath: "status")
-            hasAddedObservers = false
-        }
-        
-        // Clear references
-        player = nil
-        playerItem = nil
-        isPlaying = false
     }
     
     // MARK: - Load Audio File
@@ -67,75 +78,131 @@ class AudioEngine: NSObject, ObservableObject {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
         
-        // Setup audio session and remote controls on first load
-        setupAudioSession()
-        setupRemoteTransportControls()
-        
-        // Clean up existing player before creating new one
-        cleanup()
-        
-        let asset = AVURLAsset(url: url)
-        playerItem = AVPlayerItem(asset: asset)
-        player = AVPlayer(playerItem: playerItem)
-        
-        // Add time observer with optimized interval for better performance
-        let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        timeObserver = player?.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
-            self?.currentTime = time.seconds
-        }
-        
-        // Observe duration and status
-        playerItem?.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
-        playerItem?.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
-        hasAddedObservers = true
-        
-        // Setup now playing info asynchronously to avoid blocking
-        DispatchQueue.global(qos: .utility).async {
-            self.setupNowPlayingInfo(asset: asset)
+        audioQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Setup audio session and remote controls on first load
+            self.setupAudioSession()
+            self.setupRemoteTransportControls()
+            
+            // Clean up existing player before creating new one
+            self.cleanup()
+            
+            let asset = AVURLAsset(url: url)
+            let newPlayerItem = AVPlayerItem(asset: asset)
+            let newPlayer = AVPlayer(playerItem: newPlayerItem)
+            
+            self.player = newPlayer
+            self.playerItem = newPlayerItem
+            
+            // Add time observer with optimized interval for better performance
+            let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            self.timeObserver = newPlayer.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] time in
+                self?.updateCurrentTime(time.seconds)
+            }
+            
+            // Observe duration and status
+            newPlayerItem.addObserver(self, forKeyPath: "duration", options: [.new, .initial], context: nil)
+            newPlayerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
+            self.hasAddedObservers = true
+            
+            // Setup now playing info asynchronously to avoid blocking
+            DispatchQueue.global(qos: .utility).async {
+                self.setupNowPlayingInfo(asset: asset)
+            }
         }
     }
     
     // MARK: - Playback Controls
     func play() {
-        player?.play()
-        isPlaying = true
-        updateNowPlayingInfo()
+        audioQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            self.player?.play()
+            
+            DispatchQueue.main.async {
+                self.isPlaying = true
+                self.updateNowPlayingInfo()
+            }
+        }
     }
     
     func pause() {
-        player?.pause()
-        isPlaying = false
-        updateNowPlayingInfo()
+        audioQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            self.player?.pause()
+            
+            DispatchQueue.main.async {
+                self.isPlaying = false
+                self.updateNowPlayingInfo()
+            }
+        }
     }
     
     func togglePlayback() {
-        if isPlaying {
-            pause()
-        } else {
-            play()
+        stateQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            if self.isPlaying {
+                self.pause()
+            } else {
+                self.play()
+            }
         }
     }
     
     func seek(to time: TimeInterval) {
-        let cmTime = CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
-        player?.seek(to: cmTime)
-        updateNowPlayingInfo()
+        audioQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            let cmTime = CMTime(seconds: time, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
+            self.player?.seek(to: cmTime)
+            
+            DispatchQueue.main.async {
+                self.updateNowPlayingInfo()
+            }
+        }
     }
     
     func skipForward(_ seconds: TimeInterval = 15) {
-        let newTime = currentTime + seconds
-        seek(to: min(newTime, duration))
+        stateQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            let newTime = self.currentTime + seconds
+            self.seek(to: min(newTime, self.duration))
+        }
     }
     
     func skipBackward(_ seconds: TimeInterval = 15) {
-        let newTime = currentTime - seconds
-        seek(to: max(newTime, 0))
+        stateQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            let newTime = self.currentTime - seconds
+            self.seek(to: max(newTime, 0))
+        }
     }
     
     func setPlaybackRate(_ rate: Float) {
-        playbackRate = rate
-        player?.rate = isPlaying ? rate : 0
-        updateNowPlayingInfo()
+        audioQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            self.playbackRate = rate
+            
+            if self.isPlaying {
+                self.player?.rate = rate
+            }
+            
+            DispatchQueue.main.async {
+                self.updateNowPlayingInfo()
+            }
+        }
+    }
+    
+    // MARK: - Thread-safe current time updates
+    private func updateCurrentTime(_ time: TimeInterval) {
+        // This is already called on main queue from time observer
+        currentTime = time
     }
     
     // MARK: - Key-Value Observing
@@ -245,11 +312,16 @@ class AudioEngine: NSObject, ObservableObject {
     }
     
     private func updateNowPlayingInfo() {
-        var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
-        nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = currentTime
-        nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = isPlaying ? playbackRate : 0.0
-        
-        MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        // Ensure this runs on main thread when updating Now Playing info
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
+            nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime
+            nowPlayingInfo[MPNowPlayingInfoPropertyPlaybackRate] = self.isPlaying ? self.playbackRate : 0.0
+            
+            MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
+        }
     }
     
     // MARK: - Remote Control Events
