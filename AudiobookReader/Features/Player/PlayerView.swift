@@ -146,25 +146,25 @@ struct PlayerView: View {
                         
                         // Book Info
                         VStack(spacing: 8) {
-                            Text(audiobook.title ?? "Unknown Title")
+                            Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default title for audiobooks without title"))
                                 .font(.title3)
                                 .fontWeight(.bold)
                                 .foregroundColor(.primaryText)
                                 .multilineTextAlignment(.center)
                             
-                            Text(audiobook.author ?? "Unknown Author")
+                            Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Default author for audiobooks without author"))
                                 .font(.subheadline)
                                 .foregroundColor(.secondaryText)
                             
                             if let narrator = audiobook.narrator {
-                                Text("Narrated by \(narrator)")
+                                Text(String(format: NSLocalizedString("Narrated by %@", comment: "Narrator credit text"), narrator))
                                     .font(.caption)
                                     .foregroundColor(.secondaryText)
                             }
                             
                             // Current Chapter
                             if let chapter = currentChapter {
-                                Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
+                                Text(chapter.title ?? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapter.chapterNumber))
                                     .font(.caption)
                                     .foregroundColor(.accentColor)
                                     .padding(.horizontal, 12)
@@ -192,7 +192,7 @@ struct PlayerView: View {
                                     }
                                 )
                                 .accessibilityIdentifier(AccessibilityIdentifiers.Player.progressSlider)
-                                .accessibilityLabel("Audio progress")
+                                .accessibilityLabel(NSLocalizedString("Audio progress", comment: "Accessibility label for progress slider"))
                                 .accessibilityValue(formatAccessibilityTime(currentTime, duration: duration))
                                 .accessibilityAdjustableAction { direction in
                                     let increment: TimeInterval = 30
@@ -267,7 +267,7 @@ struct PlayerView: View {
                             
                             // Speed Control with Animation
                             VStack(spacing: 12) {
-                                Text("Speed: \(String(format: "%.1fx", playbackRate))")
+                                Text(String(format: NSLocalizedString("Speed: %.1fx", comment: "Playback speed display"), playbackRate))
                                     .font(.caption)
                                     .foregroundColor(.secondaryText)
                                 
@@ -303,20 +303,20 @@ struct PlayerView: View {
                         
                         // Action Buttons
                         HStack(spacing: 18) {
-                            ActionButton(icon: "bookmark", title: "Bookmarks", count: bookmarks.count) {
+                            ActionButton(icon: "bookmark", title: NSLocalizedString("Bookmarks", comment: "Bookmarks button title"), count: bookmarks.count) {
                                 showingBookmarks = true
                             }
                             
-                            ActionButton(icon: "bookmark.circle", title: "Add Bookmark") {
+                            ActionButton(icon: "bookmark.circle", title: NSLocalizedString("Add Bookmark", comment: "Add bookmark button title")) {
                                 showingAddBookmark = true
                             }
                             
-                            ActionButton(icon: "doc.text", title: "Transcription") {
+                            ActionButton(icon: "doc.text", title: NSLocalizedString("Transcript", comment: "Transcription button title")) {
                                 showingTranscription = true
                             }
                             
                             if !chapters.isEmpty {
-                                ActionButton(icon: "list.bullet", title: "Chapters", count: chapters.count) {
+                                ActionButton(icon: "list.bullet", title: NSLocalizedString("Chapters", comment: "Chapters button title"), count: chapters.count) {
                                     showingChapterList = true
                                 }
                             }
@@ -362,7 +362,7 @@ struct PlayerView: View {
                     audiobookManager.createBookmark(
                         for: audiobook,
                         at: bookmarkTime,
-                        title: bookmarkTitle.isEmpty ? "Bookmark at \(formatTime(bookmarkTime))" : bookmarkTitle,
+                        title: bookmarkTitle.isEmpty ? String(format: NSLocalizedString("Bookmark at %@", comment: "Default bookmark title with time"), formatTime(bookmarkTime)) : bookmarkTitle,
                         note: bookmarkNote.isEmpty ? nil : bookmarkNote
                     )
                     bookmarkTitle = ""
@@ -389,15 +389,15 @@ struct PlayerView: View {
         }
         .actionSheet(isPresented: $showingSleepTimer) {
             ActionSheet(
-                title: Text("Sleep Timer"),
-                message: Text("Choose when to stop playback"),
+                title: Text(NSLocalizedString("Sleep Timer", comment: "Sleep timer action sheet title")),
+                message: Text(NSLocalizedString("Choose when to stop playback", comment: "Sleep timer action sheet message")),
                 buttons: [
-                    .default(Text("5 minutes")) { setSleepTimer(300) },
-                    .default(Text("10 minutes")) { setSleepTimer(600) },
-                    .default(Text("15 minutes")) { setSleepTimer(900) },
-                    .default(Text("30 minutes")) { setSleepTimer(1800) },
-                    .default(Text("End of chapter")) { setSleepTimerEndOfChapter() },
-                    .destructive(Text("Cancel timer")) { cancelSleepTimer() },
+                    .default(Text(NSLocalizedString("5 minutes", comment: "5 minute sleep timer option"))) { setSleepTimer(300) },
+                    .default(Text(NSLocalizedString("10 minutes", comment: "10 minute sleep timer option"))) { setSleepTimer(600) },
+                    .default(Text(NSLocalizedString("15 minutes", comment: "15 minute sleep timer option"))) { setSleepTimer(900) },
+                    .default(Text(NSLocalizedString("30 minutes", comment: "30 minute sleep timer option"))) { setSleepTimer(1800) },
+                    .default(Text(NSLocalizedString("End of chapter", comment: "End of chapter sleep timer option"))) { setSleepTimerEndOfChapter() },
+                    .destructive(Text(NSLocalizedString("Cancel timer", comment: "Cancel sleep timer option"))) { cancelSleepTimer() },
                     .cancel()
                 ]
             )
@@ -462,7 +462,7 @@ struct PlayerView: View {
         let current = formatTime(currentTime)
         let total = formatTime(duration)
         let percentage = duration > 0 ? Int((currentTime / duration) * 100) : 0
-        return "\(current) of \(total), \(percentage) percent complete"
+        return String(format: NSLocalizedString("%@ of %@, %d percent complete", comment: "Accessibility description for audio progress"), current, total, percentage)
     }
 }
 

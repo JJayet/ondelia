@@ -17,7 +17,7 @@ struct TranscriptionView: View {
     @State private var errorMessage = ""
     @State private var searchText = ""
     @State private var highlightedRange: Range<String.Index>?
-    @State private var chapterTitle = "Transcription"
+    @State private var chapterTitle = NSLocalizedString("Transcription", comment: "Default chapter title for transcription")
     @State private var showingTranslation = false
     @State private var isTranslating = false
     
@@ -38,9 +38,9 @@ struct TranscriptionView: View {
                 // Translation toggle if available
                 if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
                     HStack {
-                        Picker("View", selection: $showingTranslation) {
-                            Text("Original").tag(false)
-                            Text("Translation").tag(true)
+                        Picker(NSLocalizedString("View", comment: "View picker label"), selection: $showingTranslation) {
+                            Text(NSLocalizedString("Original", comment: "Original text option")).tag(false)
+                            Text(NSLocalizedString("Translated", comment: "Translated text option")).tag(true)
                         }
                         .pickerStyle(SegmentedPickerStyle())
                         .onChange(of: showingTranslation) { _, shouldTranslate in
@@ -94,7 +94,7 @@ struct TranscriptionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
+                    Button(NSLocalizedString("Done", comment: "Done button")) {
                         presentationMode.wrappedValue.dismiss()
                     }.glassEffect()
                 }
@@ -131,8 +131,8 @@ struct TranscriptionView: View {
         }
         .accentColor(themeManager.accentColor.color)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .alert("Transcription Error", isPresented: $showingError) {
-            Button("OK") {}
+        .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
+            Button(NSLocalizedString("OK", comment: "OK button")) {}
         } message: {
             Text(errorMessage)
         }
@@ -167,7 +167,7 @@ struct TranscriptionView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Translation failed: \(error.localizedDescription)"
+                    errorMessage = String(format: NSLocalizedString("Translation failed: %@", comment: "Translation error message"), error.localizedDescription)
                     showingError = true
                     isTranslating = false
                 }
@@ -181,7 +181,7 @@ struct TranscriptionView: View {
     
     private func getChapterTitle(for audiobook: Audiobook, chapterIndex: Int) -> String {
         guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
-            return "Chapter \(chapterIndex)"
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
         }
         
         let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
@@ -190,7 +190,7 @@ struct TranscriptionView: View {
               let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let chaptersData = manifest["chapters"] as? [[String: Any]],
               chapterIndex < chaptersData.count else {
-            return "Chapter \(chapterIndex)"
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
         }
         
         let chapterData = chaptersData[chapterIndex]
@@ -202,7 +202,7 @@ struct TranscriptionView: View {
             let nameWithoutExtension = (fileName as NSString).deletingPathExtension
             return nameWithoutExtension.isEmpty ? "Chapter \(chapterIndex)" : nameWithoutExtension
         } else {
-            return "Chapter \(chapterIndex)"
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
         }
     }
     
@@ -270,13 +270,13 @@ struct TranscriptionHeaderView: View {
         VStack(spacing: 8) {
             if showingSearch {
                 HStack {
-                    TextField("Search in transcription...", text: $searchText)
+                    TextField(NSLocalizedString("Search in transcription...", comment: "Search text field placeholder"), text: $searchText)
                         .textFieldStyle(RoundedBorderTextFieldStyle())
                         .onSubmit {
                             searchInTranscription()
                         }
                     
-                    Button("Cancel") {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
                         searchText = ""
                         highlightedRange = nil
                         showingSearch = false
@@ -342,7 +342,7 @@ struct TranscriptionLoadingView: View {
                 .scaleEffect(1.0 + sin(Date().timeIntervalSince1970 * 2) * 0.1)
                 .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: UUID())
             
-            Text("Transcribing audio...")
+            Text(NSLocalizedString("Transcribing...", comment: "Transcription in progress text"))
                 .font(.headline)
                 .foregroundColor(.primaryText)
             
@@ -350,7 +350,7 @@ struct TranscriptionLoadingView: View {
                 .progressViewStyle(LinearProgressViewStyle())
                 .frame(maxWidth: 200)
             
-            Text(String(format: "%.0f%% complete", progress * 100))
+            Text(String(format: NSLocalizedString("%.0f%% complete", comment: "Transcription progress percentage"), progress * 100))
                 .font(.caption)
                 .foregroundColor(.secondaryText)
         }
@@ -369,19 +369,19 @@ struct TranscriptionEmptyView: View {
                 .font(.system(size: 60))
                 .foregroundColor(.secondaryText)
             
-            Text("No Transcription Available")
+            Text(NSLocalizedString("No transcription available", comment: "No transcription available title"))
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(.primaryText)
             
-            Text("Tap the button below to generate a transcription of this chapter using on-device speech recognition.")
+            Text(NSLocalizedString("Tap transcribe to generate a transcript of the current chapter", comment: "Transcription instructions text"))
                 .font(.body)
                 .foregroundColor(.secondaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
             
             Button(action: onStartTranscription) {
-                Label("Start Transcription", systemImage: "mic")
+                Label(NSLocalizedString("Transcribe", comment: "Start transcription button"), systemImage: "mic")
                     .font(.headline)
                     .foregroundColor(.white)
                     .padding()
@@ -405,7 +405,7 @@ struct TranscriptionTextView: View {
         VStack(alignment: .leading, spacing: 16) {
             // Transcription metadata
             HStack {
-                Label("Transcribed", systemImage: "checkmark.circle")
+                Label(NSLocalizedString("Transcribed", comment: "Transcription completed status"), systemImage: "checkmark.circle")
                     .foregroundColor(.green)
                     .font(.caption)
                 

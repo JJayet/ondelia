@@ -12,11 +12,11 @@ struct SettingsView: View {
         NavigationView {
             List {
                 // Appearance Section
-                Section("Appearance") {
+                Section(NSLocalizedString("Appearance", comment: "Settings section: Appearance")) {
                     HStack {
-                        Label("Theme", systemImage: "paintbrush")
+                        Label(NSLocalizedString("Theme", comment: "Theme setting label"), systemImage: "paintbrush")
                         Spacer()
-                        Picker("Theme", selection: $themeManager.currentTheme) {
+                        Picker(NSLocalizedString("Theme", comment: "Theme picker label"), selection: $themeManager.currentTheme) {
                             ForEach(AppTheme.allCases, id: \.rawValue) { theme in
                                 Text(theme.displayName)
                                     .tag(theme)
@@ -29,7 +29,7 @@ struct SettingsView: View {
                     }
                     
                     HStack {
-                        Label("Accent Color", systemImage: "circle.fill")
+                        Label(NSLocalizedString("Accent Color", comment: "Accent color setting label"), systemImage: "circle.fill")
                             .foregroundColor(themeManager.accentColor.color)
                         Spacer()
                         Picker("", selection: $themeManager.accentColor) {
@@ -48,11 +48,11 @@ struct SettingsView: View {
                 }
                 
                 // Playback Section
-                Section("Playback") {
+                Section(NSLocalizedString("Playback", comment: "Settings section: Playback")) {
                     HStack {
-                        Label("Skip Interval", systemImage: "goforward")
+                        Label(NSLocalizedString("Skip Interval", comment: "Skip interval setting label"), systemImage: "goforward")
                         Spacer()
-                        Picker("Skip Interval", selection: $themeManager.skipInterval) {
+                        Picker(NSLocalizedString("Skip Interval", comment: "Skip interval picker label"), selection: $themeManager.skipInterval) {
                             ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
                                 Text(interval.displayName)
                                     .tag(interval)
@@ -66,12 +66,12 @@ struct SettingsView: View {
                 }
                 
                 // Transcription Section
-                Section("Transcription") {
+                Section(NSLocalizedString("Transcription", comment: "Settings section: Transcription")) {
                     VStack(alignment: .leading) {
                         HStack {
-                            Label("WhisperKit Model", systemImage: "brain")
+                            Label(NSLocalizedString("WhisperKit Model", comment: "WhisperKit model setting label"), systemImage: "brain")
                             Spacer()
-                            Picker("Model", selection: $themeManager.whisperModel) {
+                            Picker(NSLocalizedString("WhisperKit Model", comment: "WhisperKit model picker label"), selection: $themeManager.whisperModel) {
                                 ForEach(WhisperModel.allCases, id: \.rawValue) { model in
                                     VStack(alignment: .leading) {
                                         Text(model.displayName)
@@ -107,7 +107,7 @@ struct SettingsView: View {
                             HStack {
                                 ProgressView()
                                     .scaleEffect(0.8)
-                                Text("Downloading \(themeManager.whisperModel.displayName)...")
+                                Text(String(format: NSLocalizedString("Downloading %@...", comment: "Model downloading status"), themeManager.whisperModel.displayName))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
                             }
@@ -116,9 +116,9 @@ struct SettingsView: View {
                     }
                     
                     HStack {
-                        Label("Language", systemImage: "globe")
+                        Label(NSLocalizedString("Language", comment: "Language setting label"), systemImage: "globe")
                         Spacer()
-                        Picker("Language", selection: $themeManager.transcriptionLanguage) {
+                        Picker(NSLocalizedString("Language", comment: "Language picker label"), selection: $themeManager.transcriptionLanguage) {
                             ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
                                 Text(language.displayName)
                                     .tag(language)
@@ -132,7 +132,7 @@ struct SettingsView: View {
                     
                     if TranslationManager.isAvailable {
                         Toggle(isOn: $themeManager.enableTranslation) {
-                            Label("Enable Translation", systemImage: "translate")
+                            Label(NSLocalizedString("Enable Translation", comment: "Enable translation toggle label"), systemImage: "translate")
                         }
                         .onChange(of: themeManager.enableTranslation) { _, newValue in
                             themeManager.updateEnableTranslation(newValue)
@@ -140,9 +140,9 @@ struct SettingsView: View {
                         
                         if themeManager.enableTranslation {
                             HStack {
-                                Label("Translate To", systemImage: "arrow.right.circle")
+                                Label(NSLocalizedString("Translate To", comment: "Translation target language label"), systemImage: "arrow.right.circle")
                                 Spacer()
-                                Picker("Target Language", selection: $themeManager.translationTargetLanguage) {
+                                Picker(NSLocalizedString("Translate To", comment: "Translation target language picker label"), selection: $themeManager.translationTargetLanguage) {
                                     ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
                                         Text(language.displayName)
                                             .tag(language)
@@ -156,9 +156,9 @@ struct SettingsView: View {
                         }
                     } else {
                         HStack {
-                            Label("Translation", systemImage: "translate")
+                            Label(NSLocalizedString("Translation", comment: "Translation feature label"), systemImage: "translate")
                             Spacer()
-                            Text("Requires iOS 17.4+")
+                            Text(NSLocalizedString("Requires iOS 17.4+", comment: "iOS version requirement text"))
                                 .font(.caption)
                                 .foregroundColor(.secondary)
                         }
@@ -166,13 +166,13 @@ struct SettingsView: View {
                 }
                 
                 // Goals Section
-                Section("Reading Goals") {
+                Section(NSLocalizedString("Reading Goals", comment: "Settings section: Reading Goals")) {
                     Button {
                         tempGoal = statistics.monthlyGoal / 3600
                         showingGoalEditor = true
                     } label: {
                         HStack {
-                            Label("Monthly Goal", systemImage: "target")
+                            Label(NSLocalizedString("Monthly Goal", comment: "Monthly goal setting label"), systemImage: "target")
                             Spacer()
                             Text(statistics.formattedMonthlyGoal)
                                 .foregroundColor(.secondary)
@@ -182,64 +182,64 @@ struct SettingsView: View {
                 }
                 
                 // Statistics Section
-                Section("Statistics") {
+                Section(NSLocalizedString("Statistics", comment: "Settings section: Statistics")) {
                     StatisticRowView(
                         icon: "clock",
-                        title: "Total Listening Time",
+                        title: NSLocalizedString("Total Listening Time", comment: "Total listening time statistic"),
                         value: statistics.formattedTotalTime
                     )
                     
                     StatisticRowView(
                         icon: "books.vertical",
-                        title: "Books Completed",
+                        title: NSLocalizedString("Books Completed", comment: "Books completed statistic"),
                         value: "\(statistics.booksCompleted)"
                     )
                     
                     StatisticRowView(
                         icon: "speedometer",
-                        title: "Average Speed",
+                        title: NSLocalizedString("Average Speed", comment: "Average playback speed statistic"),
                         value: String(format: "%.1fx", statistics.averageSpeed)
                     )
                     
                     StatisticRowView(
                         icon: "flame",
-                        title: "Current Streak",
-                        value: "\(statistics.currentStreak) days"
+                        title: NSLocalizedString("Current Streak", comment: "Current reading streak statistic"),
+                        value: "\(statistics.currentStreak) \(NSLocalizedString("days", comment: "Days unit"))"
                     )
                     
                     StatisticRowView(
                         icon: "trophy",
-                        title: "Longest Streak",
-                        value: "\(statistics.longestStreak) days"
+                        title: NSLocalizedString("Longest Streak", comment: "Longest reading streak statistic"),
+                        value: "\(statistics.longestStreak) \(NSLocalizedString("days", comment: "Days unit"))"
                     )
                 }
                 
                 // About Section
-                Section("About") {
+                Section(NSLocalizedString("About", comment: "Settings section: About")) {
                     HStack {
-                        Label("Version", systemImage: "info.circle")
+                        Label(NSLocalizedString("Version", comment: "App version label"), systemImage: "info.circle")
                         Spacer()
                         Text("1.0.0")
                             .foregroundColor(.secondary)
                     }
                     
                     Link(destination: URL(string: "https://github.com")!) {
-                        Label("GitHub", systemImage: "link")
+                        Label(NSLocalizedString("GitHub", comment: "GitHub link label"), systemImage: "link")
                     }
                 }
             }
-            .navigationTitle("Settings")
+            .navigationTitle(NSLocalizedString("Settings", comment: "Settings view title"))
             .navigationBarTitleDisplayMode(.inline)
-            .alert("Monthly Goal", isPresented: $showingGoalEditor) {
-                TextField("Hours", value: $tempGoal, format: .number)
+            .alert(NSLocalizedString("Monthly Goal", comment: "Monthly goal alert title"), isPresented: $showingGoalEditor) {
+                TextField(NSLocalizedString("Hours", comment: "Hours text field placeholder"), value: $tempGoal, format: .number)
                     .keyboardType(.decimalPad)
                 
-                Button("Cancel", role: .cancel) {}
-                Button("Save") {
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                Button(NSLocalizedString("Save", comment: "Save button")) {
                     statistics.updateMonthlyGoal(tempGoal * 3600) // Convert hours to seconds
                 }
             } message: {
-                Text("Set your monthly listening goal in hours")
+                Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
@@ -274,7 +274,7 @@ struct StatisticsView: View {
                     // Monthly Progress Card
                     VStack(spacing: 16) {
                         VStack(spacing: 8) {
-                            Text("This Month")
+                            Text(NSLocalizedString("This Month", comment: "This month progress header"))
                                 .font(.headline)
                                 .foregroundColor(.primaryText)
                             
@@ -282,7 +282,7 @@ struct StatisticsView: View {
                                 .font(.system(size: 48, weight: .bold, design: .rounded))
                                 .foregroundColor(.accentColor)
                             
-                            Text("of \(statistics.formattedMonthlyGoal) goal")
+                            Text(String(format: NSLocalizedString("of %@ goal", comment: "Monthly goal progress text"), statistics.formattedMonthlyGoal))
                                 .font(.subheadline)
                                 .foregroundColor(.secondaryText)
                         }
@@ -323,30 +323,30 @@ struct StatisticsView: View {
                         GridItem(.flexible())
                     ], spacing: 16) {
                         StatCardView(
-                            title: "Total Time",
+                            title: NSLocalizedString("Total Time", comment: "Total time stat card title"),
                             value: statistics.formattedTotalTime,
                             icon: "clock",
                             color: .blue
                         )
                         
                         StatCardView(
-                            title: "Books Completed",
+                            title: NSLocalizedString("Books Completed", comment: "Books completed stat card title"),
                             value: "\(statistics.booksCompleted)",
                             icon: "books.vertical",
                             color: .green
                         )
                         
                         StatCardView(
-                            title: "Average Speed",
+                            title: NSLocalizedString("Average Speed", comment: "Average speed stat card title"),
                             value: String(format: "%.1fx", statistics.averageSpeed),
                             icon: "speedometer",
                             color: .orange
                         )
                         
                         StatCardView(
-                            title: "Current Streak",
+                            title: NSLocalizedString("Current Streak", comment: "Current streak stat card title"),
                             value: "\(statistics.currentStreak)",
-                            subtitle: "days",
+                            subtitle: NSLocalizedString("days", comment: "Days unit for stat card"),
                             icon: "flame",
                             color: .red
                         )
@@ -354,7 +354,7 @@ struct StatisticsView: View {
                     
                     // Achievement Section
                     VStack(alignment: .leading, spacing: 16) {
-                        Text("Achievements")
+                        Text(NSLocalizedString("Achievements", comment: "Achievements section header"))
                             .font(.title2)
                             .fontWeight(.bold)
                             .foregroundColor(.primaryText)
@@ -366,22 +366,22 @@ struct StatisticsView: View {
                         ], spacing: 12) {
                             AchievementView(
                                 icon: "trophy.fill",
-                                title: "Longest Streak",
-                                value: "\(statistics.longestStreak) days",
+                                title: NSLocalizedString("Longest Streak", comment: "Longest streak achievement title"),
+                                value: "\(statistics.longestStreak) \(NSLocalizedString("days", comment: "Days unit"))",
                                 isUnlocked: statistics.longestStreak >= 7
                             )
                             
                             AchievementView(
                                 icon: "book.fill",
-                                title: "First Book",
-                                value: "Complete",
+                                title: NSLocalizedString("First Book", comment: "First book achievement title"),
+                                value: NSLocalizedString("Complete", comment: "Achievement completion status"),
                                 isUnlocked: statistics.booksCompleted >= 1
                             )
                             
                             AchievementView(
                                 icon: "clock.fill",
-                                title: "10 Hours",
-                                value: statistics.totalListeningTime >= 36000 ? "Complete" : "In Progress",
+                                title: NSLocalizedString("10 Hours", comment: "10 hours achievement title"),
+                                value: statistics.totalListeningTime >= 36000 ? NSLocalizedString("Complete", comment: "Achievement completion status") : NSLocalizedString("In Progress", comment: "Achievement in progress status"),
                                 isUnlocked: statistics.totalListeningTime >= 36000
                             )
                         }
@@ -390,11 +390,11 @@ struct StatisticsView: View {
                 .padding()
             }
             .background(Color.primaryBackground.ignoresSafeArea())
-            .navigationTitle("Statistics")
+            .navigationTitle(NSLocalizedString("Statistics", comment: "Statistics view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
+                    Button(NSLocalizedString("Done", comment: "Done button")) {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }

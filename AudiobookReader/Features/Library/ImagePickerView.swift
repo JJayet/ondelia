@@ -15,11 +15,11 @@ struct ImagePickerView: View {
             VStack(spacing: 16) {
                 // Header
                 VStack(spacing: 8) {
-                    Text("Choose Cover Image")
+                    Text(NSLocalizedString("Choose Cover Image", comment: "Choose cover image title"))
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    Text("for \(audiobook.title ?? "Unknown Title")")
+                    Text(String(format: NSLocalizedString("for %@", comment: "Cover image for audiobook title"), audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title")))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)
@@ -28,13 +28,13 @@ struct ImagePickerView: View {
                 
                 // Action Buttons
                 HStack(spacing: 16) {
-                    Button("Search Google Images") {
+                    Button(NSLocalizedString("Search Google Images", comment: "Search Google Images button")) {
                         searchGoogleImages()
                     }
                     .buttonStyle(.borderedProminent)
                     .disabled(isLoading)
                     
-                    Button("Choose from Photos") {
+                    Button(NSLocalizedString("Choose from Photos", comment: "Choose from Photos button")) {
                         showingPhotoPicker = true
                     }
                     .buttonStyle(.bordered)
@@ -44,7 +44,7 @@ struct ImagePickerView: View {
                 if isLoading {
                     VStack {
                         ProgressView()
-                        Text("Searching for images...")
+                        Text(NSLocalizedString("Searching for images...", comment: "Searching for images loading text"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                     }
@@ -65,10 +65,10 @@ struct ImagePickerView: View {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 60))
                             .foregroundColor(.secondary)
-                        Text("No images found")
+                        Text(NSLocalizedString("No images found", comment: "No images found message"))
                             .font(.headline)
                             .foregroundColor(.secondary)
-                        Text("Try searching for images or choose from your photos")
+                        Text(NSLocalizedString("Try searching for images or choose from your photos", comment: "No images found instructions"))
                             .font(.caption)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -111,11 +111,11 @@ struct ImagePickerView: View {
                 
                 Spacer()
             }
-            .navigationTitle("Cover Image")
+            .navigationTitle(NSLocalizedString("Cover Image", comment: "Cover image view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
@@ -131,7 +131,7 @@ struct ImagePickerView: View {
     
     private func searchGoogleImages() {
         guard let title = audiobook.title, !title.isEmpty else {
-            errorMessage = "No title available for search"
+            errorMessage = NSLocalizedString("No title available for search", comment: "No title error message")
             return
         }
         
@@ -150,10 +150,10 @@ struct ImagePickerView: View {
                 case .success(let results):
                     searchResults = results
                     if searchResults.isEmpty {
-                        errorMessage = "No images found for this audiobook"
+                        errorMessage = NSLocalizedString("No images found for this audiobook", comment: "No images found for audiobook message")
                     }
                 case .failure(let error):
-                    errorMessage = "Search failed: \(error.localizedDescription)"
+                    errorMessage = String(format: NSLocalizedString("Search failed: %@", comment: "Search failed error message"), error.localizedDescription)
                     searchResults = []
                 }
                 isLoading = false
@@ -167,7 +167,7 @@ struct ImagePickerView: View {
             do {
                 guard let url = URL(string: result.fullUrl) else {
                     await MainActor.run {
-                        errorMessage = "Invalid image URL"
+                        errorMessage = NSLocalizedString("Invalid image URL", comment: "Invalid image URL error message")
                     }
                     return
                 }
@@ -181,7 +181,7 @@ struct ImagePickerView: View {
                 }
             } catch {
                 await MainActor.run {
-                    errorMessage = "Failed to download image: \(error.localizedDescription)"
+                    errorMessage = String(format: NSLocalizedString("Failed to download image: %@", comment: "Image download error message"), error.localizedDescription)
                 }
             }
         }

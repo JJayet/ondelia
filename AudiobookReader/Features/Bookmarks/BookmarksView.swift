@@ -20,11 +20,11 @@ struct BookmarksView: View {
                             .font(.system(size: 60))
                             .foregroundColor(.secondary)
                         
-                        Text("No Bookmarks")
+                        Text(NSLocalizedString("No bookmarks yet", comment: "No bookmarks empty state title"))
                             .font(.title2)
                             .fontWeight(.semibold)
                         
-                        Text("Add bookmarks to save specific moments in this audiobook")
+                        Text(NSLocalizedString("Create your first bookmark by tapping the bookmark button while listening", comment: "No bookmarks instructions"))
                             .font(.body)
                             .foregroundColor(.secondary)
                             .multilineTextAlignment(.center)
@@ -52,11 +52,11 @@ struct BookmarksView: View {
                     }
                 }
             }
-            .navigationTitle("Bookmarks")
+            .navigationTitle(NSLocalizedString("Bookmarks", comment: "Bookmarks view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
+                    Button(NSLocalizedString("Done", comment: "Done button")) {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
@@ -75,7 +75,7 @@ struct BookmarkRowView: View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(bookmark.title ?? "Bookmark")
+                    Text(bookmark.title ?? NSLocalizedString("Bookmark", comment: "Default bookmark title"))
                         .font(.headline)
                         .foregroundColor(.primary)
                     
@@ -105,18 +105,18 @@ struct BookmarkRowView: View {
         }
         .buttonStyle(PlainButtonStyle())
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-            Button("Delete") {
+            Button(NSLocalizedString("Delete", comment: "Delete bookmark button")) {
                 showingDeleteAlert = true
             }
             .tint(.red)
         }
-        .alert("Delete Bookmark", isPresented: $showingDeleteAlert) {
-            Button("Cancel", role: .cancel) { }
-            Button("Delete", role: .destructive) {
+        .alert(NSLocalizedString("Delete Bookmark", comment: "Delete bookmark alert title"), isPresented: $showingDeleteAlert) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { }
+            Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                 onDelete()
             }
         } message: {
-            Text("Are you sure you want to delete this bookmark?")
+            Text(NSLocalizedString("Are you sure you want to delete this bookmark?", comment: "Delete bookmark confirmation message"))
         }
     }
     
@@ -151,23 +151,23 @@ struct AddBookmarkView: View {
     var body: some View {
         NavigationView {
             Form {
-                Section("Bookmark Details") {
-                    TextField("Title", text: $title)
-                    TextField("Note (optional)", text: $note, axis: .vertical)
+                Section(NSLocalizedString("Bookmark Details", comment: "Bookmark details form section header")) {
+                    TextField(NSLocalizedString("Bookmark Title", comment: "Bookmark title text field placeholder"), text: $title)
+                    TextField(NSLocalizedString("Note (Optional)", comment: "Bookmark note text field placeholder"), text: $note, axis: .vertical)
                         .lineLimit(3...6)
                 }
             }
-            .navigationTitle("Add Bookmark")
+            .navigationTitle(NSLocalizedString("Add Bookmark", comment: "Add bookmark view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
                         presentationMode.wrappedValue.dismiss()
                     }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Save") {
+                    Button(NSLocalizedString("Save", comment: "Save button")) {
                         onSave()
                         presentationMode.wrappedValue.dismiss()
                     }

@@ -29,8 +29,15 @@ struct LibraryView: View {
     }
     
     enum ViewMode: String, CaseIterable {
-        case list = "List"
-        case grid = "Grid"
+        case list = "list"
+        case grid = "grid"
+        
+        var displayName: String {
+            switch self {
+            case .list: return NSLocalizedString("List", comment: "List view mode")
+            case .grid: return NSLocalizedString("Grid", comment: "Grid view mode")
+            }
+        }
         
         var icon: String {
             switch self {
@@ -41,11 +48,21 @@ struct LibraryView: View {
     }
     
     enum SortOption: String, CaseIterable {
-        case title = "Title"
-        case author = "Author"
-        case lastPlayed = "Recently Played"
-        case dateAdded = "Date Added"
-        case progress = "Progress"
+        case title = "title"
+        case author = "author"
+        case lastPlayed = "lastPlayed"
+        case dateAdded = "dateAdded"
+        case progress = "progress"
+        
+        var displayName: String {
+            switch self {
+            case .title: return NSLocalizedString("Title", comment: "Sort by title")
+            case .author: return NSLocalizedString("Author", comment: "Sort by author")
+            case .lastPlayed: return NSLocalizedString("Recently Played", comment: "Sort by recently played")
+            case .dateAdded: return NSLocalizedString("Date Added", comment: "Sort by date added")
+            case .progress: return NSLocalizedString("Progress", comment: "Sort by progress")
+            }
+        }
         
         var descriptor: NSSortDescriptor {
             switch self {
@@ -64,10 +81,19 @@ struct LibraryView: View {
     }
     
     enum FilterOption: String, CaseIterable {
-        case all = "All"
-        case inProgress = "In Progress"
-        case completed = "Completed"
-        case notStarted = "Not Started"
+        case all = "all"
+        case inProgress = "inProgress"
+        case completed = "completed"
+        case notStarted = "notStarted"
+        
+        var displayName: String {
+            switch self {
+            case .all: return NSLocalizedString("All", comment: "Filter: all audiobooks")
+            case .inProgress: return NSLocalizedString("In Progress", comment: "Filter: books in progress")
+            case .completed: return NSLocalizedString("Completed", comment: "Filter: completed books")
+            case .notStarted: return NSLocalizedString("Not Started", comment: "Filter: books not started")
+            }
+        }
         
         func predicate() -> NSPredicate? {
             switch self {
@@ -167,7 +193,7 @@ struct LibraryView: View {
                         if !continueReadingBooks.isEmpty {
                             VStack(alignment: .leading, spacing: 12) {
                                 HStack {
-                                    Text("Continue Reading")
+                                    Text(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
                                         .font(.title2)
                                         .fontWeight(.bold)
                                     Spacer()
@@ -220,7 +246,7 @@ struct LibraryView: View {
                                 .listRowSeparator(.hidden)
                                 .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
                                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                                    Button("Delete") {
+                                    Button(NSLocalizedString("Delete", comment: "Delete button")) {
                                         withAnimation(.easeInOut(duration: 0.3)) {
                                             audiobookManager.deleteAudiobook(audiobook)
                                         }
@@ -228,7 +254,7 @@ struct LibraryView: View {
                                     .tint(.red)
                                 }
                                 .swipeActions(edge: .leading) {
-                                    Button(audiobook.isFinished ? "Mark Unread" : "Mark Read") {
+                                    Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                                         withAnimation(.easeInOut(duration: 0.3)) {
                                             if audiobook.isFinished {
                                                 audiobookManager.markAsUnread(audiobook)
@@ -239,7 +265,7 @@ struct LibraryView: View {
                                     }
                                     .tint(audiobook.isFinished ? .orange : .green)
                                     
-                                    Button("Rename") {
+                                    Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                         audiobookToRename = audiobook
                                         newAudiobookTitle = audiobook.title ?? ""
                                         showingRenameAlert = true
@@ -247,13 +273,13 @@ struct LibraryView: View {
                                     .tint(.blue)
                                 }
                                 .contextMenu {
-                                    Button("Rename") {
+                                    Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                         audiobookToRename = audiobook
                                         newAudiobookTitle = audiobook.title ?? ""
                                         showingRenameAlert = true
                                     }
                                     
-                                    Button(audiobook.isFinished ? "Mark as Unread" : "Mark as Read") {
+                                    Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {
                                         if audiobook.isFinished {
                                             audiobookManager.markAsUnread(audiobook)
                                         } else {
@@ -261,11 +287,11 @@ struct LibraryView: View {
                                         }
                                     }
                                     
-                                    Button("Change Cover Image") {
+                                    Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
                                         audiobookForImagePicker = audiobook
                                     }
                                     
-                                    Button("Delete", role: .destructive) {
+                                    Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                                         audiobookManager.deleteAudiobook(audiobook)
                                     }
                                 }
@@ -290,7 +316,7 @@ struct LibraryView: View {
                             if !continueReadingBooks.isEmpty {
                                 VStack(alignment: .leading, spacing: 12) {
                                     HStack {
-                                        Text("Continue Reading")
+                                        Text(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
                                             .font(.title2)
                                             .fontWeight(.bold)
                                         Spacer()
@@ -340,13 +366,13 @@ struct LibraryView: View {
                                                     selectedAudiobook = audiobook
                                                 }
                                                 .contextMenu {
-                                                    Button("Rename") {
+                                                    Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                                         audiobookToRename = audiobook
                                                         newAudiobookTitle = audiobook.title ?? ""
                                                         showingRenameAlert = true
                                                     }
                                                     
-                                                    Button(audiobook.isFinished ? "Mark as Unread" : "Mark as Read") {
+                                                    Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {
                                                         if audiobook.isFinished {
                                                             audiobookManager.markAsUnread(audiobook)
                                                         } else {
@@ -354,11 +380,11 @@ struct LibraryView: View {
                                                         }
                                                     }
                                                     
-                                                    Button("Change Cover Image") {
+                                                    Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
                                                         audiobookForImagePicker = audiobook
                                                     }
                                                     
-                                                    Button("Delete", role: .destructive) {
+                                                    Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                                                         audiobookManager.deleteAudiobook(audiobook)
                                                     }
                                                 }
@@ -374,8 +400,8 @@ struct LibraryView: View {
                 }
             }
             .background(Color.primaryBackground.ignoresSafeArea())
-            .searchable(text: $searchText, prompt: "Search audiobooks...")
-            .navigationTitle("Library")
+            .searchable(text: $searchText, prompt: NSLocalizedString("Search audiobooks...", comment: "Search placeholder"))
+            .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -384,7 +410,7 @@ struct LibraryView: View {
                             .font(.title3)
                             .foregroundColor(.accentColor)
                     }
-                    .accessibilityLabel("Import Audiobook")
+                    .accessibilityLabel(NSLocalizedString("Import Audiobook", comment: "Import button accessibility label"))
                     .accessibilityIdentifier(AccessibilityIdentifiers.Library.importButton)
                 }
             }
@@ -431,8 +457,8 @@ struct LibraryView: View {
                 audiobookForImagePicker = audiobook
             }
         }
-        .alert("Rename Audiobook", isPresented: $showingRenameAlert) {
-            TextField("New title", text: $newAudiobookTitle)
+        .alert(NSLocalizedString("Rename Audiobook", comment: "Alert title for renaming"), isPresented: $showingRenameAlert) {
+            TextField(NSLocalizedString("New title", comment: "Placeholder for new title"), text: $newAudiobookTitle)
                 .onSubmit {
                     if let audiobook = audiobookToRename, !newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         audiobookManager.renameAudiobook(audiobook, newTitle: newAudiobookTitle)
@@ -441,12 +467,12 @@ struct LibraryView: View {
                     }
                 }
             
-            Button("Cancel", role: .cancel) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
                 audiobookToRename = nil
                 newAudiobookTitle = ""
             }
             
-            Button("Save") {
+            Button(NSLocalizedString("Save", comment: "Save button")) {
                 if let audiobook = audiobookToRename, !newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                     audiobookManager.renameAudiobook(audiobook, newTitle: newAudiobookTitle)
                 }
@@ -455,7 +481,7 @@ struct LibraryView: View {
             }
             .disabled(newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         } message: {
-            Text("Enter a new title for '\(audiobookToRename?.title ?? "")'")
+            Text(String(format: NSLocalizedString("Enter a new title for '%@'", comment: "Alert message for renaming"), audiobookToRename?.title ?? ""))
         }
     }
 }
@@ -469,7 +495,7 @@ struct StatisticsCardView: View {
             VStack(spacing: 12) {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("This Month")
+                        Text(NSLocalizedString("This Month", comment: "This month statistics"))
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                         
@@ -477,7 +503,7 @@ struct StatisticsCardView: View {
                             .font(.title2)
                             .fontWeight(.bold)
                         
-                        Text("of \(statistics.formattedMonthlyGoal) goal")
+                        Text(String(format: NSLocalizedString("of %@ goal", comment: "Goal progress text"), statistics.formattedMonthlyGoal))
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                     }
@@ -485,7 +511,7 @@ struct StatisticsCardView: View {
                     Spacer()
                     
                     VStack(alignment: .trailing, spacing: 4) {
-                        Text("Total")
+                        Text(NSLocalizedString("Total", comment: "Total statistics"))
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                         
@@ -493,7 +519,7 @@ struct StatisticsCardView: View {
                             .font(.title3)
                             .fontWeight(.semibold)
                         
-                        Text("\(statistics.booksCompleted) books")
+                        Text(String(format: NSLocalizedString("%d books", comment: "Number of books completed"), statistics.booksCompleted))
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                     }

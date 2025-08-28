@@ -1,0 +1,188 @@
+/* 
+   Localizable.strings (Français)
+   AudiobookReader
+*/
+
+// MARK: - General
+"OK" = "OK";
+"Cancel" = "Annuler";
+"Save" = "Enregistrer";
+"Delete" = "Supprimer";
+"Done" = "Terminé";
+
+// MARK: - Library View
+"Library" = "Bibliothèque";
+"Search audiobooks..." = "Rechercher des livres audio...";
+"Continue Reading" = "Continuer la lecture";
+"Import Audiobook" = "Importer un livre audio";
+
+// View Modes
+"List" = "Liste";
+"Grid" = "Grille";
+
+// Sort Options
+"Title" = "Titre";
+"Author" = "Auteur";
+"Recently Played" = "Récemment écouté";
+"Date Added" = "Date d'ajout";
+"Progress" = "Progression";
+
+// Filter Options
+"All" = "Tous";
+"In Progress" = "En cours";
+"Completed" = "Terminé";
+"Not Started" = "Non commencé";
+
+// Actions
+"Rename" = "Renommer";
+"Mark Read" = "Marquer comme lu";
+"Mark Unread" = "Marquer comme non lu";
+"Mark as Read" = "Marquer comme lu";
+"Mark as Unread" = "Marquer comme non lu";
+"Change Cover Image" = "Changer l'image de couverture";
+
+// Alerts
+"Rename Audiobook" = "Renommer le livre audio";
+"New title" = "Nouveau titre";
+"Enter a new title for '%@'" = "Entrez un nouveau titre pour '%@'";
+
+// Statistics
+"This Month" = "Ce mois-ci";
+"Total" = "Total";
+"of %@ goal" = "sur l'objectif de %@";
+"%d books" = "%d livres";
+
+// MARK: - Settings View
+"Settings" = "Réglages";
+"Appearance" = "Apparence";
+"Theme" = "Thème";
+"Accent Color" = "Couleur d'accent";
+"Playback" = "Lecture";
+"Skip Interval" = "Intervalle de saut";
+"Transcription" = "Transcription";
+"WhisperKit Model" = "Modèle WhisperKit";
+"Downloading %@..." = "Téléchargement de %@...";
+"Language" = "Langue";
+"Enable Translation" = "Activer la traduction";
+"Translate To" = "Traduire vers";
+"Translation" = "Traduction";
+"Requires iOS 17.4+" = "Nécessite iOS 17.4+";
+"Reading Goals" = "Objectifs de lecture";
+"Monthly Goal" = "Objectif mensuel";
+"Statistics" = "Statistiques";
+"Total Listening Time" = "Temps d'écoute total";
+"Books Completed" = "Livres terminés";
+"Average Speed" = "Vitesse moyenne";
+"Current Streak" = "Série actuelle";
+"Longest Streak" = "Plus longue série";
+"About" = "À propos";
+"Version" = "Version";
+"GitHub" = "GitHub";
+"Monthly Goal" = "Objectif mensuel";
+"Hours" = "Heures";
+"Set your monthly listening goal in hours" = "Définissez votre objectif d'écoute mensuel en heures";
+
+// MARK: - Statistics View
+"This Month" = "Ce mois-ci";
+"Achievements" = "Réussites";
+"Total Time" = "Temps total";
+"Longest Streak" = "Plus longue série";
+"First Book" = "Premier livre";
+"10 Hours" = "10 heures";
+"Complete" = "Terminé";
+
+// MARK: - Player View
+"Narrated by %@" = "Narré par %@";
+"Chapter %d" = "Chapitre %d";
+"Speed: %.1fx" = "Vitesse : %.1fx";
+"Chapters" = "Chapitres";
+"Bookmark at %@" = "Signet à %@";
+"Choose when to stop playback" = "Choisissez quand arrêter la lecture";
+"End of chapter" = "Fin du chapitre";
+"Cancel timer" = "Annuler la minuterie";
+"Audio progress" = "Progression audio";
+"%@ of %@, %d percent complete" = "%@ sur %@, %d pour cent terminé";
+
+// MARK: - Transcription View
+"View" = "Affichage";
+"Transcription Error" = "Erreur de transcription";
+"Translation failed: %@" = "Erreur de traduction : %@";
+"Search in transcription..." = "Rechercher dans la transcription...";
+"%.0f%% complete" = "%.0f%% terminé";
+"Transcribed" = "Transcrit";
+
+// MARK: - Bookmarks View
+"Bookmark" = "Signet";
+"Delete Bookmark" = "Supprimer le signet";
+"Are you sure you want to delete this bookmark?" = "Êtes-vous sûr de vouloir supprimer ce signet ?";
+"Bookmark Details" = "Détails du signet";
+
+// MARK: - Image Picker View
+"No title available for search" = "Aucun titre disponible pour la recherche";
+"No images found for this audiobook" = "Aucune image trouvée pour ce livre audio";
+"Search failed: %@" = "Erreur de recherche : %@";
+"Invalid image URL" = "URL d'image invalide";
+"Failed to download image: %@" = "Impossible de télécharger l'image : %@";
+
+// MARK: - Library Components
+"%d%% complete" = "%d%% terminé";
+
+// MARK: - Player View
+"Player" = "Lecteur";
+"Bookmarks" = "Signets";
+"Transcript" = "Transcription";
+"Speed" = "Vitesse";
+"Sleep Timer" = "Minuteur de sommeil";
+"Off" = "Désactivé";
+"5 minutes" = "5 minutes";
+"10 minutes" = "10 minutes";
+"15 minutes" = "15 minutes";
+"30 minutes" = "30 minutes";
+"1 hour" = "1 heure";
+
+// MARK: - Bookmarks View
+"Add Bookmark" = "Ajouter un signet";
+"Bookmark Title" = "Titre du signet";
+"Note (Optional)" = "Note (optionnel)";
+"No bookmarks yet" = "Aucun signet pour le moment";
+"Create your first bookmark by tapping the bookmark button while listening" = "Créez votre premier signet en appuyant sur le bouton signet pendant l'écoute";
+
+// MARK: - Transcription View
+"Chapter" = "Chapitre";
+"Transcribe" = "Transcrire";
+"Transcribing..." = "Transcription en cours...";
+"Original" = "Original";
+"Translated" = "Traduit";
+"No transcription available" = "Aucune transcription disponible";
+"Tap transcribe to generate a transcript of the current chapter" = "Appuyez sur transcrire pour générer une transcription du chapitre actuel";
+
+// MARK: - Image Picker View
+"Choose Cover Image" = "Choisir l'image de couverture";
+"for %@" = "pour %@";
+"Search Google Images" = "Rechercher dans Google Images";
+"Choose from Photos" = "Choisir dans les photos";
+"Searching for images..." = "Recherche d'images...";
+"No images found" = "Aucune image trouvée";
+"Try searching for images or choose from your photos" = "Essayez de rechercher des images ou choisissez dans vos photos";
+"Cover Image" = "Image de couverture";
+
+// MARK: - Empty States
+"Your library is empty" = "Votre bibliothèque est vide";
+"Import your first audiobook to get started" = "Importez votre premier livre audio pour commencer";
+"Importing..." = "Importation...";
+
+// MARK: - Error Messages
+"Failed to load" = "Échec du chargement";
+"Error" = "Erreur";
+"Unknown error occurred" = "Une erreur inconnue s'est produite";
+
+// MARK: - Time Formats
+"days" = "jours";
+"hours" = "heures";
+"minutes" = "minutes";
+"seconds" = "secondes";
+
+// MARK: - Book Status
+"Unknown Title" = "Titre inconnu";
+"Unknown Author" = "Auteur inconnu";
+"Sample Audiobook" = "Livre audio d'exemple";

@@ -8,7 +8,7 @@ struct LibraryHeaderView: View {
     var body: some View {
         VStack(spacing: 12) {
             HStack {
-                Text("My Library")
+                Text(NSLocalizedString("Library", comment: "Library header title"))
                     .font(.title2)
                     .fontWeight(.bold)
                 
@@ -19,7 +19,7 @@ struct LibraryHeaderView: View {
                 // Filter Options
                 Menu {
                     ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
-                        Button(option.rawValue) {
+                        Button(option.displayName) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 filterOption = option
                             }
@@ -28,7 +28,7 @@ struct LibraryHeaderView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text(filterOption.rawValue)
+                        Text(filterOption.displayName)
                         Image(systemName: "chevron.down")
                             .font(.caption)
                     }
@@ -43,7 +43,7 @@ struct LibraryHeaderView: View {
                 // Sort Options
                 Menu {
                     ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
-                        Button(option.rawValue) {
+                        Button(option.displayName) {
                             withAnimation(.easeInOut(duration: 0.2)) {
                                 sortOption = option
                             }
@@ -52,7 +52,7 @@ struct LibraryHeaderView: View {
                 } label: {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.up.arrow.down")
-                        Text(sortOption.rawValue)
+                        Text(sortOption.displayName)
                         Image(systemName: "chevron.down")
                             .font(.caption)
                     }
@@ -104,7 +104,7 @@ struct LibraryContentView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button("Delete") {
+                        Button(NSLocalizedString("Delete", comment: "Delete audiobook button")) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 onDelete(audiobook)
                             }
@@ -130,7 +130,7 @@ struct LibraryContentView: View {
                             onSelect(audiobook)
                         }
                         .contextMenu {
-                            Button("Delete", role: .destructive) {
+                            Button(NSLocalizedString("Delete", comment: "Delete audiobook button"), role: .destructive) {
                                 onDelete(audiobook)
                             }
                         }
@@ -178,13 +178,13 @@ struct EnhancedAudiobookRowView: View {
                 
                 // Book Info
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(audiobook.title ?? "Unknown Title")
+                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
                         .font(.headline)
                         .foregroundColor(.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
-                    Text(audiobook.author ?? "Unknown Author")
+                    Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Default audiobook author"))
                         .font(.subheadline)
                         .foregroundColor(.secondaryText)
                         .lineLimit(1)
@@ -192,7 +192,7 @@ struct EnhancedAudiobookRowView: View {
                     // Progress Section
                     HStack {
                         if audiobook.isFinished {
-                            Label("Completed", systemImage: "checkmark.circle.fill")
+                            Label(NSLocalizedString("Completed", comment: "Audiobook completed status"), systemImage: "checkmark.circle.fill")
                                 .font(.caption)
                                 .foregroundColor(.green)
                         } else if audiobook.currentPosition > 0 {
@@ -201,12 +201,12 @@ struct EnhancedAudiobookRowView: View {
                                     .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
                                     .frame(height: 3)
                                 
-                                Text("\(Int(progressPercentage * 100))% complete")
+                                Text(String(format: NSLocalizedString("%d%% complete", comment: "Progress percentage"), Int(progressPercentage * 100)))
                                     .font(.caption2)
                                     .foregroundColor(.secondaryText)
                             }
                         } else {
-                            Text("Not started")
+                            Text(NSLocalizedString("Not Started", comment: "Audiobook not started status"))
                                 .font(.caption)
                                 .foregroundColor(.secondaryText)
                         }
@@ -286,14 +286,14 @@ struct AudiobookGridItemView: View {
                 
                 // Book Info
                 VStack(spacing: 4) {
-                    Text(audiobook.title ?? "Unknown Title")
+                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
                     
-                    Text(audiobook.author ?? "Unknown Author")
+                    Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Default audiobook author"))
                         .font(.caption)
                         .foregroundColor(.secondaryText)
                         .lineLimit(1)
@@ -355,7 +355,7 @@ struct ContinueReadingCardView: View {
                 .clipped()
                 
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(audiobook.title ?? "Unknown Title")
+                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundColor(.primaryText)
@@ -386,7 +386,7 @@ struct ImportingIndicatorView: View {
             ProgressView()
                 .scaleEffect(0.8)
             
-            Text("Importing audiobook...")
+            Text(NSLocalizedString("Importing...", comment: "Importing audiobook status"))
                 .font(.subheadline)
                 .foregroundColor(.secondaryText)
             
@@ -407,12 +407,12 @@ struct EmptyLibraryView: View {
                 .foregroundColor(.secondaryText)
             
             VStack(spacing: 8) {
-                Text("No Audiobooks")
+                Text(NSLocalizedString("Your library is empty", comment: "Empty library title"))
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.primaryText)
                 
-                Text("Import your first audiobook using the + button in the toolbar")
+                Text(NSLocalizedString("Import your first audiobook to get started", comment: "Empty library instructions"))
                     .font(.body)
                     .foregroundColor(.secondaryText)
                     .multilineTextAlignment(.center)
