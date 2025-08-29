@@ -17,6 +17,9 @@ struct PlayerView: View {
     @State private var sleepTimer: Timer?
     @State private var sleepTimeRemaining: TimeInterval = 0
     @State private var isSeekingManually = false
+    @State private var isMiniplayer = false // New state for miniplayer mode
+    @State private var dragOffset: CGFloat = 0 // Track drag offset
+    @State private var miniPlayerDragOffset: CGFloat = 0 // Track mini player drag
     @Environment(\.presentationMode) var presentationMode
     
     private var coverImage: UIImage? {
@@ -60,12 +63,10 @@ struct PlayerView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ZStack(alignment: .top) {
-                // Background layer
-                backgroundLayer(geometry: geometry)
-                
-                // Floating control panel
-                controlPanelContent(geometry: geometry)
+            if isMiniplayer {
+                miniPlayerView(geometry: geometry)
+            } else {
+                fullPlayerView(geometry: geometry)
             }
         }
         .navigationBarHidden(true)
@@ -145,6 +146,158 @@ struct PlayerView: View {
         .accentColor(themeManager.accentColor.color)
     }
     
+    // MARK: - Full Player View
+    @ViewBuilder
+    private func fullPlayerView(geometry: GeometryProxy) -> some View {
+        ZStack {
+            // Background layer - full screen with cover image
+            backgroundLayer(geometry: geometry)
+            
+            // Player panel - positioned 50px from bottom with 70% height
+            VStack {
+                Spacer()
+                
+                controlPanel
+                    .frame(height: geometry.size.height * 0.7) // 70% height
+                    .offset(y: dragOffset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                if value.translation.height > 0 { // Only allow downward drag
+                                    dragOffset = value.translation.height
+                                }
+                            }
+                            .onEnded { value in
+                                if value.translation.height > 100 { // Threshold for dismissing to library
+                                    // Dismiss the fullScreenCover to return to library (where MiniPlayerView will show)
+                                    presentationMode.wrappedValue.dismiss()
+                                } else {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        dragOffset = 0
+                                    }
+                                }
+                            }
+                    )
+                
+                // 50px spacing from bottom
+                Spacer()
+                    .frame(height: 50)
+            }
+            .ignoresSafeArea(.all)
+        }
+    }
+    
+    // MARK: - Mini Player View
+    @ViewBuilder
+    private func miniPlayerView(geometry: GeometryProxy) -> some View {
+        VStack(spacing: 0) {
+            Spacer()
+            
+            // Mini player container
+            HStack(spacing: 16) {
+                // Cover image
+                if let coverImage = coverImage {
+                    Image(uiImage: coverImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 60, height: 60)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(Color.accentColor.opacity(0.3))
+                        .frame(width: 60, height: 60)
+                }
+                
+                // Book info
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(audiobook.title ?? "Unknown Title")
+                        .font(.headline)
+                        .foregroundColor(.primaryText)
+                        .lineLimit(1)
+                    
+                    Text(audiobook.author ?? "Unknown Author")
+                        .font(.subheadline)
+                        .foregroundColor(.secondaryText)
+                        .lineLimit(1)
+                }
+                
+                Spacer()
+                
+                // Mini controls
+                HStack(spacing: 20) {
+                    Button {
+                        withHapticFeedback {
+                            globalAudioManager.skipBackward(15)
+                        }
+                    } label: {
+                        Image(systemName: "gobackward.15")
+                            .font(.title2)
+                            .foregroundColor(.primaryText)
+                    }
+                    
+                    Button {
+                        withHapticFeedback(.medium) {
+                            if globalAudioManager.playbackState != .loading {
+                                globalAudioManager.togglePlayback()
+                            }
+                        }
+                    } label: {
+                        if globalAudioManager.playbackState == .loading {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                        } else {
+                            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                                .font(.title2)
+                                .foregroundColor(.accentColor)
+                        }
+                    }
+                    
+                    Button {
+                        withHapticFeedback {
+                            globalAudioManager.skipForward(15)
+                        }
+                    } label: {
+                        Image(systemName: "goforward.15")
+                            .font(.title2)
+                            .foregroundColor(.primaryText)
+                    }
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+            .padding(.horizontal, 16)
+            .padding(.bottom, 50) // 50px from bottom
+            .offset(y: miniPlayerDragOffset)
+            .onTapGesture {
+                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                    isMiniplayer = false
+                    dragOffset = 0
+                    miniPlayerDragOffset = 0
+                }
+            }
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        if value.translation.height > 0 { // Only allow downward drag
+                            miniPlayerDragOffset = value.translation.height
+                        }
+                    }
+                    .onEnded { value in
+                        if value.translation.height > 50 { // Dismiss threshold
+                            // Stop playback and dismiss
+                            globalAudioManager.pausePlayback()
+                            presentationMode.wrappedValue.dismiss()
+                        } else {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                miniPlayerDragOffset = 0
+                            }
+                        }
+                    }
+            )
+        }
+    }
+    
     // MARK: - Background Layer
     @ViewBuilder
     private func backgroundLayer(geometry: GeometryProxy) -> some View {
@@ -152,11 +305,12 @@ struct PlayerView: View {
             Image(uiImage: coverImage)
                 .resizable()
                 .aspectRatio(contentMode: .fill)
-                .frame(height: geometry.size.height * 0.45) // Reduced from 0.65 to 0.45
+                .frame(width: geometry.size.width, height: geometry.size.height)
                 .clipped()
-                .overlay(alignment: .bottom) {
+                .overlay {
                     LinearGradient(
                         colors: [
+                            Color.clear,
                             Color.clear,
                             Color.primaryBackground.opacity(0.8),
                             Color.primaryBackground
@@ -164,9 +318,8 @@ struct PlayerView: View {
                         startPoint: .top,
                         endPoint: .bottom
                     )
-                    .frame(height: 150) // Reduced from 200
                 }
-                .ignoresSafeArea(edges: .top)
+                .ignoresSafeArea(.all)
         } else {
             // Fallback gradient background
             LinearGradient(
@@ -177,41 +330,30 @@ struct PlayerView: View {
                 startPoint: .top,
                 endPoint: .bottom
             )
-            .frame(height: geometry.size.height * 0.45) // Reduced from 0.65 to 0.45
-            .ignoresSafeArea(edges: .top)
-        }
-    }
-    
-    // MARK: - Control Panel Content
-    @ViewBuilder
-    private func controlPanelContent(geometry: GeometryProxy) -> some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                // Top spacer to account for reduced cover (0.25 to match 0.45 background)
-                Rectangle()
-                    .fill(Color.clear)
-                    .frame(height: geometry.size.height * 0.25)
-                
-                // Glass-morphism control panel
-                controlPanel
-                
-                // Minimal bottom spacer
-                Spacer(minLength: 10)
-            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .ignoresSafeArea(.all)
         }
     }
     
     // MARK: - Control Panel
     @ViewBuilder
     private var controlPanel: some View {
-        VStack(spacing: 16) { // Reduced from 24 to 16
+        VStack(spacing: 20) {
             headerControls
+            
+            Spacer()
+            
             bookInfo
+            
             progressSection
+            
             actionButtons
+            
+            Spacer()
         }
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
-        .shadow(color: Color.black.opacity(0.1), radius: 20, y: 8)
+        .padding(.horizontal, 16)
+        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
+        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24)) // Restore beautiful glass effect
         .padding(.horizontal, 16)
     }
     
@@ -220,6 +362,7 @@ struct PlayerView: View {
     private var headerControls: some View {
         HStack {
             Button {
+                // Dismiss to return to library (where MiniPlayerView will appear)
                 presentationMode.wrappedValue.dismiss()
             } label: {
                 Image(systemName: "chevron.down")
@@ -243,14 +386,13 @@ struct PlayerView: View {
                 }
             }
         }
-        .padding(.horizontal, 24) // Reduced from 32 to 24
-        .padding(.top, 12) // Reduced from 16 to 12
+        .padding(.top, 12)
     }
     
     // MARK: - Book Info
     @ViewBuilder
     private var bookInfo: some View {
-        VStack(spacing: 8) { // Reduced from 12 to 8
+        VStack(spacing: 8) {
             Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default title for audiobooks without title"))
                 .font(.title2)
                 .foregroundColor(.primaryText)
@@ -267,7 +409,7 @@ struct PlayerView: View {
                     .foregroundColor(.secondaryText)
             }
             
-            // Current Chapter with modern styling
+            // Current Chapter
             if let chapter = currentChapter {
                 Text(chapter.title ?? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapter.chapterNumber))
                     .font(.footnote)
@@ -277,13 +419,12 @@ struct PlayerView: View {
                     .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
             }
         }
-        .padding(.horizontal, 24) // Reduced from 32 to 24
     }
     
     // MARK: - Progress Section
     @ViewBuilder
     private var progressSection: some View {
-        VStack(spacing: 12) { // Reduced from 16 to 12
+        VStack(spacing: 16) {
             // Time Slider
             progressSlider
             
@@ -293,7 +434,6 @@ struct PlayerView: View {
             // Speed control
             speedControls
         }
-        .padding(.horizontal, 24) // Reduced from 32 to 24
     }
     
     // MARK: - Progress Slider
@@ -312,17 +452,6 @@ struct PlayerView: View {
                     isSeekingManually = editing
                 }
             )
-            .accessibilityIdentifier(AccessibilityIdentifiers.Player.progressSlider)
-            .accessibilityLabel(NSLocalizedString("Audio progress", comment: "Accessibility label for progress slider"))
-            .accessibilityValue(formatAccessibilityTime(currentTime, duration: duration))
-            .accessibilityAdjustableAction { direction in
-                let increment: TimeInterval = 30
-                let newTime = direction == .increment ? 
-                    min(currentTime + increment, duration) :
-                    max(currentTime - increment, 0)
-                
-                globalAudioManager.seek(to: newTime)
-            }
             
             HStack {
                 Text(formatTime(currentTime))
@@ -454,10 +583,10 @@ struct PlayerView: View {
                 }
             }
         }
-        .padding(.horizontal, 20) // Reduced from 32 to 20
-        .padding(.bottom, 16) // Reduced from 32 to 16
+        .padding(.bottom, 16)
     }
     
+    // MARK: - Helper Methods
     private func loadAudiobook() {
         globalAudioManager.loadAudiobook(audiobook)
     }

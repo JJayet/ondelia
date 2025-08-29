@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import WidgetKit
 
 @main
 struct AudiobookReaderApp: App {
@@ -34,6 +35,10 @@ struct AudiobookReaderApp: App {
                     .environment(\.managedObjectContext, persistenceController.context)
                     .environment(\.theme, ThemeManager.shared)
                     .environmentObject(globalAudioManager)
+                    .onAppear {
+                        // Initialize widgets on app startup
+                        WidgetCenter.shared.reloadAllTimelines()
+                    }
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
                         handleAppWillResignActive()
                     }

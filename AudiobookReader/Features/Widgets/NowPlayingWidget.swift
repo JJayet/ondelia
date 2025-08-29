@@ -410,11 +410,12 @@ private func formatTime(_ time: TimeInterval) -> String {
     }
 }
 
-// MARK: - Widget Bundle
-// Note: @main should only be used if this is in a separate Widget Extension target
-// For now, removing @main to avoid conflict with the main app
-struct AudiobookWidgetBundle: WidgetBundle {
-    var body: some Widget {
-        NowPlayingWidget()
+// MARK: - Widget Registration
+// For iOS 26 - widgets need to be explicitly registered with the system
+// This approach allows widgets to be discoverable in the dashboard when in main app target
+extension AudiobookReaderApp {
+    static func registerWidgets() {
+        // Register widgets with the system
+        WidgetCenter.shared.reloadAllTimelines()
     }
 }

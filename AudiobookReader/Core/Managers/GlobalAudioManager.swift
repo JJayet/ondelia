@@ -212,6 +212,7 @@ class GlobalAudioManager: ObservableObject {
     }
     
     func setPlaybackRate(_ rate: Float) {
+        print(rate)
         if useMultiFileEngine {
             multiFileAudioEngine?.setPlaybackRate(rate)
         } else {
