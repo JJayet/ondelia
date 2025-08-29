@@ -274,7 +274,6 @@ struct PlayerView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
             .padding(.bottom, 50) // 50px from bottom
             .offset(y: miniPlayerDragOffset)
@@ -313,21 +312,9 @@ struct PlayerView: View {
         if let coverImage = coverImage {
             Image(uiImage: coverImage)
                 .resizable()
-                .aspectRatio(contentMode: .fill)
-                .frame(width: geometry.size.width, height: geometry.size.height)
+                .aspectRatio(contentMode: .fit)
+                .frame(width: geometry.size.width, height: geometry.size.height, alignment: .top)
                 .clipped()
-                .overlay {
-                    LinearGradient(
-                        colors: [
-                            Color.clear,
-                            Color.clear,
-                            Color.primaryBackground.opacity(0.8),
-                            Color.primaryBackground
-                        ],
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                }
                 .ignoresSafeArea(.all)
         } else {
             // Fallback gradient background

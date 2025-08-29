@@ -6,38 +6,32 @@ struct MainTabView: View {
     @State private var selectedTab = 1 // Start with Library tab
     
     var body: some View {
-        ZStack {
-            TabView(selection: $selectedTab) {
-            // Home Tab
-            HomeView()
-                .tabItem {
-                    Image(systemName: "house.fill")
-                    Text(NSLocalizedString("Home", comment: "Home tab title"))
-                }
-                .tag(0)
-            
-            // Library Tab
-            LibraryView()
-                .tabItem {
-                    Image(systemName: "books.vertical.fill")
-                    Text(NSLocalizedString("Library", comment: "Library tab title"))
-                }
-                .tag(1)
-            
-            // Settings Tab
-            SettingsView()
-                .tabItem {
-                    Image(systemName: "gear")
-                    Text(NSLocalizedString("Settings", comment: "Settings tab title"))
-                }
-                .tag(2)
+        TabView(selection: $selectedTab) {
+            Tab(NSLocalizedString("Home", comment: "Home tab title"), systemImage: "house.fill", value:0) {
+                HomeView()
             }
-            .preferredColorScheme(themeManager.currentTheme.colorScheme)
-            .accentColor(themeManager.accentColor.color)
-            .environment(\.theme, themeManager)
             
+            Tab(NSLocalizedString("Library", comment: "Library tab title"), systemImage: "books.vertical.fill", value:1) {
+                // Library Tab
+                LibraryView()
+            }
+            
+            Tab(NSLocalizedString("Settings", comment: "Settings tab title"), systemImage: "gear", value:2) {
+                SettingsView()
+            }
+            
+            Tab(NSLocalizedString("Search", comment: "Search book"), systemImage: "magnifyingglass", value:3, role:.search) {
+                SettingsView()
+            }
+        }
+        .tabBarMinimizeBehavior(.onScrollDown)
+        .tabViewBottomAccessory {
             MiniPlayerView()
         }
+        .preferredColorScheme(themeManager.currentTheme.colorScheme)
+        .accentColor(themeManager.accentColor.color)
+        .environment(\.theme, themeManager)
+        
     }
 }
 
