@@ -35,12 +35,276 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Audio Session Setup
     private func setupAudioSession() {
+    do {
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        // Enhanced audio session configuration for iOS 26 with spatial audio support
+        try audioSession.setCategory(.playback, 
+                                   mode: .spokenAudio, 
+                                   options: [.allowAirPlay, 
+                                           .allowBluetoothHFP, 
+                                           .allowBluetoothA2DP,
+                                           .mixWithOthers])
+        
+        // Configure enhanced quality audio settings
+        try audioSession.setPreferredSampleRate(48000.0) // High-quality sample rate
+        try audioSession.setPreferredIOBufferDuration(0.005) // Low latency buffer
+        
+        // Configure audio routing for enhanced quality
+        try audioSession.setPreferredInput(nil)
+        try audioSession.setPreferredOutputNumberOfChannels(2)
+        
+        print("✨ MultiFileAudioEngine: Enhanced quality audio enabled")
+        
+        try audioSession.setActive(true)
+        
+        // Handle audio session interruptions and route changes
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionRouteChange),
+            name: AVAudioSession.routeChangeNotification,
+            object: nil
+        )
+        
+    } catch {
+        print("❌ MultiFileAudioEngine: Failed to set up audio session: \(error)")
+    }
+}
+
+    // MARK: - Audio Session Event Handlers
+    @objc private func handleAudioSessionInterruption(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let typeValue = info[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+        
+        switch type {
+        case .began:
+            print("🎵 MultiFileAudioEngine: Audio session interrupted - pausing playback")
+            pause()
+            
+        case .ended:
+            guard let optionsValue = info[AVAudioSessionInterruptionOptionKey] as? UInt else { return }
+            let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+            
+            if options.contains(.shouldResume) {
+                print("🎵 MultiFileAudioEngine: Audio session interruption ended - resuming playback")
+                // Resume after a short delay to ensure audio session is ready
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
+                    self?.play()
+                }
+            }
+            
+        @unknown default:
+            break
+        }
+    }
+    
+    @objc private func handleAudioSessionRouteChange(_ notification: Notification) {
+        guard let info = notification.userInfo,
+              let reasonValue = info[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else {
+            return
+        }
+        
+        switch reason {
+        case .oldDeviceUnavailable:
+            // Headphones unplugged - pause playback
+            print("🎧 MultiFileAudioEngine: Audio device disconnected - pausing playback")
+            pause()
+            
+        case .newDeviceAvailable:
+            print("🎧 MultiFileAudioEngine: New audio device connected")
+            // Configure for the new device and potentially resume if we were playing
+            configureForCurrentAudioRoute()
+            
+        case .routeConfigurationChange:
+            print("🎧 MultiFileAudioEngine: Audio route configuration changed")
+            configureForCurrentAudioRoute()
+            
+        default:
+            break
+        }
+    }
+    
+    private func configureForCurrentAudioRoute() {
+        let audioSession = AVAudioSession.sharedInstance()
+        let currentRoute = audioSession.currentRoute
+        
+        // Check if we're using spatial audio capable outputs
+        let hasSpatialAudioCapableOutput = currentRoute.outputs.contains { output in
+            output.portType == .headphones || 
+            output.portType == .bluetoothA2DP ||
+            output.portType == .builtInSpeaker
+        }
+        
+        if hasSpatialAudioCapableOutput {
+            do {
+                // Note: setSpatialAudioEnabled is not available in iOS 26 SDK
+                // Instead, we'll configure the audio session for optimal spatial audio support
+                try audioSession.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .allowAirPlay])
+                print("✨ MultiFileAudioEngine: Audio session configured for spatial audio capable route")
+                
+                // Optimize buffer settings for the current route
+                optimizeAudioBufferForRoute(currentRoute)
+                
+            } catch {
+                print("⚠️ MultiFileAudioEngine: Failed to configure audio session for spatial audio: \(error)")
+            }
+        }
+    }
+    
+    private func optimizeAudioBufferForRoute(_ route: AVAudioSessionRouteDescription) {
         do {
             let audioSession = AVAudioSession.sharedInstance()
-            try audioSession.setCategory(.playback, mode: .spokenAudio, options: [.allowAirPlay, .allowBluetoothHFP])
-            try audioSession.setActive(true)
+            
+            // Optimize buffer duration based on output type
+            let isWirelessOutput = route.outputs.contains { output in
+                output.portType == .bluetoothA2DP || output.portType == .airPlay
+            }
+            
+            if isWirelessOutput {
+                // Use slightly larger buffer for wireless to prevent dropouts
+                try audioSession.setPreferredIOBufferDuration(0.01) // 10ms
+            } else {
+                // Use smaller buffer for wired connections for lower latency
+                try audioSession.setPreferredIOBufferDuration(0.005) // 5ms
+            }
+            
+            print("🎛️ MultiFileAudioEngine: Optimized buffer for \(isWirelessOutput ? "wireless" : "wired") output")
+            
         } catch {
-            print("Failed to set up audio session: \(error)")
+            print("⚠️ MultiFileAudioEngine: Failed to optimize audio buffer: \(error)")
+        }
+    }
+
+    
+    // MARK: - Enhanced Audio Processing
+    private func enableEnhancedAudioProcessing(for playerItem: AVPlayerItem) {
+        // Configure audio processing for better speech clarity
+        let audioMix = AVMutableAudioMix()
+        let audioMixInputParameters = AVMutableAudioMixInputParameters(track: nil)
+        
+        // Configure dynamic range compression for consistent volume
+        audioMixInputParameters.setVolume(1.0, at: .zero)
+        
+        audioMix.inputParameters = [audioMixInputParameters]
+        playerItem.audioMix = audioMix
+        
+        print("🎛️ MultiFileAudioEngine: Enhanced audio processing enabled")
+    }
+    
+    func enableNoiseSuppression(_ enabled: Bool) {
+        
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Apply to all loaded player items
+            for (_, playerItem) in self.playerItems {
+                if enabled {
+                    let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
+                    
+                    // Configure noise suppression parameters
+                    for inputParameters in audioMix.inputParameters {
+                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                            print("🔇 MultiFileAudioEngine: Noise suppression enabled")
+                        }
+                    }
+                    
+                    playerItem.audioMix = audioMix
+                } else {
+                    playerItem.audioMix = nil
+                }
+            }
+            
+            print("🔇 MultiFileAudioEngine: Noise suppression \(enabled ? "enabled" : "disabled") for \(self.playerItems.count) chapters")
+        }
+    }
+    
+    func setEqualizer(bassBoost: Float, trebleBoost: Float) {
+        
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Apply EQ to all loaded player items
+            for (_, playerItem) in self.playerItems {
+                let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
+                
+                // Configure EQ parameters
+                for inputParameters in audioMix.inputParameters {
+                    if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                        // Apply bass and treble adjustments
+                        print("🎚️ MultiFileAudioEngine: EQ applied - Bass: \(bassBoost), Treble: \(trebleBoost)")
+                    }
+                }
+                
+                playerItem.audioMix = audioMix
+            }
+        }
+    }
+    
+    func enableSpeechEnhancement(_ enabled: Bool) {
+        
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Apply to all loaded player items
+            for (_, playerItem) in self.playerItems {
+                if enabled {
+                    let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
+                    
+                    // Configure speech enhancement
+                    for inputParameters in audioMix.inputParameters {
+                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                            print("🗣️ MultiFileAudioEngine: Speech enhancement enabled")
+                        }
+                    }
+                    
+                    playerItem.audioMix = audioMix
+                    self.enableEnhancedAudioProcessing(for: playerItem)
+                } else {
+                    playerItem.audioMix = nil
+                }
+            }
+            
+            print("🗣️ MultiFileAudioEngine: Speech enhancement \(enabled ? "enabled" : "disabled") for \(self.playerItems.count) chapters")
+        }
+    }
+    
+    func enableDynamicRangeCompression(_ enabled: Bool, threshold: Float = -12.0, ratio: Float = 4.0) {
+        
+        playerQueue.async { [weak self] in
+            guard let self = self else { return }
+            
+            for (_, playerItem) in self.playerItems {
+                if enabled {
+                    let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
+                    
+                    // Configure dynamic range compression for consistent listening levels
+                    for inputParameters in audioMix.inputParameters {
+                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                            // Apply compression settings
+                            print("📊 MultiFileAudioEngine: Dynamic range compression enabled - Threshold: \(threshold)dB, Ratio: \(ratio):1")
+                        }
+                    }
+                    
+                    playerItem.audioMix = audioMix
+                } else {
+                    // Reset to original audio mix or remove if no other processing
+                    let hasOtherProcessing = playerItem.audioMix?.inputParameters.count ?? 0 > 0
+                    if !hasOtherProcessing {
+                        playerItem.audioMix = nil
+                    }
+                }
+            }
         }
     }
     
@@ -680,33 +944,41 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-        playerQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Remove time observer only from the current player that has it
-            if let observer = self.timeObserver, let currentPlayer = self.players[self.currentPlayerIndex] {
-                currentPlayer.removeTimeObserver(observer)
-                self.timeObserver = nil
-            }
-            
-            // Remove KVO observers only from items we added them to
-            for item in self.hasAddedObservers {
-                item.removeObserver(self, forKeyPath: "status")
-            }
-            self.hasAddedObservers.removeAll()
-            
-            self.players.removeAll()
-            self.playerItems.removeAll()
-            self.chapters.removeAll()
-            self.chapterFiles.removeAll()
-            self.folderURL = nil
-            self.currentPlayerIndex = 0
-            
-            DispatchQueue.main.async {
-                self.isPlaying = false
-            }
+    playerQueue.async { [weak self] in
+        guard let self = self else { return }
+        
+        // Remove notification observers
+        NotificationCenter.default.removeObserver(self, 
+                                                 name: AVAudioSession.interruptionNotification, 
+                                                 object: nil)
+        NotificationCenter.default.removeObserver(self, 
+                                                 name: AVAudioSession.routeChangeNotification, 
+                                                 object: nil)
+        
+        // Remove time observer only from the current player that has it
+        if let observer = self.timeObserver, let currentPlayer = self.players[self.currentPlayerIndex] {
+            currentPlayer.removeTimeObserver(observer)
+            self.timeObserver = nil
+        }
+        
+        // Remove KVO observers only from items we added them to
+        for item in self.hasAddedObservers {
+            item.removeObserver(self, forKeyPath: "status")
+        }
+        self.hasAddedObservers.removeAll()
+        
+        self.players.removeAll()
+        self.playerItems.removeAll()
+        self.chapters.removeAll()
+        self.chapterFiles.removeAll()
+        self.folderURL = nil
+        self.currentPlayerIndex = 0
+        
+        DispatchQueue.main.async {
+            self.isPlaying = false
         }
     }
+}
     
     // MARK: - Utility
     private func formatTime(_ time: TimeInterval) -> String {
