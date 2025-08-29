@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-class GlobalAudioManager: ObservableObject {
+class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     static let shared = GlobalAudioManager()
     
     @Published var currentAudiobook: Audiobook?

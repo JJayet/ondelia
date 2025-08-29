@@ -1,7 +1,7 @@
 import Foundation
 import CoreData
 
-class ReadingStatistics: ObservableObject {
+class ReadingStatistics: ReadingStatisticsProtocol {
     private let persistenceController = PersistenceController.shared
     
     @Published var totalListeningTime: TimeInterval = 0
@@ -62,7 +62,12 @@ class ReadingStatistics: ObservableObject {
         saveStatistics()
     }
     
-    private func updateStreak() {
+    func getAverageSpeed() -> Float {
+        return averageSpeed
+    }
+    
+    
+    internal func updateStreak() {
         let today = Calendar.current.startOfDay(for: Date())
         let lastListenDate = UserDefaults.standard.object(forKey: "lastListenDate") as? Date ?? Date.distantPast
         let lastListenDay = Calendar.current.startOfDay(for: lastListenDate)

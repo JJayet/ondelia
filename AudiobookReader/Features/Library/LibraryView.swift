@@ -439,7 +439,7 @@ struct LibraryView: View {
             StatisticsView(statistics: statistics)
         }
         .fullScreenCover(item: $selectedAudiobook) { audiobook in
-            PlayerView(audiobook: audiobook, statistics: statistics)
+            PlayerView(audiobook: audiobook)
         }
         .refreshable {
             withAnimation(.easeInOut(duration: 0.5)) {

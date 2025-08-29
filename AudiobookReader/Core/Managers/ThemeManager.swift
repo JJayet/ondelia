@@ -1,7 +1,7 @@
 import SwiftUI
 import Combine
 
-class ThemeManager: ObservableObject {
+class ThemeManager: ThemeManagerProtocol {    
     static let shared = ThemeManager()
     
     @Published var currentTheme: AppTheme = .system
@@ -98,17 +98,17 @@ class ThemeManager: ObservableObject {
         }
     }
     
-    func updateTheme(_ theme: AppTheme) {
+    func setTheme(_ theme: AppTheme) {
         currentTheme = theme
         UserDefaults.standard.set(theme.rawValue, forKey: "selectedTheme")
     }
     
-    func updateAccentColor(_ color: AccentColor) {
+    func setAccentColor(_ color: AccentColor) {
         accentColor = color
         UserDefaults.standard.set(color.rawValue, forKey: "accentColor")
     }
     
-    func updateSkipInterval(_ interval: SkipInterval) {
+    func setSkipInterval(_ interval: SkipInterval) {
         skipInterval = interval
         UserDefaults.standard.set(interval.rawValue, forKey: "skipInterval")
     }

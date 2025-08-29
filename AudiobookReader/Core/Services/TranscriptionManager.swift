@@ -12,52 +12,14 @@ class TranscriptionManager: ObservableObject {
     @Published var transcriptionProgress: Double = 0
     @Published var isModelLoading = false
     @Published var modelLoadingProgress: Double = 0
-    
-    private let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "en-US"))
-    private var recognitionTask: SFSpeechRecognitionTask?
-    
+        
     private let persistenceController = PersistenceController.shared
     private let themeManager = ThemeManager.shared
     private let whisperManager = WhisperTranscriptionManager.shared
     private var translationManager: AnyObject?
     
-    // Initialize translation manager only on iOS 17.4+
-    private init() {
-        requestTranscriptionPermission()
-        
-        if TranslationManager.isAvailable {
-            if #available(iOS 17.4, *) {
-                translationManager = TranslationManager.shared
-            }
-        }
-    }
-    
     deinit {
         stopTranscription()
-    }
-    
-    // MARK: - Permission Handling
-    private func requestTranscriptionPermission() {
-        SFSpeechRecognizer.requestAuthorization { authStatus in
-            DispatchQueue.main.async {
-                switch authStatus {
-                case .authorized:
-                    print("✅ TranscriptionManager: Speech recognition authorized")
-                case .denied:
-                    print("❌ TranscriptionManager: Speech recognition denied")
-                case .restricted:
-                    print("⚠️ TranscriptionManager: Speech recognition restricted")
-                case .notDetermined:
-                    print("⏳ TranscriptionManager: Speech recognition not determined")
-                @unknown default:
-                    print("❓ TranscriptionManager: Unknown authorization status")
-                }
-            }
-        }
-    }
-    
-    var isAuthorizationGranted: Bool {
-        return SFSpeechRecognizer.authorizationStatus() == .authorized
     }
     
     var isReady: Bool {
@@ -71,85 +33,26 @@ class TranscriptionManager: ObservableObject {
     }
     
     func transcribeAudioFileWithDetails(_ audioURL: URL, for audiobook: Audiobook, chapterIndex: Int) async throws -> TranscriptionResult {
-        // Forward model loading progress from WhisperKit
         await MainActor.run {
             isModelLoading = whisperManager.isModelLoading
             modelLoadingProgress = whisperManager.modelLoadingProgress
         }
         
-        // Use WhisperKit for transcription
         let result = try await whisperManager.transcribeAudioFile(audioURL, for: audiobook, chapterIndex: chapterIndex)
         
-        // Apply translation if enabled
         if themeManager.enableTranslation && TranslationManager.isAvailable {
-            if #available(iOS 17.4, *) {
-                if let translationManager = translationManager as? TranslationManager {
-                    return try await translationManager.translateTranscriptionResult(result)
-                }
+            if let translationManager = translationManager as? TranslationManager {
+                return try await translationManager.translateTranscriptionResult(result)
             }
         }
         
         return result
     }
-    
-    private func transcribeWithAppleSpeech(_ audioURL: URL, for audiobook: Audiobook, chapterIndex: Int) async throws -> TranscriptionResult {
-        guard isAuthorizationGranted else {
-            throw TranscriptionError.authorizationDenied
-        }
         
-        guard let speechRecognizer = speechRecognizer, speechRecognizer.isAvailable else {
-            throw TranscriptionError.recognizerUnavailable
-        }
-        
-        print("🎤 TranscriptionManager: Starting Apple Speech transcription for chapter \(chapterIndex)")
-        
-        return try await withCheckedThrowingContinuation { continuation in
-            let request = SFSpeechURLRecognitionRequest(url: audioURL)
-            request.shouldReportPartialResults = true
-            
-            recognitionTask = speechRecognizer.recognitionTask(with: request) { [weak self] result, error in
-                guard let self = self else { return }
-                
-                if let error = error {
-                    print("❌ TranscriptionManager: Apple Speech transcription error: \(error)")
-                    continuation.resume(throwing: TranscriptionError.transcriptionFailed)
-                    return
-                }
-                
-                guard let result = result else { return }
-                
-                let transcription = result.bestTranscription.formattedString
-                
-                Task { @MainActor in
-                    self.currentTranscription = transcription
-                    self.transcriptionProgress = result.isFinal ? 1.0 : 0.8
-                }
-                
-                if result.isFinal {
-                    print("✅ TranscriptionManager: Apple Speech transcription completed")
-                    
-                    // Create segments from Apple Speech result
-                    let segments = result.bestTranscription.segments.map { segment in
-                        TranscriptionSegment(
-                            text: segment.substring,
-                            start: segment.timestamp,
-                            end: segment.timestamp + segment.duration
-                        )
-                    }
-                    
-                    let transcriptionResult = TranscriptionResult(
-                        text: transcription,
-                        segments: segments,
-                        language: self.themeManager.transcriptionLanguage.rawValue
-                    )
-                    
-                    continuation.resume(returning: transcriptionResult)
-                }
-            }
-        }
-    }
-    
     func transcribeCurrentChapter(for audiobook: Audiobook, currentChapterIndex: Int) async throws -> String {
+        await MainActor.run {
+            isTranscribing = true
+        }
         let result = try await transcribeCurrentChapterWithDetails(for: audiobook, currentChapterIndex: currentChapterIndex)
         return result.text
     }
@@ -164,10 +67,10 @@ class TranscriptionManager: ObservableObject {
         
         let currentChapterURL = folderURL.appendingPathComponent(chapterFiles[currentChapterIndex])
         
-        // Check if transcription already exists (with engine consideration)
         if let existingResult = getCachedTranscriptionResult(for: audiobook, chapterIndex: currentChapterIndex) {
             print("📖 TranscriptionManager: Using cached transcription")
             await MainActor.run {
+                isTranscribing = false
                 currentTranscription = existingResult.text
             }
             return existingResult
@@ -179,13 +82,13 @@ class TranscriptionManager: ObservableObject {
         // Cache the transcription result
         await cacheTranscriptionResult(transcriptionResult, for: audiobook, chapterIndex: currentChapterIndex)
         
+        await MainActor.run {
+            isTranscribing = false
+        }
         return transcriptionResult
     }
     
     func stopTranscription() {
-        recognitionTask?.cancel()
-        recognitionTask = nil
-        
         DispatchQueue.main.async { [weak self] in
             self?.isTranscribing = false
         }

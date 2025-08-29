@@ -190,7 +190,7 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(item: $selectedAudiobook) { audiobook in
-            PlayerView(audiobook: audiobook, statistics: statistics)
+            PlayerView(audiobook: audiobook)
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)

@@ -64,7 +64,9 @@ struct TranscriptionView: View {
                     ScrollView {
                         VStack(alignment: .leading, spacing: 16) {
                             if transcriptionManager.isTranscribing {
-                                TranscriptionLoadingView(progress: transcriptionManager.transcriptionProgress)
+                                Spacer()
+                                TranscriptionLoader()
+                                Spacer()
                             } else if transcriptionText.isEmpty {
                                 TranscriptionEmptyView {
                                     startTranscription()
@@ -100,32 +102,30 @@ struct TranscriptionView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    HStack {
-                        if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
-                            Button(action: {
-                                if translatedText.isEmpty {
-                                    translateText()
-                                } else {
-                                    showingTranslation.toggle()
-                                }
-                            }) {
-                                Image(systemName: showingTranslation ? "textformat" : "translate")
-                                    .foregroundColor(showingTranslation ? .primary : .accentColor)
+                    if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                        Button(action: {
+                            if translatedText.isEmpty {
+                                translateText()
+                            } else {
+                                showingTranslation.toggle()
                             }
-                            .disabled(isTranslating)
+                        }) {
+                            Image(systemName: showingTranslation ? "textformat" : "translate")
+                                .foregroundColor(showingTranslation ? .primary : .accentColor)
                         }
-                        
-                        if !displayText.isEmpty {
-                            Button(action: shareTranscription) {
-                                Image(systemName: "square.and.arrow.up")
-                            }
-                        }
-                        
-                        Button(action: refreshTranscription) {
-                            Image(systemName: "arrow.clockwise")
-                        }
-                        .disabled(transcriptionManager.isTranscribing)
+                        .disabled(isTranslating)
                     }
+                    
+                    if !displayText.isEmpty {
+                        Button(action: shareTranscription) {
+                            Image(systemName: "square.and.arrow.up")
+                        }
+                    }
+                    
+                    Button(action: refreshTranscription) {
+                        Image(systemName: "arrow.clockwise")
+                    }
+                    .disabled(transcriptionManager.isTranscribing)
                 }
             }
         }
@@ -373,21 +373,6 @@ struct TranscriptionEmptyView: View {
                 .font(.title2)
                 .fontWeight(.semibold)
                 .foregroundColor(.primaryText)
-            
-            Text(NSLocalizedString("Tap transcribe to generate a transcript of the current chapter", comment: "Transcription instructions text"))
-                .font(.body)
-                .foregroundColor(.secondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-            
-            Button(action: onStartTranscription) {
-                Label(NSLocalizedString("Transcribe", comment: "Start transcription button"), systemImage: "mic")
-                    .font(.headline)
-                    .foregroundColor(.white)
-                    .padding()
-                    .background(Color.accentColor)
-                    .cornerRadius(12)
-            }
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)

@@ -2,7 +2,7 @@ import Foundation
 import CoreData
 import UIKit
 
-class AudiobookManager: ObservableObject {
+class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     private let persistenceController = PersistenceController.shared
     
     @Published var audiobooks: [Audiobook] = []
@@ -16,6 +16,19 @@ class AudiobookManager: ObservableObject {
         // Don't fetch audiobooks immediately during initialization
         // This will be called by views when they appear
     }
+    
+    func getBookmarks(for audiobook: Audiobook) -> [Bookmark] {
+        return (audiobook.bookmarks?.allObjects as? [Bookmark] ?? [])
+    }
+    
+    func markAsFinished(_ audiobook: Audiobook) {
+        audiobook.isFinished = true
+    }
+    
+    func resetProgress(for audiobook: Audiobook) {
+        audiobook.currentPosition = 0
+    }
+    
     
     // MARK: - Fetch Operations
     func fetchAudiobooks() {

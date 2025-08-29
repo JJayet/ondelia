@@ -3,6 +3,24 @@ import CoreData
 
 class PersistenceController: ObservableObject {
     static let shared = PersistenceController()
+    static let preview: PersistenceController = {
+        let controller = PersistenceController()
+        let container = NSPersistentContainer(name: "AudiobookReader")
+        let description = NSPersistentStoreDescription()
+        description.type = NSInMemoryStoreType
+        container.persistentStoreDescriptions = [description]
+        
+        container.loadPersistentStores { _, error in
+            if let error = error {
+                fatalError("Preview Core Data error: \(error)")
+            }
+        }
+        
+        container.viewContext.automaticallyMergesChangesFromParent = true
+        controller._container = container
+        controller.isLoaded = true
+        return controller
+    }()
     
     @Published var isLoaded = false
     @Published var isLoading = false

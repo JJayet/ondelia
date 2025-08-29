@@ -3,10 +3,19 @@ import UIKit
 
 struct PlayerView: View {
     let audiobook: Audiobook
-    @ObservedObject var statistics: ReadingStatistics
-    @StateObject private var audiobookManager = AudiobookManager()
-    @StateObject private var themeManager = ThemeManager.shared
-    @ObservedObject private var globalAudioManager = GlobalAudioManager.shared
+    @Environment(\.dependencies) private var deps
+    @StateObject private var statistics: ReadingStatistics
+    
+    // Access dependencies through the container
+    private var audioManager: any AudioManagerProtocol { deps.audioManager }
+    private var themeManager: any ThemeManagerProtocol { deps.themeManager }
+    private var audiobookManager: AudiobookManagerProtocol { deps.audiobookManager }
+    
+    init(audiobook: Audiobook, dependencies: AudiobookDependencies? = nil) {
+        self.audiobook = audiobook
+        let deps = dependencies ?? (ProcessInfo.isPreview ? PreviewDependencies() : LiveDependencies())
+        self._statistics = StateObject(wrappedValue: deps.createReadingStatistics() as! ReadingStatistics)
+    }
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
     @State private var showingSleepTimer = false
@@ -36,7 +45,7 @@ struct PlayerView: View {
     }
     
     private var currentChapter: Chapter? {
-        let currentTime = globalAudioManager.getCurrentTime()
+        let currentTime = audioManager.getCurrentTime()
         return chapters.first { chapter in
             currentTime >= chapter.startTime && currentTime < chapter.endTime
         } ?? chapters.first { chapter in
@@ -46,19 +55,19 @@ struct PlayerView: View {
     
     private var isPlaying: Bool {
         // Use the published playback state for better UI responsiveness
-        return globalAudioManager.playbackState == .playing
+        return audioManager.playbackState == .playing
     }
     
     private var currentTime: TimeInterval {
-        globalAudioManager.getCurrentTime()
+        audioManager.getCurrentTime()
     }
     
     private var duration: TimeInterval {
-        globalAudioManager.getDuration()
+        audioManager.getDuration()
     }
     
     private var playbackRate: Float {
-        globalAudioManager.getPlaybackRate()
+        audioManager.getPlaybackRate()
     }
 
     var body: some View {
@@ -74,14 +83,14 @@ struct PlayerView: View {
             loadAudiobook()
             // Auto-play when entering the player
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if globalAudioManager.playbackState != .playing {
-                    globalAudioManager.startPlayback()
+                if audioManager.playbackState != .playing {
+                    audioManager.startPlayback()
                 }
             }
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
             if !isSeekingManually && isPlaying {
-                let currentPlaybackTime = globalAudioManager.getCurrentTime()
+                let currentPlaybackTime = audioManager.getCurrentTime()
                 audiobookManager.updateProgress(for: audiobook, currentTime: currentPlaybackTime)
                 statistics.addListeningTime(1, playbackRate: playbackRate)
                 
@@ -91,7 +100,7 @@ struct PlayerView: View {
             }
         }
         .sheet(isPresented: $showingBookmarks) {
-            BookmarksView(audiobook: audiobook, globalAudioManager: globalAudioManager)
+            BookmarksView(audiobook: audiobook, globalAudioManager: audioManager as! GlobalAudioManager)
         }
         .sheet(isPresented: $showingAddBookmark) {
             AddBookmarkView(
@@ -114,8 +123,8 @@ struct PlayerView: View {
             ChapterListView(
                 chapters: chapters,
                 onChapterTap: { chapter in
-                    globalAudioManager.seek(to: chapter.startTime)
-                    globalAudioManager.startPlayback()
+                    audioManager.seek(to: chapter.startTime)
+                    audioManager.startPlayback()
                     showingChapterList = false
                 }
             )
@@ -227,7 +236,7 @@ struct PlayerView: View {
                 HStack(spacing: 20) {
                     Button {
                         withHapticFeedback {
-                            globalAudioManager.skipBackward(15)
+                            audioManager.skipBackward(15)
                         }
                     } label: {
                         Image(systemName: "gobackward.15")
@@ -237,12 +246,12 @@ struct PlayerView: View {
                     
                     Button {
                         withHapticFeedback(.medium) {
-                            if globalAudioManager.playbackState != .loading {
-                                globalAudioManager.togglePlayback()
+                            if audioManager.playbackState != .loading {
+                                audioManager.togglePlayback()
                             }
                         }
                     } label: {
-                        if globalAudioManager.playbackState == .loading {
+                        if audioManager.playbackState == .loading {
                             ProgressView()
                                 .scaleEffect(0.8)
                         } else {
@@ -254,7 +263,7 @@ struct PlayerView: View {
                     
                     Button {
                         withHapticFeedback {
-                            globalAudioManager.skipForward(15)
+                            audioManager.skipForward(15)
                         }
                     } label: {
                         Image(systemName: "goforward.15")
@@ -286,7 +295,7 @@ struct PlayerView: View {
                     .onEnded { value in
                         if value.translation.height > 50 { // Dismiss threshold
                             // Stop playback and dismiss
-                            globalAudioManager.pausePlayback()
+                            audioManager.pausePlayback()
                             presentationMode.wrappedValue.dismiss()
                         } else {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
@@ -443,7 +452,7 @@ struct PlayerView: View {
                 value: Binding(
                     get: { currentTime },
                     set: { newValue in
-                        globalAudioManager.seek(to: newValue)
+                        audioManager.seek(to: newValue)
                     }
                 ),
                 range: 0...max(duration, 1),
@@ -474,7 +483,7 @@ struct PlayerView: View {
         HStack(spacing: 40) {
             Button {
                 withHapticFeedback {
-                    globalAudioManager.skipBackward(themeManager.skipInterval.seconds)
+                    audioManager.skipBackward(themeManager.skipInterval.seconds)
                 }
             } label: {
                 Image(systemName: "gobackward.\(Int(themeManager.skipInterval.seconds))")
@@ -484,13 +493,13 @@ struct PlayerView: View {
             
             Button {
                 withHapticFeedback(.medium) {
-                    if globalAudioManager.playbackState != .loading {
-                        globalAudioManager.togglePlayback()
+                    if audioManager.playbackState != .loading {
+                        audioManager.togglePlayback()
                     }
                 }
             } label: {
                 Group {
-                    if globalAudioManager.playbackState == .loading {
+                    if audioManager.playbackState == .loading {
                         ProgressView()
                             .scaleEffect(1.8)
                             .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
@@ -503,11 +512,11 @@ struct PlayerView: View {
                 }
             }
             .frame(width: 80, height: 80)
-            .disabled(globalAudioManager.playbackState == .loading)
+            .disabled(audioManager.playbackState == .loading)
             
             Button {
                 withHapticFeedback {
-                    globalAudioManager.skipForward(themeManager.skipInterval.seconds)
+                    audioManager.skipForward(themeManager.skipInterval.seconds)
                 }
             } label: {
                 Image(systemName: "goforward.\(Int(themeManager.skipInterval.seconds))")
@@ -542,7 +551,7 @@ struct PlayerView: View {
         
         Button(String(format: "%.2fx", speed)) {
             withHapticFeedback {
-                globalAudioManager.setPlaybackRate(Float(speed))
+                audioManager.setPlaybackRate(Float(speed))
             }
         }
         .font(.caption)
@@ -587,7 +596,7 @@ struct PlayerView: View {
     
     // MARK: - Helper Methods
     private func loadAudiobook() {
-        globalAudioManager.loadAudiobook(audiobook)
+        audioManager.loadAudiobook(audiobook)
     }
     
     private func setSleepTimer(_ seconds: TimeInterval) {
@@ -598,7 +607,7 @@ struct PlayerView: View {
             sleepTimeRemaining -= 1
             
             if sleepTimeRemaining <= 0 {
-                globalAudioManager.pausePlayback()
+                audioManager.pausePlayback()
                 timer.invalidate()
                 sleepTimer = nil
             }
@@ -607,7 +616,7 @@ struct PlayerView: View {
     
     private func setSleepTimerEndOfChapter() {
         guard let currentChapter = currentChapter else { return }
-        let currentTime = globalAudioManager.getCurrentTime()
+        let currentTime = audioManager.getCurrentTime()
         let remainingTime = currentChapter.endTime - currentTime
         setSleepTimer(max(remainingTime, 60)) // Minimum 1 minute
     }
@@ -778,6 +787,26 @@ struct CustomSlider: View {
     }
 }
 
-#Preview {
-    PlayerView(audiobook: Audiobook(), statistics: ReadingStatistics())
+#Preview("Player View - Playing") {
+    PlayerView(audiobook: PreviewContent.audiobook())
+        .previewWithMockAudio(
+            state: .playing,
+            currentTime: 1800.0,
+            duration: 7200.0
+        )
+        .environment(\.dependencies, PreviewDependencies())
+}
+
+#Preview("Player View - Dark Theme") {
+    PlayerView(audiobook: PreviewContent.audiobook(
+        title: "The Lord of the Rings",
+        author: "J.R.R. Tolkien",
+        narrator: "Rob Inglis"
+    ))
+    .previewWithMockAudio(
+        state: .paused,
+        currentTime: 3600.0,
+        duration: 14400.0
+    )
+    .previewWithTheme(theme: .dark, accentColor: .purple)
 }

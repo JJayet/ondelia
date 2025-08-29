@@ -113,7 +113,7 @@ struct MiniPlayerView: View {
                 Spacer().frame(height: 60)
             }
             .fullScreenCover(item: $selectedAudiobook) { audiobook in
-                PlayerView(audiobook: audiobook, statistics: statistics)
+                PlayerView(audiobook: audiobook)
             }
         }
     }
