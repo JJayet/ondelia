@@ -36,6 +36,52 @@ AudiobookReader/
 3. Follow SwiftUI best practices for UI development
 4. Maintain proper separation between UI and business logic
 
+## iOS 26 Visual Effects
+
+### Target Platform
+**This project exclusively targets iOS 26+. No backward compatibility needed.**
+
+### Liquid Glass Effects
+This project uses the new Liquid Glass design language introduced in iOS 26. Always use the proper iOS 26 glass effects:
+
+#### Primary Glass Effect Implementation
+```swift
+// Use the new glassEffect modifier for iOS 26
+.glassEffect(.regular, in: RoundedRectangle(cornerRadius: 24))
+
+// For interactive elements, use the interactive variant
+.glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 24))
+```
+
+#### Glass Container for Grouped Elements
+```swift
+GlassEffectContainer {
+    // Multiple glass elements here share the same visual context
+    controlPanel
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
+    
+    miniPlayer
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 12))
+}
+```
+
+#### Sheet Presentations with Liquid Glass
+```swift
+.sheet(isPresented: $showSheet) {
+    SheetContent()
+        .presentationDetents([.medium, .large])
+        .navigationTransition(.zoom(sourceID: "sourceButton"))
+}
+```
+
+### Visual Design Principles
+- UI elements should "float, breathe, and interact with light"
+- Use `.interactive()` for user-interactive glass elements
+- Group related glass elements in containers for visual consistency
+- Avoid custom `presentationBackground()` modifiers with glass sheets
+- Glass effects automatically adapt to underlying content
+- **Never use .ultraThinMaterial** - always use proper glassEffect modifiers
+
 ### Testing Commands
 - Build: Use the command above with iPhone 16 destination
 - Run tests: Replace `build` with `test` in the build command

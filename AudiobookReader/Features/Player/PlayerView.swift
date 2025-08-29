@@ -265,7 +265,7 @@ struct PlayerView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16))
+            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
             .padding(.horizontal, 16)
             .padding(.bottom, 50) // 50px from bottom
             .offset(y: miniPlayerDragOffset)
@@ -352,8 +352,7 @@ struct PlayerView: View {
             Spacer()
         }
         .padding(.horizontal, 16)
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 24))
-        .glassEffect(.clear, in: RoundedRectangle(cornerRadius: 24)) // Restore beautiful glass effect
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, 16)
     }
     
@@ -416,7 +415,7 @@ struct PlayerView: View {
                     .foregroundColor(.accentColor)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+                    .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 12))
             }
         }
     }
@@ -557,7 +556,7 @@ struct PlayerView: View {
                 Color.clear
             }
         }
-        .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 12))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
         .foregroundColor(isSelected ? .white : .primaryText)
     }
     
