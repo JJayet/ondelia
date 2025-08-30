@@ -16,6 +16,7 @@ class AudioEngine: NSObject, ObservableObject {
     private var timeObserver: Any?
     private var hasAddedObservers = false
     private var hasSetupAudioSession = false
+    private var isCleanedUp = false
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -135,7 +136,8 @@ class AudioEngine: NSObject, ObservableObject {
                 print("🎵 AudioEngine: Audio session interruption ended - resuming playback")
                 // Resume after a short delay to ensure audio session is ready
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                    self?.play()
+                    guard let self = self, !self.isCleanedUp else { return }
+                    self.play()
                 }
             }
             
@@ -281,10 +283,19 @@ class AudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-    audioQueue.sync { [weak self] in
-        guard let self = self else { return }
+        // Prevent multiple cleanup calls
+        guard !isCleanedUp else { 
+            print("⚠️ AudioEngine: Cleanup already performed")
+            return 
+        }
+        isCleanedUp = true
         
-        // Remove notification observers
+        print("🧹 AudioEngine: Starting cleanup...")
+        
+        // Stop playback first on current thread
+        player?.pause()
+        
+        // Remove notification observers synchronously on current thread
         NotificationCenter.default.removeObserver(self, 
                                                  name: AVAudioSession.interruptionNotification, 
                                                  object: nil)
@@ -292,28 +303,38 @@ class AudioEngine: NSObject, ObservableObject {
                                                  name: AVAudioSession.routeChangeNotification, 
                                                  object: nil)
         
-        // Remove time observer from current player
-        if let observer = self.timeObserver, let currentPlayer = self.player {
+        // Remove time observer from current player synchronously
+        if let observer = timeObserver, let currentPlayer = player {
             currentPlayer.removeTimeObserver(observer)
-            self.timeObserver = nil
+            timeObserver = nil
         }
         
-        // Remove KVO observers if they were added
-        if self.hasAddedObservers, let item = self.playerItem {
-            item.removeObserver(self, forKeyPath: "duration")
-            item.removeObserver(self, forKeyPath: "status")
-            self.hasAddedObservers = false
+        // Remove KVO observers synchronously if they were added
+        if hasAddedObservers, let item = playerItem {
+            do {
+                item.removeObserver(self, forKeyPath: "duration")
+                item.removeObserver(self, forKeyPath: "status")
+            } catch {
+                print("⚠️ AudioEngine: Error removing KVO observers: \(error)")
+            }
+            hasAddedObservers = false
         }
         
-        // Clear references
-        self.player = nil
-        self.playerItem = nil
+        // Clear references synchronously
+        player = nil
+        playerItem = nil
         
-        DispatchQueue.main.async {
-            self.isPlaying = false
+        // Update UI state immediately since we're potentially in deinit
+        if Thread.isMainThread {
+            isPlaying = false
+        } else {
+            DispatchQueue.main.sync {
+                isPlaying = false
+            }
         }
+        
+        print("✅ AudioEngine: Cleanup completed")
     }
-}
 
     private func cleanupPlayerDirectly() {
         // This method runs on audioQueue, so no need for sync
@@ -326,24 +347,24 @@ class AudioEngine: NSObject, ObservableObject {
                                                  object: nil)
         
         // Remove time observer from current player
-        if let observer = self.timeObserver, let currentPlayer = self.player {
+        if let observer = timeObserver, let currentPlayer = player {
             currentPlayer.removeTimeObserver(observer)
-            self.timeObserver = nil
+            timeObserver = nil
         }
         
         // Remove KVO observers if they were added
-        if self.hasAddedObservers, let item = self.playerItem {
+        if hasAddedObservers, let item = playerItem {
             item.removeObserver(self, forKeyPath: "duration")
             item.removeObserver(self, forKeyPath: "status")
-            self.hasAddedObservers = false
+            hasAddedObservers = false
         }
         
         // Clear references
-        self.player = nil
-        self.playerItem = nil
+        player = nil
+        playerItem = nil
         
-        DispatchQueue.main.async {
-            self.isPlaying = false
+        DispatchQueue.main.async { [weak self] in
+            self?.isPlaying = false
         }
     }
 
@@ -603,7 +624,7 @@ private func deactivateAudioSession() {
     private func updateNowPlayingInfo() {
         // Ensure this runs on main thread when updating Now Playing info
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, !self.isCleanedUp else { return }
             
             var nowPlayingInfo = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [String: Any]()
             nowPlayingInfo[MPNowPlayingInfoPropertyElapsedPlaybackTime] = self.currentTime

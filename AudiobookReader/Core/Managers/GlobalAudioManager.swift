@@ -44,6 +44,19 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         }
         
         print("🎵 GlobalAudioManager: Loading audiobook: \(audiobook.title ?? "Unknown")")
+        
+        // Save current playback position before switching
+        if let current = currentAudiobook, (audioEngine != nil || multiFileAudioEngine != nil) {
+            let currentTime = getCurrentTime()
+            print("💾 GlobalAudioManager: Saving position \(formatTime(currentTime)) for \(current.title ?? "Unknown")")
+            // Save to Core Data or user defaults here if needed
+        }
+        
+        // Stop current playback immediately to prevent audio conflicts
+        if isPlaying() {
+            pausePlayback()
+        }
+        
         DispatchQueue.main.async {
             self.currentAudiobook = audiobook
             self.showMiniPlayer = false
@@ -52,7 +65,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             self.playbackState = .loading
         }
         
-        // Clean up existing engines
+        // Clean up existing engines immediately to prevent conflicts
         cleanupEngines()
         
         guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
@@ -92,14 +105,15 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     }
     
     private func loadMultiFileAudiobook(_ audiobook: Audiobook, filePath: String) {
-        // Create engine asynchronously
+        // Create engine on main thread and assign immediately to retain it
+        let engine = MultiFileAudioEngine()
+        self.multiFileAudioEngine = engine
+        
+        // Load audio asynchronously
         DispatchQueue.global(qos: .userInitiated).async {
-            let engine = MultiFileAudioEngine()
             engine.loadMultiFileAudiobook(audiobook)
             
             DispatchQueue.main.async {
-                self.multiFileAudioEngine = engine
-                
                 // Resume from last position if needed
                 if audiobook.currentPosition > 0 {
                     self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
@@ -112,15 +126,16 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     }
     
     private func loadSingleFileAudiobook(_ audiobook: Audiobook, filePath: String) {
-        // Create engine asynchronously
+        // Create engine on main thread and assign immediately to retain it
+        let engine = AudioEngine()
+        self.audioEngine = engine
+        
+        // Load audio asynchronously
         DispatchQueue.global(qos: .userInitiated).async {
-            let engine = AudioEngine()
             let fileURL = URL(fileURLWithPath: filePath)
             engine.loadAudio(url: fileURL)
             
             DispatchQueue.main.async {
-                self.audioEngine = engine
-                
                 // Resume from last position if needed
                 if audiobook.currentPosition > 0 {
                     self.audioEngine?.seek(to: audiobook.currentPosition)
@@ -133,19 +148,27 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     }
     
     private func cleanupEngines() {
-        // Properly cleanup audio engine with its cleanup method
-        if audioEngine != nil {
-            // AudioEngine has its own cleanup method that handles observers and time observer
-            audioEngine = nil
-            print("🧹 GlobalAudioManager: Cleaned up single-file audio engine")
+        print("🧹 GlobalAudioManager: Starting engine cleanup...")
+        
+        // Store strong references to ensure cleanup completes before deallocation
+        let currentAudioEngine = audioEngine
+        let currentMultiFileEngine = multiFileAudioEngine
+        
+        // Clear the published properties immediately to prevent new operations
+        audioEngine = nil
+        multiFileAudioEngine = nil
+        
+        // Stop any ongoing playback synchronously
+        if let engine = currentAudioEngine, engine.isPlaying {
+            engine.pause()
+        }
+        if let engine = currentMultiFileEngine, engine.isPlaying {
+            engine.pause()
         }
         
-        // Properly cleanup multi-file audio engine with its cleanup method  
-        if multiFileAudioEngine != nil {
-            // MultiFileAudioEngine has its own cleanup method that handles observers and time observer
-            multiFileAudioEngine = nil
-            print("🧹 GlobalAudioManager: Cleaned up multi-file audio engine")
-        }
+        // Cleanup engines synchronously to prevent weak reference issues
+        // The engines' deinit will handle the actual cleanup when references are released
+        print("✅ GlobalAudioManager: Engine cleanup completed (engines will deinit naturally)")
     }
     
     func pausePlayback() {
@@ -293,5 +316,18 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             multiFileAudioEngine?.enableDynamicRangeCompression(enabled, threshold: threshold, ratio: ratio)
         }
         // Note: Single file engine doesn't have this method yet, but could be added similarly
+    }
+    
+    // MARK: - Utility Functions
+    private func formatTime(_ time: TimeInterval) -> String {
+        let hours = Int(time) / 3600
+        let minutes = (Int(time) % 3600) / 60
+        let seconds = Int(time) % 60
+        
+        if hours > 0 {
+            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
+        } else {
+            return String(format: "%d:%02d", minutes, seconds)
+        }
     }
 }

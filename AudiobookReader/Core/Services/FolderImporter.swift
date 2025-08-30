@@ -1,5 +1,48 @@
 import Foundation
 
+// MARK: - Timeout Helper
+func withTimeout<T>(seconds: TimeInterval, operation: @escaping @Sendable () async throws -> T) async throws -> T {
+    return try await withThrowingTaskGroup(of: T?.self) { group in
+        // Add the main operation task
+        group.addTask {
+            do {
+                let result = try await operation()
+                return result
+            } catch {
+                // Return nil on any error to allow timeout to handle it
+                return nil
+            }
+        }
+        
+        // Add the timeout task
+        group.addTask {
+            try await Task.sleep(nanoseconds: UInt64(seconds * 1_000_000_000))
+            return nil // Timeout reached
+        }
+        
+        // Wait for first completion
+        for try await result in group {
+            group.cancelAll() // Cancel remaining tasks
+            
+            if let actualResult = result {
+                return actualResult
+            } else {
+                throw TimeoutError()
+            }
+        }
+        
+        throw TimeoutError() // Fallback
+    }
+}
+
+struct TimeoutError: Error {
+    let message = "Operation timed out"
+    
+    var localizedDescription: String {
+        return message
+    }
+}
+
 // MARK: - Complete.json Models
 struct CompleteJsonEntry: Codable {
     let channels: Int
@@ -210,39 +253,75 @@ class FolderImporter {
             var chapters: [FolderChapter] = []
             var cumulativeTime: TimeInterval = 0
             
-            for (index, audioFileURL) in audioFiles.enumerated() {
-                // Extract duration from the audio file
-                let asset = AVURLAsset(url: audioFileURL)
-                let duration: TimeInterval
+            // Process files in batches to improve performance and reduce memory pressure
+            let batchSize = 3
+            for batchStart in stride(from: 0, to: audioFiles.count, by: batchSize) {
+                let batchEnd = min(batchStart + batchSize, audioFiles.count)
+                let batch = Array(audioFiles[batchStart..<batchEnd])
                 
-                do {
-                    let durationCMTime = try await asset.load(.duration)
-                    duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
-                } catch {
-                    print("⚠️ FolderImporter: Could not get duration for \(audioFileURL.lastPathComponent)")
-                    duration = 0
+                print("🔄 FolderImporter: Processing batch \(batchStart / batchSize + 1): files \(batchStart + 1)-\(batchEnd)")
+                
+                // Process batch in parallel for better performance
+                let batchResults = await withTaskGroup(of: (index: Int, duration: TimeInterval, fileName: String, fileSize: Int64).self) { group in
+                    for (localIndex, audioFileURL) in batch.enumerated() {
+                        let globalIndex = batchStart + localIndex
+                        
+                        group.addTask {
+                            let asset = AVURLAsset(url: audioFileURL)
+                            let duration: TimeInterval
+                            
+                            do {
+                                // Use shorter timeout and better error handling
+                                let durationCMTime = try await withTimeout(seconds: 3) {
+                                    try await asset.load(.duration)
+                                }
+                                duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
+                            } catch is TimeoutError {
+                                print("⏱️ FolderImporter: Timeout on \(audioFileURL.lastPathComponent)")
+                                duration = 0
+                            } catch {
+                                print("⚠️ FolderImporter: Error on \(audioFileURL.lastPathComponent): \(error)")
+                                duration = 0
+                            }
+                            
+                            // Get file size
+                            let attributes = try? FileManager.default.attributesOfItem(atPath: audioFileURL.path)
+                            let fileSize = attributes?[.size] as? Int64 ?? 0
+                            
+                            return (index: globalIndex, duration: duration, fileName: audioFileURL.lastPathComponent, fileSize: fileSize)
+                        }
+                    }
+                    
+                    var results: [(index: Int, duration: TimeInterval, fileName: String, fileSize: Int64)] = []
+                    for await result in group {
+                        results.append(result)
+                    }
+                    return results.sorted { $0.index < $1.index }
                 }
                 
-                let fileName = audioFileURL.lastPathComponent
-                let chapterTitle = generateChapterTitle(from: fileName, index: index + 1)
+                // Create chapters from batch results
+                for result in batchResults {
+                    let chapterTitle = generateChapterTitle(from: result.fileName, index: result.index + 1)
+                    
+                    let chapter = FolderChapter(
+                        title: chapterTitle,
+                        fileName: result.fileName,
+                        duration: result.duration,
+                        startTimeInBook: cumulativeTime,
+                        chapterNumber: result.index + 1,
+                        fileSize: result.fileSize
+                    )
+                    
+                    chapters.append(chapter)
+                    cumulativeTime += result.duration
+                    
+                    print("📖 FolderImporter: Chapter \(result.index + 1): \(chapterTitle) (\(formatTime(result.duration)))")
+                }
                 
-                // Get file size
-                let attributes = try? FileManager.default.attributesOfItem(atPath: audioFileURL.path)
-                let fileSize = attributes?[.size] as? Int64 ?? 0
-                
-                let chapter = FolderChapter(
-                    title: chapterTitle,
-                    fileName: fileName,
-                    duration: duration,
-                    startTimeInBook: cumulativeTime,
-                    chapterNumber: index + 1,
-                    fileSize: fileSize
-                )
-                
-                chapters.append(chapter)
-                cumulativeTime += duration
-                
-                print("📖 FolderImporter: Chapter \(index + 1): \(chapterTitle) (\(formatTime(duration)))")
+                // Small delay between batches to prevent overwhelming the system
+                if batchEnd < audioFiles.count {
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+                }
             }
             
             // Look for cover image

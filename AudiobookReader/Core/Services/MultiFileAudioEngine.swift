@@ -12,6 +12,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     private var hasAddedObservers: Set<AVPlayerItem> = []
     private var chapterFiles: [String] = [] // File paths for each chapter
     private var folderURL: URL?
+    private var isCleanedUp = false
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -99,7 +100,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 print("🎵 MultiFileAudioEngine: Audio session interruption ended - resuming playback")
                 // Resume after a short delay to ensure audio session is ready
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
-                    self?.play()
+                    guard let self = self, !self.isCleanedUp else { return }
+                    self.play()
                 }
             }
             
@@ -560,7 +562,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             currentPlayer.rate = self.playbackRate
             currentPlayer.play()
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, !self.isCleanedUp else { return }
                 self.isPlaying = true
                 self.updateNowPlayingInfo()
             }
@@ -581,7 +584,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 player.pause()
             }
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, !self.isCleanedUp else { return }
                 self.isPlaying = false
                 self.updateNowPlayingInfo()
             }
@@ -622,7 +626,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             let cmTime = CMTime(seconds: timeWithinChapter, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
             currentPlayer.seek(to: cmTime)
             
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, !self.isCleanedUp else { return }
                 self.currentTime = time
                 self.updateNowPlayingInfo()
             }
@@ -773,7 +778,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 newPlayer.play()
                 
                 DispatchQueue.main.async { [weak self] in
-                    self?.updateNowPlayingInfo()
+                    guard let self = self, !self.isCleanedUp else { return }
+                    self.updateNowPlayingInfo()
                 }
             }
         }
@@ -944,10 +950,16 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-    playerQueue.async { [weak self] in
-        guard let self = self else { return }
+        // Prevent multiple cleanup calls
+        guard !isCleanedUp else { 
+            print("⚠️ MultiFileAudioEngine: Cleanup already performed")
+            return 
+        }
+        isCleanedUp = true
         
-        // Remove notification observers
+        print("🧹 MultiFileAudioEngine: Starting cleanup...")
+        
+        // Remove notification observers on current thread
         NotificationCenter.default.removeObserver(self, 
                                                  name: AVAudioSession.interruptionNotification, 
                                                  object: nil)
@@ -956,29 +968,39 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                                                  object: nil)
         
         // Remove time observer only from the current player that has it
-        if let observer = self.timeObserver, let currentPlayer = self.players[self.currentPlayerIndex] {
+        if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
             currentPlayer.removeTimeObserver(observer)
-            self.timeObserver = nil
+            timeObserver = nil
         }
         
         // Remove KVO observers only from items we added them to
-        for item in self.hasAddedObservers {
-            item.removeObserver(self, forKeyPath: "status")
+        for item in hasAddedObservers {
+            do {
+                item.removeObserver(self, forKeyPath: "status")
+            } catch {
+                print("⚠️ MultiFileAudioEngine: Error removing KVO observer: \(error)")
+            }
         }
-        self.hasAddedObservers.removeAll()
+        hasAddedObservers.removeAll()
         
-        self.players.removeAll()
-        self.playerItems.removeAll()
-        self.chapters.removeAll()
-        self.chapterFiles.removeAll()
-        self.folderURL = nil
-        self.currentPlayerIndex = 0
+        players.removeAll()
+        playerItems.removeAll()
+        chapters.removeAll()
+        chapterFiles.removeAll()
+        folderURL = nil
+        currentPlayerIndex = 0
         
-        DispatchQueue.main.async {
-            self.isPlaying = false
+        // Update UI state immediately since we're potentially in deinit
+        if Thread.isMainThread {
+            isPlaying = false
+        } else {
+            DispatchQueue.main.sync {
+                isPlaying = false
+            }
         }
+        
+        print("✅ MultiFileAudioEngine: Cleanup completed")
     }
-}
     
     // MARK: - Utility
     private func formatTime(_ time: TimeInterval) -> String {
