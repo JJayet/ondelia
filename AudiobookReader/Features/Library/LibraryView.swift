@@ -152,18 +152,24 @@ struct LibraryView: View {
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
                 
-                var isDirectory: ObjCBool = false
-                if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-                    if isDirectory.boolValue {
-                        print("📁 Importing folder: \(url.lastPathComponent)")
-                        await audiobookManager.importAudiobookFolder(from: url)
+                // Check if it's a ZIP file
+                if url.pathExtension.lowercased() == "zip" {
+                    print("📦 Importing ZIP file: \(url.lastPathComponent)")
+                    await audiobookManager.importZIPAudiobook(from: url)
+                } else {
+                    var isDirectory: ObjCBool = false
+                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
+                        if isDirectory.boolValue {
+                            print("📁 Importing folder: \(url.lastPathComponent)")
+                            await audiobookManager.importAudiobookFolder(from: url)
+                        } else {
+                            print("🎵 Importing single file: \(url.lastPathComponent)")
+                            await audiobookManager.importAudiobook(from: url)
+                        }
                     } else {
-                        print("🎵 Importing single file: \(url.lastPathComponent)")
+                        print("🎵 Importing file (fallback): \(url.lastPathComponent)")
                         await audiobookManager.importAudiobook(from: url)
                     }
-                } else {
-                    print("🎵 Importing file (fallback): \(url.lastPathComponent)")
-                    await audiobookManager.importAudiobook(from: url)
                 }
                 
                 await MainActor.run {

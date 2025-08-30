@@ -396,7 +396,7 @@ class LiveActivityManager: ObservableObject {
         Task {
             guard let activity = currentActivity else { return }
             
-            await activity.end(dismissalPolicy: .immediate)
+            await activity.end(activity.content, dismissalPolicy: .immediate)
             currentActivity = nil
             print("🛑 Live Activity ended")
         }

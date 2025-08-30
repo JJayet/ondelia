@@ -15,6 +15,7 @@ class AudioEngine: NSObject, ObservableObject {
     private var playerItem: AVPlayerItem?
     private var timeObserver: Any?
     private var hasAddedObservers = false
+    private var hasSetupAudioSession = false
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -32,6 +33,7 @@ class AudioEngine: NSObject, ObservableObject {
     
     deinit {
         cleanup()
+        deactivateAudioSession()
     }
     
     // MARK: - Audio Session Setup
@@ -39,25 +41,39 @@ class AudioEngine: NSObject, ObservableObject {
     do {
         let audioSession = AVAudioSession.sharedInstance()
         
-        // Enhanced audio session configuration for iOS 26 with spatial audio support
+        // Deactivate session first to avoid conflicts
+        try audioSession.setActive(false, options: .notifyOthersOnDeactivation)
+        
+        // Configure basic audio session for audiobook playback
         try audioSession.setCategory(.playback, 
                                    mode: .spokenAudio, 
                                    options: [.allowAirPlay, 
-                                           .allowBluetoothHFP, 
-                                           .allowBluetoothA2DP,
-                                           .mixWithOthers])
+                                           .allowBluetoothA2DP])
         
-        // Configure enhanced quality audio settings
-        try audioSession.setPreferredSampleRate(48000.0) // High-quality sample rate
-        try audioSession.setPreferredIOBufferDuration(0.005) // Low latency buffer
+        // Set reasonable audio settings that work reliably
+        do {
+            try audioSession.setPreferredSampleRate(44100.0) // Standard CD quality
+        } catch {
+            print("⚠️ AudioEngine: Could not set sample rate: \(error)")
+        }
         
-        // Configure audio routing for enhanced quality
-        try audioSession.setPreferredInput(nil)
-        try audioSession.setPreferredOutputNumberOfChannels(2)
+        do {
+            try audioSession.setPreferredIOBufferDuration(0.02) // 20ms buffer for stability
+        } catch {
+            print("⚠️ AudioEngine: Could not set buffer duration: \(error)")
+        }
         
-        print("✨ AudioEngine: Enhanced quality audio enabled")
+        // Configure audio routing
+        do {
+            try audioSession.setPreferredOutputNumberOfChannels(2)
+        } catch {
+            print("⚠️ AudioEngine: Could not set output channels: \(error)")
+        }
         
+        // Activate the session
         try audioSession.setActive(true)
+        
+        print("✅ AudioEngine: Audio session configured successfully")
         
         // Handle audio session interruptions and route changes
         NotificationCenter.default.addObserver(
@@ -76,8 +92,27 @@ class AudioEngine: NSObject, ObservableObject {
         
     } catch {
         print("❌ AudioEngine: Failed to set up audio session: \(error)")
+        // Try a minimal fallback configuration
+        setupFallbackAudioSession()
     }
 }
+
+    private func setupFallbackAudioSession() {
+        do {
+            let audioSession = AVAudioSession.sharedInstance()
+            
+            print("🔄 AudioEngine: Attempting fallback audio session setup")
+            
+            // Minimal configuration that should always work
+            try audioSession.setCategory(.playback, mode: .default)
+            try audioSession.setActive(true)
+            
+            print("✅ AudioEngine: Fallback audio session configured")
+            
+        } catch {
+            print("❌ AudioEngine: Even fallback audio session failed: \(error)")
+        }
+    }
 
     // MARK: - Audio Session Event Handlers
     @objc private func handleAudioSessionInterruption(_ notification: Notification) {
@@ -186,7 +221,7 @@ class AudioEngine: NSObject, ObservableObject {
                 
                 // Configure noise suppression parameters
                 for inputParameters in audioMix.inputParameters {
-                    if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                    if inputParameters is AVMutableAudioMixInputParameters {
                         // Add noise suppression processing here
                         print("🔇 AudioEngine: Noise suppression enabled")
                     }
@@ -209,7 +244,7 @@ class AudioEngine: NSObject, ObservableObject {
             
             // Configure EQ parameters
             for inputParameters in audioMix.inputParameters {
-                if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                if inputParameters is AVMutableAudioMixInputParameters {
                     // Apply bass and treble adjustments
                     print("🎚️ AudioEngine: EQ applied - Bass: \(bassBoost), Treble: \(trebleBoost)")
                 }
@@ -230,7 +265,7 @@ class AudioEngine: NSObject, ObservableObject {
                 
                 // Configure speech enhancement
                 for inputParameters in audioMix.inputParameters {
-                    if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                    if inputParameters is AVMutableAudioMixInputParameters {
                         print("🗣️ AudioEngine: Speech enhancement enabled")
                     }
                 }
@@ -279,21 +314,68 @@ class AudioEngine: NSObject, ObservableObject {
         }
     }
 }
+
+    private func cleanupPlayerDirectly() {
+        // This method runs on audioQueue, so no need for sync
+        // Remove notification observers
+        NotificationCenter.default.removeObserver(self, 
+                                                 name: AVAudioSession.interruptionNotification, 
+                                                 object: nil)
+        NotificationCenter.default.removeObserver(self, 
+                                                 name: AVAudioSession.routeChangeNotification, 
+                                                 object: nil)
+        
+        // Remove time observer from current player
+        if let observer = self.timeObserver, let currentPlayer = self.player {
+            currentPlayer.removeTimeObserver(observer)
+            self.timeObserver = nil
+        }
+        
+        // Remove KVO observers if they were added
+        if self.hasAddedObservers, let item = self.playerItem {
+            item.removeObserver(self, forKeyPath: "duration")
+            item.removeObserver(self, forKeyPath: "status")
+            self.hasAddedObservers = false
+        }
+        
+        // Clear references
+        self.player = nil
+        self.playerItem = nil
+        
+        DispatchQueue.main.async {
+            self.isPlaying = false
+        }
+    }
+
+private func deactivateAudioSession() {
+    if hasSetupAudioSession {
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            hasSetupAudioSession = false
+            print("✅ AudioEngine: Audio session deactivated")
+        } catch {
+            print("⚠️ AudioEngine: Failed to deactivate audio session: \(error)")
+        }
+    }
+}
     
     // MARK: - Load Audio File
     func loadAudio(url: URL) {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
         
+        // Setup audio session once on main thread if not already done
+        if !hasSetupAudioSession {
+            setupAudioSession()
+            setupRemoteTransportControls()
+            hasSetupAudioSession = true
+        }
+        
         audioQueue.async { [weak self] in
             guard let self = self else { return }
             
-            // Setup audio session and remote controls on first load
-            self.setupAudioSession()
-            self.setupRemoteTransportControls()
-            
-            // Clean up existing player before creating new one
-            self.cleanup()
+            // Clean up existing player directly without calling cleanup() to avoid deadlock
+            self.cleanupPlayerDirectly()
             
             let asset = AVURLAsset(url: url)
             let newPlayerItem = AVPlayerItem(asset: asset)

@@ -214,7 +214,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                     
                     // Configure noise suppression parameters
                     for inputParameters in audioMix.inputParameters {
-                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                        if inputParameters is AVMutableAudioMixInputParameters {
                             print("🔇 MultiFileAudioEngine: Noise suppression enabled")
                         }
                     }
@@ -240,7 +240,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 
                 // Configure EQ parameters
                 for inputParameters in audioMix.inputParameters {
-                    if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                    if inputParameters is AVMutableAudioMixInputParameters {
                         // Apply bass and treble adjustments
                         print("🎚️ MultiFileAudioEngine: EQ applied - Bass: \(bassBoost), Treble: \(trebleBoost)")
                     }
@@ -263,7 +263,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                     
                     // Configure speech enhancement
                     for inputParameters in audioMix.inputParameters {
-                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                        if inputParameters is AVMutableAudioMixInputParameters {
                             print("🗣️ MultiFileAudioEngine: Speech enhancement enabled")
                         }
                     }
@@ -290,7 +290,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                     
                     // Configure dynamic range compression for consistent listening levels
                     for inputParameters in audioMix.inputParameters {
-                        if let mutableInputParameters = inputParameters as? AVMutableAudioMixInputParameters {
+                        if inputParameters is AVMutableAudioMixInputParameters {
                             // Apply compression settings
                             print("📊 MultiFileAudioEngine: Dynamic range compression enabled - Threshold: \(threshold)dB, Ratio: \(ratio):1")
                         }

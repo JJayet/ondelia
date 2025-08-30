@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
 		F11938B52E60A52C003F868D /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = F11938B42E60A52C003F868D /* WhisperKit */; };
 /* End PBXBuildFile section */
 
@@ -70,7 +69,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */,
 				F11938B52E60A52C003F868D /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -133,7 +131,6 @@
 			name = AudiobookReader;
 			packageProductDependencies = (
 				F11938B42E60A52C003F868D /* WhisperKit */,
-				F11938C42E60A52D003F868D /* ZIPFoundation */,
 			);
 			productName = AudiobookReader;
 			productReference = F13289A02E4DBA6B004EC064 /* AudiobookReader.app */;
@@ -220,7 +217,6 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				F11938B32E60A52C003F868D /* XCRemoteSwiftPackageReference "WhisperKit" */,
-				F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = F13289A12E4DBA6B004EC064 /* Products */;
@@ -615,14 +611,6 @@
 				kind = branch;
 			};
 		};
-		F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.9.19;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -630,11 +618,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = F11938B32E60A52C003F868D /* XCRemoteSwiftPackageReference "WhisperKit" */;
 			productName = WhisperKit;
-		};
-		F11938C42E60A52D003F868D /* ZIPFoundation */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */;
-			productName = ZIPFoundation;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

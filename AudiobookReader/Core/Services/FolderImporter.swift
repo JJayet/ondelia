@@ -167,7 +167,30 @@ class FolderImporter {
         do {
             let contents = try FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.isRegularFileKey])
             
-            // Filter for audio files
+            // Look for CUE files first
+            let cueFiles = CUEParser.findCUEFiles(in: folderURL)
+            var cueFile: CUEFile?
+            var associatedAudioFile: URL?
+            
+            if let firstCueFile = cueFiles.first {
+                print("🎵 FolderImporter: Found CUE file: \(firstCueFile.lastPathComponent)")
+                cueFile = CUEParser.parseCUEFile(at: firstCueFile)
+                
+                if let parsedCue = cueFile {
+                    associatedAudioFile = CUEParser.matchCUEWithAudioFile(cueFile: parsedCue, in: folderURL)
+                }
+            }
+            
+            // If we have a valid CUE file with associated audio, this is a single-file audiobook
+            // We should return nil here so the AudiobookManager can import it as a single file instead
+            if let _ = cueFile, let audioFile = associatedAudioFile {
+                print("📖 FolderImporter: CUE file detected - this should be imported as a single-file audiobook")
+                print("   Audio file: \(audioFile.lastPathComponent)")
+                print("   ⚠️ Returning nil to trigger single-file import workflow")
+                return nil
+            }
+            
+            // Filter for audio files (fallback to original behavior for multiple files)
             let audioExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
             let audioFiles = contents.filter { url in
                 audioExtensions.contains(url.pathExtension.lowercased())
@@ -248,6 +271,7 @@ class FolderImporter {
             return nil
         }
     }
+
     
     // MARK: - Helper Methods
     private static func extractTitle(from folderName: String) -> String {

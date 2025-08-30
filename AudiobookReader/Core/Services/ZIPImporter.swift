@@ -1,5 +1,5 @@
 import Foundation
-import Compression
+import ZIPFoundation
 
 class ZIPImporter {
     
@@ -46,10 +46,60 @@ class ZIPImporter {
     }
     
     private static func extractZIP(from zipURL: URL, to destinationURL: URL) async -> Bool {
-        // For now, return a placeholder that indicates ZIP import is not available
-        // In a real implementation, you would use a proper ZIP library
-        print("⚠️ ZIPImporter: ZIP extraction not implemented - would extract \(zipURL.lastPathComponent) to \(destinationURL.path)")
-        return false
+        print("📦 ZIPImporter: Extracting ZIP file \(zipURL.lastPathComponent) to \(destinationURL.path)")
+        
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                do {
+                    // Create the destination directory if it doesn't exist
+                    if !FileManager.default.fileExists(atPath: destinationURL.path) {
+                        try FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true, attributes: nil)
+                    }
+                    
+                    // Open the ZIP archive
+                    let archive: Archive
+                    do {
+                        archive = try Archive(url: zipURL, accessMode: .read)
+                    } catch {
+                        print("❌ ZIPImporter: Failed to open ZIP archive: \(error)")
+                        continuation.resume(returning: false)
+                        return
+                    }
+                    
+                    print("📊 ZIPImporter: Starting ZIP extraction...")
+                    
+                    var extractedCount = 0
+                    
+                    // Extract all entries
+                    for entry in archive {
+                        let entryDestinationURL = destinationURL.appendingPathComponent(entry.path)
+                        
+                        // Ensure the directory structure exists
+                        let entryDirectory = entryDestinationURL.deletingLastPathComponent()
+                        if !FileManager.default.fileExists(atPath: entryDirectory.path) {
+                            try FileManager.default.createDirectory(at: entryDirectory, withIntermediateDirectories: true, attributes: nil)
+                        }
+                        
+                        // Skip if it's a directory entry
+                        if entry.type == .directory {
+                            continue
+                        }
+                        
+                        // Extract the file
+                        _ = try archive.extract(entry, to: entryDestinationURL)
+                        extractedCount += 1
+                        print("   ✅ Extracted: \(entry.path)")
+                    }
+                    
+                    print("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
+                    continuation.resume(returning: true)
+                    
+                } catch {
+                    print("❌ ZIPImporter: Failed to extract ZIP file: \(error.localizedDescription)")
+                    continuation.resume(returning: false)
+                }
+            }
+        }
     }
     
     private static func validateAudiobookContent(in directory: URL) async -> URL? {
@@ -59,8 +109,11 @@ class ZIPImporter {
         do {
             let contents = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey], options: [.skipsHiddenFiles])
             
+            var targetDirectory = directory
+            var audioFiles: [URL] = []
+            
             // Look for audio files directly in extracted directory
-            var audioFiles = contents.filter { url in
+            audioFiles = contents.filter { url in
                 audioExtensions.contains(url.pathExtension.lowercased())
             }
             
@@ -80,8 +133,7 @@ class ZIPImporter {
                     
                     if subAudioFiles.count > audioFiles.count {
                         audioFiles = subAudioFiles
-                        // Return the subdirectory with the most audio files
-                        return subdirectory
+                        targetDirectory = subdirectory
                     }
                 }
             }
@@ -92,7 +144,23 @@ class ZIPImporter {
                 return nil
             }
             
-            // Check total size and duration requirements
+            // Check for CUE files in the target directory
+            let cueFiles = CUEParser.findCUEFiles(in: targetDirectory)
+            if !cueFiles.isEmpty {
+                print("🎵 ZIPImporter: Found \(cueFiles.count) CUE file(s) in extracted content")
+                
+                // If we have CUE files, validate that we can parse them and find associated audio
+                for cueFileURL in cueFiles {
+                    if let parsedCUE = CUEParser.parseCUEFile(at: cueFileURL) {
+                        if let _ = CUEParser.matchCUEWithAudioFile(cueFile: parsedCUE, in: targetDirectory) {
+                            print("✅ ZIPImporter: Valid CUE-based audiobook found")
+                            return targetDirectory
+                        }
+                    }
+                }
+            }
+            
+            // Check total size and duration requirements for regular audio files
             var totalSize: Int64 = 0
             var validAudioFiles = 0
             
@@ -114,8 +182,7 @@ class ZIPImporter {
             
             print("✅ ZIPImporter: Valid audiobook found - \(validAudioFiles) files, \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
             
-            // Return the directory containing the audio files
-            return audioFiles.first?.deletingLastPathComponent() ?? directory
+            return targetDirectory
             
         } catch {
             print("❌ ZIPImporter: Error validating content: \(error)")

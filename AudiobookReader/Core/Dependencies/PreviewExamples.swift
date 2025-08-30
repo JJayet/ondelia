@@ -99,49 +99,43 @@ struct BookInfoView: View {
 }
 
 // MARK: - Modern SwiftUI Previews with Full Functionality
-#Preview("Book Info - Playing") {
+#Preview("Playing State") {
     BookInfoView(audiobook: PreviewContent.audiobook())
         .previewWithMockAudio(
             state: .playing,
             currentTime: 450.0,
             duration: 3600.0
         )
-        .previewDisplayName("Playing State")
 }
 
-#Preview("Book Info - Paused") {
+#Preview("Paused State") {
     BookInfoView(audiobook: PreviewContent.audiobook())
         .previewWithMockAudio(
             state: .paused,
             currentTime: 1800.0,
             duration: 3600.0
         )
-        .previewDisplayName("Paused State")
 }
 
-#Preview("Book Info - Long Title") {
+#Preview("Long Title") {
     BookInfoView(audiobook: PreviewContent.audiobookLong())
         .previewWithMockAudio(
             state: .playing,
             currentTime: 3780.0,
             duration: 12600.0
         )
-        .previewDisplayName("Long Title")
 }
 
 #Preview("Book Info - Different Themes") {
     Group {
         BookInfoView(audiobook: PreviewContent.audiobook())
             .previewWithTheme(theme: .light, accentColor: .blue)
-            .previewDisplayName("Light Blue")
         
         BookInfoView(audiobook: PreviewContent.audiobook())
             .previewWithTheme(theme: .dark, accentColor: .purple)
-            .previewDisplayName("Dark Purple")
         
         BookInfoView(audiobook: PreviewContent.audiobook())
             .previewWithTheme(theme: .dark, accentColor: .green)
-            .previewDisplayName("Dark Green")
     }
 }
 
@@ -175,5 +169,4 @@ struct BookInfoView: View {
         narrator: "Expert Reader"
     ))
     .environment(\.dependencies, config)
-    .previewDisplayName("Custom Config")
 }

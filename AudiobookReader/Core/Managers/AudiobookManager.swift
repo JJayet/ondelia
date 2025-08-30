@@ -210,6 +210,23 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         print("📁 AudiobookManager: Starting folder import from: \(folderURL.lastPathComponent)")
         
         guard let folderAudiobook = await FolderImporter.importAudiobookFolder(from: folderURL) else {
+            print("🔍 AudiobookManager: Folder import failed, checking for single audio file with CUE")
+            
+            // Check if this folder contains a CUE file with a single audio file
+            let cueFiles = CUEParser.findCUEFiles(in: folderURL)
+            if let firstCueFile = cueFiles.first,
+               let parsedCue = CUEParser.parseCUEFile(at: firstCueFile),
+               let audioFile = CUEParser.matchCUEWithAudioFile(cueFile: parsedCue, in: folderURL) {
+                
+                print("🎵 AudiobookManager: Found CUE + audio file, importing as single file audiobook")
+                print("   CUE file: \(firstCueFile.lastPathComponent)")
+                print("   Audio file: \(audioFile.lastPathComponent)")
+                
+                // Import as single file but use CUE metadata for chapters
+                await importCUEBasedAudiobook(audioFile: audioFile, cueFile: parsedCue)
+                return
+            }
+            
             await MainActor.run {
                 isImporting = false
             }
@@ -260,6 +277,78 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             print("   Duration: \(formatTime(folderAudiobook.totalDuration))")
             print("   Chapters: \(folderAudiobook.chapters.count)")
             print("   Folder Path: \(localFolderURL.path)")
+            
+            persistenceController.save()
+            fetchAudiobooks()
+            isImporting = false
+        }
+    }
+
+    
+    // MARK: - CUE-based Audiobook Import
+    
+    private func importCUEBasedAudiobook(audioFile: URL, cueFile: CUEFile) async {
+        print("🎵 AudiobookManager: Starting CUE-based audiobook import")
+        
+        // Extract metadata from the audio file
+        guard let metadata = await MetadataExtractor.extractMetadata(from: audioFile) else {
+            print("❌ AudiobookManager: Failed to extract metadata from audio file")
+            await MainActor.run {
+                isImporting = false
+            }
+            return
+        }
+        
+        // Copy the single audio file to documents directory
+        guard let localURL = await copyFileToDocuments(from: audioFile) else {
+            await MainActor.run {
+                isImporting = false
+            }
+            return
+        }
+        
+        // Create audiobook entity (single file, not folder)
+        await MainActor.run {
+            let context = persistenceController.context
+            let audiobook = Audiobook(context: context)
+            
+            audiobook.id = UUID()
+            // Use CUE metadata where available, fallback to audio metadata
+            audiobook.title = cueFile.title ?? metadata.title
+            audiobook.author = cueFile.performer ?? metadata.author
+            audiobook.narrator = metadata.narrator
+            audiobook.duration = metadata.duration
+            audiobook.fileURL = localURL.path // Single file path
+            audiobook.dateAdded = Date()
+            audiobook.currentPosition = 0
+            audiobook.isFinished = false
+            
+            if let coverImage = metadata.coverImage {
+                audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
+            } else {
+                audiobookNeedingCover = audiobook
+            }
+            
+            // Add chapters from CUE file
+            for (index, track) in cueFile.tracks.enumerated() {
+                let chapter = Chapter(context: context)
+                chapter.id = UUID()
+                chapter.title = track.title
+                chapter.startTime = track.startTime
+                // Calculate end time (next track start or total duration)
+                let endTime = (index + 1 < cueFile.tracks.count) ? 
+                    cueFile.tracks[index + 1].startTime : metadata.duration
+                chapter.endTime = endTime
+                chapter.chapterNumber = Int16(track.number)
+                chapter.audiobook = audiobook
+            }
+            
+            print("✅ AudiobookManager: Created CUE-based audiobook record:")
+            print("   Title: \(audiobook.title ?? "Unknown")")
+            print("   Author: \(audiobook.author ?? "Unknown")")
+            print("   Duration: \(formatTime(metadata.duration))")
+            print("   Chapters: \(cueFile.tracks.count) (from CUE)")
+            print("   File Path: \(localURL.path)")
             
             persistenceController.save()
             fetchAudiobooks()
@@ -476,16 +565,26 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             }
         }
         
-        // Create unique folder name
+        // Create unique folder name with better duplicate handling
         let originalFolderName = sourceFolderURL.lastPathComponent
-        var destinationFolderURL = audiobooksDirectory.appendingPathComponent(originalFolderName)
+        let sanitizedFolderName = originalFolderName.replacingOccurrences(of: "[", with: "").replacingOccurrences(of: "]", with: "")
+        var destinationFolderURL = audiobooksDirectory.appendingPathComponent(sanitizedFolderName)
         var counter = 1
         
+        // Generate unique name if folder already exists
         while fileManager.fileExists(atPath: destinationFolderURL.path) {
-            let uniqueName = "\(originalFolderName)_\(counter)"
+            let uniqueName = "\(sanitizedFolderName) (\(counter))"
             destinationFolderURL = audiobooksDirectory.appendingPathComponent(uniqueName)
             counter += 1
+            
+            // Prevent infinite loop
+            if counter > 100 {
+                print("❌ AudiobookManager: Too many duplicate folders, aborting")
+                return nil
+            }
         }
+        
+        print("📂 AudiobookManager: Creating destination folder: \(destinationFolderURL.lastPathComponent)")
         
         do {
             // Create destination folder
@@ -493,13 +592,26 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             
             // Copy each audio file from the folder
             var totalCopiedSize: Int64 = 0
+            var copiedFiles = 0
             
             for folderChapter in folderAudiobook.chapters {
                 let sourceFileURL = sourceFolderURL.appendingPathComponent(folderChapter.fileName)
                 let destinationFileURL = destinationFolderURL.appendingPathComponent(folderChapter.fileName)
                 
+                // Check if source file exists
+                guard fileManager.fileExists(atPath: sourceFileURL.path) else {
+                    print("⚠️ AudiobookManager: Source file not found: \(folderChapter.fileName)")
+                    continue
+                }
+                
+                // If destination file already exists, remove it first
+                if fileManager.fileExists(atPath: destinationFileURL.path) {
+                    try fileManager.removeItem(at: destinationFileURL)
+                }
+                
                 try fileManager.copyItem(at: sourceFileURL, to: destinationFileURL)
                 totalCopiedSize += folderChapter.fileSize
+                copiedFiles += 1
                 
                 print("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
             }
@@ -518,9 +630,16 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             let manifestURL = destinationFolderURL.appendingPathComponent("audiobook_manifest.json")
             try manifestData.write(to: manifestURL)
             
+            guard copiedFiles > 0 else {
+                print("❌ AudiobookManager: No files were copied successfully")
+                // Clean up empty folder
+                try? fileManager.removeItem(at: destinationFolderURL)
+                return nil
+            }
+            
             print("✅ AudiobookManager: Folder copied successfully to: \(destinationFolderURL.path)")
             print("   Total size: \(ByteCountFormatter.string(fromByteCount: totalCopiedSize, countStyle: .file))")
-            print("   Files: \(folderAudiobook.chapters.count)")
+            print("   Files: \(copiedFiles)/\(folderAudiobook.chapters.count)")
             
             return destinationFolderURL
             
