@@ -105,7 +105,11 @@ struct SearchView: View {
                     ForEach(results, id: \.id) { book in
                         SearchResultRow(audiobook: book, query: debouncedQuery)
                             .contentShape(Rectangle())
-                            .onTapGesture { playerRouter?.present(book) }
+                            .onTapGesture {
+                                let audio = GlobalAudioManager.shared
+                                audio.loadAudiobook(book)
+                                audio.startPlayback()
+                            }
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "") : NSLocalizedString("Mark Read", comment: "")) {
                                     if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }

@@ -36,8 +36,10 @@ extension View {
         showMiniPlayer: Bool = true
     ) -> some View {
         let deps = PreviewDependencies()
+        
         let mockAudio = deps.audioManager as! MockGlobalAudioManager
         
+        mockAudio.currentAudiobook = PreviewContent.audiobookLong()
         mockAudio.playbackState = state
         mockAudio.setMockCurrentTime(currentTime)
         mockAudio.setMockDuration(duration)

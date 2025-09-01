@@ -127,6 +127,13 @@ struct LibraryView: View {
 
         return sortedBooks
     }
+
+    // MARK: - Actions
+    private func playInMini(_ audiobook: AudiobookModel) {
+        let audio = GlobalAudioManager.shared
+        audio.loadAudiobook(audiobook)
+        audio.startPlayback()
+    }
     
     private var continueReadingBooks: [AudiobookModel] {
         audiobookManager.audiobooks
@@ -202,7 +209,7 @@ struct LibraryView: View {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     LazyHStack(spacing: 16) {
                                         ForEach(continueReadingBooks, id: \.id) { audiobook in
-                                            ContinueReadingCardView(audiobook: audiobook) { playerRouter?.present(audiobook) }
+                                            ContinueReadingCardView(audiobook: audiobook) { playInMini(audiobook) }
                                         }
                                     }
                                     .padding(.horizontal, 4)
@@ -267,7 +274,7 @@ struct LibraryView: View {
                                     ScrollView(.horizontal, showsIndicators: false) {
                                         LazyHStack(spacing: 16) {
                                             ForEach(continueReadingBooks, id: \.id) { audiobook in
-                                                ContinueReadingCardView(audiobook: audiobook) { playerRouter?.present(audiobook) }
+                                                ContinueReadingCardView(audiobook: audiobook) { playInMini(audiobook) }
                                             }
                                         }
                                         .padding(.horizontal)
@@ -301,7 +308,7 @@ struct LibraryView: View {
                                             GridItem(.flexible(), spacing: 16)
                                         ], spacing: 16) {
                                             ForEach(filteredAudiobooks, id: \.id) { audiobook in
-                                                AudiobookGridItemView(audiobook: audiobook) { playerRouter?.present(audiobook) }
+                                                AudiobookGridItemView(audiobook: audiobook) { playInMini(audiobook) }
                                                 .contextMenu {
                                                     Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                                         audiobookToRename = audiobook
@@ -480,7 +487,7 @@ struct StatisticsCardView: View {
 extension LibraryView {
     @ViewBuilder
     private func libraryRow(audiobook: AudiobookModel) -> some View {
-        EnhancedAudiobookRowView(audiobook: audiobook) { playerRouter?.present(audiobook) }
+        EnhancedAudiobookRowView(audiobook: audiobook) { playInMini(audiobook) }
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))

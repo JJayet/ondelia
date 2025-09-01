@@ -6,6 +6,7 @@ struct MainTabView: View {
     @StateObject private var playerRouter = PlayerRouter()
     @State private var selectedTab = 1
     @State private var searchText: String = ""
+    @Namespace private var namespace
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -22,7 +23,6 @@ struct MainTabView: View {
                 systemImage: "books.vertical.fill",
                 value: 1
             ) {
-                // Library Tab
                 LibraryView()
             }
 
@@ -45,28 +45,23 @@ struct MainTabView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
-        // Mini player is now handled by the sheet's mini detent inside PlayerView
+        .tabViewBottomAccessory {
+            if let book = globalAudioManager.currentAudiobook {
+                MiniPlayerBar()
+                    .matchedTransitionSource(id: "MINIPLAYER", in: namespace)
+                    .onTapGesture {
+                        playerRouter.present(book)
+                    }
+            }
+        }
         .searchable(text: $searchText)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
         .environment(\.theme, themeManager)
         .environment(\.playerRouter, playerRouter)
-        .sheet(item: $playerRouter.presented) { presentation in
-            PlayerSheetView(bookID: presentation.id)
-                .environment(\.playerRouter, playerRouter)
-                .presentationDetents([.height(92), .large], selection: $playerRouter.selectedDetent)
-                .presentationDragIndicator(.visible)
-                .interactiveDismissDisabled(true)
+        .fullScreenCover(item: $playerRouter.presented) { presentation in
+            PlayerSheetView(bookID: presentation.id).navigationTransition(.zoom(sourceID: "MINIPLAYER", in: namespace))
         }
 
     }
-}
-
-#Preview("Empty") {
-    MainTabView()
-}
-
-#Preview("With books") {
-    MainTabView()
-        .previewWithMockAudio()
 }

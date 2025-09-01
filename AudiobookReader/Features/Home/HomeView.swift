@@ -210,9 +210,6 @@ struct HomeView: View {
                 audiobookManager.fetchAudiobooks()
             }
         }
-        .fullScreenCover(item: $selectedAudiobook) { audiobook in
-            PlayerView(audiobook: audiobook)
-        }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
         .onAppear {
