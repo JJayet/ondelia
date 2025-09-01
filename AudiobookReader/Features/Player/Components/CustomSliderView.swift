@@ -6,12 +6,12 @@ struct PlayerProgressSlider: View {
     let onEditingChanged: (Bool) -> Void
     @State private var isDragging = false
     @State private var localValue: Double = 0
-    @State private var seekTimer: Timer?
-    @State private var pendingSeekValue: Double?
+    @State private var committedTarget: Double? = nil
     
     var body: some View {
         GeometryReader { geometry in
-            let percentage = (isDragging ? localValue : value - range.lowerBound) / (range.upperBound - range.lowerBound)
+            let useLocal = isDragging || committedTarget != nil
+            let percentage = (useLocal ? localValue : value - range.lowerBound) / (range.upperBound - range.lowerBound)
             let clampedPercentage = min(max(percentage, 0), 1)
             
             ZStack(alignment: .leading) {
@@ -41,51 +41,36 @@ struct PlayerProgressSlider: View {
                             localValue = value - range.lowerBound
                             onEditingChanged(true)
                         }
-                        
+
                         let percentage = max(0, min(1, gesture.location.x / geometry.size.width))
                         localValue = (range.upperBound - range.lowerBound) * percentage
-                        let newValue = range.lowerBound + localValue
-                        
-                        // Store the pending value and set up debounced seeking
-                        pendingSeekValue = newValue
-                        scheduleSeek()
+                        // NOTE: Do not update external value while dragging
                     }
-                    .onEnded { _ in
-                        isDragging = false
-                        
-                        // Cancel any pending seek timer
-                        seekTimer?.invalidate()
-                        seekTimer = nil
-                        
-                        // Perform final seek if there's a pending value
-                        if let pendingValue = pendingSeekValue {
-                            value = pendingValue
-                            pendingSeekValue = nil
-                        }
-                        
+                    .onEnded { gesture in
+                        // Commit the seek on release BEFORE ending drag state to avoid flicker
+                        let percentage = max(0, min(1, gesture.location.x / geometry.size.width))
+                        let committed = range.lowerBound + (range.upperBound - range.lowerBound) * percentage
+                        // Display the committed position until external value catches up
+                        localValue = committed - range.lowerBound
+                        committedTarget = committed
+                        // Update binding (triggers seek)
+                        value = committed
+                        // Notify end of editing
                         onEditingChanged(false)
+                        // Now end drag state
+                        isDragging = false
                     }
             )
             // Tap to seek can be implemented with a GestureDetector capturing location; removed here to avoid invalid signature
         }
         .frame(height: 44) // Larger touch target
         .onAppear { localValue = value - range.lowerBound }
-        .onDisappear {
-            // Clean up timer when view disappears
-            seekTimer?.invalidate()
-            seekTimer = nil
-        }
-    }
-    
-    private func scheduleSeek() {
-        // Cancel previous timer
-        seekTimer?.invalidate()
-        
-        // Use shorter debounce for better responsiveness while still preventing excessive seeks
-        seekTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-            if let pendingValue = pendingSeekValue {
-                value = pendingValue
-                pendingSeekValue = nil
+        .onChange(of: value) { new in
+            // Clear committed override once external value is in place
+            if let target = committedTarget {
+                if abs(new - target) <= max(0.15, 0.005 * (range.upperBound - range.lowerBound)) {
+                    committedTarget = nil
+                }
             }
         }
     }

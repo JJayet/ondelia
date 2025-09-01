@@ -236,6 +236,7 @@ struct LibraryView: View {
                             EmptyLibraryView()
                             .listRowBackground(Color.clear)
                             .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
                         } else {
                             if audiobookManager.isImporting {
                                 ImportingIndicatorView()

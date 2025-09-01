@@ -502,6 +502,7 @@ struct EmptyLibraryView: View {
             }
         }
         .padding(32)
+        .frame(maxWidth: .infinity)
     }
 }
 
