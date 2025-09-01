@@ -6,18 +6,19 @@
 //
 
 import SwiftUI
+import SwiftData
 import WidgetKit
 
 @main
 struct AudiobookReaderApp: App {
     // Use StateObject for proper SwiftUI lifecycle management
-    @StateObject private var persistenceController = PersistenceController.shared
+    @StateObject private var swiftDataController = SwiftDataController.shared
     @StateObject private var globalAudioManager = GlobalAudioManager.shared
     
     var body: some Scene {
         WindowGroup {
-            // Show a loading view only during initial Core Data loading
-            if persistenceController.isLoading {
+            // Show a loading view only during initial SwiftData loading
+            if swiftDataController.isLoading {
                 // Optimized loading view that doesn't block
                 VStack(spacing: 16) {
                     ProgressView()
@@ -30,9 +31,9 @@ struct AudiobookReaderApp: App {
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
             } else {
-                // Main app content - loads immediately once Core Data setup is complete
+                // Main app content - loads immediately once SwiftData setup is complete
                 MainTabView()
-                    .environment(\.managedObjectContext, persistenceController.context)
+                    .modelContainer(swiftDataController.container)
                     .environment(\.theme, ThemeManager.shared)
                     .environmentObject(globalAudioManager)
                     .onAppear {
@@ -56,8 +57,8 @@ struct AudiobookReaderApp: App {
             let audiobookManager = AudiobookManager()
             audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
             
-            // Save Core Data context
-            try? persistenceController.context.save()
+            // Save SwiftData context
+            swiftDataController.save()
         }
     }
     

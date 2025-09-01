@@ -2,19 +2,22 @@ import SwiftUI
 import UIKit
 
 struct PlayerView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     @Environment(\.dependencies) private var deps
     @StateObject private var statistics: ReadingStatistics
+    @StateObject private var viewModel: PlayerViewModel
     
     // Access dependencies through the container
     private var audioManager: any AudioManagerProtocol { deps.audioManager }
     private var themeManager: any ThemeManagerProtocol { deps.themeManager }
     private var audiobookManager: AudiobookManagerProtocol { deps.audiobookManager }
     
-    init(audiobook: Audiobook, dependencies: AudiobookDependencies? = nil) {
+    init(audiobook: AudiobookModel, dependencies: AudiobookDependencies? = nil) {
         self.audiobook = audiobook
         let deps = dependencies ?? (ProcessInfo.isPreview ? PreviewDependencies() : LiveDependencies())
-        self._statistics = StateObject(wrappedValue: deps.createReadingStatistics() as! ReadingStatistics)
+        let stats = deps.createReadingStatistics() as! ReadingStatistics
+        self._statistics = StateObject(wrappedValue: stats)
+        self._viewModel = StateObject(wrappedValue: PlayerViewModel(audiobook: audiobook, dependencies: deps, statistics: stats))
     }
     @State private var showingBookmarks = false
     @State private var showingAddBookmark = false
@@ -23,28 +26,26 @@ struct PlayerView: View {
     @State private var showingTranscription = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
-    @State private var sleepTimer: Timer?
-    @State private var sleepTimeRemaining: TimeInterval = 0
     @State private var isSeekingManually = false
     @State private var isMiniplayer = false // New state for miniplayer mode
     @State private var dragOffset: CGFloat = 0 // Track drag offset
     @State private var miniPlayerDragOffset: CGFloat = 0 // Track mini player drag
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     private var coverImage: UIImage? {
         guard let data = audiobook.coverImageData else { return nil }
         return UIImage(data: data)
     }
     
-    private var chapters: [Chapter] {
-        (audiobook.chapters?.allObjects as? [Chapter] ?? []).sorted { $0.chapterNumber < $1.chapterNumber }
+    private var chapters: [ChapterModel] {
+        audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
     }
     
-    private var bookmarks: [Bookmark] {
-        (audiobook.bookmarks?.allObjects as? [Bookmark] ?? []).sorted { $0.timestamp < $1.timestamp }
+    private var bookmarks: [BookmarkModel] {
+        audiobook.bookmarks.sorted { $0.timestamp < $1.timestamp }
     }
     
-    private var currentChapter: Chapter? {
+    private var currentChapter: ChapterModel? {
         let currentTime = audioManager.getCurrentTime()
         return chapters.first { chapter in
             currentTime >= chapter.startTime && currentTime < chapter.endTime
@@ -53,22 +54,10 @@ struct PlayerView: View {
         }
     }
     
-    private var isPlaying: Bool {
-        // Use the published playback state for better UI responsiveness
-        return audioManager.playbackState == .playing
-    }
-    
-    private var currentTime: TimeInterval {
-        audioManager.getCurrentTime()
-    }
-    
-    private var duration: TimeInterval {
-        audioManager.getDuration()
-    }
-    
-    private var playbackRate: Float {
-        audioManager.getPlaybackRate()
-    }
+    private var isPlaying: Bool { viewModel.isPlaying }
+    private var currentTime: TimeInterval { viewModel.currentTime }
+    private var duration: TimeInterval { viewModel.duration }
+    private var playbackRate: Float { viewModel.playbackRate }
 
     var body: some View {
         GeometryReader { geometry in
@@ -78,26 +67,14 @@ struct PlayerView: View {
                 fullPlayerView(geometry: geometry)
             }
         }
-        .navigationBarHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
         .onAppear {
-            loadAudiobook()
-            // Auto-play when entering the player
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                if audioManager.playbackState != .playing {
-                    audioManager.startPlayback()
-                }
-            }
+            viewModel.load()
+            viewModel.autoPlayIfNeeded()
         }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            if !isSeekingManually && isPlaying {
-                let currentPlaybackTime = audioManager.getCurrentTime()
-                audiobookManager.updateProgress(for: audiobook, currentTime: currentPlaybackTime)
-                statistics.addListeningTime(1, playbackRate: playbackRate)
-                
-                if audiobook.isFinished && !audiobook.isFinished {
-                    statistics.markBookCompleted()
-                }
-            }
+            viewModel.isSeekingManually = isSeekingManually
+            viewModel.onTick()
         }
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(audiobook: audiobook, globalAudioManager: audioManager as! GlobalAudioManager)
@@ -136,23 +113,22 @@ struct PlayerView: View {
                 currentTime: currentTime
             )
         }
-        .actionSheet(isPresented: $showingSleepTimer) {
-            ActionSheet(
-                title: Text(NSLocalizedString("Sleep Timer", comment: "Sleep timer action sheet title")),
-                message: Text(NSLocalizedString("Choose when to stop playback", comment: "Sleep timer action sheet message")),
-                buttons: [
-                    .default(Text(NSLocalizedString("5 minutes", comment: "5 minute sleep timer option"))) { setSleepTimer(300) },
-                    .default(Text(NSLocalizedString("10 minutes", comment: "10 minute sleep timer option"))) { setSleepTimer(600) },
-                    .default(Text(NSLocalizedString("15 minutes", comment: "15 minute sleep timer option"))) { setSleepTimer(900) },
-                    .default(Text(NSLocalizedString("30 minutes", comment: "30 minute sleep timer option"))) { setSleepTimer(1800) },
-                    .default(Text(NSLocalizedString("End of chapter", comment: "End of chapter sleep timer option"))) { setSleepTimerEndOfChapter() },
-                    .destructive(Text(NSLocalizedString("Cancel timer", comment: "Cancel sleep timer option"))) { cancelSleepTimer() },
-                    .cancel()
-                ]
-            )
+        .confirmationDialog(
+            Text(NSLocalizedString("Sleep Timer", comment: "Sleep timer title")),
+            isPresented: $showingSleepTimer,
+            titleVisibility: .visible
+        ) {
+            Button(NSLocalizedString("5 minutes", comment: "")) { viewModel.setSleepTimer(300) }
+            Button(NSLocalizedString("10 minutes", comment: "")) { viewModel.setSleepTimer(600) }
+            Button(NSLocalizedString("15 minutes", comment: "")) { viewModel.setSleepTimer(900) }
+            Button(NSLocalizedString("30 minutes", comment: "")) { viewModel.setSleepTimer(1800) }
+            Button(NSLocalizedString("End of chapter", comment: "")) {
+                viewModel.setSleepTimerEndOfChapter(currentChapter: currentChapter, currentTime: currentTime)
+            }
+            Button(NSLocalizedString("Cancel timer", comment: ""), role: .destructive) { viewModel.cancelSleepTimer() }
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .accentColor(themeManager.accentColor.color)
+        .tint(themeManager.accentColor.color)
     }
     
     // MARK: - Full Player View
@@ -179,7 +155,7 @@ struct PlayerView: View {
                             .onEnded { value in
                                 if value.translation.height > 100 { // Threshold for dismissing to library
                                     // Dismiss the fullScreenCover to return to library (where MiniPlayerView will show)
-                                    presentationMode.wrappedValue.dismiss()
+                                    dismiss()
                                 } else {
                                     withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                         dragOffset = 0
@@ -274,7 +250,6 @@ struct PlayerView: View {
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
-            .padding(.horizontal, 16)
             .padding(.bottom, 50) // 50px from bottom
             .offset(y: miniPlayerDragOffset)
             .onTapGesture {
@@ -295,7 +270,7 @@ struct PlayerView: View {
                         if value.translation.height > 50 { // Dismiss threshold
                             // Stop playback and dismiss
                             audioManager.pausePlayback()
-                            presentationMode.wrappedValue.dismiss()
+                            dismiss()
                         } else {
                             withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
                                 miniPlayerDragOffset = 0
@@ -358,7 +333,7 @@ struct PlayerView: View {
         HStack {
             Button {
                 // Dismiss to return to library (where MiniPlayerView will appear)
-                presentationMode.wrappedValue.dismiss()
+                dismiss()
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.title2)
@@ -370,8 +345,8 @@ struct PlayerView: View {
             Button {
                 showingSleepTimer = true
             } label: {
-                if sleepTimeRemaining > 0 {
-                    Label(formatTime(sleepTimeRemaining), systemImage: "moon.fill")
+                if viewModel.sleepTimeRemaining > 0 {
+                    Label(formatTime(viewModel.sleepTimeRemaining), systemImage: "moon.fill")
                         .font(.caption)
                         .foregroundColor(.accentColor)
                 } else {
@@ -435,7 +410,7 @@ struct PlayerView: View {
     @ViewBuilder
     private var progressSlider: some View {
         VStack(spacing: 8) {
-            CustomSlider(
+            PlayerProgressSlider(
                 value: Binding(
                     get: { currentTime },
                     set: { newValue in
@@ -560,20 +535,20 @@ struct PlayerView: View {
     @ViewBuilder
     private var actionButtons: some View {
         HStack(spacing: 16) {
-            ActionButton(icon: "bookmark", title: NSLocalizedString("Bookmarks", comment: "Bookmarks button title"), count: bookmarks.count) {
+            PlayerActionButton(icon: "bookmark", title: NSLocalizedString("Bookmarks", comment: "Bookmarks button title"), count: bookmarks.count) {
                 showingBookmarks = true
             }
             
-            ActionButton(icon: "bookmark.circle", title: NSLocalizedString("Add Bookmark", comment: "Add bookmark button title")) {
+            PlayerActionButton(icon: "bookmark.circle", title: NSLocalizedString("Add Bookmark", comment: "Add bookmark button title")) {
                 showingAddBookmark = true
             }
             
-            ActionButton(icon: "doc.text", title: NSLocalizedString("Transcript", comment: "Transcription button title")) {
+            PlayerActionButton(icon: "doc.text", title: NSLocalizedString("Transcript", comment: "Transcription button title")) {
                 showingTranscription = true
             }
             
             if !chapters.isEmpty {
-                ActionButton(icon: "list.bullet", title: NSLocalizedString("Chapters", comment: "Chapters button title"), count: chapters.count) {
+                PlayerActionButton(icon: "list.bullet", title: NSLocalizedString("Chapters", comment: "Chapters button title"), count: chapters.count) {
                     showingChapterList = true
                 }
             }
@@ -586,33 +561,7 @@ struct PlayerView: View {
         audioManager.loadAudiobook(audiobook)
     }
     
-    private func setSleepTimer(_ seconds: TimeInterval) {
-        cancelSleepTimer()
-        sleepTimeRemaining = seconds
-        
-        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { timer in
-            sleepTimeRemaining -= 1
-            
-            if sleepTimeRemaining <= 0 {
-                audioManager.pausePlayback()
-                timer.invalidate()
-                sleepTimer = nil
-            }
-        }
-    }
-    
-    private func setSleepTimerEndOfChapter() {
-        guard let currentChapter = currentChapter else { return }
-        let currentTime = audioManager.getCurrentTime()
-        let remainingTime = currentChapter.endTime - currentTime
-        setSleepTimer(max(remainingTime, 60)) // Minimum 1 minute
-    }
-    
-    private func cancelSleepTimer() {
-        sleepTimer?.invalidate()
-        sleepTimer = nil
-        sleepTimeRemaining = 0
-    }
+    // Sleep timer is handled by PlayerViewModel
     
     private func formatTime(_ time: TimeInterval) -> String {
         let hours = Int(time) / 3600
@@ -642,6 +591,7 @@ struct PlayerView: View {
     }
 }
 
+#if false
 struct ActionButton: View {
     let icon: String
     let title: String
@@ -676,103 +626,9 @@ struct ActionButton: View {
         .buttonStyle(PlainButtonStyle())
     }
 }
+#endif
 
-struct CustomSlider: View {
-    @Binding var value: Double
-    let range: ClosedRange<Double>
-    let onEditingChanged: (Bool) -> Void
-    @State private var isDragging = false
-    @State private var localValue: Double = 0
-    @State private var seekTimer: Timer?
-    @State private var pendingSeekValue: Double?
-    
-    var body: some View {
-        GeometryReader { geometry in
-            let percentage = (isDragging ? localValue : value - range.lowerBound) / (range.upperBound - range.lowerBound)
-            let clampedPercentage = min(max(percentage, 0), 1)
-            
-            ZStack(alignment: .leading) {
-                // Track
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.secondaryBackground)
-                    .frame(height: 4)
-                
-                // Progress
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(Color.accentColor)
-                    .frame(width: geometry.size.width * clampedPercentage, height: 4)
-                
-                // Thumb
-                Circle()
-                    .fill(Color.accentColor)
-                    .frame(width: isDragging ? 24 : 20, height: isDragging ? 24 : 20)
-                    .offset(x: geometry.size.width * clampedPercentage - (isDragging ? 12 : 10))
-                    .animation(.easeInOut(duration: 0.1), value: isDragging)
-            }
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { gesture in
-                        if !isDragging {
-                            isDragging = true
-                            localValue = value - range.lowerBound
-                            onEditingChanged(true)
-                        }
-                        
-                        let percentage = max(0, min(1, gesture.location.x / geometry.size.width))
-                        localValue = (range.upperBound - range.lowerBound) * percentage
-                        let newValue = range.lowerBound + localValue
-                        
-                        // Store the pending value and set up debounced seeking
-                        pendingSeekValue = newValue
-                        scheduleSeek()
-                    }
-                    .onEnded { _ in
-                        isDragging = false
-                        
-                        // Cancel any pending seek timer
-                        seekTimer?.invalidate()
-                        seekTimer = nil
-                        
-                        // Perform final seek if there's a pending value
-                        if let pendingValue = pendingSeekValue {
-                            value = pendingValue
-                            pendingSeekValue = nil
-                        }
-                        
-                        onEditingChanged(false)
-                    }
-            )
-            .onTapGesture { location in
-                let percentage = max(0, min(1, location.x / geometry.size.width))
-                let newValue = range.lowerBound + (range.upperBound - range.lowerBound) * percentage
-                value = newValue
-            }
-        }
-        .frame(height: 44) // Larger touch target
-        .onAppear {
-            localValue = value - range.lowerBound
-        }
-        .onDisappear {
-            // Clean up timer when view disappears
-            seekTimer?.invalidate()
-            seekTimer = nil
-        }
-    }
-    
-    private func scheduleSeek() {
-        // Cancel previous timer
-        seekTimer?.invalidate()
-        
-        // Use shorter debounce for better responsiveness while still preventing excessive seeks
-        seekTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: false) { _ in
-            if let pendingValue = pendingSeekValue {
-                value = pendingValue
-                pendingSeekValue = nil
-            }
-        }
-    }
-}
+// CustomSlider moved to Components/CustomSliderView.swift
 
 #Preview("Player View - Playing") {
     PlayerView(audiobook: PreviewContent.audiobook())

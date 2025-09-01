@@ -1,14 +1,14 @@
 import Foundation
-import CoreData
+import SwiftData
 import UIKit
 
 class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
-    private let persistenceController = PersistenceController.shared
+    private let swiftDataController = SwiftDataController.shared
     
-    @Published var audiobooks: [Audiobook] = []
+    @Published var audiobooks: [AudiobookModel] = []
     @Published var isImporting = false
     @Published var isLoadingLibrary = false
-    @Published var audiobookNeedingCover: Audiobook?
+    @Published var audiobookNeedingCover: AudiobookModel?
     
     private var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
     
@@ -17,16 +17,51 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         // This will be called by views when they appear
     }
     
-    func getBookmarks(for audiobook: Audiobook) -> [Bookmark] {
-        return (audiobook.bookmarks?.allObjects as? [Bookmark] ?? [])
+    func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {
+        return audiobook.bookmarks
     }
     
-    func markAsFinished(_ audiobook: Audiobook) {
+    func markAsFinished(_ audiobook: AudiobookModel) {
         audiobook.isFinished = true
     }
     
-    func resetProgress(for audiobook: Audiobook) {
+    func resetProgress(for audiobook: AudiobookModel) {
         audiobook.currentPosition = 0
+    }
+    
+    func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval) {
+        audiobook.currentPosition = currentTime
+        audiobook.lastPlayed = Date()
+        
+        // Mark as finished if within 30 seconds of the end
+        if audiobook.duration > 0 && (audiobook.duration - currentTime) <= 30 {
+            audiobook.isFinished = true
+        }
+        
+        swiftDataController.save()
+    }
+    
+    @MainActor
+    func createBookmark(for audiobook: AudiobookModel, at timestamp: TimeInterval, title: String, note: String? = nil) {
+        let context = swiftDataController.context
+        let bookmark = BookmarkModel(
+            title: title,
+            note: note,
+            timestamp: timestamp,
+            dateCreated: Date()
+        )
+        
+        bookmark.audiobook = audiobook
+        context.insert(bookmark)
+        
+        swiftDataController.save()
+    }
+    
+    @MainActor
+    func deleteBookmark(_ bookmark: BookmarkModel) {
+        let context = swiftDataController.context
+        context.delete(bookmark)
+        swiftDataController.save()
     }
     
     
@@ -43,20 +78,20 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                 self.isLoadingLibrary = true
             }
             
-            let request: NSFetchRequest<Audiobook> = Audiobook.fetchRequest()
-            request.sortDescriptors = [NSSortDescriptor(keyPath: \Audiobook.lastPlayed, ascending: false),
-                                     NSSortDescriptor(keyPath: \Audiobook.dateAdded, ascending: false)]
-            
-            // Optimize fetch with prefetching relationships
-            request.relationshipKeyPathsForPrefetching = ["chapters", "bookmarks"]
-            request.returnsObjectsAsFaults = false
+            let context = self.swiftDataController.context
+            let descriptor = FetchDescriptor<AudiobookModel>(
+                sortBy: [
+                    SortDescriptor(\.lastPlayed, order: .reverse),
+                    SortDescriptor(\.dateAdded, order: .reverse)
+                ]
+            )
             
             do {
-                let fetchedAudiobooks = try self.persistenceController.context.fetch(request)
+                let fetchedAudiobooks = try context.fetch(descriptor)
                 
                 // Validate file existence and filter out missing files (on background queue)
-                var validAudiobooks: [Audiobook] = []
-                var audiobooksToDelete: [Audiobook] = []
+                var validAudiobooks: [AudiobookModel] = []
+                var audiobooksToDelete: [AudiobookModel] = []
                 
                 for audiobook in fetchedAudiobooks {
                     if self.validateAudiobookFile(audiobook) {
@@ -76,21 +111,17 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                     self.processPendingImports()
                 }
                 
-                // Handle deletions and saving on background context
+                // Handle deletions
                 if !audiobooksToDelete.isEmpty {
-                    let backgroundContext = self.persistenceController.backgroundContext()
-                    backgroundContext.performAndWait {
-                        for audiobook in audiobooksToDelete {
-                            if let objectID = backgroundContext.object(with: audiobook.objectID) as? Audiobook {
-                                backgroundContext.delete(objectID)
-                            }
-                        }
-                        
-                        do {
-                            try backgroundContext.save()
-                        } catch {
-                            print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
-                        }
+                    let backgroundContext = self.swiftDataController.backgroundContext()
+                    for audiobook in audiobooksToDelete {
+                        backgroundContext.delete(audiobook)
+                    }
+                    
+                    do {
+                        try backgroundContext.save()
+                    } catch {
+                        print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
                     }
                 }
             } catch {
@@ -102,7 +133,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
     }
     
-    private func validateAudiobookFile(_ audiobook: Audiobook) -> Bool {
+    private func validateAudiobookFile(_ audiobook: AudiobookModel) -> Bool {
         guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
             print("⚠️ AudiobookManager: No file path for audiobook '\(audiobook.title ?? "Unknown")'")
             return false
@@ -243,8 +274,8 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         
         // Create audiobook entity with multiple files
         await MainActor.run {
-            let context = persistenceController.context
-            let audiobook = Audiobook(context: context)
+            let context = swiftDataController.context
+            let audiobook = AudiobookModel()
             
             audiobook.id = UUID()
             audiobook.title = folderAudiobook.title
@@ -262,14 +293,18 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             
             // Add chapters from folder structure
             for folderChapter in folderAudiobook.chapters {
-                let chapter = Chapter(context: context)
-                chapter.id = UUID()
-                chapter.title = folderChapter.title
-                chapter.startTime = folderChapter.startTimeInBook
-                chapter.endTime = folderChapter.startTimeInBook + folderChapter.duration
-                chapter.chapterNumber = Int16(folderChapter.chapterNumber)
+                let chapter = ChapterModel(
+                    title: folderChapter.title,
+                    chapterNumber: Int16(folderChapter.chapterNumber),
+                    startTime: folderChapter.startTimeInBook,
+                    endTime: folderChapter.startTimeInBook + folderChapter.duration
+                )
                 chapter.audiobook = audiobook
+                context.insert(chapter)
             }
+            
+            // Insert the audiobook into the context
+            context.insert(audiobook)
             
             print("✅ AudiobookManager: Created multi-file audiobook record:")
             print("   Title: \(folderAudiobook.title)")
@@ -278,7 +313,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             print("   Chapters: \(folderAudiobook.chapters.count)")
             print("   Folder Path: \(localFolderURL.path)")
             
-            persistenceController.save()
+            swiftDataController.save()
             fetchAudiobooks()
             isImporting = false
         }
@@ -309,8 +344,8 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         
         // Create audiobook entity (single file, not folder)
         await MainActor.run {
-            let context = persistenceController.context
-            let audiobook = Audiobook(context: context)
+            let context = swiftDataController.context
+            let audiobook = AudiobookModel()
             
             audiobook.id = UUID()
             // Use CUE metadata where available, fallback to audio metadata
@@ -331,17 +366,21 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             
             // Add chapters from CUE file
             for (index, track) in cueFile.tracks.enumerated() {
-                let chapter = Chapter(context: context)
-                chapter.id = UUID()
-                chapter.title = track.title
-                chapter.startTime = track.startTime
                 // Calculate end time (next track start or total duration)
                 let endTime = (index + 1 < cueFile.tracks.count) ? 
                     cueFile.tracks[index + 1].startTime : metadata.duration
-                chapter.endTime = endTime
-                chapter.chapterNumber = Int16(track.number)
+                let chapter = ChapterModel(
+                    title: track.title,
+                    chapterNumber: Int16(track.number),
+                    startTime: track.startTime,
+                    endTime: endTime
+                )
                 chapter.audiobook = audiobook
+                context.insert(chapter)
             }
+            
+            // Insert the audiobook into the context
+            context.insert(audiobook)
             
             print("✅ AudiobookManager: Created CUE-based audiobook record:")
             print("   Title: \(audiobook.title ?? "Unknown")")
@@ -350,7 +389,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             print("   Chapters: \(cueFile.tracks.count) (from CUE)")
             print("   File Path: \(localURL.path)")
             
-            persistenceController.save()
+            swiftDataController.save()
             fetchAudiobooks()
             isImporting = false
         }
@@ -416,8 +455,8 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         
         // Create audiobook entity
         await MainActor.run {
-            let context = persistenceController.context
-            let audiobook = Audiobook(context: context)
+            let context = swiftDataController.context
+            let audiobook = AudiobookModel()
             
             audiobook.id = UUID()
             audiobook.title = metadata.title
@@ -443,29 +482,34 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             
             // Add chapters
             for chapterInfo in chapterInfos {
-                let chapter = Chapter(context: context)
-                chapter.id = UUID()
-                chapter.title = chapterInfo.title
-                chapter.startTime = chapterInfo.startTime
-                chapter.endTime = chapterInfo.endTime
-                chapter.chapterNumber = Int16(chapterInfo.chapterNumber)
+                let chapter = ChapterModel(
+                    title: chapterInfo.title,
+                    chapterNumber: Int16(chapterInfo.chapterNumber),
+                    startTime: chapterInfo.startTime,
+                    endTime: chapterInfo.endTime
+                )
                 chapter.audiobook = audiobook
+                context.insert(chapter)
             }
             
-            persistenceController.save()
+            // Insert the audiobook into the context
+            context.insert(audiobook)
+            
+            swiftDataController.save()
             fetchAudiobooks()
             isImporting = false
         }
     }
     
     // MARK: - Cover Image Management
-    func updateCoverImage(for audiobook: Audiobook, with image: UIImage) {
+    @MainActor
+    func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
         audiobook.coverImageData = image.jpegData(compressionQuality: 0.8)
-        persistenceController.save()
+        swiftDataController.save()
         fetchAudiobooks()
         
         // Clear the needing cover flag if this was the audiobook that needed it
-        if audiobookNeedingCover?.objectID == audiobook.objectID {
+        if audiobookNeedingCover?.persistentModelID == audiobook.persistentModelID {
             audiobookNeedingCover = nil
         }
     }
@@ -682,41 +726,30 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
     }
     
-    // MARK: - Progress Management
-    func updateProgress(for audiobook: Audiobook, currentTime: TimeInterval) {
-        audiobook.currentPosition = currentTime
-        audiobook.lastPlayed = Date()
-        
-        // Mark as finished if within 30 seconds of the end
-        if audiobook.duration > 0 && (audiobook.duration - currentTime) <= 30 {
-            audiobook.isFinished = true
-        }
-        
-        persistenceController.save()
-    }
+    // MARK: - Progress Management (duplicate removed - the real implementation is earlier)
     
     // MARK: - Bookmark Management
-    func createBookmark(for audiobook: Audiobook, at timestamp: TimeInterval, title: String, note: String? = nil) {
-        let context = persistenceController.context
-        let bookmark = Bookmark(context: context)
-        
-        bookmark.id = UUID()
-        bookmark.title = title
-        bookmark.note = note
-        bookmark.timestamp = timestamp
-        bookmark.dateCreated = Date()
+    @MainActor
+    func createBookmarkLegacy(for audiobook: AudiobookModel, at timestamp: TimeInterval, title: String, note: String? = nil) {
+        // This is a duplicate - the real createBookmark using SwiftData is earlier in the file
+        let context = swiftDataController.context
+        let bookmark = BookmarkModel(
+            title: title,
+            note: note,
+            timestamp: timestamp,
+            dateCreated: Date()
+        )
         bookmark.audiobook = audiobook
+        context.insert(bookmark)
         
-        persistenceController.save()
+        swiftDataController.save()
     }
     
-    func deleteBookmark(_ bookmark: Bookmark) {
-        persistenceController.context.delete(bookmark)
-        persistenceController.save()
-    }
+    // Legacy deleteBookmarkOld function removed - using SwiftData deleteBookmark instead
     
     // MARK: - Library Management
-    func deleteAudiobook(_ audiobook: Audiobook) {
+    @MainActor
+    func deleteAudiobook(_ audiobook: AudiobookModel) {
         // Delete physical file
         if let filePath = audiobook.fileURL, !filePath.isEmpty {
             let fileURL = URL(fileURLWithPath: filePath)
@@ -724,39 +757,42 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
         
         // Delete from Core Data
-        persistenceController.context.delete(audiobook)
-        persistenceController.save()
+        swiftDataController.context.delete(audiobook)
+        swiftDataController.save()
         fetchAudiobooks()
     }
     
-    func renameAudiobook(_ audiobook: Audiobook, newTitle: String) {
+    @MainActor
+    func renameAudiobook(_ audiobook: AudiobookModel, newTitle: String) {
         guard !newTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         
         audiobook.title = newTitle.trimmingCharacters(in: .whitespacesAndNewlines)
-        persistenceController.save()
+        swiftDataController.save()
         fetchAudiobooks()
         
         print("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
     }
     
-    func markAsRead(_ audiobook: Audiobook) {
+    @MainActor
+    func markAsRead(_ audiobook: AudiobookModel) {
         audiobook.isFinished = true
         audiobook.currentPosition = audiobook.duration // Set to end
-        persistenceController.save()
+        swiftDataController.save()
         fetchAudiobooks()
         
         print("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
     }
     
-    func markAsUnread(_ audiobook: Audiobook) {
+    @MainActor
+    func markAsUnread(_ audiobook: AudiobookModel) {
         audiobook.isFinished = false
-        persistenceController.save()
+        swiftDataController.save()
         fetchAudiobooks()
         
         print("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")
     }
     
-    func searchAudiobooks(query: String) -> [Audiobook] {
+    func searchAudiobooks(query: String) -> [AudiobookModel] {
         guard !query.isEmpty else { return audiobooks }
         
         return audiobooks.filter { audiobook in

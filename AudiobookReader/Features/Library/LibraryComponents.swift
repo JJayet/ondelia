@@ -4,90 +4,82 @@ struct LibraryHeaderView: View {
     @Binding var viewMode: LibraryView.ViewMode
     @Binding var sortOption: LibraryView.SortOption
     @Binding var filterOption: LibraryView.FilterOption
-    
+
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Text(NSLocalizedString("Library", comment: "Library header title"))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                
-                Spacer()
+        HStack(spacing: 16) {
+            // Filter Options
+            Menu {
+                ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) {
+                    option in
+                    Button(option.displayName) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            filterOption = option
+                        }
+                    }
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "line.3.horizontal.decrease.circle")
+                    Text(filterOption.displayName)
+                    Image(systemName: "chevron.down")
+                        .font(.caption)
+                }
+                .font(.caption)
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.accentColor.opacity(0.1))
+                .cornerRadius(8)
             }
-            
-            HStack(spacing: 16) {
-                // Filter Options
-                Menu {
-                    ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
-                        Button(option.displayName) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                filterOption = option
-                            }
+
+            // Sort Options
+            Menu {
+                ForEach(LibraryView.SortOption.allCases, id: \.rawValue) {
+                    option in
+                    Button(option.displayName) {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            sortOption = option
                         }
                     }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "line.3.horizontal.decrease.circle")
-                        Text(filterOption.displayName)
-                        Image(systemName: "chevron.down")
-                            .font(.caption)
-                    }
-                    .font(.caption)
+                }
+            } label: {
+                HStack(spacing: 4) {
+                    Image(systemName: "arrow.up.arrow.down")
+                    Text(sortOption.displayName)
+                    Image(systemName: "chevron.down")
+                        .font(.caption)
+                }
+                .font(.caption)
+                .foregroundColor(.accentColor)
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(Color.accentColor.opacity(0.1))
+                .cornerRadius(8)
+            }
+
+            Spacer()
+
+            // View Mode Toggle
+            Button {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    viewMode = viewMode == .list ? .grid : .list
+                }
+            } label: {
+                Image(systemName: viewMode.icon)
+                    .font(.title3)
                     .foregroundColor(.accentColor)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.accentColor.opacity(0.1))
-                    .cornerRadius(8)
-                }
-                
-                // Sort Options
-                Menu {
-                    ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
-                        Button(option.displayName) {
-                            withAnimation(.easeInOut(duration: 0.2)) {
-                                sortOption = option
-                            }
-                        }
-                    }
-                } label: {
-                    HStack(spacing: 4) {
-                        Image(systemName: "arrow.up.arrow.down")
-                        Text(sortOption.displayName)
-                        Image(systemName: "chevron.down")
-                            .font(.caption)
-                    }
-                    .font(.caption)
-                    .foregroundColor(.accentColor)
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(Color.accentColor.opacity(0.1))
-                    .cornerRadius(8)
-                }
-                
-                Spacer()
-                
-                // View Mode Toggle
-                Button {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        viewMode = viewMode == .list ? .grid : .list
-                    }
-                } label: {
-                    Image(systemName: viewMode.icon)
-                        .font(.title3)
-                        .foregroundColor(.accentColor)
-                }
             }
         }
     }
 }
 
 struct LibraryContentView: View {
-    let audiobooks: [Audiobook]
+    let audiobooks: [AudiobookModel]
     let viewMode: LibraryView.ViewMode
     let isImporting: Bool
-    let onSelect: (Audiobook) -> Void
-    let onDelete: (Audiobook) -> Void
-    
+    let onSelect: (AudiobookModel) -> Void
+    let onDelete: (AudiobookModel) -> Void
+
     var body: some View {
         if viewMode == .list {
             List {
@@ -96,7 +88,7 @@ struct LibraryContentView: View {
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                 }
-                
+
                 ForEach(audiobooks, id: \.id) { audiobook in
                     EnhancedAudiobookRowView(audiobook: audiobook) {
                         onSelect(audiobook)
@@ -104,7 +96,12 @@ struct LibraryContentView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                        Button(NSLocalizedString("Delete", comment: "Delete audiobook button")) {
+                        Button(
+                            NSLocalizedString(
+                                "Delete",
+                                comment: "Delete audiobook button"
+                            )
+                        ) {
                             withAnimation(.easeInOut(duration: 0.3)) {
                                 onDelete(audiobook)
                             }
@@ -120,17 +117,26 @@ struct LibraryContentView: View {
                 if isImporting {
                     ImportingIndicatorView()
                 }
-                
-                LazyVGrid(columns: [
-                    GridItem(.flexible(), spacing: 16),
-                    GridItem(.flexible(), spacing: 16)
-                ], spacing: 16) {
+
+                LazyVGrid(
+                    columns: [
+                        GridItem(.flexible(), spacing: 16),
+                        GridItem(.flexible(), spacing: 16),
+                    ],
+                    spacing: 16
+                ) {
                     ForEach(audiobooks, id: \.id) { audiobook in
                         AudiobookGridItemView(audiobook: audiobook) {
                             onSelect(audiobook)
                         }
                         .contextMenu {
-                            Button(NSLocalizedString("Delete", comment: "Delete audiobook button"), role: .destructive) {
+                            Button(
+                                NSLocalizedString(
+                                    "Delete",
+                                    comment: "Delete audiobook button"
+                                ),
+                                role: .destructive
+                            ) {
                                 onDelete(audiobook)
                             }
                         }
@@ -142,19 +148,19 @@ struct LibraryContentView: View {
 }
 
 struct EnhancedAudiobookRowView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     let onTap: () -> Void
-    
+
     private var coverImage: UIImage? {
         guard let data = audiobook.coverImageData else { return nil }
         return UIImage(data: data)
     }
-    
+
     private var progressPercentage: Double {
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
     }
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 16) {
@@ -175,52 +181,87 @@ struct EnhancedAudiobookRowView: View {
                 .cornerRadius(12)
                 .clipped()
                 .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
-                
+
                 // Book Info
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
-                    Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Default audiobook author"))
-                        .font(.subheadline)
-                        .foregroundColor(.secondaryText)
-                        .lineLimit(1)
-                    
+                    Text(
+                        audiobook.title
+                            ?? NSLocalizedString(
+                                "Unknown Title",
+                                comment: "Default audiobook title"
+                            )
+                    )
+                    .font(.headline)
+                    .foregroundColor(.primaryText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                    Text(
+                        audiobook.author
+                            ?? NSLocalizedString(
+                                "Unknown Author",
+                                comment: "Default audiobook author"
+                            )
+                    )
+                    .font(.subheadline)
+                    .foregroundColor(.secondaryText)
+                    .lineLimit(1)
+
                     // Progress Section
                     HStack {
                         if audiobook.isFinished {
-                            Label(NSLocalizedString("Completed", comment: "Audiobook completed status"), systemImage: "checkmark.circle.fill")
-                                .font(.caption)
-                                .foregroundColor(.green)
+                            Label(
+                                NSLocalizedString(
+                                    "Completed",
+                                    comment: "Audiobook completed status"
+                                ),
+                                systemImage: "checkmark.circle.fill"
+                            )
+                            .font(.caption)
+                            .foregroundColor(.green)
                         } else if audiobook.currentPosition > 0 {
                             VStack(alignment: .leading, spacing: 4) {
                                 ProgressView(value: progressPercentage)
-                                    .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
+                                    .progressViewStyle(
+                                        LinearProgressViewStyle(
+                                            tint: .accentColor
+                                        )
+                                    )
                                     .frame(height: 3)
-                                
-                                Text(String(format: NSLocalizedString("%d%% complete", comment: "Progress percentage"), Int(progressPercentage * 100)))
-                                    .font(.caption2)
-                                    .foregroundColor(.secondaryText)
+
+                                Text(
+                                    String(
+                                        format: NSLocalizedString(
+                                            "%d%% complete",
+                                            comment: "Progress percentage"
+                                        ),
+                                        Int(progressPercentage * 100)
+                                    )
+                                )
+                                .font(.caption2)
+                                .foregroundColor(.secondaryText)
                             }
                         } else {
-                            Text(NSLocalizedString("Not Started", comment: "Audiobook not started status"))
-                                .font(.caption)
-                                .foregroundColor(.secondaryText)
+                            Text(
+                                NSLocalizedString(
+                                    "Not Started",
+                                    comment: "Audiobook not started status"
+                                )
+                            )
+                            .font(.caption)
+                            .foregroundColor(.secondaryText)
                         }
-                        
+
                         Spacer()
-                        
+
                         Text(formatDuration(audiobook.duration))
                             .font(.caption)
                             .foregroundColor(.secondaryText)
                     }
                 }
-                
+
                 Spacer()
-                
+
                 Image(systemName: "chevron.right")
                     .font(.caption)
                     .foregroundColor(.secondaryText)
@@ -232,11 +273,11 @@ struct EnhancedAudiobookRowView: View {
         }
         .buttonStyle(PlainButtonStyle())
     }
-    
+
     private func formatDuration(_ duration: TimeInterval) -> String {
         let hours = Int(duration) / 3600
         let minutes = (Int(duration) % 3600) / 60
-        
+
         if hours > 0 {
             return "\(hours)h \(minutes)m"
         } else {
@@ -246,19 +287,19 @@ struct EnhancedAudiobookRowView: View {
 }
 
 struct AudiobookGridItemView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     let onTap: () -> Void
-    
+
     private var coverImage: UIImage? {
         guard let data = audiobook.coverImageData else { return nil }
         return UIImage(data: data)
     }
-    
+
     private var progressPercentage: Double {
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
     }
-    
+
     var body: some View {
         Button(action: onTap) {
             VStack(spacing: 12) {
@@ -281,23 +322,40 @@ struct AudiobookGridItemView: View {
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .stroke(Color.accentColor.opacity(audiobook.currentPosition > 0 ? 0.3 : 0), lineWidth: 2)
+                        .stroke(
+                            Color.accentColor.opacity(
+                                audiobook.currentPosition > 0 ? 0.3 : 0
+                            ),
+                            lineWidth: 2
+                        )
                 )
-                
+
                 // Book Info
                 VStack(spacing: 4) {
-                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-                    
-                    Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: "Default audiobook author"))
-                        .font(.caption)
-                        .foregroundColor(.secondaryText)
-                        .lineLimit(1)
-                    
+                    Text(
+                        audiobook.title
+                            ?? NSLocalizedString(
+                                "Unknown Title",
+                                comment: "Default audiobook title"
+                            )
+                    )
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primaryText)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.center)
+
+                    Text(
+                        audiobook.author
+                            ?? NSLocalizedString(
+                                "Unknown Author",
+                                comment: "Default audiobook author"
+                            )
+                    )
+                    .font(.caption)
+                    .foregroundColor(.secondaryText)
+                    .lineLimit(1)
+
                     // Progress Indicator
                     if audiobook.isFinished {
                         Image(systemName: "checkmark.circle.fill")
@@ -305,7 +363,9 @@ struct AudiobookGridItemView: View {
                             .font(.caption)
                     } else if audiobook.currentPosition > 0 {
                         ProgressView(value: progressPercentage)
-                            .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
+                            .progressViewStyle(
+                                LinearProgressViewStyle(tint: .accentColor)
+                            )
                             .frame(height: 2)
                     }
                 }
@@ -321,19 +381,19 @@ struct AudiobookGridItemView: View {
 }
 
 struct ContinueReadingCardView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     let onTap: () -> Void
-    
+
     private var coverImage: UIImage? {
         guard let data = audiobook.coverImageData else { return nil }
         return UIImage(data: data)
     }
-    
+
     private var progressPercentage: Double {
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
     }
-    
+
     var body: some View {
         Button(action: onTap) {
             VStack(alignment: .leading, spacing: 12) {
@@ -353,18 +413,26 @@ struct ContinueReadingCardView: View {
                 .background(Color.secondaryBackground)
                 .cornerRadius(12)
                 .clipped()
-                
+
                 VStack(alignment: .leading, spacing: 6) {
-                    Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title"))
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(2)
-                    
+                    Text(
+                        audiobook.title
+                            ?? NSLocalizedString(
+                                "Unknown Title",
+                                comment: "Default audiobook title"
+                            )
+                    )
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundColor(.primaryText)
+                    .lineLimit(2)
+
                     ProgressView(value: progressPercentage)
-                        .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
+                        .progressViewStyle(
+                            LinearProgressViewStyle(tint: .accentColor)
+                        )
                         .frame(height: 3)
-                    
+
                     Text("\(Int(progressPercentage * 100))% complete")
                         .font(.caption2)
                         .foregroundColor(.secondaryText)
@@ -385,11 +453,16 @@ struct ImportingIndicatorView: View {
         HStack(spacing: 12) {
             ProgressView()
                 .scaleEffect(0.8)
-            
-            Text(NSLocalizedString("Importing...", comment: "Importing audiobook status"))
-                .font(.subheadline)
-                .foregroundColor(.secondaryText)
-            
+
+            Text(
+                NSLocalizedString(
+                    "Importing...",
+                    comment: "Importing audiobook status"
+                )
+            )
+            .font(.subheadline)
+            .foregroundColor(.secondaryText)
+
             Spacer()
         }
         .padding()
@@ -405,20 +478,41 @@ struct EmptyLibraryView: View {
             Image(systemName: "books.vertical")
                 .font(.system(size: 80))
                 .foregroundColor(.secondaryText)
-            
+
             VStack(spacing: 8) {
-                Text(NSLocalizedString("Your library is empty", comment: "Empty library title"))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.primaryText)
-                
-                Text(NSLocalizedString("Import your first audiobook to get started", comment: "Empty library instructions"))
-                    .font(.body)
-                    .foregroundColor(.secondaryText)
-                    .multilineTextAlignment(.center)
+                Text(
+                    NSLocalizedString(
+                        "Your library is empty",
+                        comment: "Empty library title"
+                    )
+                )
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primaryText)
+
+                Text(
+                    NSLocalizedString(
+                        "Import your first audiobook to get started",
+                        comment: "Empty library instructions"
+                    )
+                )
+                .font(.body)
+                .foregroundColor(.secondaryText)
+                .multilineTextAlignment(.center)
             }
         }
         .padding(32)
     }
 }
 
+#Preview("Library Header View") {
+    LibraryHeaderView(
+        viewMode: .constant(.list),
+        sortOption: .constant(.lastPlayed),
+        filterOption: .constant(.all)
+    )
+}
+
+#Preview("Empty Library View") {
+    EmptyLibraryView()
+}

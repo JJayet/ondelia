@@ -32,6 +32,7 @@
 		F13289A02E4DBA6B004EC064 /* AudiobookReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudiobookReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -98,6 +99,7 @@
 				F13289A22E4DBA6B004EC064 /* AudiobookReader */,
 				F13289B42E4DBA6D004EC064 /* AudiobookReaderTests */,
 				F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */,
+				F1C0NF1G0000000000000003 /* Config */,
 				F13289A12E4DBA6B004EC064 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,6 +112,14 @@
 				F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F1C0NF1G0000000000000003 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				F1F056352E65D0B300C6E809 /* Secrets.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

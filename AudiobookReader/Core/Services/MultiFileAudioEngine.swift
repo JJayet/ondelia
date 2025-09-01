@@ -7,8 +7,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     private var playerItems: [Int: AVPlayerItem] = [:] // Sparse array for lazy loading
     private var currentPlayerIndex = 0
     private var timeObserver: Any?
-    private var chapters: [Chapter] = []
-    private var audiobook: Audiobook?
+    private var chapters: [ChapterModel] = []
+    private var audiobook: AudiobookModel?
     private var hasAddedObservers: Set<AVPlayerItem> = []
     private var chapterFiles: [String] = [] // File paths for each chapter
     private var folderURL: URL?
@@ -311,7 +311,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     // MARK: - Load Multi-File Audiobook
-    func loadMultiFileAudiobook(_ audiobook: Audiobook) {
+    func loadMultiFileAudiobook(_ audiobook: AudiobookModel) {
         print("🎵 MultiFileAudioEngine: Loading multi-file audiobook: \(audiobook.title ?? "Unknown")")
         
         // Setup audio session and remote controls on first load
@@ -341,7 +341,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         loadChaptersFromFolder(folderPath: folderPath, audiobook: audiobook)
     }
     
-    private func loadSingleFile(_ audiobook: Audiobook) {
+    private func loadSingleFile(_ audiobook: AudiobookModel) {
         guard let filePath = audiobook.fileURL else { return }
         let fileURL = URL(fileURLWithPath: filePath)
         
@@ -364,12 +364,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         print("✅ MultiFileAudioEngine: Single file loaded successfully")
     }
     
-    private func loadChaptersFromFolder(folderPath: String, audiobook: Audiobook) {
+    private func loadChaptersFromFolder(folderPath: String, audiobook: AudiobookModel) {
         folderURL = URL(fileURLWithPath: folderPath)
         
-        // Get chapters from Core Data, sorted by chapter number
-        chapters = (audiobook.chapters?.allObjects as? [Chapter] ?? [])
-            .sorted { $0.chapterNumber < $1.chapterNumber }
+        // Get chapters from SwiftData, sorted by chapter number
+        chapters = audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
         
         guard !chapters.isEmpty else {
             print("❌ MultiFileAudioEngine: No chapters found")
@@ -439,7 +438,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         print("   Starting chapter: \(currentChapterIndex + 1)")
     }
     
-    private func loadChaptersDirectly(folderPath: String, audiobook: Audiobook) {
+    private func loadChaptersDirectly(folderPath: String, audiobook: AudiobookModel) {
         // Fallback method to load chapters directly from audio files
         let folderURL = URL(fileURLWithPath: folderPath)
         
@@ -793,7 +792,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     // MARK: - Now Playing Info
-    private func setupNowPlayingInfo(for audiobook: Audiobook) {
+    private func setupNowPlayingInfo(for audiobook: AudiobookModel) {
         var nowPlayingInfo = [String: Any]()
         nowPlayingInfo[MPMediaItemPropertyTitle] = audiobook.title ?? "Unknown Title"
         nowPlayingInfo[MPMediaItemPropertyArtist] = audiobook.author ?? "Unknown Author"
@@ -975,11 +974,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         
         // Remove KVO observers only from items we added them to
         for item in hasAddedObservers {
-            do {
-                item.removeObserver(self, forKeyPath: "status")
-            } catch {
-                print("⚠️ MultiFileAudioEngine: Error removing KVO observer: \(error)")
-            }
+            item.removeObserver(self, forKeyPath: "status")            
         }
         hasAddedObservers.removeAll()
         

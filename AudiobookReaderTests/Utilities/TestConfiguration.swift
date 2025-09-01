@@ -7,7 +7,7 @@
 
 import Foundation
 import XCTest
-import CoreData
+import SwiftData
 @testable import AudiobookReader
 
 /// Central configuration for test environment and utilities
@@ -16,7 +16,7 @@ enum TestConfiguration {
     static let testTimeout: TimeInterval = 10.0
     static let performanceTimeout: TimeInterval = 5.0
     static let audioEngineTimeout: TimeInterval = 3.0
-    static let coreDataTimeout: TimeInterval = 2.0
+    static let swiftDataTimeout: TimeInterval = 2.0
     
     // MARK: - Performance Metrics
     static let memoryTestIterations = 100
@@ -129,44 +129,44 @@ extension XCTestCase {
         }
     }
     
-    // MARK: - Core Data Testing Helpers
-    func createInMemoryPersistenceController() -> PersistenceController {
-        let controller = PersistenceController.preview
+    // MARK: - SwiftData Testing Helpers
+    @MainActor
+    func createInMemorySwiftDataController() -> SwiftDataController {
+        let controller = SwiftDataController.preview
         return controller
     }
     
     func createTestAudiobook(
-        in context: NSManagedObjectContext,
         title: String = TestConfiguration.mockAudiobookTitle,
         author: String = TestConfiguration.mockAuthor,
         duration: TimeInterval = TestConfiguration.mockDuration
-    ) -> Audiobook {
-        let audiobook = Audiobook(context: context)
-        audiobook.id = UUID()
-        audiobook.title = title
-        audiobook.author = author
-        audiobook.narrator = TestConfiguration.mockNarrator
-        audiobook.duration = duration
-        audiobook.currentPosition = 0
-        audiobook.isFinished = false
-        audiobook.dateAdded = Date()
+    ) -> AudiobookModel {
+        let audiobook = AudiobookModel(
+            title: title,
+            author: author,
+            narrator: TestConfiguration.mockNarrator,
+            fileURL: nil,
+            duration: duration,
+            currentPosition: 0,
+            isFinished: false,
+            dateAdded: Date()
+        )
         return audiobook
     }
     
     func createTestChapter(
-        in context: NSManagedObjectContext,
-        for audiobook: Audiobook,
+        for audiobook: AudiobookModel,
         title: String = "Test Chapter",
         chapterNumber: Int = 1,
         startTime: TimeInterval = 0,
         endTime: TimeInterval = 1800
-    ) -> Chapter {
-        let chapter = Chapter(context: context)
-        chapter.id = UUID()
-        chapter.title = title
-        chapter.chapterNumber = Int16(chapterNumber)
-        chapter.startTime = startTime
-        chapter.endTime = endTime
+    ) -> ChapterModel {
+        let chapter = ChapterModel(
+            title: title,
+            chapterNumber: Int16(chapterNumber),
+            startTime: startTime,
+            endTime: endTime
+        )
         chapter.audiobook = audiobook
         return chapter
     }

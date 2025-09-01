@@ -6,5 +6,9 @@
 	<array>
 		<string>audio</string>
 	</array>
+    <key>GOOGLE_CSE_API_KEY</key>
+    <string>$(GOOGLE_CSE_API_KEY)</string>
+    <key>GOOGLE_CSE_ID</key>
+    <string>$(GOOGLE_CSE_ID)</string>
 </dict>
 </plist>

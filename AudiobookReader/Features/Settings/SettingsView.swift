@@ -4,19 +4,19 @@ struct SettingsView: View {
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var statistics = ReadingStatistics()
     @StateObject private var whisperManager = WhisperTranscriptionManager.shared
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     @State private var showingGoalEditor = false
     @State private var tempGoal: Double = 0
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 // Appearance Section
                 Section(NSLocalizedString("Appearance", comment: "Settings section: Appearance")) {
                     HStack {
                         Label(NSLocalizedString("Theme", comment: "Theme setting label"), systemImage: "paintbrush")
                         Spacer()
-                        Picker(NSLocalizedString("Theme", comment: "Theme picker label"), selection: $themeManager.currentTheme) {
+                        Picker("", selection: $themeManager.currentTheme) {
                             ForEach(AppTheme.allCases, id: \.rawValue) { theme in
                                 Text(theme.displayName)
                                     .tag(theme)
@@ -50,7 +50,7 @@ struct SettingsView: View {
                 // Playback Section
                 Section(NSLocalizedString("Playback", comment: "Settings section: Playback")) {
                     HStack {
-                        Label(NSLocalizedString("Skip Interval", comment: "Skip interval setting label"), systemImage: "goforward")
+                        Label("", systemImage: "goforward")
                         Spacer()
                         Picker(NSLocalizedString("Skip Interval", comment: "Skip interval picker label"), selection: $themeManager.skipInterval) {
                             ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
@@ -71,7 +71,7 @@ struct SettingsView: View {
                         HStack {
                             Label(NSLocalizedString("WhisperKit Model", comment: "WhisperKit model setting label"), systemImage: "brain")
                             Spacer()
-                            Picker(NSLocalizedString("WhisperKit Model", comment: "WhisperKit model picker label"), selection: $themeManager.whisperModel) {
+                            Picker("", selection: $themeManager.whisperModel) {
                                 ForEach(WhisperModel.allCases, id: \.rawValue) { model in
                                     VStack(alignment: .leading) {
                                         Text(model.displayName)
@@ -118,7 +118,7 @@ struct SettingsView: View {
                     HStack {
                         Label(NSLocalizedString("Language", comment: "Language setting label"), systemImage: "globe")
                         Spacer()
-                        Picker(NSLocalizedString("Language", comment: "Language picker label"), selection: $themeManager.transcriptionLanguage) {
+                        Picker("", selection: $themeManager.transcriptionLanguage) {
                             ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
                                 Text(language.displayName)
                                     .tag(language)
@@ -142,7 +142,7 @@ struct SettingsView: View {
                             HStack {
                                 Label(NSLocalizedString("Translate To", comment: "Translation target language label"), systemImage: "arrow.right.circle")
                                 Spacer()
-                                Picker(NSLocalizedString("Translate To", comment: "Translation target language picker label"), selection: $themeManager.translationTargetLanguage) {
+                                Picker("", selection: $themeManager.translationTargetLanguage) {
                                     ForEach(TranscriptionLanguage.allCases, id: \.rawValue) { language in
                                         Text(language.displayName)
                                             .tag(language)
@@ -243,7 +243,7 @@ struct SettingsView: View {
             }
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .accentColor(themeManager.accentColor.color)
+        .tint(themeManager.accentColor.color)
     }
 }
 
@@ -265,13 +265,12 @@ struct StatisticRowView: View {
 struct StatisticsView: View {
     @ObservedObject var statistics: ReadingStatistics
     @StateObject private var themeManager = ThemeManager.shared
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             ScrollView {
                 LazyVStack(spacing: 24) {
-                    // Monthly Progress Card
                     VStack(spacing: 16) {
                         VStack(spacing: 8) {
                             Text(NSLocalizedString("This Month", comment: "This month progress header"))
@@ -394,14 +393,12 @@ struct StatisticsView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
             }
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .accentColor(themeManager.accentColor.color)
+        .tint(themeManager.accentColor.color)
     }
 }
 
@@ -477,6 +474,10 @@ struct AchievementView: View {
     }
 }
 
-#Preview {
+#Preview("Settings") {
     SettingsView()
+}
+
+#Preview("Statistics") {
+    StatisticsView(statistics: ReadingStatistics())
 }

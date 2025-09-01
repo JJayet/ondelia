@@ -1,20 +1,19 @@
 import SwiftUI
 
 struct BookmarksView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     @ObservedObject var globalAudioManager: GlobalAudioManager
     @StateObject private var audiobookManager = AudiobookManager()
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
-    private var bookmarks: [Bookmark] {
-        (audiobook.bookmarks?.allObjects as? [Bookmark] ?? []).sorted { $0.timestamp < $1.timestamp }
+    private var bookmarks: [BookmarkModel] {
+        audiobook.bookmarks.sorted { $0.timestamp < $1.timestamp }
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Group {
                 if bookmarks.isEmpty {
-                    // Empty State
                     VStack(spacing: 20) {
                         Image(systemName: "bookmark")
                             .font(.system(size: 60))
@@ -38,11 +37,7 @@ struct BookmarksView: View {
                                 onTap: {
                                     print("🔖 Seeking to bookmark at \(bookmark.timestamp) seconds")
                                     globalAudioManager.seek(to: bookmark.timestamp)
-                                    
-                                    // Dismiss the sheet after a short delay to let the seek complete
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                                        presentationMode.wrappedValue.dismiss()
-                                    }
+                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { dismiss() }
                                 },
                                 onDelete: {
                                     audiobookManager.deleteBookmark(bookmark)
@@ -55,10 +50,8 @@ struct BookmarksView: View {
             .navigationTitle(NSLocalizedString("Bookmarks", comment: "Bookmarks view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
             }
         }
@@ -66,7 +59,7 @@ struct BookmarksView: View {
 }
 
 struct BookmarkRowView: View {
-    let bookmark: Bookmark
+    let bookmark: BookmarkModel
     let onTap: () -> Void
     let onDelete: () -> Void
     @State private var showingDeleteAlert = false
@@ -146,10 +139,10 @@ struct AddBookmarkView: View {
     @Binding var title: String
     @Binding var note: String
     let onSave: () -> Void
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             Form {
                 Section(NSLocalizedString("Bookmark Details", comment: "Bookmark details form section header")) {
                     TextField(NSLocalizedString("Bookmark Title", comment: "Bookmark title text field placeholder"), text: $title)
@@ -161,16 +154,11 @@ struct AddBookmarkView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button(NSLocalizedString("Save", comment: "Save button")) {
-                        onSave()
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    Button(NSLocalizedString("Save", comment: "Save button")) { onSave(); dismiss() }
                     .fontWeight(.semibold)
                 }
             }
@@ -178,6 +166,11 @@ struct AddBookmarkView: View {
     }
 }
 
-#Preview {
-    BookmarksView(audiobook: Audiobook(), globalAudioManager: GlobalAudioManager.shared)
+#Preview("Empty") {
+    BookmarksView(audiobook: PreviewContent.audiobookLong(), globalAudioManager: GlobalAudioManager.shared)
+}
+
+
+#Preview("With bookmarks") {
+    BookmarksView(audiobook: PreviewContent.audiobookFinished(), globalAudioManager: GlobalAudioManager.shared)
 }

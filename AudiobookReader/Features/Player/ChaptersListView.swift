@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct ChapterListView: View {
-    let chapters: [Chapter]
-    let onChapterTap: (Chapter) -> Void
-    @Environment(\.presentationMode) var presentationMode
+    let chapters: [ChapterModel]
+    let onChapterTap: (ChapterModel) -> Void
+    @Environment(\.dismiss) private var dismiss
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(chapters, id: \.id) { chapter in
                     ChapterRowView(chapter: chapter) {
@@ -18,9 +18,7 @@ struct ChapterListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    Button("Done") { dismiss() }
                 }
             }
         }
@@ -28,7 +26,7 @@ struct ChapterListView: View {
 }
 
 struct ChapterRowView: View {
-    let chapter: Chapter
+    let chapter: ChapterModel
     let onTap: () -> Void
     
     var body: some View {

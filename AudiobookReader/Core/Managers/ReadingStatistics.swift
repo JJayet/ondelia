@@ -1,8 +1,8 @@
 import Foundation
-import CoreData
+import SwiftData
 
 class ReadingStatistics: ReadingStatisticsProtocol {
-    private let persistenceController = PersistenceController.shared
+    private let swiftDataController = SwiftDataController.shared
     
     @Published var totalListeningTime: TimeInterval = 0
     @Published var booksCompleted: Int = 0
@@ -14,7 +14,9 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     
     init() {
         loadStatistics()
-        calculateCurrentMonthProgress()
+        Task {
+            await calculateCurrentMonthProgress()
+        }
     }
     
     private func loadStatistics() {
@@ -42,6 +44,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         UserDefaults.standard.set(monthlyGoal, forKey: "monthlyGoal")
     }
     
+    @MainActor
     func addListeningTime(_ time: TimeInterval, playbackRate: Float = 1.0) {
         totalListeningTime += time
         
@@ -90,17 +93,20 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         UserDefaults.standard.set(Date(), forKey: "lastListenDate")
     }
     
+    @MainActor
     private func calculateCurrentMonthProgress() {
         let calendar = Calendar.current
         let now = Date()
         let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
         
         // Calculate listening time for current month
-        let request: NSFetchRequest<Audiobook> = Audiobook.fetchRequest()
-        request.predicate = NSPredicate(format: "lastPlayed >= %@", startOfMonth as NSDate)
+        let context = swiftDataController.context
+        let descriptor = FetchDescriptor<AudiobookModel>(
+            predicate: #Predicate<AudiobookModel> { $0.lastPlayed >= startOfMonth }
+        )
         
         do {
-            let audiobooks = try persistenceController.context.fetch(request)
+            let audiobooks = try context.fetch(descriptor)
             monthlyProgress = audiobooks.reduce(0) { total, book in
                 return total + book.currentPosition
             }
@@ -109,6 +115,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         }
     }
     
+    @MainActor
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
         saveStatistics()

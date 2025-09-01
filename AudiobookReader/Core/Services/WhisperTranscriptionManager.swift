@@ -1,7 +1,7 @@
 import Foundation
 import WhisperKit
 import AVFoundation
-import CoreData
+import SwiftData
 
 class WhisperTranscriptionManager: ObservableObject {
     static let shared = WhisperTranscriptionManager()
@@ -13,7 +13,7 @@ class WhisperTranscriptionManager: ObservableObject {
     @Published var modelLoadingProgress: Double = 0
     
     private var whisperKit: WhisperKit?
-    private let persistenceController = PersistenceController.shared
+    private let swiftDataController = SwiftDataController.shared
     private let themeManager = ThemeManager.shared
     
     // Current model name tracking
@@ -72,7 +72,7 @@ class WhisperTranscriptionManager: ObservableObject {
         }
     }
     
-    func transcribeAudioFile(_ audioURL: URL, for audiobook: Audiobook, chapterIndex: Int) async throws -> TranscriptionResult {
+    func transcribeAudioFile(_ audioURL: URL, for audiobook: AudiobookModel, chapterIndex: Int) async throws -> TranscriptionResult {
         // Check if model switch is needed
         try await switchModelIfNeeded()
         
@@ -150,7 +150,7 @@ class WhisperTranscriptionManager: ObservableObject {
         }
     }
     
-    func transcribeCurrentChapter(for audiobook: Audiobook, currentChapterIndex: Int) async throws -> TranscriptionResult {
+    func transcribeCurrentChapter(for audiobook: AudiobookModel, currentChapterIndex: Int) async throws -> TranscriptionResult {
         // Get the current chapter file URL
         guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)),
               let chapterFiles = getChapterFiles(from: folderURL),
@@ -161,7 +161,7 @@ class WhisperTranscriptionManager: ObservableObject {
         let currentChapterURL = folderURL.appendingPathComponent(chapterFiles[currentChapterIndex])
         
         // Check if transcription already exists
-        if let existingResult = getCachedTranscription(for: audiobook, chapterIndex: currentChapterIndex) {
+        if let existingResult = await MainActor.run(body: { getCachedTranscription(for: audiobook, chapterIndex: currentChapterIndex) }) {
             print("📖 WhisperTranscriptionManager: Using cached transcription")
             await MainActor.run {
                 currentTranscription = existingResult.text
@@ -200,16 +200,22 @@ class WhisperTranscriptionManager: ObservableObject {
         return chaptersData.compactMap { $0["fileName"] as? String }
     }
     
-    // MARK: - Caching (reuse existing Core Data logic)
-    private func getCachedTranscription(for audiobook: Audiobook, chapterIndex: Int) -> TranscriptionResult? {
-        let context = persistenceController.context
-        let request: NSFetchRequest<ChapterTranscription> = ChapterTranscription.fetchRequest()
-        request.predicate = NSPredicate(format: "audiobook == %@ AND chapterIndex == %d", audiobook, chapterIndex)
+    @MainActor private func getCachedTranscription(for audiobook: AudiobookModel, chapterIndex: Int) -> TranscriptionResult? {
+        let context = swiftDataController.context
+        let allDescriptor = FetchDescriptor<ChapterTranscriptionModel>()
         
+        let allTranscriptions: [ChapterTranscriptionModel]
         do {
-            let transcriptions = try context.fetch(request)
-            guard let cached = transcriptions.first,
-                  let text = cached.transcriptionText else {
+            allTranscriptions = try context.fetch(allDescriptor)
+        } catch {
+            print("❌ WhisperTranscriptionManager: Error fetching transcriptions: \(error)")
+            return nil
+        }
+        
+        guard let cached = allTranscriptions.first(where: { 
+            $0.chapterIndex == Int16(chapterIndex) && $0.audiobook?.id == audiobook.id 
+        }),
+              let text = cached.transcriptionText else {
                 return nil
             }
             
@@ -225,67 +231,39 @@ class WhisperTranscriptionManager: ObservableObject {
                 segments: segments,
                 language: cached.language ?? "en"
             )
-        } catch {
-            print("❌ WhisperTranscriptionManager: Error fetching cached transcription: \(error)")
-            return nil
-        }
     }
     
-    private func cacheTranscription(_ result: TranscriptionResult, for audiobook: Audiobook, chapterIndex: Int) async {
-        let audiobookObjectID = audiobook.objectID
-        await MainActor.run {
-            let context = persistenceController.context
-            guard let audiobook = try? context.existingObject(with: audiobookObjectID) as? Audiobook else {
-                print("❌ WhisperTranscriptionManager: Failed to find audiobook for caching")
-                return
-            }
-            
-            // Remove existing transcription if any
-            let request: NSFetchRequest<ChapterTranscription> = ChapterTranscription.fetchRequest()
-            request.predicate = NSPredicate(format: "audiobook == %@ AND chapterIndex == %d", audiobook, chapterIndex)
-            
-            if let existingTranscription = try? context.fetch(request).first {
-                context.delete(existingTranscription)
-            }
-            
-            // Create new transcription
-            let transcription = ChapterTranscription(context: context)
-            transcription.id = UUID()
-            transcription.audiobook = audiobook
-            transcription.chapterIndex = Int16(chapterIndex)
-            transcription.transcriptionText = result.text
-            transcription.language = result.language
-            transcription.dateCreated = Date()
-            
-            // Store segments as JSON data
-            if !result.segments.isEmpty {
-                transcription.segmentsData = try? JSONEncoder().encode(result.segments)
-            }
-            
-            persistenceController.save()
-            print("💾 WhisperTranscriptionManager: Cached transcription for chapter \(chapterIndex)")
+    @MainActor
+    private func cacheTranscription(_ result: TranscriptionResult, for audiobook: AudiobookModel, chapterIndex: Int) async {
+        let context = swiftDataController.context
+        
+        // Remove existing transcription if any
+        let allDescriptor = FetchDescriptor<ChapterTranscriptionModel>()
+        if let allTranscriptions = try? context.fetch(allDescriptor),
+           let existingTranscription = allTranscriptions.first(where: { 
+               $0.chapterIndex == Int16(chapterIndex) && $0.audiobook?.id == audiobook.id 
+           }) {
+            context.delete(existingTranscription)
         }
+        
+        // Create new transcription
+        let transcription = ChapterTranscriptionModel(
+            chapterIndex: Int16(chapterIndex),
+            transcriptionText: result.text,
+            language: result.language,
+            transcriptionEngine: themeManager.transcriptionEngine.displayName,
+            dateCreated: Date()
+        )
+        
+        // Store segments as JSON data
+        if !result.segments.isEmpty {
+            transcription.segmentsData = try? JSONEncoder().encode(result.segments)
+        }
+        
+        context.insert(transcription)
+        swiftDataController.save()
+        print("💾 WhisperTranscriptionManager: Cached transcription for chapter \(chapterIndex)")
     }
-//}
-//
-//// MARK: - Error Types
-//enum WhisperTranscriptionError: Error, LocalizedError {
-//    case whisperKitNotInitialized
-//    case chapterNotFound
-//    case transcriptionFailed(Error)
-//    case modelLoadingFailed
-//    
-//    var errorDescription: String? {
-//        switch self {
-//        case .whisperKitNotInitialized:
-//            return "WhisperKit not initialized. Please wait for model to load."
-//        case .chapterNotFound:
-//            return "Chapter file not found"
-//        case .transcriptionFailed(let error):
-//            return "Transcription failed: \(error.localizedDescription)"
-//        case .modelLoadingFailed:
-//            return "Model loading failed"
-//        }
     
     // MARK: - Model Management
     func switchModel(to model: WhisperModel) async throws {

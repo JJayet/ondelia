@@ -5,16 +5,27 @@ class GoogleImageSearchService {
     static let shared = GoogleImageSearchService()
     
     // Google Custom Search API configuration
-    // Note: You'll need to set up a Google Custom Search Engine and get these keys
-    // For development, we'll provide fallback mock data if API keys aren't configured
-    private let apiKey = "AIzaSyAUwupZP47x816pqRZH7BGWMjSVII3n5XQ" // Add your Google API key here
-    private let searchEngineId = "b626822d80f5c4c44" // Add your Custom Search Engine ID here
+    // Configure via Info.plist keys: `GOOGLE_CSE_API_KEY` and `GOOGLE_CSE_ID`.
+    // If not set, the service returns mock results for development.
+    private var apiKey: String {
+        (Bundle.main.object(forInfoDictionaryKey: "GOOGLE_CSE_API_KEY") as? String) ?? ""
+    }
+    private var searchEngineId: String {
+        (Bundle.main.object(forInfoDictionaryKey: "GOOGLE_CSE_ID") as? String) ?? ""
+    }
+
+    private var hasValidKeys: Bool {
+        func isPlaceholder(_ s: String) -> Bool { s.trimmingCharacters(in: .whitespacesAndNewlines).hasPrefix("$(") }
+        let key = apiKey.trimmingCharacters(in: .whitespacesAndNewlines)
+        let cx = searchEngineId.trimmingCharacters(in: .whitespacesAndNewlines)
+        return !key.isEmpty && !cx.isEmpty && !isPlaceholder(key) && !isPlaceholder(cx)
+    }
     
     private init() {}
     
     func searchImages(query: String) async -> Result<[ImageSearchResult], GoogleImageSearchError> {
         // Check if API keys are configured
-        guard !apiKey.isEmpty && !searchEngineId.isEmpty else {
+        guard hasValidKeys else {
             // Return mock data with realistic book cover placeholders for development
             return await createMockSearchResults(for: query)
         }

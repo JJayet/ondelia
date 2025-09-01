@@ -133,7 +133,13 @@ class MetadataExtractor {
         let asset = AVURLAsset(url: url)
         
         do {
-            let chapterMetadata = try await asset.loadChapterMetadataGroups(withTitleLocale: .current)
+            let locales = try? await asset.load(.availableChapterLocales)
+            
+            if (locales == nil || locales!.isEmpty) {
+                return []
+            }
+
+            let chapterMetadata = try await asset.loadChapterMetadataGroups(withTitleLocale: locales!.first!)
             var chapters: [ChapterInfo] = []
             
             for (index, chapterGroup) in chapterMetadata.enumerated() {

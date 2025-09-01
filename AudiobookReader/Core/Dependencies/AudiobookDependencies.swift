@@ -1,16 +1,16 @@
 import Foundation
 import SwiftUI
-import CoreData
+import SwiftData
 
 // MARK: - Audio Manager Protocol
 protocol AudioManagerProtocol: ObservableObject {
     var playbackState: GlobalAudioManager.PlaybackState { get set }
     var showMiniPlayer: Bool { get set }
-    var currentAudiobook: Audiobook? { get set }
+    var currentAudiobook: AudiobookModel? { get set }
     var isLoading: Bool { get set }
     var isReady: Bool { get set }
     
-    func loadAudiobook(_ audiobook: Audiobook)
+    func loadAudiobook(_ audiobook: AudiobookModel)
     func startPlayback()
     func pausePlayback()
     func resumePlayback()
@@ -39,12 +39,12 @@ protocol ThemeManagerProtocol: ObservableObject {
 
 // MARK: - Audiobook Manager Protocol
 protocol AudiobookManagerProtocol {
-    func updateProgress(for audiobook: Audiobook, currentTime: TimeInterval)
-    func createBookmark(for audiobook: Audiobook, at time: TimeInterval, title: String, note: String?)
-    func deleteBookmark(_ bookmark: Bookmark)
-    func getBookmarks(for audiobook: Audiobook) -> [Bookmark]
-    func markAsFinished(_ audiobook: Audiobook)
-    func resetProgress(for audiobook: Audiobook)
+    func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval)
+    func createBookmark(for audiobook: AudiobookModel, at time: TimeInterval, title: String, note: String?)
+    func deleteBookmark(_ bookmark: BookmarkModel)
+    func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel]
+    func markAsFinished(_ audiobook: AudiobookModel)
+    func resetProgress(for audiobook: AudiobookModel)
 }
 
 // MARK: - Reading Statistics Protocol
@@ -65,7 +65,7 @@ protocol AudiobookDependencies {
     var audioManager: any AudioManagerProtocol { get }
     var themeManager: any ThemeManagerProtocol { get }
     var audiobookManager: AudiobookManagerProtocol { get }
-    var persistenceController: PersistenceController { get }
+    var swiftDataController: SwiftDataController { get }
     
     func createReadingStatistics() -> any ReadingStatisticsProtocol
 }
@@ -75,7 +75,7 @@ class LiveDependencies: AudiobookDependencies {
     lazy var audioManager: any AudioManagerProtocol = GlobalAudioManager.shared
     lazy var themeManager: any ThemeManagerProtocol = ThemeManager.shared
     lazy var audiobookManager: AudiobookManagerProtocol = AudiobookManager()
-    lazy var persistenceController: PersistenceController = PersistenceController.shared
+    lazy var swiftDataController: SwiftDataController = SwiftDataController.shared
     
     func createReadingStatistics() -> any ReadingStatisticsProtocol {
         return ReadingStatistics()
@@ -87,7 +87,7 @@ class PreviewDependencies: AudiobookDependencies {
     lazy var audioManager: any AudioManagerProtocol = MockGlobalAudioManager()
     lazy var themeManager: any ThemeManagerProtocol = MockThemeManager()
     lazy var audiobookManager: AudiobookManagerProtocol = MockAudiobookManager()
-    lazy var persistenceController: PersistenceController = PersistenceController.preview
+    lazy var swiftDataController: SwiftDataController = SwiftDataController.preview
     
     func createReadingStatistics() -> any ReadingStatisticsProtocol {
         return MockReadingStatistics()

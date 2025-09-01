@@ -1,12 +1,12 @@
 import Foundation
 import SwiftUI
-import CoreData
+import SwiftData
 
 // MARK: - Mock Global Audio Manager
 class MockGlobalAudioManager: AudioManagerProtocol {
     @Published var playbackState: GlobalAudioManager.PlaybackState = .stopped
     @Published var showMiniPlayer: Bool = false
-    @Published var currentAudiobook: Audiobook? = nil
+    @Published var currentAudiobook: AudiobookModel? = nil
     @Published var isLoading: Bool = false
     @Published var isReady: Bool = true
     
@@ -15,7 +15,7 @@ class MockGlobalAudioManager: AudioManagerProtocol {
     private var mockDuration: TimeInterval = 3600.0 // 1 hour
     private var mockPlaybackRate: Float = 1.0
     
-    func loadAudiobook(_ audiobook: Audiobook) {
+    func loadAudiobook(_ audiobook: AudiobookModel) {
         currentAudiobook = audiobook
         isReady = true
         showMiniPlayer = true
@@ -122,13 +122,13 @@ class MockAudiobookManager: AudiobookManagerProtocol {
         let note: String?
     }
     
-    func updateProgress(for audiobook: Audiobook, currentTime: TimeInterval) {
-        // Mock implementation - in real app this would update Core Data
+    func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval) {
+        // Mock implementation - in real app this would update SwiftData
         audiobook.currentPosition = currentTime
     }
     
-    func createBookmark(for audiobook: Audiobook, at time: TimeInterval, title: String, note: String?) {
-        let bookmarkKey = audiobook.id?.uuidString ?? "unknown"
+    func createBookmark(for audiobook: AudiobookModel, at time: TimeInterval, title: String, note: String?) {
+        let bookmarkKey = audiobook.id.uuidString
         let bookmark = MockBookmark(timestamp: time, title: title, note: note)
         
         if mockBookmarks[bookmarkKey] == nil {
@@ -137,20 +137,20 @@ class MockAudiobookManager: AudiobookManagerProtocol {
         mockBookmarks[bookmarkKey]?.append(bookmark)
     }
     
-    func deleteBookmark(_ bookmark: Bookmark) {
+    func deleteBookmark(_ bookmark: BookmarkModel) {
         // Mock implementation
     }
     
-    func getBookmarks(for audiobook: Audiobook) -> [Bookmark] {
+    func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {
         // Mock implementation - return empty array for previews
         return []
     }
     
-    func markAsFinished(_ audiobook: Audiobook) {
+    func markAsFinished(_ audiobook: AudiobookModel) {
         audiobook.isFinished = true
     }
     
-    func resetProgress(for audiobook: Audiobook) {
+    func resetProgress(for audiobook: AudiobookModel) {
         audiobook.currentPosition = 0
         audiobook.isFinished = false
     }
@@ -185,7 +185,7 @@ class MockReadingStatistics: ReadingStatisticsProtocol {
 }
 
 // MARK: - Core Data Extensions for Previews
-extension Audiobook {
+extension AudiobookModel {
     static func preview(
         title: String = "The Art of War",
         author: String = "Sun Tzu", 
@@ -193,17 +193,17 @@ extension Audiobook {
         duration: TimeInterval = 3600.0,
         currentPosition: TimeInterval = 450.0,
         isFinished: Bool = false
-    ) -> Audiobook {
-        let context = PersistenceController.preview.container.viewContext
-        let audiobook = Audiobook(context: context)
-        
-        audiobook.id = UUID()
-        audiobook.title = title
-        audiobook.author = author
-        audiobook.narrator = narrator
-        audiobook.duration = duration
-        audiobook.currentPosition = currentPosition
-        audiobook.isFinished = isFinished
+    ) -> AudiobookModel {
+        let audiobook = AudiobookModel(
+            title: title,
+            author: author,
+            narrator: narrator,
+            duration: duration,
+            currentPosition: currentPosition,
+            isFinished: isFinished,
+            dateAdded: Date(),
+            lastPlayed: Date().addingTimeInterval(-3600)
+        )
         
         // Create mock cover image data
         if let mockImage = createMockCoverImage(title: title) {
@@ -211,21 +211,23 @@ extension Audiobook {
         }
         
         // Create sample chapters
-        let chapter1 = Chapter(context: context)
-        chapter1.id = UUID()
-        chapter1.title = "Chapter 1: Introduction"
-        chapter1.chapterNumber = 1
-        chapter1.startTime = 0
-        chapter1.endTime = 1800
+        let chapter1 = ChapterModel(
+            title: "Chapter 1: Introduction",
+            chapterNumber: 1,
+            startTime: 0,
+            endTime: 1800
+        )
         chapter1.audiobook = audiobook
         
-        let chapter2 = Chapter(context: context)
-        chapter2.id = UUID()
-        chapter2.title = "Chapter 2: Planning"
-        chapter2.chapterNumber = 2
-        chapter2.startTime = 1800
-        chapter2.endTime = 3600
+        let chapter2 = ChapterModel(
+            title: "Chapter 2: Planning",
+            chapterNumber: 2,
+            startTime: 1800,
+            endTime: 3600
+        )
         chapter2.audiobook = audiobook
+        
+        audiobook.chapters = [chapter1, chapter2]
         
         return audiobook
     }
@@ -274,40 +276,33 @@ extension Audiobook {
     }
 }
 
-extension Chapter {
+extension ChapterModel {
     static func preview(
         title: String = "Chapter 1: Introduction",
         chapterNumber: Int = 1,
         startTime: TimeInterval = 0,
         endTime: TimeInterval = 1800
-    ) -> Chapter {
-        let context = PersistenceController.preview.container.viewContext
-        let chapter = Chapter(context: context)
-        
-        chapter.id = UUID()
-        chapter.title = title
-        chapter.chapterNumber = Int16(chapterNumber)
-        chapter.startTime = startTime
-        chapter.endTime = endTime
-        
-        return chapter
+    ) -> ChapterModel {
+        return ChapterModel(
+            title: title,
+            chapterNumber: Int16(chapterNumber),
+            startTime: startTime,
+            endTime: endTime
+        )
     }
 }
 
-extension Bookmark {
+extension BookmarkModel {
     static func preview(
         title: String = "Important Quote",
         note: String? = "This is a really insightful passage",
         timestamp: TimeInterval = 300.0
-    ) -> Bookmark {
-        let context = PersistenceController.preview.container.viewContext
-        let bookmark = Bookmark(context: context)
-        
-        bookmark.id = UUID()
-        bookmark.title = title
-        bookmark.note = note
-        bookmark.timestamp = timestamp
-        
-        return bookmark
+    ) -> BookmarkModel {
+        return BookmarkModel(
+            title: title,
+            note: note,
+            timestamp: timestamp,
+            dateCreated: Date()
+        )
     }
 }

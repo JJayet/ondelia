@@ -2,14 +2,14 @@ import SwiftUI
 import UIKit
 
 struct TranscriptionView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     let currentChapterIndex: Int
     let currentTime: TimeInterval
     
     @StateObject private var transcriptionManager = TranscriptionManager.shared
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var translationManager = TranslationManager.shared
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     @State private var transcriptionText = ""
     @State private var translatedText = ""
@@ -26,7 +26,7 @@ struct TranscriptionView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 // Header with controls
                 TranscriptionHeaderView(
@@ -96,9 +96,7 @@ struct TranscriptionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }.glassEffect()
+                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }.glassEffect()
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -129,7 +127,7 @@ struct TranscriptionView: View {
                 }
             }
         }
-        .accentColor(themeManager.accentColor.color)
+        .tint(themeManager.accentColor.color)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
             Button(NSLocalizedString("OK", comment: "OK button")) {}
@@ -179,7 +177,7 @@ struct TranscriptionView: View {
         chapterTitle = getChapterTitle(for: audiobook, chapterIndex: currentChapterIndex)
     }
     
-    private func getChapterTitle(for audiobook: Audiobook, chapterIndex: Int) -> String {
+    private func getChapterTitle(for audiobook: AudiobookModel, chapterIndex: Int) -> String {
         guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
             return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
         }
@@ -434,10 +432,9 @@ struct TranscriptionTextView: View {
     }
 }
 
-// MARK: - Preview
 #Preview {
     TranscriptionView(
-        audiobook: Audiobook(),
+        audiobook: PreviewContent.audiobook(),
         currentChapterIndex: 0,
         currentTime: 150
     )

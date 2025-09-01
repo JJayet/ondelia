@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct ImagePickerView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     let onImageSelected: (UIImage) -> Void
-    @Environment(\.presentationMode) var presentationMode
+    @Environment(\.dismiss) private var dismiss
     
     @State private var searchResults: [ImageSearchResult] = []
     @State private var isLoading = false
@@ -11,7 +11,7 @@ struct ImagePickerView: View {
     @State private var showingPhotoPicker = false
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 16) {
                 // Header
                 VStack(spacing: 8) {
@@ -31,13 +31,13 @@ struct ImagePickerView: View {
                     Button(NSLocalizedString("Search Google Images", comment: "Search Google Images button")) {
                         searchGoogleImages()
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(.glassProminent)
                     .disabled(isLoading)
                     
                     Button(NSLocalizedString("Choose from Photos", comment: "Choose from Photos button")) {
                         showingPhotoPicker = true
                     }
-                    .buttonStyle(.bordered)
+                    .buttonStyle(.glass)
                 }
                 .padding(.horizontal)
                 
@@ -75,19 +75,18 @@ struct ImagePickerView: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else {
-                    // Image Grid
                     ScrollView {
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
                             GridItem(.flexible()),
                             GridItem(.flexible())
-                        ], spacing: 16) {
+                        ], spacing: 10) {
                             ForEach(searchResults, id: \.id) { result in
                                 AsyncImage(url: URL(string: result.thumbnailUrl)) { image in
                                     image
                                         .resizable()
-                                        .aspectRatio(contentMode: .fill)
-                                        .frame(width: 100, height: 100)
+                                        .aspectRatio(contentMode: .fit)
+                                        .frame(height: 100)
                                         .clipped()
                                         .cornerRadius(8)
                                         .onTapGesture {
@@ -115,16 +114,14 @@ struct ImagePickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
                 }
             }
         }
         .sheet(isPresented: $showingPhotoPicker) {
             PhotoPickerView { image in
                 onImageSelected(image)
-                presentationMode.wrappedValue.dismiss()
+                dismiss()
             }
         }
     }
@@ -174,10 +171,7 @@ struct ImagePickerView: View {
                 
                 let (data, _) = try await URLSession.shared.data(from: url)
                 if let image = UIImage(data: data) {
-                    await MainActor.run {
-                        onImageSelected(image)
-                        presentationMode.wrappedValue.dismiss()
-                    }
+                    await MainActor.run { onImageSelected(image); dismiss() }
                 }
             } catch {
                 await MainActor.run {
@@ -234,5 +228,5 @@ struct PhotoPickerView: UIViewControllerRepresentable {
 }
 
 #Preview {
-    ImagePickerView(audiobook: Audiobook()) { _ in }
+    ImagePickerView(audiobook: PreviewContent.audiobook()) { _ in }
 }

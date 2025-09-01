@@ -1,10 +1,11 @@
 import Foundation
 import SwiftUI
 
+@MainActor
 class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     static let shared = GlobalAudioManager()
     
-    @Published var currentAudiobook: Audiobook?
+    @Published var currentAudiobook: AudiobookModel?
     @Published var audioEngine: AudioEngine?
     @Published var multiFileAudioEngine: MultiFileAudioEngine?
     @Published var useMultiFileEngine = false
@@ -21,21 +22,10 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         case failed
     }
     
-    private init() {
-        // Removed all initialization work to speed up app launch
-        // Audio session setup is now deferred until first audio load
-    }
-    
-    deinit {
-        // Ensure proper cleanup when GlobalAudioManager is deallocated
-        cleanupEngines()
-        print("🧹 GlobalAudioManager: Deallocated and cleaned up")
-    }
-    
-    func loadAudiobook(_ audiobook: Audiobook) {
+    func loadAudiobook(_ audiobook: AudiobookModel) {
         // If we're already playing this audiobook, don't reload
         if let current = currentAudiobook,
-           current.objectID == audiobook.objectID,
+           current.id == audiobook.id,
            (audioEngine != nil || multiFileAudioEngine != nil) {
             print("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
             showMiniPlayer = true
@@ -104,7 +94,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         }
     }
     
-    private func loadMultiFileAudiobook(_ audiobook: Audiobook, filePath: String) {
+    private func loadMultiFileAudiobook(_ audiobook: AudiobookModel, filePath: String) {
         // Create engine on main thread and assign immediately to retain it
         let engine = MultiFileAudioEngine()
         self.multiFileAudioEngine = engine
@@ -125,7 +115,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         }
     }
     
-    private func loadSingleFileAudiobook(_ audiobook: Audiobook, filePath: String) {
+    private func loadSingleFileAudiobook(_ audiobook: AudiobookModel, filePath: String) {
         // Create engine on main thread and assign immediately to retain it
         let engine = AudioEngine()
         self.audioEngine = engine

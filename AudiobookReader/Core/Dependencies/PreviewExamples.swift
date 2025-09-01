@@ -2,7 +2,7 @@ import SwiftUI
 
 // MARK: - Example Component Using Dependency Injection
 struct BookInfoView: View {
-    let audiobook: Audiobook
+    let audiobook: AudiobookModel
     @Environment(\.dependencies) private var deps
     
     // Access dependencies through the container

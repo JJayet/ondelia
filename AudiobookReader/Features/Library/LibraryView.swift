@@ -5,12 +5,11 @@ struct LibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var statistics = ReadingStatistics()
-    @State private var searchText = ""
-    @State private var selectedAudiobook: Audiobook?
+    @State private var selectedAudiobook: AudiobookModel?
     @State private var showingStatistics = false
-    @State private var audiobookForImagePicker: Audiobook?
+    @State private var audiobookForImagePicker: AudiobookModel?
     @State private var showingRenameAlert = false
-    @State private var audiobookToRename: Audiobook?
+    @State private var audiobookToRename: AudiobookModel?
     @State private var newAudiobookTitle = ""
     @State private var viewMode: ViewMode = .list
     @State private var sortOption: SortOption = .lastPlayed
@@ -64,18 +63,18 @@ struct LibraryView: View {
             }
         }
         
-        var descriptor: NSSortDescriptor {
+        var descriptor: SortDescriptor<AudiobookModel> {
             switch self {
             case .title:
-                return NSSortDescriptor(keyPath: \Audiobook.title, ascending: true)
+                return SortDescriptor(\AudiobookModel.title)
             case .author:
-                return NSSortDescriptor(keyPath: \Audiobook.author, ascending: true)
+                return SortDescriptor(\AudiobookModel.author)
             case .lastPlayed:
-                return NSSortDescriptor(keyPath: \Audiobook.lastPlayed, ascending: false)
+                return SortDescriptor(\AudiobookModel.lastPlayed, order:.reverse)
             case .dateAdded:
-                return NSSortDescriptor(keyPath: \Audiobook.dateAdded, ascending: false)
+                return SortDescriptor(\AudiobookModel.dateAdded, order:.reverse)
             case .progress:
-                return NSSortDescriptor(keyPath: \Audiobook.currentPosition, ascending: false)
+                return SortDescriptor(\AudiobookModel.currentPosition, order:.reverse)
             }
         }
     }
@@ -109,15 +108,10 @@ struct LibraryView: View {
         }
     }
     
-    private var filteredAudiobooks: [Audiobook] {
-        let searchedBooks: [Audiobook]
-        if !searchText.isEmpty {
-            searchedBooks = audiobookManager.searchAudiobooks(query: searchText)
-        } else {
-            searchedBooks = audiobookManager.audiobooks
-        }
-
-        let filteredBooks: [Audiobook]
+    private var filteredAudiobooks: [AudiobookModel] {
+        let searchedBooks = audiobookManager.audiobooks
+        
+        let filteredBooks: [AudiobookModel]
         if let predicate = filterOption.predicate() {
             filteredBooks = searchedBooks.filter { book in
                 predicate.evaluate(with: book)
@@ -128,16 +122,16 @@ struct LibraryView: View {
 
         let descriptor = sortOption.descriptor
         let sortedBooks = filteredBooks.sorted { book1, book2 in
-            descriptor.compare(book1, to: book2) == .orderedAscending
+            descriptor.compare(book1, book2) == .orderedAscending
         }
 
         return sortedBooks
     }
     
-    private var continueReadingBooks: [Audiobook] {
+    private var continueReadingBooks: [AudiobookModel] {
         audiobookManager.audiobooks
             .filter { $0.currentPosition > 0 && !$0.isFinished }
-            .sorted { $0.lastPlayed ?? Date.distantPast > $1.lastPlayed ?? Date.distantPast }
+            .sorted { $0.lastPlayed > $1.lastPlayed }
             .prefix(3)
             .map { $0 }
     }
@@ -180,7 +174,7 @@ struct LibraryView: View {
     }
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             VStack(spacing: 0) {
                 if viewMode == .list {
                     // List mode - use List for proper swipe actions
@@ -406,7 +400,6 @@ struct LibraryView: View {
                 }
             }
             .background(Color.primaryBackground.ignoresSafeArea())
-            .searchable(text: $searchText, prompt: NSLocalizedString("Search audiobooks...", comment: "Search placeholder"))
             .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
@@ -439,7 +432,7 @@ struct LibraryView: View {
                 }
             }
         }
-        .accentColor(themeManager.accentColor.color)
+        .tint(themeManager.accentColor.color)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .sheet(isPresented: $showingStatistics) {
             StatisticsView(statistics: statistics)
@@ -544,6 +537,6 @@ struct StatisticsCardView: View {
     }
 }
 
-#Preview {
+#Preview("Empty library view") {
     LibraryView()
 }

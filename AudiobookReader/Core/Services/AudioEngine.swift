@@ -38,7 +38,7 @@ class AudioEngine: NSObject, ObservableObject {
     }
     
     // MARK: - Audio Session Setup
-    private func setupAudioSession() {
+    func setupAudioSession() {
     do {
         let audioSession = AVAudioSession.sharedInstance()
         
@@ -311,12 +311,8 @@ class AudioEngine: NSObject, ObservableObject {
         
         // Remove KVO observers synchronously if they were added
         if hasAddedObservers, let item = playerItem {
-            do {
-                item.removeObserver(self, forKeyPath: "duration")
-                item.removeObserver(self, forKeyPath: "status")
-            } catch {
-                print("⚠️ AudioEngine: Error removing KVO observers: \(error)")
-            }
+            item.removeObserver(self, forKeyPath: "duration")
+            item.removeObserver(self, forKeyPath: "status")
             hasAddedObservers = false
         }
         

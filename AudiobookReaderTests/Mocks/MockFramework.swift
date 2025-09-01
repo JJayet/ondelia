@@ -195,6 +195,15 @@ class MockAudioEngine: ObservableObject {
     
     private var playbackTimer: Timer?
     
+    func loadAudio(url: URL) {
+        guard !shouldFailOperations else { return }
+        
+        // Mock loading from URL
+        self.isReady = true
+        self.duration = 3600 // Default 1 hour
+        self.currentTime = 0
+    }
+    
     func loadAudiobook(_ audiobook: Audiobook) throws {
         guard !shouldFailOperations else {
             throw AudiobookError.fileNotFound("Mock error for testing")
@@ -212,16 +221,28 @@ class MockAudioEngine: ObservableObject {
         }
     }
     
-    func startPlayback() {
+    func play() {
         guard !shouldFailOperations && isReady else { return }
         
         isPlaying = true
         startPlaybackTimer()
     }
     
-    func pausePlayback() {
+    func startPlayback() {
+        play()
+    }
+    
+    func startPlaybook() {
+        play()
+    }
+    
+    func pause() {
         isPlaying = false
         stopPlaybackTimer()
+    }
+    
+    func pausePlayback() {
+        pause()
     }
     
     func resumePlayback() {
@@ -231,10 +252,18 @@ class MockAudioEngine: ObservableObject {
         startPlaybackTimer()
     }
     
-    func stopPlayback() {
+    func stop() {
         isPlaying = false
         stopPlaybackTimer()
         currentTime = 0
+    }
+    
+    func stopPlayback() {
+        stop()
+    }
+    
+    func stopPlaybook() {
+        stop()
     }
     
     func seek(to time: TimeInterval) {
@@ -252,6 +281,13 @@ class MockAudioEngine: ObservableObject {
     
     func setPlaybackRate(_ rate: Float) {
         playbackRate = rate
+    }
+    
+    func skipToChapter(_ chapterIndex: Int) {
+        guard !mockChapters.isEmpty, chapterIndex >= 0, chapterIndex < mockChapters.count else { return }
+        
+        currentChapterIndex = chapterIndex
+        seek(to: mockChapters[chapterIndex].startTime)
     }
     
     func nextChapter() {

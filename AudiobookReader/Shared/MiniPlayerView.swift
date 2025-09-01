@@ -3,7 +3,7 @@ import SwiftUI
 struct MiniPlayerView: View {
     @ObservedObject var globalAudioManager = GlobalAudioManager.shared
     @ObservedObject var statistics = ReadingStatistics()
-    @State private var selectedAudiobook: Audiobook?
+    @State private var selectedAudiobook: AudiobookModel?
 
     private var coverImage: UIImage? {
         guard let data = globalAudioManager.currentAudiobook?.coverImageData
@@ -132,6 +132,7 @@ struct MiniPlayerView_Previews: PreviewProvider {
         ZStack {
             Color.primaryBackground.ignoresSafeArea()
             MiniPlayerView()
+                .previewWithMockAudio()
         }
     }
 }
