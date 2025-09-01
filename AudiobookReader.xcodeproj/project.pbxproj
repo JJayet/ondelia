@@ -74,9 +74,20 @@
 		F1A887172E66445200718F1B /* Exceptions for "AudiobookReaderWidget" folder in "AudiobookReaderWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
+				AudiobookReaderWidgetControl.swift,
+				AudiobookReaderWidgetLiveActivity.swift,
 				Info.plist,
-				Widgets/NowPlayingWidget.swift,
-				Widgets/WidgetBundle.swift,
+			);
+			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;
+		};
+		F1A887202E66496A00718F1B /* Exceptions for "AudiobookReader" folder in "AudiobookReaderWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Core/Models/SwiftData/AudiobookModel.swift,
+				Core/Models/SwiftData/BookmarkModel.swift,
+				Core/Models/SwiftData/ChapterModel.swift,
+				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
+				Shared/NowPlayingSharedStore.swift,
 			);
 			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;
 		};
@@ -87,6 +98,7 @@
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
 				F13E2CE82E5F994200A4C166 /* Exceptions for "AudiobookReader" folder in "AudiobookReader" target */,
+				F1A887202E66496A00718F1B /* Exceptions for "AudiobookReader" folder in "AudiobookReaderWidgetExtension" target */,
 			);
 			path = AudiobookReader;
 			sourceTree = "<group>";

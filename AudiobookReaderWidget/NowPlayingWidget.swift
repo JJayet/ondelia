@@ -417,7 +417,7 @@ private func formatTime(_ time: TimeInterval) -> String {
 // MARK: - Widget Registration
 // For iOS 26 - widgets need to be explicitly registered with the system
 // This approach allows widgets to be discoverable in the dashboard when in main app target
-extension AudiobookReaderApp {
+extension AudiobookWidgetBundle {
     static func registerWidgets() {
         // Register widgets with the system
         WidgetCenter.shared.reloadAllTimelines()
