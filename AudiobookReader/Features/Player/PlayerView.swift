@@ -196,11 +196,18 @@ struct PlayerView: View {
     // MARK: - Control Panel
     @ViewBuilder
     private var controlPanel: some View {
-        VStack(spacing: 20) {
+        VStack(spacing: 16) {
+            // Drag handle
+            RoundedRectangle(cornerRadius: 3)
+                .fill(Color.primaryText.opacity(0.25))
+                .frame(width: 56, height: 6)
+                .padding(.top, 8)
+                .accessibilityHidden(true)
+
             headerControls
-
+            
             Spacer()
-
+            
             bookInfo
 
             progressSection
