@@ -94,20 +94,26 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     
     @MainActor
     private func calculateCurrentMonthProgress() {
+        // If SwiftData isn't ready yet (e.g., early view creation or previews), skip gracefully
+        guard SwiftDataController.shared.isLoaded else {
+            monthlyProgress = 0
+            return
+        }
+
         let calendar = Calendar.current
         let now = Date()
         let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
-        
+
         // Calculate listening time for current month
         let context = swiftDataController.context
         let descriptor = FetchDescriptor<AudiobookModel>(
             predicate: #Predicate<AudiobookModel> { $0.lastPlayed >= startOfMonth }
         )
-        
+
         do {
             let audiobooks = try context.fetch(descriptor)
             monthlyProgress = audiobooks.reduce(0) { total, book in
-                return total + book.currentPosition
+                total + book.currentPosition
             }
         } catch {
             print("Failed to calculate monthly progress: \(error)")

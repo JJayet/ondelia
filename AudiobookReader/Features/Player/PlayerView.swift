@@ -214,6 +214,7 @@ struct PlayerView: View {
             .regular.interactive(),
             in: RoundedRectangle(cornerRadius: 24)
         )
+        .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 24))
         .padding(.horizontal, 16)
     }
 
@@ -316,6 +317,7 @@ struct PlayerView: View {
                     .regular.interactive(),
                     in: RoundedRectangle(cornerRadius: 12)
                 )
+                .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 12))
             }
         }
     }
@@ -630,4 +632,3 @@ struct PlayerView: View {
         }
     }
 #endif
-

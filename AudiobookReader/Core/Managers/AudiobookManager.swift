@@ -12,11 +12,6 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     
     private var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
     
-    init() {
-        // Don't fetch audiobooks immediately during initialization
-        // This will be called by views when they appear
-    }
-    
     func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {
         return audiobook.bookmarks
     }

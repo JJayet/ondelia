@@ -73,7 +73,7 @@ struct MiniPlayerBar: View {
         }
         .padding(.horizontal, 16)
         .safeAreaPadding(.vertical, 6)
-        .glassEffect()
+        .glassEffect(.regular.tint(.clear.opacity(0.5)))
     }
 }
 

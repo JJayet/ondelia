@@ -21,9 +21,7 @@ class WhisperTranscriptionManager: ObservableObject {
     private var currentModelName: String = ""
     
     private init() {
-        Task {
-            await initializeWhisperKit()
-        }
+        // Lazy init: do not download automatically. Initialization happens on demand via switchModel or when first used.
     }
     
     // MARK: - Initialization

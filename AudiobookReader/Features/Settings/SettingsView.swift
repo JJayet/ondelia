@@ -7,6 +7,8 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @State private var showingGoalEditor = false
     @State private var tempGoal: Double = 0
+    @State private var showModelDownloadConfirm = false
+    @State private var pendingWhisperModel: WhisperModel? = nil
     
     var body: some View {
         NavigationStack {
@@ -15,10 +17,12 @@ struct SettingsView: View {
                 Section(NSLocalizedString("Appearance", comment: "Settings section: Appearance")) {
                     HStack {
                         Label(NSLocalizedString("Theme", comment: "Theme setting label"), systemImage: "paintbrush")
+                            .foregroundColor(.primaryText)
                         Spacer()
                         Picker("", selection: $themeManager.currentTheme) {
                             ForEach(AppTheme.allCases, id: \.rawValue) { theme in
                                 Text(theme.displayName)
+                                    .foregroundColor(.primaryText)
                                     .tag(theme)
                             }
                         }
@@ -27,6 +31,7 @@ struct SettingsView: View {
                             themeManager.setTheme(newTheme)
                         }
                     }
+                    .modifier(SettingsRowCard())
                     
                     HStack {
                         Label(NSLocalizedString("Accent Color", comment: "Accent color setting label"), systemImage: "circle.fill")
@@ -45,16 +50,19 @@ struct SettingsView: View {
                             themeManager.setAccentColor(newColor)
                         }
                     }
+                    .modifier(SettingsRowCard())
                 }
                 
                 // Playback Section
                 Section(NSLocalizedString("Playback", comment: "Settings section: Playback")) {
                     HStack {
                         Label("", systemImage: "goforward")
+                            .foregroundColor(.primaryText)
                         Spacer()
                         Picker(NSLocalizedString("Skip Interval", comment: "Skip interval picker label"), selection: $themeManager.skipInterval) {
                             ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
                                 Text(interval.displayName)
+                                    .foregroundColor(.primaryText)
                                     .tag(interval)
                             }
                         }
@@ -63,6 +71,7 @@ struct SettingsView: View {
                             themeManager.setSkipInterval(newInterval)
                         }
                     }
+                    .modifier(SettingsRowCard())
                 }
                 
                 // Transcription Section
@@ -70,24 +79,26 @@ struct SettingsView: View {
                     VStack(alignment: .leading) {
                         HStack {
                             Label(NSLocalizedString("WhisperKit Model", comment: "WhisperKit model setting label"), systemImage: "brain")
+                                .foregroundColor(.primaryText)
                             Spacer()
                             Picker("", selection: $themeManager.whisperModel) {
                                 ForEach(WhisperModel.allCases, id: \.rawValue) { model in
                                     VStack(alignment: .leading) {
                                         Text(model.displayName)
                                             .font(.body)
+                                            .foregroundColor(.primaryText)
                                         HStack {
                                             Text(model.sizeDescription)
                                                 .font(.caption)
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(.secondaryText)
                                             Text("•")
                                                 .font(.caption)
-                                                .foregroundColor(.secondary)
+                                                .foregroundColor(.secondaryText)
                                             HStack(spacing: 2) {
                                                 ForEach(0..<5) { index in
                                                     Image(systemName: index < model.accuracyRating ? "star.fill" : "star")
                                                         .font(.system(size: 8))
-                                                        .foregroundColor(index < model.accuracyRating ? .yellow : .secondary)
+                                                        .foregroundColor(index < model.accuracyRating ? .yellow : .secondaryText)
                                                 }
                                             }
                                         }
@@ -98,6 +109,10 @@ struct SettingsView: View {
                             .pickerStyle(MenuPickerStyle())
                             .onChange(of: themeManager.whisperModel) { _, newModel in
                                 themeManager.updateWhisperModel(newModel)
+                                if themeManager.transcriptionEngine == .whisperKit {
+                                    pendingWhisperModel = newModel
+                                    showModelDownloadConfirm = true
+                                }
                             }
                             .disabled(whisperManager.isModelLoading)
                         }
@@ -109,11 +124,12 @@ struct SettingsView: View {
                                     .scaleEffect(0.8)
                                 Text(String(format: NSLocalizedString("Downloading %@...", comment: "Model downloading status"), themeManager.whisperModel.displayName))
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(.secondaryText)
                             }
                             .padding(.top, 4)
                         }
                     }
+                    .modifier(SettingsRowCard())
                     
                     HStack {
                         Label(NSLocalizedString("Language", comment: "Language setting label"), systemImage: "globe")
@@ -129,6 +145,7 @@ struct SettingsView: View {
                             themeManager.updateTranscriptionLanguage(newLanguage)
                         }
                     }
+                    .modifier(SettingsRowCard())
                     
                     if TranslationManager.isAvailable {
                         Toggle(isOn: $themeManager.enableTranslation) {
@@ -137,6 +154,7 @@ struct SettingsView: View {
                         .onChange(of: themeManager.enableTranslation) { _, newValue in
                             themeManager.updateEnableTranslation(newValue)
                         }
+                        .modifier(SettingsRowCard())
                         
                         if themeManager.enableTranslation {
                             HStack {
@@ -153,6 +171,7 @@ struct SettingsView: View {
                                     themeManager.updateTranslationTargetLanguage(newLanguage)
                                 }
                             }
+                            .modifier(SettingsRowCard())
                         }
                     } else {
                         HStack {
@@ -160,8 +179,9 @@ struct SettingsView: View {
                             Spacer()
                             Text(NSLocalizedString("Requires iOS 17.4+", comment: "iOS version requirement text"))
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(.secondaryText)
                         }
+                        .modifier(SettingsRowCard())
                     }
                 }
                 
@@ -241,9 +261,47 @@ struct SettingsView: View {
             } message: {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
+            .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .background(Color.primaryBackground)
+            .tint(themeManager.accentColor.color)
+        }
+        .alert(
+            NSLocalizedString("Download Model?", comment: "Whisper model download confirm title"),
+            isPresented: $showModelDownloadConfirm
+        ) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
+                pendingWhisperModel = nil
+            }
+            Button(NSLocalizedString("Download", comment: "Download button")) {
+                if let model = pendingWhisperModel {
+                    Task { try? await whisperManager.switchModel(to: model) }
+                }
+                pendingWhisperModel = nil
+            }
+        } message: {
+            Text(
+                String(
+                    format: NSLocalizedString(
+                        "Download %@ model for offline transcription?",
+                        comment: "Whisper download confirm message"
+                    ),
+                    pendingWhisperModel?.displayName ?? ""
+                )
+            )
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .tint(themeManager.accentColor.color)
+    }
+}
+
+private struct SettingsRowCard: ViewModifier {
+    func body(content: Content) -> some View {
+        content
+            .padding()
+            .background(Color.cardBackground)
+            .cornerRadius(14)
+            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
 }
 
@@ -452,7 +510,7 @@ struct AchievementView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(isUnlocked ? .yellow : .secondary)
+                .foregroundColor(isUnlocked ? .yellow : .secondaryText)
             
             Text(title)
                 .font(.caption2)

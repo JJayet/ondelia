@@ -96,7 +96,9 @@ struct TranscriptionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }.glassEffect()
+                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
+                        .glassEffect()
+                        .background(Color.glassTint, in: Capsule())
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {

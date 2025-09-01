@@ -201,7 +201,7 @@ struct HomeView: View {
                 }
                 .padding(.vertical)
             }
-            .background(Color.primaryBackground.ignoresSafeArea())
+            .background(Color.primaryBackground)
             .navigationTitle(
                 NSLocalizedString("Home", comment: "Home navigation title")
             )
@@ -212,9 +212,6 @@ struct HomeView: View {
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
-        .onAppear {
-            audiobookManager.fetchAudiobooks()
-        }
     }
 
     private var greetingMessage: String {
@@ -289,6 +286,7 @@ struct QuickStatView: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity)
         .glassEffect(in: .rect(cornerRadius: 16))
+        .background(Color.glassTint, in: .rect(cornerRadius: 16))
     }
 }
 
@@ -409,4 +407,5 @@ struct MonthlyGoalCardView: View {
 
 #Preview("Home") {
     HomeView()
+        .previewWithMockAudio()
 }

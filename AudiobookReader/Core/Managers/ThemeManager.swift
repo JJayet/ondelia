@@ -114,33 +114,11 @@ class ThemeManager: ThemeManagerProtocol {
     func updateTranscriptionEngine(_ engine: TranscriptionEngine) {
         transcriptionEngine = engine
         UserDefaults.standard.set(engine.rawValue, forKey: "transcriptionEngine")
-        
-        // Auto-download current model when switching to WhisperKit
-        if engine == .whisperKit {
-            Task {
-                do {
-                    try await WhisperTranscriptionManager.shared.switchModel(to: whisperModel)
-                } catch {
-                    print("❌ Failed to switch WhisperKit model: \(error)")
-                }
-            }
-        }
     }
     
     func updateWhisperModel(_ model: WhisperModel) {
         whisperModel = model
         UserDefaults.standard.set(model.rawValue, forKey: "whisperModel")
-        
-        // Trigger model download if WhisperKit engine is selected
-        if transcriptionEngine == .whisperKit {
-            Task {
-                do {
-                    try await WhisperTranscriptionManager.shared.switchModel(to: model)
-                } catch {
-                    print("❌ Failed to download WhisperKit model: \(error)")
-                }
-            }
-        }
     }
     
     func updateTranscriptionLanguage(_ language: TranscriptionLanguage) {
@@ -164,6 +142,7 @@ enum AppTheme: Int, CaseIterable {
     case light = 1
     case dark = 2
     case sepia = 3
+    case dim = 4
     
     var displayName: String {
         switch self {
@@ -171,6 +150,7 @@ enum AppTheme: Int, CaseIterable {
         case .light: return "Light"
         case .dark: return "Dark"
         case .sepia: return "Sepia"
+        case .dim: return "Dim"
         }
     }
     
@@ -180,6 +160,7 @@ enum AppTheme: Int, CaseIterable {
         case .light: return .light
         case .dark: return .dark
         case .sepia: return .light
+        case .dim: return .dark
         }
     }
 }
@@ -203,15 +184,32 @@ enum AccentColor: Int, CaseIterable {
         }
     }
     
-    var color: Color {
-        switch self {
-        case .blue: return .blue
-        case .green: return .green
-        case .orange: return .orange
-        case .purple: return .purple
-        case .red: return .red
-        case .teal: return .teal
+    @MainActor var color: Color {
+        // Base palette
+        let base: Color = {
+            switch self {
+            case .blue: return .blue
+            case .green: return .green
+            case .orange: return .orange
+            case .purple: return .purple
+            case .red: return .red
+            case .teal: return .teal
+            }
+        }()
+
+        // Dim theme: slightly mute accents to reduce contrast
+        if ThemeManager.shared.currentTheme == .dim {
+            switch self {
+            case .blue:   return Color(red: 0.36, green: 0.53, blue: 0.90)   // #5C87E5
+            case .green:  return Color(red: 0.35, green: 0.76, blue: 0.54)   // #59C288
+            case .orange: return Color(red: 0.94, green: 0.66, blue: 0.38)   // #F0A760
+            case .purple: return Color(red: 0.69, green: 0.54, blue: 0.90)   // #B08AE6
+            case .red:    return Color(red: 0.88, green: 0.41, blue: 0.41)   // #E06767
+            case .teal:   return Color(red: 0.39, green: 0.76, blue: 0.76)   // #63C2C2
+            }
         }
+
+        return base
     }
 }
 
@@ -348,24 +346,89 @@ extension EnvironmentValues {
 
 // MARK: - Custom Colors
 extension Color {
-    static var primaryBackground: Color {
-        Color(.systemBackground)
+    @MainActor static var primaryBackground: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            // Sepia: warm parchment
+            return Color(red: 0.953, green: 0.914, blue: 0.843) // #F3E9D7
+        case .dark:
+            return Color(red: 0.06, green: 0.06, blue: 0.07)
+        case .dim:
+            // Dim: softer dark, less contrast than pure dark
+            return Color(red: 0.106, green: 0.110, blue: 0.122) // #1B1C1F
+        case .light:
+            return Color(.systemBackground)
+        case .system:
+            return Color(.systemBackground)
+        }
+    }
+
+    // Glass tint to theme materials consistently
+    @MainActor static var glassTint: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            // Warm amber glow over material
+            return Color(red: 0.90, green: 0.74, blue: 0.42).opacity(0.10) // #E6BD6B @10%
+        case .dim:
+            // Slight lift to avoid harsh contrast
+            return Color.white.opacity(0.06)
+        case .dark:
+            return Color.white.opacity(0.04)
+        case .light, .system:
+            return Color.black.opacity(0.03)
+        }
     }
     
-    static var secondaryBackground: Color {
-        Color(.systemGroupedBackground)
+    @MainActor static var secondaryBackground: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            return Color(red: 0.937, green: 0.882, blue: 0.788) // #EFE1C9
+        case .dark:
+            return Color(red: 0.10, green: 0.10, blue: 0.11)
+        case .dim:
+            return Color(red: 0.137, green: 0.145, blue: 0.161) // #232529
+        case .light:
+            return Color(.systemGroupedBackground)
+        case .system:
+            return Color(.systemGroupedBackground)
+        }
     }
     
-    static var cardBackground: Color {
-        Color(.secondarySystemGroupedBackground)
+    @MainActor static var cardBackground: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            return Color(red: 0.917, green: 0.843, blue: 0.725) // #EAD7B9
+        case .dark:
+            return Color(red: 0.13, green: 0.13, blue: 0.14)
+        case .dim:
+            return Color(red: 0.165, green: 0.173, blue: 0.192) // #2A2C31
+        case .light:
+            return Color(.secondarySystemGroupedBackground)
+        case .system:
+            return Color(.secondarySystemGroupedBackground)
+        }
     }
     
-    static var primaryText: Color {
-        Color(.label)
+    @MainActor static var primaryText: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            return Color(red: 0.243, green: 0.184, blue: 0.118) // #3E2F1E
+        case .dark, .dim:
+            return Color(red: 0.903, green: 0.909, blue: 0.915) // #E6E7EA
+        case .light, .system:
+            return Color(.label)
+        }
     }
     
-    static var secondaryText: Color {
-        Color(.secondaryLabel)
+    @MainActor static var secondaryText: Color {
+        switch ThemeManager.shared.currentTheme {
+        case .sepia:
+            return Color(red: 0.435, green: 0.353, blue: 0.235) // #6F5A3C
+        case .dark, .dim:
+            return Color(red: 0.659, green: 0.671, blue: 0.698) // #A8ABB2
+        case .light, .system:
+            return Color(.secondaryLabel)
+        }
     }
 }
 
