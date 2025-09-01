@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
 		F11938B52E60A52C003F868D /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = F11938B42E60A52C003F868D /* WhisperKit */; };
+		F1A887002E66445100718F1B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
+		F1A887022E66445100718F1B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
+		F1A887132E66445200718F1B /* AudiobookReaderWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F1A886FD2E66445100718F1B /* AudiobookReaderWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -26,12 +29,37 @@
 			remoteGlobalIDString = F132899F2E4DBA6B004EC064;
 			remoteInfo = AudiobookReader;
 		};
+		F1A887112E66445200718F1B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F1A886FC2E66445100718F1B;
+			remoteInfo = AudiobookReaderWidgetExtension;
+		};
 /* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		F1A887182E66445200718F1B /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				F1A887132E66445200718F1B /* AudiobookReaderWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		F13289A02E4DBA6B004EC064 /* AudiobookReader.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AudiobookReader.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AudiobookReaderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1A886FD2E66445100718F1B /* AudiobookReaderWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = AudiobookReaderWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1A886FF2E66445100718F1B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		F1A887012E66445100718F1B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		F1A8871A2E6644BA00718F1B /* AudiobookReaderWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AudiobookReaderWidgetExtension.entitlements; sourceTree = "<group>"; };
 		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -42,6 +70,15 @@
 				Resources/Info.plist,
 			);
 			target = F132899F2E4DBA6B004EC064 /* AudiobookReader */;
+		};
+		F1A887172E66445200718F1B /* Exceptions for "AudiobookReaderWidget" folder in "AudiobookReaderWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Widgets/NowPlayingWidget.swift,
+				Widgets/WidgetBundle.swift,
+			);
+			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -62,6 +99,14 @@
 		F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = AudiobookReaderUITests;
+			sourceTree = "<group>";
+		};
+		F1A887032E66445100718F1B /* AudiobookReaderWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F1A887172E66445200718F1B /* Exceptions for "AudiobookReaderWidget" folder in "AudiobookReaderWidgetExtension" target */,
+			);
+			path = AudiobookReaderWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -90,16 +135,28 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F1A886FA2E66445100718F1B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F1A887022E66445100718F1B /* SwiftUI.framework in Frameworks */,
+				F1A887002E66445100718F1B /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		F13289972E4DBA6B004EC064 = {
 			isa = PBXGroup;
 			children = (
+				F1A8871A2E6644BA00718F1B /* AudiobookReaderWidgetExtension.entitlements */,
 				F13289A22E4DBA6B004EC064 /* AudiobookReader */,
 				F13289B42E4DBA6D004EC064 /* AudiobookReaderTests */,
 				F13289BE2E4DBA6D004EC064 /* AudiobookReaderUITests */,
 				F1C0NF1G0000000000000003 /* Config */,
+				F1A887032E66445100718F1B /* AudiobookReaderWidget */,
+				F1A886FE2E66445100718F1B /* Frameworks */,
 				F13289A12E4DBA6B004EC064 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -110,8 +167,18 @@
 				F13289A02E4DBA6B004EC064 /* AudiobookReader.app */,
 				F13289B12E4DBA6D004EC064 /* AudiobookReaderTests.xctest */,
 				F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */,
+				F1A886FD2E66445100718F1B /* AudiobookReaderWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		F1A886FE2E66445100718F1B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F1A886FF2E66445100718F1B /* WidgetKit.framework */,
+				F1A887012E66445100718F1B /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		F1C0NF1G0000000000000003 /* Config */ = {
@@ -132,10 +199,12 @@
 				F132899C2E4DBA6B004EC064 /* Sources */,
 				F132899D2E4DBA6B004EC064 /* Frameworks */,
 				F132899E2E4DBA6B004EC064 /* Resources */,
+				F1A887182E66445200718F1B /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				F1A887122E66445200718F1B /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F13289A22E4DBA6B004EC064 /* AudiobookReader */,
@@ -195,6 +264,28 @@
 			productReference = F13289BB2E4DBA6D004EC064 /* AudiobookReaderUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
+		F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "AudiobookReaderWidgetExtension" */;
+			buildPhases = (
+				F1A886F92E66445100718F1B /* Sources */,
+				F1A886FA2E66445100718F1B /* Frameworks */,
+				F1A886FB2E66445100718F1B /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				F1A887032E66445100718F1B /* AudiobookReaderWidget */,
+			);
+			name = AudiobookReaderWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = AudiobookReaderWidgetExtension;
+			productReference = F1A886FD2E66445100718F1B /* AudiobookReaderWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -202,7 +293,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1640;
+				LastSwiftUpdateCheck = 2600;
 				LastUpgradeCheck = 2600;
 				TargetAttributes = {
 					F132899F2E4DBA6B004EC064 = {
@@ -215,6 +306,9 @@
 					F13289BA2E4DBA6D004EC064 = {
 						CreatedOnToolsVersion = 16.4;
 						TestTargetID = F132899F2E4DBA6B004EC064;
+					};
+					F1A886FC2E66445100718F1B = {
+						CreatedOnToolsVersion = 26.0;
 					};
 				};
 			};
@@ -240,6 +334,7 @@
 				F132899F2E4DBA6B004EC064 /* AudiobookReader */,
 				F13289B02E4DBA6D004EC064 /* AudiobookReaderTests */,
 				F13289BA2E4DBA6D004EC064 /* AudiobookReaderUITests */,
+				F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -260,6 +355,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F13289B92E4DBA6D004EC064 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F1A886FB2E66445100718F1B /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -290,6 +392,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		F1A886F92E66445100718F1B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -302,6 +411,11 @@
 			isa = PBXTargetDependency;
 			target = F132899F2E4DBA6B004EC064 /* AudiobookReader */;
 			targetProxy = F13289BC2E4DBA6D004EC064 /* PBXContainerItemProxy */;
+		};
+		F1A887122E66445200718F1B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;
+			targetProxy = F1A887112E66445200718F1B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -575,6 +689,70 @@
 			};
 			name = Release;
 		};
+		F1A887152E66445200718F1B /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = AudiobookReaderWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X4YGQGMEQG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudiobookReaderWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AudiobookReaderWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReader.AudiobookReaderWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F1A887162E66445200718F1B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = AudiobookReaderWidgetExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = X4YGQGMEQG;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = AudiobookReaderWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = AudiobookReaderWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReader.AudiobookReaderWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -610,6 +788,15 @@
 			buildConfigurations = (
 				F13289CD2E4DBA6D004EC064 /* Debug */,
 				F13289CE2E4DBA6D004EC064 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "AudiobookReaderWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F1A887152E66445200718F1B /* Debug */,
+				F1A887162E66445200718F1B /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

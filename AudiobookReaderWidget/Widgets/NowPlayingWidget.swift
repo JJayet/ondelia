@@ -56,20 +56,24 @@ struct NowPlayingProvider: TimelineProvider {
     }
     
     private func getCurrentPlaybackState() -> NowPlayingEntry {
-        // For now, return placeholder data
-        // This will be connected to the actual GlobalAudioManager once the app context is available
+        let shared = NowPlayingSharedStore.read()
+        let title = shared.title ?? "Sample Audiobook"
+        let author = shared.author ?? "Sample Author"
+        let isPlaying = shared.isPlaying
+        let current = shared.current
+        let duration = max(shared.duration, 1)
+        let progress = Float(min(max(current / duration, 0), 1))
+        var coverImage: UIImage? = nil
+        if let data = shared.cover { coverImage = UIImage(data: data) }
+
+        let info = AudiobookInfo(title: title, author: author, chapterTitle: nil, progress: progress)
         return NowPlayingEntry(
             date: Date(),
-            audiobook: AudiobookInfo(
-                title: "Sample Audiobook",
-                author: "Sample Author", 
-                chapterTitle: "Chapter 1",
-                progress: 0.3
-            ),
-            isPlaying: false,
-            currentTime: 0,
-            duration: 0,
-            coverImage: UIImage(systemName: "book.circle")
+            audiobook: info,
+            isPlaying: isPlaying,
+            currentTime: current,
+            duration: duration,
+            coverImage: coverImage
         )
     }
 }

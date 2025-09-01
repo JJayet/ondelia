@@ -230,6 +230,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         } else {
             audioEngine?.setPlaybackRate(rate)
         }
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
     }
     
     func skipForward(_ interval: TimeInterval) {
@@ -238,6 +245,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         } else {
             audioEngine?.skipForward(interval)
         }
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
     }
     
     func skipBackward(_ interval: TimeInterval) {
@@ -246,6 +260,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         } else {
             audioEngine?.skipBackward(interval)
         }
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
     }
     
     func togglePlayback() {
@@ -264,6 +285,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             playbackState = .playing
             showMiniPlayer = true
         }
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
     }
     
     func seek(to time: TimeInterval) {
@@ -272,6 +300,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         } else {
             audioEngine?.seek(to: time)
         }
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
     }
 
     
