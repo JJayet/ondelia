@@ -12,6 +12,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     @Published var averageSpeed: Float = 1.0
     @Published var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
     @Published var monthlyProgress: TimeInterval = 0
+    private var monthlyAnchor: Date = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
     
     init() {
         loadStatistics()
@@ -25,6 +26,10 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         longestStreak = UserDefaults.standard.integer(forKey: "longestStreak")
         averageSpeed = UserDefaults.standard.float(forKey: "averageSpeed")
         monthlyGoal = UserDefaults.standard.double(forKey: "monthlyGoal")
+        monthlyProgress = UserDefaults.standard.double(forKey: "monthlyProgress")
+        if let anchor = UserDefaults.standard.object(forKey: "monthlyAnchor") as? Date {
+            monthlyAnchor = anchor
+        }
         
         if monthlyGoal == 0 {
             monthlyGoal = 3600 * 10 // Default 10 hours
@@ -41,11 +46,21 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         UserDefaults.standard.set(longestStreak, forKey: "longestStreak")
         UserDefaults.standard.set(averageSpeed, forKey: "averageSpeed")
         UserDefaults.standard.set(monthlyGoal, forKey: "monthlyGoal")
+        UserDefaults.standard.set(monthlyProgress, forKey: "monthlyProgress")
+        UserDefaults.standard.set(monthlyAnchor, forKey: "monthlyAnchor")
     }
     
     @MainActor
     func addListeningTime(_ time: TimeInterval, playbackRate: Float = 1.0) {
+        // Ensure current month anchor and reset if the month rolled over
+        let startOfMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
+        if startOfMonth != monthlyAnchor {
+            monthlyAnchor = startOfMonth
+            monthlyProgress = 0
+        }
         totalListeningTime += time
+        // Count real time spent listening, not content position deltas
+        monthlyProgress += time
         
         // Update average speed (weighted average)
         let totalSessions = UserDefaults.standard.integer(forKey: "totalSessions")
@@ -55,12 +70,26 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         UserDefaults.standard.set(newTotalSessions, forKey: "totalSessions")
         updateStreak()
         saveStatistics()
-        calculateCurrentMonthProgress()
     }
     
     func markBookCompleted() {
         booksCompleted += 1
         updateStreak()
+        saveStatistics()
+    }
+
+    // MARK: - Reset
+    func resetAll() {
+        totalListeningTime = 0
+        currentStreak = 0
+        longestStreak = 0
+        averageSpeed = 1.0
+        // Preserve user's monthly goal, but reset progress
+        monthlyProgress = 0
+        monthlyAnchor = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
+        // Clear session counters and last listen timestamp
+        UserDefaults.standard.removeObject(forKey: "lastListenDate")
+        UserDefaults.standard.removeObject(forKey: "totalSessions")
         saveStatistics()
     }
     
@@ -94,29 +123,12 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     
     @MainActor
     private func calculateCurrentMonthProgress() {
-        // If SwiftData isn't ready yet (e.g., early view creation or previews), skip gracefully
-        guard SwiftDataController.shared.isLoaded else {
+        // Maintain progress as accumulated listening time only; reset when the month changes
+        let startOfMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
+        if startOfMonth != monthlyAnchor {
+            monthlyAnchor = startOfMonth
             monthlyProgress = 0
-            return
-        }
-
-        let calendar = Calendar.current
-        let now = Date()
-        let startOfMonth = calendar.dateInterval(of: .month, for: now)?.start ?? now
-
-        // Calculate listening time for current month
-        let context = swiftDataController.context
-        let descriptor = FetchDescriptor<AudiobookModel>(
-            predicate: #Predicate<AudiobookModel> { $0.lastPlayed >= startOfMonth }
-        )
-
-        do {
-            let audiobooks = try context.fetch(descriptor)
-            monthlyProgress = audiobooks.reduce(0) { total, book in
-                total + book.currentPosition
-            }
-        } catch {
-            print("Failed to calculate monthly progress: \(error)")
+            saveStatistics()
         }
     }
     

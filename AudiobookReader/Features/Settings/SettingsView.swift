@@ -9,6 +9,7 @@ struct SettingsView: View {
     @State private var tempGoal: Double = 0
     @State private var showModelDownloadConfirm = false
     @State private var pendingWhisperModel: WhisperModel? = nil
+    @State private var showResetStatsConfirm = false
     
     var body: some View {
         NavigationStack {
@@ -233,6 +234,20 @@ struct SettingsView: View {
                         value: "\(statistics.longestStreak) \(NSLocalizedString("days", comment: "Days unit"))"
                     )
                 }
+
+                // Data Management
+                Section(NSLocalizedString("Data", comment: "Settings section: Data management")) {
+                    Button(role: .destructive) {
+                        showResetStatsConfirm = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "arrow.counterclockwise")
+                            Text(NSLocalizedString("Reset Listening Stats", comment: "Reset stats button label"))
+                        }
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+                    .modifier(SettingsRowCard())
+                }
                 
                 // About Section
                 Section(NSLocalizedString("About", comment: "Settings section: About")) {
@@ -290,6 +305,17 @@ struct SettingsView: View {
                     pendingWhisperModel?.displayName ?? ""
                 )
             )
+        }
+        .alert(
+            NSLocalizedString("Reset Stats?", comment: "Reset stats confirm title"),
+            isPresented: $showResetStatsConfirm
+        ) {
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Reset", comment: "Reset button"), role: .destructive) {
+                statistics.resetAll()
+            }
+        } message: {
+            Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books and goals remain.", comment: "Reset stats confirm message"))
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .tint(themeManager.accentColor.color)

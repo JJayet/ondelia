@@ -9,6 +9,7 @@
 "Save" = "Save";
 "Delete" = "Delete";
 "Done" = "Done";
+"Reset" = "Reset";
 
 // MARK: - Library View
 "Library" = "Library";
@@ -62,6 +63,7 @@
 "Transcription" = "Transcription";
 "WhisperKit Model" = "WhisperKit Model";
 "Downloading %@..." = "Downloading %@...";
+"Download Model?" = "Download Model?";
 "Language" = "Language";
 "Enable Translation" = "Enable Translation";
 "Translate To" = "Translate To";
@@ -210,3 +212,7 @@
 "Unknown Title" = "Unknown Title";
 "Unknown Author" = "Unknown Author";
 "Sample Audiobook" = "Sample Audiobook";
+"Data" = "Data";
+"Reset Listening Stats" = "Reset Listening Stats";
+"Reset Stats?" = "Reset Stats?";
+"This will clear your listening time, streaks, and monthly progress. Your books and goals remain." = "This will clear your listening time, streaks, and monthly progress. Your books and goals remain.";

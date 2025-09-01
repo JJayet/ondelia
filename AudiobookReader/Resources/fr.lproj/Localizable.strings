@@ -9,6 +9,7 @@
 "Save" = "Enregistrer";
 "Delete" = "Supprimer";
 "Done" = "Terminé";
+"Reset" = "Réinitialiser";
 
 // MARK: - Library View
 "Library" = "Bibliothèque";
@@ -62,6 +63,7 @@
 "Transcription" = "Transcription";
 "WhisperKit Model" = "Modèle WhisperKit";
 "Downloading %@..." = "Téléchargement de %@...";
+"Download Model?" = "Télécharger le modèle ?";
 "Language" = "Langue";
 "Enable Translation" = "Activer la traduction";
 "Translate To" = "Traduire vers";
@@ -210,3 +212,7 @@
 "Unknown Title" = "Titre inconnu";
 "Unknown Author" = "Auteur inconnu";
 "Sample Audiobook" = "Livre audio d'exemple";
+"Data" = "Données";
+"Reset Listening Stats" = "Réinitialiser les statistiques d'écoute";
+"Reset Stats?" = "Réinitialiser les statistiques ?";
+"This will clear your listening time, streaks, and monthly progress. Your books and goals remain." = "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés.";
