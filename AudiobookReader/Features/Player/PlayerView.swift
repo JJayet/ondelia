@@ -49,8 +49,14 @@ struct PlayerView: View {
     
 
     var body: some View {
-        GeometryReader { geometry in
-            fullPlayerView(geometry: geometry)
+        Group {
+            if playerRouter?.selectedDetent == .height(92) {
+                miniPlayerBar
+            } else {
+                GeometryReader { geometry in
+                    fullPlayerView(geometry: geometry)
+                }
+            }
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
@@ -138,7 +144,50 @@ struct PlayerView: View {
         }
     }
     
-    // MARK: - Mini Player View (removed; handled by sheet detents)
+    // MARK: - Mini Player (sheet mini detent)
+    private var miniPlayerBar: some View {
+        HStack(spacing: 12) {
+            // Cover
+            Group {
+                if let img = coverImage { Image(uiImage: img).resizable() } else { Image(systemName: "book.closed") }
+            }
+            .aspectRatio(1, contentMode: .fill)
+            .frame(width: 40, height: 40)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+
+            // Texts
+            VStack(alignment: .leading, spacing: 2) {
+                Text(audiobook.title ?? NSLocalizedString("Unknown Title", comment: ""))
+                    .font(.subheadline).fontWeight(.semibold)
+                    .lineLimit(1)
+                Text(audiobook.author ?? NSLocalizedString("Unknown Author", comment: ""))
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+                    .lineLimit(1)
+            }
+
+            Spacer()
+
+            // Controls
+            HStack(spacing: 16) {
+                Button { audioManager.skipBackward(15) } label: { Image(systemName: "gobackward.15") }
+                Button {
+                    if audioManager.playbackState != .loading { audioManager.togglePlayback() }
+                } label: {
+                    Group {
+                        if audioManager.playbackState == .loading { ProgressView().scaleEffect(0.8) }
+                        else { Image(systemName: viewModel.isPlaying ? "pause.fill" : "play.fill") }
+                    }
+                }
+                Button { audioManager.skipForward(15) } label: { Image(systemName: "goforward.15") }
+            }
+            .font(.title3)
+        }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
+        .background(.ultraThinMaterial)
+        .onTapGesture { playerRouter?.selectedDetent = .large }
+    }
 // MARK: - Background Layer
     @ViewBuilder
     private func backgroundLayer(geometry: GeometryProxy) -> some View {
@@ -190,13 +239,9 @@ struct PlayerView: View {
     private var headerControls: some View {
         HStack {
             Button {
-                // Chevron minimizes to mini detent; only dismiss if already mini
+                // Chevron always minimizes to mini detent (no full dismiss)
                 if let router = playerRouter {
-                    if router.selectedDetent != .height(92) {
-                        router.selectedDetent = .height(92)
-                    } else {
-                        router.dismiss()
-                    }
+                    router.selectedDetent = .height(92)
                 } else {
                     dismiss()
                 }

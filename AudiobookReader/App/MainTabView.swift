@@ -45,12 +45,7 @@ struct MainTabView: View {
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
-        .tabViewBottomAccessory {
-            // Avoid showing the mini player while the full player sheet is up or dismissing
-            if playerRouter.presented == nil, !playerRouter.isDismissing {
-                NewMiniPlayerBar()
-            }
-        }
+        // Mini player is now handled by the sheet's mini detent inside PlayerView
         .searchable(text: $searchText)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
