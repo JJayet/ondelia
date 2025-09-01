@@ -13,6 +13,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     private var chapterFiles: [String] = [] // File paths for each chapter
     private var folderURL: URL?
     private var isCleanedUp = false
+    private var hasSetupAudioSession = false
     
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
@@ -32,6 +33,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     deinit {
         cleanup()
+        deactivateAudioSession()
     }
     
     // MARK: - Audio Session Setup
@@ -58,6 +60,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         print("✨ MultiFileAudioEngine: Enhanced quality audio enabled")
         
         try audioSession.setActive(true)
+        hasSetupAudioSession = true
         
         // Handle audio session interruptions and route changes
         NotificationCenter.default.addObserver(
@@ -375,7 +378,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             return
         }
         
-        // Load manifest file to get file names
+        // Load manifest file to get file names (back to sync version for now)
         let manifestURL = folderURL!.appendingPathComponent("audiobook_manifest.json")
         if let manifestData = try? Data(contentsOf: manifestURL),
            let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
@@ -383,7 +386,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             
             // Store file names for lazy loading
             chapterFiles.removeAll()
-            chapterFiles.reserveCapacity(chaptersData.count) // Optimize memory allocation
+            chapterFiles.reserveCapacity(chaptersData.count)
             var totalDuration: TimeInterval = 0
             
             // Pre-validate all files in batch to avoid repeated file system calls
@@ -978,6 +981,10 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
         hasAddedObservers.removeAll()
         
+        // Stop ALL players, not just the current one
+        for (_, player) in players {
+            player.pause()  // Ensure all players are stopped
+        }
         players.removeAll()
         playerItems.removeAll()
         chapters.removeAll()
@@ -995,6 +1002,18 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
         
         print("✅ MultiFileAudioEngine: Cleanup completed")
+    }
+    
+    private func deactivateAudioSession() {
+        if hasSetupAudioSession {
+            do {
+                try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+                hasSetupAudioSession = false
+                print("✅ MultiFileAudioEngine: Audio session deactivated")
+            } catch {
+                print("⚠️ MultiFileAudioEngine: Error deactivating audio session: \(error)")
+            }
+        }
     }
     
     // MARK: - Utility

@@ -3,14 +3,19 @@ import SwiftUI
 
 @MainActor
 final class PlayerRouter: ObservableObject {
-    @Published var presentedAudiobook: AudiobookModel?
-    @Published var selectedDetent: PresentationDetent? = nil
+    struct PlayerPresentation: Identifiable, Equatable {
+        let id: UUID
+    }
+
+    // Present by stable ID to avoid SwiftUI sheet re-present loops when the model mutates
+    @Published var presented: PlayerPresentation?
+    @Published var selectedDetent: PresentationDetent = .large
     @Published private(set) var isDismissing = false
     
     func present(_ audiobook: AudiobookModel) {
         // Prevent immediate re-present during active dismissal animation
         guard !isDismissing else { return }
-        presentedAudiobook = audiobook
+        presented = PlayerPresentation(id: audiobook.id)
     }
     
     func presentFull(_ audiobook: AudiobookModel) {
@@ -26,11 +31,11 @@ final class PlayerRouter: ObservableObject {
     func dismiss() {
         // Debounce dismissal to avoid AttributeGraph cycles / re-present loops
         isDismissing = true
-        presentedAudiobook = nil
+        presented = nil
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: 300_000_000)
             isDismissing = false
-            selectedDetent = nil
+            // Keep last detent; no need to reset
         }
     }
 }

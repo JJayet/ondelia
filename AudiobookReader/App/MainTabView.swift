@@ -46,19 +46,22 @@ struct MainTabView: View {
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
-            NewMiniPlayerBar()
+            // Avoid showing the mini player while the full player sheet is up or dismissing
+            if playerRouter.presented == nil, !playerRouter.isDismissing {
+                NewMiniPlayerBar()
+            }
         }
         .searchable(text: $searchText)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
         .environment(\.theme, themeManager)
         .environment(\.playerRouter, playerRouter)
-        .sheet(item: $playerRouter.presentedAudiobook) { book in
-            PlayerView(audiobook: book)
+        .sheet(item: $playerRouter.presented) { presentation in
+            PlayerSheetView(bookID: presentation.id)
                 .environment(\.playerRouter, playerRouter)
-                .presentationDetents([.height(92), .large], selection: Binding(get: { playerRouter.selectedDetent ?? .large }, set: { playerRouter.selectedDetent = $0 }))
+                .presentationDetents([.height(92), .large], selection: $playerRouter.selectedDetent)
                 .presentationDragIndicator(.visible)
-                .interactiveDismissDisabled(false)
+                .interactiveDismissDisabled(true)
         }
 
     }

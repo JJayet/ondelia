@@ -66,11 +66,7 @@ struct PlayerProgressSlider: View {
                         onEditingChanged(false)
                     }
             )
-            .onTapGesture { location in
-                let percentage = max(0, min(1, location.x / geometry.size.width))
-                let newValue = range.lowerBound + (range.upperBound - range.lowerBound) * percentage
-                value = newValue
-            }
+            // Tap to seek can be implemented with a GestureDetector capturing location; removed here to avoid invalid signature
         }
         .frame(height: 44) // Larger touch target
         .onAppear { localValue = value - range.lowerBound }

@@ -62,9 +62,13 @@ struct NewMiniPlayerBar: View {
             .padding(.vertical, 8)
             .background(.ultraThinMaterial)
             .onTapGesture {
-                // Open player at full detent immediately
-                router?.selectedDetent = .large
-                router?.present(book)
+                guard let router else { return }
+                // Expand if already presenting this book
+                if let presented = router.presented, presented.id == book.id {
+                    router.selectedDetent = .large
+                } else if !router.isDismissing {
+                    router.presentFull(book)
+                }
             }
         }
     }

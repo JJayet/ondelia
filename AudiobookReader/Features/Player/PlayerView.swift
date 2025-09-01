@@ -26,7 +26,6 @@ struct PlayerView: View {
     @State private var showingTranscription = false
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
-    @State private var isSeekingManually = false
     // Sheet presentation handles dragging/dismiss. No custom drag state needed.
     @Environment(\.dismiss) private var dismiss
     @Environment(\.playerRouter) private var playerRouter
@@ -44,19 +43,10 @@ struct PlayerView: View {
         audiobook.bookmarks.sorted { $0.timestamp < $1.timestamp }
     }
     
-    private var currentChapter: ChapterModel? {
-        let currentTime = audioManager.getCurrentTime()
-        return chapters.first { chapter in
-            currentTime >= chapter.startTime && currentTime < chapter.endTime
-        } ?? chapters.first { chapter in
-            currentTime >= chapter.startTime
-        }
-    }
     
-    private var isPlaying: Bool { viewModel.isPlaying }
-    private var currentTime: TimeInterval { viewModel.currentTime }
-    private var duration: TimeInterval { viewModel.duration }
-    private var playbackRate: Float { viewModel.playbackRate }
+    // Remove computed properties that cause AttributeGraph cycles
+    // Access @Published properties directly from viewModel instead
+    
 
     var body: some View {
         GeometryReader { geometry in
@@ -67,9 +57,8 @@ struct PlayerView: View {
             viewModel.load()
             viewModel.autoPlayIfNeeded()
         }
-        .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in
-            viewModel.isSeekingManually = isSeekingManually
-            viewModel.onTick()
+        .onDisappear {
+            viewModel.cleanup()
         }
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(audiobook: audiobook, globalAudioManager: audioManager as! GlobalAudioManager)
@@ -79,7 +68,7 @@ struct PlayerView: View {
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
                 onSave: {
-                    let bookmarkTime = currentTime
+                    let bookmarkTime = viewModel.currentTime // Use @Published property directly
                     audiobookManager.createBookmark(
                         for: audiobook,
                         at: bookmarkTime,
@@ -104,8 +93,8 @@ struct PlayerView: View {
         .sheet(isPresented: $showingTranscription) {
             TranscriptionView(
                 audiobook: audiobook,
-                currentChapterIndex: Int(currentChapter?.chapterNumber ?? 0),
-                currentTime: currentTime
+                currentChapterIndex: Int(viewModel.currentChapter?.chapterNumber ?? 0),
+                currentTime: viewModel.currentTime // Use @Published property directly
             )
         }
         .confirmationDialog(
@@ -118,7 +107,7 @@ struct PlayerView: View {
             Button(NSLocalizedString("15 minutes", comment: "")) { viewModel.setSleepTimer(900) }
             Button(NSLocalizedString("30 minutes", comment: "")) { viewModel.setSleepTimer(1800) }
             Button(NSLocalizedString("End of chapter", comment: "")) {
-                viewModel.setSleepTimerEndOfChapter(currentChapter: currentChapter, currentTime: currentTime)
+                viewModel.setSleepTimerEndOfChapter(currentChapter: viewModel.currentChapter, currentTime: viewModel.currentTime) // Use @Published property directly
             }
             Button(NSLocalizedString("Cancel timer", comment: ""), role: .destructive) { viewModel.cancelSleepTimer() }
         }
@@ -201,8 +190,16 @@ struct PlayerView: View {
     private var headerControls: some View {
         HStack {
             Button {
-                // Prefer router dismissal when available to avoid re-present loops
-                if let router = playerRouter { router.dismiss() } else { dismiss() }
+                // Chevron minimizes to mini detent; only dismiss if already mini
+                if let router = playerRouter {
+                    if router.selectedDetent != .height(92) {
+                        router.selectedDetent = .height(92)
+                    } else {
+                        router.dismiss()
+                    }
+                } else {
+                    dismiss()
+                }
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.title2)
@@ -249,7 +246,7 @@ struct PlayerView: View {
             }
             
             // Current Chapter
-            if let chapter = currentChapter {
+            if let chapter = viewModel.currentChapter {
                 Text(chapter.title ?? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapter.chapterNumber))
                     .font(.footnote)
                     .foregroundColor(.accentColor)
@@ -281,26 +278,26 @@ struct PlayerView: View {
         VStack(spacing: 8) {
             PlayerProgressSlider(
                 value: Binding(
-                    get: { currentTime },
+                    get: { viewModel.currentTime }, // Use @Published property directly
                     set: { newValue in
                         audioManager.seek(to: newValue)
                     }
                 ),
-                range: 0...max(duration, 1),
+                range: 0...max(viewModel.duration, 1), // Use @Published property directly
                 onEditingChanged: { editing in
-                    isSeekingManually = editing
+                    viewModel.isSeekingManually = editing
                 }
             )
             
             HStack {
-                Text(formatTime(currentTime))
+                Text(formatTime(viewModel.currentTime)) // Use @Published property directly
                     .font(.caption)
                     .foregroundColor(.secondaryText)
                     .monospacedDigit()
                 
                 Spacer()
                 
-                Text(formatTime(duration))
+                Text(formatTime(viewModel.duration)) // Use @Published property directly
                     .font(.caption)
                     .foregroundColor(.secondaryText)
                     .monospacedDigit()
@@ -313,8 +310,11 @@ struct PlayerView: View {
     private var playbackControls: some View {
         HStack(spacing: 40) {
             Button {
+                let skipInterval = themeManager.skipInterval.seconds
                 withHapticFeedback {
-                    audioManager.skipBackward(themeManager.skipInterval.seconds)
+                    DispatchQueue.main.async {
+                        audioManager.skipBackward(skipInterval)
+                    }
                 }
             } label: {
                 Image(systemName: "gobackward.\(Int(themeManager.skipInterval.seconds))")
@@ -324,8 +324,10 @@ struct PlayerView: View {
             
             Button {
                 withHapticFeedback(.medium) {
-                    if audioManager.playbackState != .loading {
-                        audioManager.togglePlayback()
+                    DispatchQueue.main.async {
+                        if audioManager.playbackState != .loading {
+                            audioManager.togglePlayback()
+                        }
                     }
                 }
             } label: {
@@ -335,7 +337,7 @@ struct PlayerView: View {
                             .scaleEffect(1.8)
                             .progressViewStyle(CircularProgressViewStyle(tint: .accentColor))
                     } else {
-                        Image(systemName: isPlaying ? "pause.circle.fill" : "play.circle.fill")
+                        Image(systemName: viewModel.isPlaying ? "pause.circle.fill" : "play.circle.fill") // Use @Published property directly
                             .font(.system(size: 80))
                             .foregroundColor(.accentColor)
                             .shadow(color: .accentColor.opacity(0.3), radius: 8, x: 0, y: 4)
@@ -346,8 +348,11 @@ struct PlayerView: View {
             .disabled(audioManager.playbackState == .loading)
             
             Button {
+                let skipInterval = themeManager.skipInterval.seconds
                 withHapticFeedback {
-                    audioManager.skipForward(themeManager.skipInterval.seconds)
+                    DispatchQueue.main.async {
+                        audioManager.skipForward(skipInterval)
+                    }
                 }
             } label: {
                 Image(systemName: "goforward.\(Int(themeManager.skipInterval.seconds))")
@@ -361,7 +366,7 @@ struct PlayerView: View {
     @ViewBuilder
     private var speedControls: some View {
         VStack(spacing: 12) {
-            Text(String(format: NSLocalizedString("Speed: %.1fx", comment: "Playback speed display"), playbackRate))
+            Text(String(format: NSLocalizedString("Speed: %.1fx", comment: "Playback speed display"), viewModel.playbackRate)) // Use @Published property directly
                 .font(.caption)
                 .foregroundColor(.secondaryText)
             
@@ -378,11 +383,13 @@ struct PlayerView: View {
     // MARK: - Speed Button Helper
     @ViewBuilder
     private func speedButton(for speed: Double) -> some View {
-        let isSelected = playbackRate == Float(speed)
+        let isSelected = viewModel.playbackRate == Float(speed) // Use @Published property directly
         
         Button(String(format: "%.2fx", speed)) {
             withHapticFeedback {
-                audioManager.setPlaybackRate(Float(speed))
+                DispatchQueue.main.async {
+                    audioManager.setPlaybackRate(Float(speed))
+                }
             }
         }
         .font(.caption)

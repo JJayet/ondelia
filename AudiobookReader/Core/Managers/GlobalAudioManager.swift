@@ -63,22 +63,45 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             return
         }
         
-        // Check file existence on main (avoids Sendable capture warnings)
-        var isDirectory: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
-            print("❌ GlobalAudioManager: File/folder not found at path: \(filePath)")
-            self.isLoading = false
-            self.playbackState = .failed
-            return
+        // Move file operations to background thread to avoid blocking main thread
+        Task {
+            let fileOperationResult = await performFileOperations(filePath: filePath)
+            
+            await MainActor.run {
+                switch fileOperationResult {
+                case .success(let isDirectory):
+                    if isDirectory {
+                        print("📁 GlobalAudioManager: Loading multi-file audiobook")
+                        self.useMultiFileEngine = true
+                        self.loadMultiFileAudiobook(audiobook, filePath: filePath)
+                    } else {
+                        print("📄 GlobalAudioManager: Loading single audio file")
+                        self.useMultiFileEngine = false
+                        self.loadSingleFileAudiobook(audiobook, filePath: filePath)
+                    }
+                case .failure(let error):
+                    print("❌ GlobalAudioManager: File error: \(error)")
+                    self.isLoading = false
+                    self.playbackState = .failed
+                }
+            }
         }
-        if isDirectory.boolValue {
-            print("📁 GlobalAudioManager: Loading multi-file audiobook")
-            self.useMultiFileEngine = true
-            self.loadMultiFileAudiobook(audiobook, filePath: filePath)
-        } else {
-            print("📄 GlobalAudioManager: Loading single audio file")
-            self.useMultiFileEngine = false
-            self.loadSingleFileAudiobook(audiobook, filePath: filePath)
+    }
+
+    private func performFileOperations(filePath: String) async -> Result<Bool, Error> {
+        return await withCheckedContinuation { continuation in
+            DispatchQueue.global(qos: .userInitiated).async {
+                // Perform file operations on background thread
+                var isDirectory: ObjCBool = false
+                let fileExists = FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory)
+                
+                if fileExists {
+                    continuation.resume(returning: .success(isDirectory.boolValue))
+                } else {
+                    let error = NSError(domain: "AudiobookReader", code: 404, userInfo: [NSLocalizedDescriptionKey: "File/folder not found at path: \(filePath)"])
+                    continuation.resume(returning: .failure(error))
+                }
+            }
         }
     }
     
