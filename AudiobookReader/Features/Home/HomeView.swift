@@ -11,6 +11,8 @@ struct HomeView: View {
     @StateObject private var statistics = ReadingStatistics()
     @StateObject private var themeManager = ThemeManager.shared
     @State private var selectedAudiobook: AudiobookModel?
+    @Environment(\.setTabSelection) private var setTabSelection
+    @Environment(\.playerRouter) private var playerRouter
 
     private var recentlyPlayed: [AudiobookModel] {
         audiobookManager.audiobooks
@@ -108,7 +110,10 @@ struct HomeView: View {
                                         ContinueReadingCardView(
                                             audiobook: audiobook
                                         ) {
-                                            selectedAudiobook = audiobook
+                                            let audio = GlobalAudioManager.shared
+                                            audio.loadAudiobook(audiobook)
+                                            audio.startPlayback()
+                                            playerRouter?.present(audiobook)
                                         }
                                     }
                                 }
@@ -136,7 +141,10 @@ struct HomeView: View {
                                         RecentlyPlayedCardView(
                                             audiobook: audiobook
                                         ) {
-                                            selectedAudiobook = audiobook
+                                            let audio = GlobalAudioManager.shared
+                                            audio.loadAudiobook(audiobook)
+                                            audio.startPlayback()
+                                            playerRouter?.present(audiobook)
                                         }
                                     }
                                 }
@@ -180,7 +188,9 @@ struct HomeView: View {
                                 .multilineTextAlignment(.center)
                             }
 
-                            NavigationLink(destination: LibraryView()) {
+                            Button {
+                                setTabSelection?(1)
+                            } label: {
                                 Text(
                                     NSLocalizedString(
                                         "Browse Library",
@@ -212,6 +222,9 @@ struct HomeView: View {
         }
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
+        .onAppear {
+            audiobookManager.fetchAudiobooks()
+        }
     }
 
     private var greetingMessage: String {
@@ -376,22 +389,22 @@ struct MonthlyGoalCardView: View {
                     )
                     .font(.headline)
                     .foregroundColor(.primaryText)
-
+                    
                     Text(
                         "\(statistics.formattedMonthlyProgress) of \(statistics.formattedMonthlyGoal)"
                     )
                     .font(.subheadline)
                     .foregroundColor(.secondaryText)
                 }
-
+                
                 Spacer()
-
+                
                 Text("\(Int(statistics.monthlyGoalProgress * 100))%")
                     .font(.title2)
                     .fontWeight(.bold)
                     .foregroundColor(.accentColor)
             }
-
+            
             ProgressView(value: statistics.monthlyGoalProgress)
                 .progressViewStyle(LinearProgressViewStyle(tint: .accentColor))
                 .frame(height: 6)

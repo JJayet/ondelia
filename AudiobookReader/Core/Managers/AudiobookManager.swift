@@ -492,6 +492,8 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                 print("🔓 AudiobookManager: Released security-scoped resource access")
             }
         }
+
+        // NOTE: Reverted iCloud handling to simple copy to avoid regressions.
         
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
             print("❌ AudiobookManager: Failed to get documents directory")

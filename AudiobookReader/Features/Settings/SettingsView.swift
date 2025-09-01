@@ -265,6 +265,7 @@ struct SettingsView: View {
             .scrollContentBackground(.hidden)
             .background(Color.primaryBackground)
             .tint(themeManager.accentColor.color)
+            .listRowBackground(Color.clear)
         }
         .alert(
             NSLocalizedString("Download Model?", comment: "Whisper model download confirm title"),

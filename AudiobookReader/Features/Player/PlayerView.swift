@@ -299,25 +299,30 @@ struct PlayerView: View {
 
             // Current Chapter
             if let chapter = viewModel.currentChapter {
-                Text(
-                    chapter.title
-                        ?? String(
-                            format: NSLocalizedString(
-                                "Chapter %d",
-                                comment: "Default chapter title with number"
-                            ),
-                            chapter.chapterNumber
-                        )
-                )
-                .font(.footnote)
-                .foregroundColor(.accentColor)
-                .padding(.horizontal, 16)
-                .padding(.vertical, 8)
-                .glassEffect(
-                    .regular.interactive(),
-                    in: RoundedRectangle(cornerRadius: 12)
-                )
-                .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 12))
+                Button {
+                    showingChapterList = true
+                } label: {
+                    Text(
+                        chapter.title
+                            ?? String(
+                                format: NSLocalizedString(
+                                    "Chapter %d",
+                                    comment: "Default chapter title with number"
+                                ),
+                                chapter.chapterNumber
+                            )
+                    )
+                    .font(.footnote)
+                    .foregroundColor(.accentColor)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .glassEffect(
+                        .regular.interactive(),
+                        in: RoundedRectangle(cornerRadius: 12)
+                    )
+                    .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 12))
+                }
+                .buttonStyle(.plain)
             }
         }
     }
@@ -529,19 +534,6 @@ struct PlayerView: View {
                 )
             ) {
                 showingTranscription = true
-            }
-
-            if !chapters.isEmpty {
-                PlayerActionButton(
-                    icon: "list.bullet",
-                    title: NSLocalizedString(
-                        "Chapters",
-                        comment: "Chapters button title"
-                    ),
-                    count: chapters.count
-                ) {
-                    showingChapterList = true
-                }
             }
         }
         .padding(.bottom, 16)

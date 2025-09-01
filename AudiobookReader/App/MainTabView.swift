@@ -59,6 +59,7 @@ struct MainTabView: View {
         .accentColor(themeManager.accentColor.color)
         .environment(\.theme, themeManager)
         .environment(\.playerRouter, playerRouter)
+        .environment(\.setTabSelection) { index in selectedTab = index }
         .fullScreenCover(item: $playerRouter.presented) { presentation in
             PlayerSheetView(bookID: presentation.id).navigationTransition(.zoom(sourceID: "MINIPLAYER", in: namespace))
         }
