@@ -1,6 +1,7 @@
 import Foundation
 import Translation
 
+@MainActor
 class TranslationManager: ObservableObject {
     static let shared = TranslationManager()
     
@@ -190,4 +191,3 @@ extension TranslationManager {
         }
     }
 }
-

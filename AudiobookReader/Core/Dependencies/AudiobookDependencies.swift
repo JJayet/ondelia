@@ -3,6 +3,7 @@ import SwiftUI
 import SwiftData
 
 // MARK: - Audio Manager Protocol
+@MainActor
 protocol AudioManagerProtocol: ObservableObject {
     var playbackState: GlobalAudioManager.PlaybackState { get set }
     var showMiniPlayer: Bool { get set }
@@ -27,6 +28,7 @@ protocol AudioManagerProtocol: ObservableObject {
 }
 
 // MARK: - Theme Manager Protocol
+@MainActor
 protocol ThemeManagerProtocol: ObservableObject {
     var currentTheme: AppTheme { get set }
     var accentColor: AccentColor { get set }
@@ -38,6 +40,7 @@ protocol ThemeManagerProtocol: ObservableObject {
 }
 
 // MARK: - Audiobook Manager Protocol
+@MainActor
 protocol AudiobookManagerProtocol {
     func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval)
     func createBookmark(for audiobook: AudiobookModel, at time: TimeInterval, title: String, note: String?)
@@ -48,6 +51,7 @@ protocol AudiobookManagerProtocol {
 }
 
 // MARK: - Reading Statistics Protocol
+@MainActor
 protocol ReadingStatisticsProtocol: ObservableObject {
     var totalListeningTime: TimeInterval { get set }
     var booksCompleted: Int { get set }
@@ -61,6 +65,7 @@ protocol ReadingStatisticsProtocol: ObservableObject {
 }
 
 // MARK: - Dependency Container
+@MainActor
 protocol AudiobookDependencies {
     var audioManager: any AudioManagerProtocol { get }
     var themeManager: any ThemeManagerProtocol { get }
@@ -71,6 +76,7 @@ protocol AudiobookDependencies {
 }
 
 // MARK: - Live Dependencies
+@MainActor
 class LiveDependencies: AudiobookDependencies {
     lazy var audioManager: any AudioManagerProtocol = GlobalAudioManager.shared
     lazy var themeManager: any ThemeManagerProtocol = ThemeManager.shared
@@ -83,6 +89,7 @@ class LiveDependencies: AudiobookDependencies {
 }
 
 // MARK: - Preview Dependencies
+@MainActor
 class PreviewDependencies: AudiobookDependencies {
     lazy var audioManager: any AudioManagerProtocol = MockGlobalAudioManager()
     lazy var themeManager: any ThemeManagerProtocol = MockThemeManager()
@@ -103,8 +110,10 @@ extension ProcessInfo {
 
 // MARK: - Environment Key
 private struct DependencyEnvironmentKey: EnvironmentKey {
-    static let defaultValue: AudiobookDependencies = ProcessInfo.isPreview ? 
-        PreviewDependencies() : LiveDependencies()
+    @MainActor
+    static var defaultValue: AudiobookDependencies {
+        ProcessInfo.isPreview ? PreviewDependencies() : LiveDependencies()
+    }
 }
 
 extension EnvironmentValues {

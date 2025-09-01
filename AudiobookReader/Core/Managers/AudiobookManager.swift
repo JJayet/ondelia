@@ -66,70 +66,40 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     
     
     // MARK: - Fetch Operations
+    @MainActor
     func fetchAudiobooks() {
         // Prevent multiple concurrent fetch operations
         guard !isLoadingLibrary else { return }
-        
-        // Perform fetch on background queue to avoid blocking UI
-        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.isLoadingLibrary = true
-            }
-            
-            let context = self.swiftDataController.context
+        isLoadingLibrary = true
+        let context = swiftDataController.context
             let descriptor = FetchDescriptor<AudiobookModel>(
                 sortBy: [
                     SortDescriptor(\.lastPlayed, order: .reverse),
                     SortDescriptor(\.dateAdded, order: .reverse)
                 ]
             )
-            
-            do {
-                let fetchedAudiobooks = try context.fetch(descriptor)
-                
-                // Validate file existence and filter out missing files (on background queue)
-                var validAudiobooks: [AudiobookModel] = []
-                var audiobooksToDelete: [AudiobookModel] = []
-                
-                for audiobook in fetchedAudiobooks {
-                    if self.validateAudiobookFile(audiobook) {
-                        validAudiobooks.append(audiobook)
-                    } else {
-                        print("⚠️ AudiobookManager: File missing for '\(audiobook.title ?? "Unknown")', removing from library")
-                        audiobooksToDelete.append(audiobook)
-                    }
-                }
-                
-                // Update UI on main queue
-                DispatchQueue.main.async {
-                    self.audiobooks = validAudiobooks
-                    self.isLoadingLibrary = false
-                    
-                    // Process any pending imports now that library is loaded
-                    self.processPendingImports()
-                }
-                
-                // Handle deletions
-                if !audiobooksToDelete.isEmpty {
-                    let backgroundContext = self.swiftDataController.backgroundContext()
-                    for audiobook in audiobooksToDelete {
-                        backgroundContext.delete(audiobook)
-                    }
-                    
-                    do {
-                        try backgroundContext.save()
-                    } catch {
+        do {
+            let fetched = try context.fetch(descriptor)
+            var valid: [AudiobookModel] = []
+            var toDelete: [AudiobookModel] = []
+            for book in fetched {
+                if validateAudiobookFile(book) { valid.append(book) } else { toDelete.append(book) }
+            }
+            self.audiobooks = valid
+            self.isLoadingLibrary = false
+            self.processPendingImports()
+            if !toDelete.isEmpty {
+                Task.detached(priority: .utility) {
+                    let background = self.swiftDataController.backgroundContext()
+                    for b in toDelete { background.delete(b) }
+                    do { try background.save() } catch {
                         print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
                     }
                 }
-            } catch {
-                print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
-                DispatchQueue.main.async {
-                    self.isLoadingLibrary = false
-                }
             }
+        } catch {
+            print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
+            self.isLoadingLibrary = false
         }
     }
     

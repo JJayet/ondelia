@@ -47,50 +47,38 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             pausePlayback()
         }
         
-        DispatchQueue.main.async {
-            self.currentAudiobook = audiobook
-            self.showMiniPlayer = false
-            self.isLoading = true
-            self.isReady = false
-            self.playbackState = .loading
-        }
+        self.currentAudiobook = audiobook
+        self.showMiniPlayer = false
+        self.isLoading = true
+        self.isReady = false
+        self.playbackState = .loading
         
         // Clean up existing engines immediately to prevent conflicts
         cleanupEngines()
         
         guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
             print("❌ GlobalAudioManager: No file path found")
-            DispatchQueue.main.async {
-                self.isLoading = false
-                self.playbackState = .failed
-            }
+            self.isLoading = false
+            self.playbackState = .failed
             return
         }
         
-        // Perform file system checks and loading on background queue
-        DispatchQueue.global(qos: .userInitiated).async {
-            // Check if it's a folder (multi-file audiobook) or single file
-            var isDirectory: ObjCBool = false
-            guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
-                print("❌ GlobalAudioManager: File/folder not found at path: \(filePath)")
-                DispatchQueue.main.async {
-                    self.isLoading = false
-                    self.playbackState = .failed
-                }
-                return
-            }
-            
-            DispatchQueue.main.async {
-                if isDirectory.boolValue {
-                    print("📁 GlobalAudioManager: Loading multi-file audiobook")
-                    self.useMultiFileEngine = true
-                    self.loadMultiFileAudiobook(audiobook, filePath: filePath)
-                } else {
-                    print("📄 GlobalAudioManager: Loading single audio file")
-                    self.useMultiFileEngine = false
-                    self.loadSingleFileAudiobook(audiobook, filePath: filePath)
-                }
-            }
+        // Check file existence on main (avoids Sendable capture warnings)
+        var isDirectory: ObjCBool = false
+        guard FileManager.default.fileExists(atPath: filePath, isDirectory: &isDirectory) else {
+            print("❌ GlobalAudioManager: File/folder not found at path: \(filePath)")
+            self.isLoading = false
+            self.playbackState = .failed
+            return
+        }
+        if isDirectory.boolValue {
+            print("📁 GlobalAudioManager: Loading multi-file audiobook")
+            self.useMultiFileEngine = true
+            self.loadMultiFileAudiobook(audiobook, filePath: filePath)
+        } else {
+            print("📄 GlobalAudioManager: Loading single audio file")
+            self.useMultiFileEngine = false
+            self.loadSingleFileAudiobook(audiobook, filePath: filePath)
         }
     }
     
@@ -99,20 +87,15 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         let engine = MultiFileAudioEngine()
         self.multiFileAudioEngine = engine
         
-        // Load audio asynchronously
-        DispatchQueue.global(qos: .userInitiated).async {
-            engine.loadMultiFileAudiobook(audiobook)
-            
-            DispatchQueue.main.async {
-                // Resume from last position if needed
-                if audiobook.currentPosition > 0 {
-                    self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
-                }
-                self.isLoading = false
-                self.isReady = true
-                self.playbackState = .paused
-            }
+        // Load audio (engine handles its own threading)
+        engine.loadMultiFileAudiobook(audiobook)
+        // Resume from last position if needed
+        if audiobook.currentPosition > 0 {
+            self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
         }
+        self.isLoading = false
+        self.isReady = true
+        self.playbackState = .paused
     }
     
     private func loadSingleFileAudiobook(_ audiobook: AudiobookModel, filePath: String) {
@@ -120,21 +103,14 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         let engine = AudioEngine()
         self.audioEngine = engine
         
-        // Load audio asynchronously
-        DispatchQueue.global(qos: .userInitiated).async {
-            let fileURL = URL(fileURLWithPath: filePath)
-            engine.loadAudio(url: fileURL)
-            
-            DispatchQueue.main.async {
-                // Resume from last position if needed
-                if audiobook.currentPosition > 0 {
-                    self.audioEngine?.seek(to: audiobook.currentPosition)
-                }
-                self.isLoading = false
-                self.isReady = true
-                self.playbackState = .paused
-            }
+        let fileURL = URL(fileURLWithPath: filePath)
+        engine.loadAudio(url: fileURL)
+        if audiobook.currentPosition > 0 {
+            self.audioEngine?.seek(to: audiobook.currentPosition)
         }
+        self.isLoading = false
+        self.isReady = true
+        self.playbackState = .paused
     }
     
     private func cleanupEngines() {

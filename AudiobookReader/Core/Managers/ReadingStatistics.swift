@@ -1,6 +1,7 @@
 import Foundation
 import SwiftData
 
+@MainActor
 class ReadingStatistics: ReadingStatisticsProtocol {
     private let swiftDataController = SwiftDataController.shared
     
@@ -14,9 +15,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     
     init() {
         loadStatistics()
-        Task {
-            await calculateCurrentMonthProgress()
-        }
+        calculateCurrentMonthProgress()
     }
     
     private func loadStatistics() {
@@ -123,10 +122,8 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         // Recalculate monthly progress to update UI immediately
         calculateCurrentMonthProgress()
         
-        // Force UI update by updating the @Published property
-        DispatchQueue.main.async { [weak self] in
-            self?.objectWillChange.send()
-        }
+        // Force UI update by sending change (already on @MainActor)
+        self.objectWillChange.send()
     }
     
     // MARK: - Computed Properties

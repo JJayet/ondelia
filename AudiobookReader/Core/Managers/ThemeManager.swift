@@ -1,6 +1,7 @@
 import SwiftUI
 import Combine
 
+@MainActor
 class ThemeManager: ThemeManagerProtocol {    
     static let shared = ThemeManager()
     
@@ -16,10 +17,8 @@ class ThemeManager: ThemeManagerProtocol {
     @Published var translationTargetLanguage: TranscriptionLanguage = .english
     
     private init() {
-        // Load settings asynchronously to avoid blocking initialization
-        DispatchQueue.global(qos: .utility).async {
-            self.loadSettings()
-        }
+        // Load settings without GCD to align with @MainActor
+        Task { self.loadSettings() }
     }
     
     private func loadSettings() {
@@ -85,17 +84,15 @@ class ThemeManager: ThemeManagerProtocol {
             targetLanguage = .english
         }
         
-        // Update published properties on main queue
-        DispatchQueue.main.async {
-            self.currentTheme = theme
-            self.accentColor = accent
-            self.skipInterval = skip
-            self.transcriptionEngine = engine
-            self.whisperModel = model
-            self.transcriptionLanguage = language
-            self.enableTranslation = translation
-            self.translationTargetLanguage = targetLanguage
-        }
+        // Update published properties on main actor
+        self.currentTheme = theme
+        self.accentColor = accent
+        self.skipInterval = skip
+        self.transcriptionEngine = engine
+        self.whisperModel = model
+        self.transcriptionLanguage = language
+        self.enableTranslation = translation
+        self.translationTargetLanguage = targetLanguage
     }
     
     func setTheme(_ theme: AppTheme) {
@@ -338,7 +335,8 @@ enum TranscriptionLanguage: String, CaseIterable {
 
 // MARK: - Theme Environment
 struct ThemeEnvironment: EnvironmentKey {
-    static let defaultValue = ThemeManager.shared
+    @MainActor
+    static var defaultValue: ThemeManager { ThemeManager.shared }
 }
 
 extension EnvironmentValues {

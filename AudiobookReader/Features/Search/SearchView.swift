@@ -4,7 +4,7 @@ import UIKit
 struct SearchView: View {
     @Binding var query: String
     @StateObject private var audiobookManager = AudiobookManager()
-    @State private var selectedAudiobook: AudiobookModel?
+    @Environment(\.playerRouter) private var playerRouter
     @State private var debouncedQuery: String = ""
     @State private var searchTask: Task<Void, Never>? = nil
     @State private var filter: Filter = .all
@@ -51,7 +51,7 @@ struct SearchView: View {
         case .relevance:
             items.sort { weight(for: $0) > weight(for: $1) }
         case .recent:
-            items.sort { ($0.lastPlayed ?? .distantPast) > ($1.lastPlayed ?? .distantPast) }
+            items.sort { $0.lastPlayed > $1.lastPlayed }
         case .title:
             items.sort { ($0.title ?? "") < ($1.title ?? "") }
         case .author:
@@ -105,7 +105,7 @@ struct SearchView: View {
                     ForEach(results, id: \.id) { book in
                         SearchResultRow(audiobook: book, query: debouncedQuery)
                             .contentShape(Rectangle())
-                            .onTapGesture { selectedAudiobook = book }
+                            .onTapGesture { playerRouter?.present(book) }
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "") : NSLocalizedString("Mark Read", comment: "")) {
                                     if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }
@@ -134,10 +134,7 @@ struct SearchView: View {
                     self.debouncedQuery = newValue
                 }
             }
-            .fullScreenCover(item: $selectedAudiobook) { book in
-                PlayerView(audiobook: book)
-            }
-        }
+                    }
     }
 
     private var header: some View {

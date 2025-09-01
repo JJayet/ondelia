@@ -61,11 +61,13 @@ final class PlayerViewModel: ObservableObject {
 
         sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
             guard let self else { return }
-            self.sleepTimeRemaining -= 1
-            if self.sleepTimeRemaining <= 0 {
-                (self.audioManager).pausePlayback()
-                timer.invalidate()
-                self.sleepTimer = nil
+            Task { @MainActor in
+                self.sleepTimeRemaining -= 1
+                if self.sleepTimeRemaining <= 0 {
+                    self.audioManager.pausePlayback()
+                    timer.invalidate()
+                    self.sleepTimer = nil
+                }
             }
         }
     }
@@ -82,4 +84,3 @@ final class PlayerViewModel: ObservableObject {
         sleepTimeRemaining = 0
     }
 }
-

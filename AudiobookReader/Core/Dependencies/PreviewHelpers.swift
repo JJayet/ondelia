@@ -1,6 +1,7 @@
 import SwiftUI
 
 // MARK: - Preview Wrapper
+@MainActor
 struct PreviewWrapper<Content: View>: View {
     let content: Content
     let customDependencies: AudiobookDependencies?
@@ -20,6 +21,7 @@ struct PreviewWrapper<Content: View>: View {
 }
 
 // MARK: - View Extension for Preview Dependencies
+@MainActor
 extension View {
     func previewDependencies(_ dependencies: AudiobookDependencies? = nil) -> some View {
         PreviewWrapper(dependencies: dependencies) {
@@ -63,6 +65,7 @@ extension View {
 }
 
 // MARK: - Preview State Configurator
+@MainActor
 class PreviewStateConfigurator {
     private let dependencies = PreviewDependencies()
     
@@ -178,7 +181,7 @@ struct PreviewContent {
         )
     }
     
-    static func readingStatistics() -> any ReadingStatisticsProtocol {
+    @MainActor static func readingStatistics() -> any ReadingStatisticsProtocol {
         return MockReadingStatistics()
     }
 }

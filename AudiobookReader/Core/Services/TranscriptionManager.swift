@@ -4,6 +4,7 @@ import AVFoundation
 import SwiftData
 import WhisperKit
 
+@MainActor
 class TranscriptionManager: ObservableObject {
     static let shared = TranscriptionManager()
     
@@ -19,7 +20,7 @@ class TranscriptionManager: ObservableObject {
     private var translationManager: AnyObject?
     
     deinit {
-        stopTranscription()
+        // Avoid calling @MainActor methods during deinit
     }
     
     var isReady: Bool {
@@ -67,7 +68,7 @@ class TranscriptionManager: ObservableObject {
         
         let currentChapterURL = folderURL.appendingPathComponent(chapterFiles[currentChapterIndex])
         
-        if let existingResult = await MainActor.run(body: { getCachedTranscriptionResult(for: audiobook, chapterIndex: Int16(currentChapterIndex)) }) {
+        if let existingResult = await MainActor.run(body: { getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: Int16(currentChapterIndex)) }) {
             print("📖 TranscriptionManager: Using cached transcription")
             await MainActor.run {
                 isTranscribing = false
@@ -89,9 +90,7 @@ class TranscriptionManager: ObservableObject {
     }
     
     func stopTranscription() {
-        DispatchQueue.main.async { [weak self] in
-            self?.isTranscribing = false
-        }
+        isTranscribing = false
     }
     
     // MARK: - Helper Methods
@@ -113,6 +112,10 @@ class TranscriptionManager: ObservableObject {
     }
     
     @MainActor private func getCachedTranscriptionResult(for audiobook: AudiobookModel, chapterIndex: Int16) -> TranscriptionResult? {
+        return getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: chapterIndex)
+    }
+
+    @MainActor private func getCachedTranscriptionResult(audiobookID: UUID, chapterIndex: Int16) -> TranscriptionResult? {
         let context = swiftDataController.context
         let descriptor = FetchDescriptor<ChapterTranscriptionModel>()
         
@@ -127,7 +130,7 @@ class TranscriptionManager: ObservableObject {
         
         // Filter in memory
         guard let cached = allTranscriptions.first(where: { 
-            $0.chapterIndex == chapterIndex && $0.audiobook?.id == audiobook.id 
+            $0.chapterIndex == chapterIndex && $0.audiobook?.id == audiobookID 
         }),
               let text = cached.transcriptionText else {
             return nil

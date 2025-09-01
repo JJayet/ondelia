@@ -3,6 +3,7 @@ import SwiftUI
 import SwiftData
 
 // MARK: - Mock Global Audio Manager
+@MainActor
 class MockGlobalAudioManager: AudioManagerProtocol {
     @Published var playbackState: GlobalAudioManager.PlaybackState = .stopped
     @Published var showMiniPlayer: Bool = false
@@ -92,6 +93,7 @@ class MockGlobalAudioManager: AudioManagerProtocol {
 }
 
 // MARK: - Mock Theme Manager
+@MainActor
 class MockThemeManager: ThemeManagerProtocol {
     @Published var currentTheme: AppTheme = .system
     @Published var accentColor: AccentColor = .blue
@@ -112,6 +114,7 @@ class MockThemeManager: ThemeManagerProtocol {
 }
 
 // MARK: - Mock Audiobook Manager
+@MainActor
 class MockAudiobookManager: AudiobookManagerProtocol {
     private var mockBookmarks: [String: [MockBookmark]] = [:]
     
@@ -157,6 +160,7 @@ class MockAudiobookManager: AudiobookManagerProtocol {
 }
 
 // MARK: - Mock Reading Statistics
+@MainActor
 class MockReadingStatistics: ReadingStatisticsProtocol {
     @Published var totalListeningTime: TimeInterval = 125400.0 // ~34.8 hours
     @Published var booksCompleted: Int = 12

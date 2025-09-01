@@ -3,6 +3,7 @@ import WhisperKit
 import AVFoundation
 import SwiftData
 
+@MainActor
 class WhisperTranscriptionManager: ObservableObject {
     static let shared = WhisperTranscriptionManager()
     
@@ -161,7 +162,7 @@ class WhisperTranscriptionManager: ObservableObject {
         let currentChapterURL = folderURL.appendingPathComponent(chapterFiles[currentChapterIndex])
         
         // Check if transcription already exists
-        if let existingResult = await MainActor.run(body: { getCachedTranscription(for: audiobook, chapterIndex: currentChapterIndex) }) {
+        if let existingResult = await MainActor.run(body: { getCachedTranscription(audiobookID: audiobook.id, chapterIndex: currentChapterIndex) }) {
             print("📖 WhisperTranscriptionManager: Using cached transcription")
             await MainActor.run {
                 currentTranscription = existingResult.text
@@ -181,10 +182,8 @@ class WhisperTranscriptionManager: ObservableObject {
     func stopTranscription() {
         // Note: WhisperKit doesn't support stopping mid-transcription in the current API
         // But we can reset our state
-        DispatchQueue.main.async { [weak self] in
-            self?.isTranscribing = false
-            self?.transcriptionProgress = 0
-        }
+        isTranscribing = false
+        transcriptionProgress = 0
     }
     
     // MARK: - Helper Methods
@@ -201,6 +200,10 @@ class WhisperTranscriptionManager: ObservableObject {
     }
     
     @MainActor private func getCachedTranscription(for audiobook: AudiobookModel, chapterIndex: Int) -> TranscriptionResult? {
+        return getCachedTranscription(audiobookID: audiobook.id, chapterIndex: chapterIndex)
+    }
+
+    @MainActor private func getCachedTranscription(audiobookID: UUID, chapterIndex: Int) -> TranscriptionResult? {
         let context = swiftDataController.context
         let allDescriptor = FetchDescriptor<ChapterTranscriptionModel>()
         
@@ -213,7 +216,7 @@ class WhisperTranscriptionManager: ObservableObject {
         }
         
         guard let cached = allTranscriptions.first(where: { 
-            $0.chapterIndex == Int16(chapterIndex) && $0.audiobook?.id == audiobook.id 
+            $0.chapterIndex == Int16(chapterIndex) && $0.audiobook?.id == audiobookID 
         }),
               let text = cached.transcriptionText else {
                 return nil

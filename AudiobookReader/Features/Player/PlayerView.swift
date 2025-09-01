@@ -27,10 +27,9 @@ struct PlayerView: View {
     @State private var bookmarkTitle = ""
     @State private var bookmarkNote = ""
     @State private var isSeekingManually = false
-    @State private var isMiniplayer = false // New state for miniplayer mode
-    @State private var dragOffset: CGFloat = 0 // Track drag offset
-    @State private var miniPlayerDragOffset: CGFloat = 0 // Track mini player drag
+    // Sheet presentation handles dragging/dismiss. No custom drag state needed.
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.playerRouter) private var playerRouter
     
     private var coverImage: UIImage? {
         guard let data = audiobook.coverImageData else { return nil }
@@ -61,11 +60,7 @@ struct PlayerView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            if isMiniplayer {
-                miniPlayerView(geometry: geometry)
-            } else {
-                fullPlayerView(geometry: geometry)
-            }
+            fullPlayerView(geometry: geometry)
         }
         .toolbar(.hidden, for: .navigationBar)
         .onAppear {
@@ -144,25 +139,7 @@ struct PlayerView: View {
                 
                 controlPanel
                     .frame(height: geometry.size.height * 0.7) // 70% height
-                    .offset(y: dragOffset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                if value.translation.height > 0 { // Only allow downward drag
-                                    dragOffset = value.translation.height
-                                }
-                            }
-                            .onEnded { value in
-                                if value.translation.height > 100 { // Threshold for dismissing to library
-                                    // Dismiss the fullScreenCover to return to library (where MiniPlayerView will show)
-                                    dismiss()
-                                } else {
-                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                        dragOffset = 0
-                                    }
-                                }
-                            }
-                    )
+                    
                 
                 // 50px spacing from bottom
                 Spacer()
@@ -172,116 +149,8 @@ struct PlayerView: View {
         }
     }
     
-    // MARK: - Mini Player View
-    @ViewBuilder
-    private func miniPlayerView(geometry: GeometryProxy) -> some View {
-        VStack(spacing: 0) {
-            Spacer()
-            
-            // Mini player container
-            HStack(spacing: 16) {
-                // Cover image
-                if let coverImage = coverImage {
-                    Image(uiImage: coverImage)
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(width: 60, height: 60)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                } else {
-                    RoundedRectangle(cornerRadius: 8)
-                        .fill(Color.accentColor.opacity(0.3))
-                        .frame(width: 60, height: 60)
-                }
-                
-                // Book info
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(audiobook.title ?? "Unknown Title")
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(1)
-                    
-                    Text(audiobook.author ?? "Unknown Author")
-                        .font(.subheadline)
-                        .foregroundColor(.secondaryText)
-                        .lineLimit(1)
-                }
-                
-                Spacer()
-                
-                // Mini controls
-                HStack(spacing: 20) {
-                    Button {
-                        withHapticFeedback {
-                            audioManager.skipBackward(15)
-                        }
-                    } label: {
-                        Image(systemName: "gobackward.15")
-                            .font(.title2)
-                            .foregroundColor(.primaryText)
-                    }
-                    
-                    Button {
-                        withHapticFeedback(.medium) {
-                            if audioManager.playbackState != .loading {
-                                audioManager.togglePlayback()
-                            }
-                        }
-                    } label: {
-                        if audioManager.playbackState == .loading {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        } else {
-                            Image(systemName: isPlaying ? "pause.fill" : "play.fill")
-                                .font(.title2)
-                                .foregroundColor(.accentColor)
-                        }
-                    }
-                    
-                    Button {
-                        withHapticFeedback {
-                            audioManager.skipForward(15)
-                        }
-                    } label: {
-                        Image(systemName: "goforward.15")
-                            .font(.title2)
-                            .foregroundColor(.primaryText)
-                    }
-                }
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .padding(.bottom, 50) // 50px from bottom
-            .offset(y: miniPlayerDragOffset)
-            .onTapGesture {
-                withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                    isMiniplayer = false
-                    dragOffset = 0
-                    miniPlayerDragOffset = 0
-                }
-            }
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        if value.translation.height > 0 { // Only allow downward drag
-                            miniPlayerDragOffset = value.translation.height
-                        }
-                    }
-                    .onEnded { value in
-                        if value.translation.height > 50 { // Dismiss threshold
-                            // Stop playback and dismiss
-                            audioManager.pausePlayback()
-                            dismiss()
-                        } else {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                miniPlayerDragOffset = 0
-                            }
-                        }
-                    }
-            )
-        }
-    }
-    
-    // MARK: - Background Layer
+    // MARK: - Mini Player View (removed; handled by sheet detents)
+// MARK: - Background Layer
     @ViewBuilder
     private func backgroundLayer(geometry: GeometryProxy) -> some View {
         if let coverImage = coverImage {
@@ -332,8 +201,8 @@ struct PlayerView: View {
     private var headerControls: some View {
         HStack {
             Button {
-                // Dismiss to return to library (where MiniPlayerView will appear)
-                dismiss()
+                // Prefer router dismissal when available to avoid re-present loops
+                if let router = playerRouter { router.dismiss() } else { dismiss() }
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.title2)

@@ -3,6 +3,7 @@ import SwiftUI
 struct MainTabView: View {
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var globalAudioManager = GlobalAudioManager.shared
+    @StateObject private var playerRouter = PlayerRouter()
     @State private var selectedTab = 1
     @State private var searchText: String = ""
 
@@ -45,12 +46,20 @@ struct MainTabView: View {
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
         .tabViewBottomAccessory {
-            MiniPlayerView()
+            NewMiniPlayerBar()
         }
         .searchable(text: $searchText)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
         .environment(\.theme, themeManager)
+        .environment(\.playerRouter, playerRouter)
+        .sheet(item: $playerRouter.presentedAudiobook) { book in
+            PlayerView(audiobook: book)
+                .environment(\.playerRouter, playerRouter)
+                .presentationDetents([.height(92), .large], selection: Binding(get: { playerRouter.selectedDetent ?? .large }, set: { playerRouter.selectedDetent = $0 }))
+                .presentationDragIndicator(.visible)
+                .interactiveDismissDisabled(false)
+        }
 
     }
 }
