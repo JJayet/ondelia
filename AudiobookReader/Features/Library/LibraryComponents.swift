@@ -267,9 +267,7 @@ struct EnhancedAudiobookRowView: View {
                     .foregroundColor(.secondaryText)
             }
             .padding(16)
-            .background(Color.cardBackground)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+            .glassEffect(in:.rect(cornerRadius: 16))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -372,9 +370,7 @@ struct AudiobookGridItemView: View {
                 .frame(maxWidth: .infinity)
             }
             .padding(12)
-            .background(Color.cardBackground)
-            .cornerRadius(20)
-            .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+            .glassEffect(in:.rect(cornerRadius: 20))
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -440,35 +436,41 @@ struct ContinueReadingCardView: View {
             }
             .frame(width: 140)
             .padding(12)
-            .background(Color.cardBackground)
-            .cornerRadius(16)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .glassEffect(in:.rect(cornerRadius: 16))
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
 
 struct ImportingIndicatorView: View {
+    @ObservedObject var manager: AudiobookManager
+    init(manager: AudiobookManager) { self.manager = manager }
+    init() { self.manager = AudiobookManager.shared }
+    
     var body: some View {
         HStack(spacing: 12) {
-            ProgressView()
-                .scaleEffect(0.8)
-
-            Text(
-                NSLocalizedString(
-                    "Importing...",
-                    comment: "Importing audiobook status"
-                )
-            )
-            .font(.subheadline)
-            .foregroundColor(.secondaryText)
-
+            Image(systemName: "tray.and.arrow.down.fill")
+                .foregroundColor(.accentColor)
+            VStack(alignment: .leading, spacing: 4) {
+                Text(NSLocalizedString("Importing...", comment: "Importing audiobook status"))
+                    .font(.subheadline)
+                    .foregroundColor(.primaryText)
+                if let name = manager.currentImportFileName {
+                    Text(name)
+                        .font(.caption)
+                        .foregroundColor(.secondaryText)
+                        .lineLimit(1)
+                }
+                if manager.importQueueTotal > 1 {
+                    Text("\(manager.importQueueCompleted + 1)/\(manager.importQueueTotal)")
+                        .font(.caption2)
+                        .foregroundColor(.secondaryText)
+                }
+            }
             Spacer()
         }
         .padding()
-        .background(Color.cardBackground)
-        .cornerRadius(12)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .glassEffect(in:.rect(cornerRadius: 12))
     }
 }
 
@@ -506,14 +508,11 @@ struct EmptyLibraryView: View {
     }
 }
 
-#Preview("Library Header View") {
-    LibraryHeaderView(
-        viewMode: .constant(.list),
-        sortOption: .constant(.lastPlayed),
-        filterOption: .constant(.all)
-    )
-}
-
 #Preview("Empty Library View") {
     EmptyLibraryView()
+}
+
+#Preview() {
+    LibraryView()
+        .previewWithMockAudio()
 }

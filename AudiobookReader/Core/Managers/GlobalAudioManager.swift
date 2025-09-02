@@ -1,5 +1,7 @@
 import Foundation
 import SwiftUI
+import ActivityKit
+import Combine
 
 @MainActor
 class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
@@ -13,6 +15,8 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     @Published var isReady = false
     @Published var showMiniPlayer = false
     @Published var playbackState: PlaybackState = .stopped
+    
+    private let liveActivityManager = LiveActivityManager()
     
     enum PlaybackState {
         case stopped
@@ -84,6 +88,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
                     self.isLoading = false
                     self.playbackState = .failed
                 }
+                NowPlayingSharedStore.write(
+                    audiobook: self.currentAudiobook,
+                    isPlaying: self.playbackState == .playing,
+                    currentTime: self.getCurrentTime(),
+                    duration: self.getDuration(),
+                    coverImageData: self.currentAudiobook?.coverImageData
+                )
             }
         }
     }
@@ -167,6 +178,14 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             audioEngine?.pause()
         }
         playbackState = .paused
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
+        updateLiveActivity()
     }
     
     func resumePlayback() {
@@ -177,18 +196,42 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         }
         showMiniPlayer = true
         playbackState = .playing
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
+        updateLiveActivity()
     }
     
     func startPlayback() {
         resumePlayback()
         showMiniPlayer = true
         playbackState = .playing
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
+        updateLiveActivity()
     }
     
     func stopPlayback() {
         pausePlayback()
         showMiniPlayer = false
         playbackState = .stopped
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData
+        )
+        updateLiveActivity()
     }
     
     func isPlaying() -> Bool {
@@ -237,6 +280,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             duration: getDuration(),
             coverImageData: currentAudiobook?.coverImageData
         )
+        updateLiveActivity()
     }
     
     func skipForward(_ interval: TimeInterval) {
@@ -252,6 +296,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             duration: getDuration(),
             coverImageData: currentAudiobook?.coverImageData
         )
+        updateLiveActivity()
     }
     
     func skipBackward(_ interval: TimeInterval) {
@@ -267,6 +312,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             duration: getDuration(),
             coverImageData: currentAudiobook?.coverImageData
         )
+        updateLiveActivity()
     }
     
     func togglePlayback() {
@@ -292,6 +338,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             duration: getDuration(),
             coverImageData: currentAudiobook?.coverImageData
         )
+        updateLiveActivity()
     }
     
     func seek(to time: TimeInterval) {
@@ -307,6 +354,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             duration: getDuration(),
             coverImageData: currentAudiobook?.coverImageData
         )
+        updateLiveActivity()
     }
 
     
@@ -340,6 +388,40 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             multiFileAudioEngine?.enableDynamicRangeCompression(enabled, threshold: threshold, ratio: ratio)
         }
         // Note: Single file engine doesn't have this method yet, but could be added similarly
+    }
+    
+    // MARK: - Live Activity Management
+    private func updateLiveActivity() {
+        guard let audiobook = currentAudiobook else {
+            liveActivityManager.endLiveActivity()
+            return
+        }
+        
+        let contentState = AudiobookLiveActivityAttributes.ContentState(
+            title: audiobook.title ?? "Unknown Title",
+            author: audiobook.author ?? "Unknown Author",
+            chapterTitle: audiobook.chapters.first?.title,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            isPlaying: playbackState == .playing,
+            playbackRate: getPlaybackRate(),
+            coverImageData: audiobook.coverImageData
+        )
+        
+        // Start live activity if not already started, otherwise update
+        if playbackState == .playing && !liveActivityManager.isActivityActive {
+            liveActivityManager.startLiveActivity(
+                for: contentState,
+                audiobookId: audiobook.id.uuidString
+            )
+        } else if liveActivityManager.isActivityActive {
+            liveActivityManager.updateLiveActivity(with: contentState)
+        }
+        
+        // End live activity when stopped
+        if playbackState == .stopped {
+            liveActivityManager.endLiveActivity()
+        }
     }
     
     // MARK: - Utility Functions

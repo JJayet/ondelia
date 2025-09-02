@@ -87,6 +87,7 @@
 				Core/Models/SwiftData/BookmarkModel.swift,
 				Core/Models/SwiftData/ChapterModel.swift,
 				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
+				Shared/AppIntents/AudiobookLiveActivity.swift,
 				Shared/NowPlayingSharedStore.swift,
 			);
 			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;

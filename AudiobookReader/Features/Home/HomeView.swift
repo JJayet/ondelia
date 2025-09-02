@@ -299,7 +299,6 @@ struct QuickStatView: View {
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity)
         .glassEffect(in: .rect(cornerRadius: 16))
-        .background(Color.glassTint, in: .rect(cornerRadius: 16))
     }
 }
 
@@ -412,9 +411,7 @@ struct MonthlyGoalCardView: View {
                 .cornerRadius(3)
         }
         .padding()
-        .background(Color.cardBackground)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 8, x: 0, y: 4)
+        .glassEffect(in: .rect(cornerRadius: 16))
     }
 }
 

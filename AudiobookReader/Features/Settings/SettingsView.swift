@@ -326,8 +326,6 @@ private struct SettingsRowCard: ViewModifier {
     func body(content: Content) -> some View {
         content
             .padding()
-            .background(Color.cardBackground)
-            .cornerRadius(14)
             .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
     }
 }
@@ -397,9 +395,7 @@ struct StatisticsView: View {
                         .frame(width: 150, height: 150)
                     }
                     .padding(24)
-                    .background(Color.cardBackground)
-                    .cornerRadius(20)
-                    .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+                    .glassEffect(in:.rect(cornerRadius: 20))
                     
                     // Statistics Grid
                     LazyVGrid(columns: [
@@ -521,9 +517,7 @@ struct StatCardView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .background(Color.cardBackground)
-        .cornerRadius(16)
-        .shadow(color: Color.black.opacity(0.05), radius: 4, x: 0, y: 2)
+        .glassEffect(in:.rect(cornerRadius: 16))
     }
 }
 
@@ -552,10 +546,8 @@ struct AchievementView: View {
         .padding(.vertical, 12)
         .padding(.horizontal, 8)
         .frame(maxWidth: .infinity)
-        .background(Color.cardBackground)
-        .cornerRadius(12)
+        .glassEffect(in:.rect(cornerRadius: 12))
         .opacity(isUnlocked ? 1.0 : 0.6)
-        .shadow(color: Color.black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 

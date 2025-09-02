@@ -1,6 +1,7 @@
 import SwiftUI
 import WidgetKit
 import Intents
+import AppIntents
 
 // MARK: - Now Playing Widget Entry
 struct NowPlayingEntry: TimelineEntry {
@@ -127,10 +128,12 @@ struct SmallNowPlayingView: View {
             VStack(spacing: 4) {
                 Spacer()
                 
-                // Play/Pause indicator
-                Image(systemName: entry.isPlaying ? "play.fill" : "pause.fill")
-                    .font(.title2)
-                    .foregroundColor(.white)
+                // Play/Pause control
+                Button(intent: PlayPauseIntent()) {
+                    Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.title2)
+                        .foregroundColor(.white)
+                }
                 
                 // Title (truncated)
                 if let audiobook = entry.audiobook {
@@ -197,9 +200,11 @@ struct MediumNowPlayingView: View {
                         
                         Spacer()
                         
-                        Image(systemName: entry.isPlaying ? "play.fill" : "pause.fill")
-                            .font(.caption)
-                            .foregroundColor(.accentColor)
+                        Button(intent: PlayPauseIntent()) {
+                            Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
+                                .font(.caption)
+                                .foregroundColor(.accentColor)
+                        }
                     }
                 }
             }
@@ -261,10 +266,11 @@ struct LargeNowPlayingView: View {
                 
                 // Playback status
                 VStack {
-                    Image(systemName: entry.isPlaying ? "play.fill" : "pause.fill")
-                        .font(.title2)
-                        .foregroundColor(.accentColor)
-                    
+                    Button(intent: PlayPauseIntent()) {
+                        Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
+                            .font(.title2)
+                            .foregroundColor(.accentColor)
+                    }
                     Text(entry.isPlaying ? "Playing" : "Paused")
                         .font(.caption2)
                         .foregroundColor(.secondary)

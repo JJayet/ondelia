@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import SwiftData
 
 struct LibraryView: View {
     @StateObject private var audiobookManager = AudiobookManager()
@@ -109,23 +110,23 @@ struct LibraryView: View {
     }
     
     private var filteredAudiobooks: [AudiobookModel] {
-        let searchedBooks = audiobookManager.audiobooks
-        
-        let filteredBooks: [AudiobookModel]
-        if let predicate = filterOption.predicate() {
-            filteredBooks = searchedBooks.filter { book in
-                predicate.evaluate(with: book)
+        let source = audiobookManager.audiobooks
+        // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
+        let filtered: [AudiobookModel] = {
+            switch filterOption {
+            case .all:
+                return source
+            case .inProgress:
+                return source.filter { $0.currentPosition > 0 && !$0.isFinished }
+            case .completed:
+                return source.filter { $0.isFinished }
+            case .notStarted:
+                return source.filter { $0.currentPosition == 0 }
             }
-        } else {
-            filteredBooks = searchedBooks
-        }
-
+        }()
+        // Sort with SortDescriptor for consistency
         let descriptor = sortOption.descriptor
-        let sortedBooks = filteredBooks.sorted { book1, book2 in
-            descriptor.compare(book1, book2) == .orderedAscending
-        }
-
-        return sortedBooks
+        return filtered.sorted { descriptor.compare($0, $1) == .orderedAscending }
     }
 
     // MARK: - Actions
@@ -144,41 +145,9 @@ struct LibraryView: View {
             .map { $0 }
     }
     
-    // MARK: - Import Handler
+    // MARK: - Import Handler (delegates to manager's queue w/ progress)
     private func handleImport(urls: [URL]) {
-        for url in urls {
-            Task {
-                print("📂 Processing import: \(url.lastPathComponent)")
-                
-                // Start accessing security-scoped resource
-                let accessing = url.startAccessingSecurityScopedResource()
-                defer { if accessing { url.stopAccessingSecurityScopedResource() } }
-                
-                // Check if it's a ZIP file
-                if url.pathExtension.lowercased() == "zip" {
-                    print("📦 Importing ZIP file: \(url.lastPathComponent)")
-                    await audiobookManager.importZIPAudiobook(from: url)
-                } else {
-                    var isDirectory: ObjCBool = false
-                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-                        if isDirectory.boolValue {
-                            print("📁 Importing folder: \(url.lastPathComponent)")
-                            await audiobookManager.importAudiobookFolder(from: url)
-                        } else {
-                            print("🎵 Importing single file: \(url.lastPathComponent)")
-                            await audiobookManager.importAudiobook(from: url)
-                        }
-                    } else {
-                        print("🎵 Importing file (fallback): \(url.lastPathComponent)")
-                        await audiobookManager.importAudiobook(from: url)
-                    }
-                }
-                
-                await MainActor.run {
-                    statistics.addListeningTime(0) // Update streak
-                }
-            }
-        }
+        audiobookManager.handleImportRequest(urls: urls)
     }
     
     var body: some View {
@@ -239,7 +208,7 @@ struct LibraryView: View {
                             .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
                         } else {
                             if audiobookManager.isImporting {
-                                ImportingIndicatorView()
+                                ImportingIndicatorView(manager: audiobookManager)
                                     .listRowBackground(Color.clear)
                                     .listRowSeparator(.hidden)
                                     .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
@@ -301,7 +270,7 @@ struct LibraryView: View {
                                 } else {
                                     VStack(spacing: 16) {
                                         if audiobookManager.isImporting {
-                                            ImportingIndicatorView()
+                                            ImportingIndicatorView(manager: audiobookManager)
                                                 .padding(.horizontal)
                                         }
                                         
@@ -472,9 +441,8 @@ struct StatisticsCardView: View {
                     .frame(height: 4)
             }
             .padding()
-            .background(Color.cardBackground)
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
+            .glassEffect(in:.rect(cornerRadius: 12))
+            
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -482,6 +450,38 @@ struct StatisticsCardView: View {
 
 #Preview("Empty library view") {
     LibraryView()
+}
+
+// MARK: - Library Preview with Mock Data
+#Preview("Library with mock books") {
+    PreviewWrapper {
+        SeededLibraryPreview()
+    }
+}
+
+@MainActor
+private struct SeededLibraryPreview: View {
+    @Environment(\.modelContext) private var context
+    
+    var body: some View {
+        LibraryView()
+            .task {
+                // Seed a handful of mock books only once
+                let desc = FetchDescriptor<AudiobookModel>()
+                let existing = (try? context.fetch(desc)) ?? []
+                guard existing.isEmpty else { return }
+                
+                let samples: [AudiobookModel] = [
+                    AudiobookModel.preview(title: "The Art of War", author: "Sun Tzu"),
+                    AudiobookModel.preview(title: "1984", author: "George Orwell"),
+                    AudiobookModel.preview(title: "Dune", author: "Frank Herbert"),
+                    AudiobookModel.preview(title: "The Hobbit", author: "J.R.R. Tolkien"),
+                    AudiobookModel.preview(title: "Project Hail Mary", author: "Andy Weir")
+                ]
+                samples.forEach { context.insert($0) }
+                try? context.save()
+            }
+    }
 }
 
 

@@ -41,6 +41,7 @@ struct MainTabView: View {
                 role: .search
             ) {
                 SearchView(query: $searchText)
+                    .searchable(text: $searchText)
             }
         }
         .tabViewStyle(.sidebarAdaptable)
@@ -54,7 +55,6 @@ struct MainTabView: View {
                     }
             }
         }
-        .searchable(text: $searchText)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .accentColor(themeManager.accentColor.color)
         .environment(\.theme, themeManager)

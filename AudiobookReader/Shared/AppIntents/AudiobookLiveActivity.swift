@@ -2,6 +2,7 @@ import ActivityKit
 import SwiftUI
 import WidgetKit
 import AppIntents
+import Combine
 
 // MARK: - Live Activity Attributes
 struct AudiobookLiveActivityAttributes: ActivityAttributes {
@@ -161,7 +162,7 @@ struct AudiobookLiveActivityView: View {
             }
         }
         .padding(16)
-        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 16))
+        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 16))
     }
 }
 
@@ -235,21 +236,26 @@ struct AudiobookExpandedView: View {
                     Button(intent: SkipBackwardIntent()) {
                         Image(systemName: "gobackward.15")
                             .font(.title3)
+                            .foregroundColor(.primary)
                     }
-                    .buttonStyle(.plain)
+                    .glassEffect(.regular.interactive(), in: Circle())
+                    .frame(width: 44, height: 44)
                     
                     Button(intent: PlayPauseIntent()) {
                         Image(systemName: context.state.isPlaying ? "pause.fill" : "play.fill")
                             .font(.title2)
                             .foregroundColor(.accentColor)
                     }
-                    .buttonStyle(.plain)
+                    .glassEffect(.regular.interactive(), in: Circle())
+                    .frame(width: 52, height: 52)
                     
                     Button(intent: SkipForwardIntent()) {
                         Image(systemName: "goforward.30")
                             .font(.title3)
+                            .foregroundColor(.primary)
                     }
-                    .buttonStyle(.plain)
+                    .glassEffect(.regular.interactive(), in: Circle())
+                    .frame(width: 44, height: 44)
                     
                     if context.state.playbackRate != 1.0 {
                         Text("\(String(format: "%.1fx", context.state.playbackRate))")
@@ -257,7 +263,7 @@ struct AudiobookExpandedView: View {
                             .foregroundColor(.secondary)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(.quaternary, in: RoundedRectangle(cornerRadius: 8))
+                            .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 8))
                     }
                 }
             }
@@ -317,18 +323,22 @@ struct PlayPauseIntent: AudioIntent {
     static var description = IntentDescription("Toggle playback")
     
     func perform() async throws -> some IntentResult {
-        // This would trigger the play/pause action in the app
-        // Implementation depends on app architecture
+        // Use the shared store to communicate with the main app
+//        if let data = NowPlayingSharedStore.read() {
+//            // Send notification to main app to toggle playback
+//            NotificationCenter.default.post(name: .togglePlaybackFromWidget, object: nil)
+//        }
         return .result()
     }
 }
 
 struct SkipForwardIntent: AudioIntent {
     static var title: LocalizedStringResource = "Skip Forward"
-    static var description = IntentDescription("Skip forward 30 seconds")
+    static var description = IntentDescription("Skip forward 15 seconds")
     
     func perform() async throws -> some IntentResult {
-        // This would trigger skip forward in the app
+        // Send notification to main app to skip forward
+        NotificationCenter.default.post(name: .skipForwardFromWidget, object: nil)
         return .result()
     }
 }
@@ -338,7 +348,8 @@ struct SkipBackwardIntent: AudioIntent {
     static var description = IntentDescription("Skip backward 15 seconds")
     
     func perform() async throws -> some IntentResult {
-        // This would trigger skip backward in the app
+        // Send notification to main app to skip backward
+        NotificationCenter.default.post(name: .skipBackwardFromWidget, object: nil)
         return .result()
     }
 }
@@ -364,6 +375,10 @@ private func formatTime(_ time: TimeInterval) -> String {
 // MARK: - Live Activity Manager
 class LiveActivityManager: ObservableObject {
     private var currentActivity: Activity<AudiobookLiveActivityAttributes>?
+    
+    var isActivityActive: Bool {
+        return currentActivity?.activityState == .active
+    }
     
     func startLiveActivity(for audiobook: AudiobookLiveActivityAttributes.ContentState, audiobookId: String) {
         let attributes = AudiobookLiveActivityAttributes(
@@ -401,4 +416,11 @@ class LiveActivityManager: ObservableObject {
             print("🛑 Live Activity ended")
         }
     }
+}
+
+// MARK: - Notification Names
+extension Notification.Name {
+    static let togglePlaybackFromWidget = Notification.Name("togglePlaybackFromWidget")
+    static let skipForwardFromWidget = Notification.Name("skipForwardFromWidget") 
+    static let skipBackwardFromWidget = Notification.Name("skipBackwardFromWidget")
 }
