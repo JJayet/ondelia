@@ -11,7 +11,7 @@ struct SearchView: View {
     @State private var sort: Sort = .relevance
 
     private var results: [AudiobookModel] {
-        let q = debouncedQuery.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let q = normalize(debouncedQuery)
         guard !q.isEmpty else { return [] }
 
         var items = audiobookManager.audiobooks
@@ -27,17 +27,17 @@ struct SearchView: View {
 
         // Query match
         items = items.filter { book in
-            let t = (book.title ?? "").lowercased()
-            let a = (book.author ?? "").lowercased()
-            let n = (book.narrator ?? "").lowercased()
+            let t = normalize(book.title ?? "")
+            let a = normalize(book.author ?? "")
+            let n = normalize(book.narrator ?? "")
             return t.contains(q) || a.contains(q) || n.contains(q)
         }
 
         // Relevance weight
         func weight(for book: AudiobookModel) -> Int {
-            let t = (book.title ?? "").lowercased()
-            let a = (book.author ?? "").lowercased()
-            let n = (book.narrator ?? "").lowercased()
+            let t = normalize(book.title ?? "")
+            let a = normalize(book.author ?? "")
+            let n = normalize(book.narrator ?? "")
             var w = 0
             if t == q { w += 100 }
             if a == q { w += 80 }
@@ -65,6 +65,11 @@ struct SearchView: View {
         }
 
         return items
+    }
+
+    // Normalize strings for case- and accent-insensitive comparison
+    private func normalize(_ s: String) -> String {
+        s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 
     private var filtersActive: Bool { filter != .all || sort != .relevance }
@@ -261,11 +266,19 @@ private struct SearchResultRow: View {
 
     private func highlighted(_ text: String, query: String) -> AttributedString {
         var attr = AttributedString(text)
-        let ltext = text.lowercased()
-        let lq = query.lowercased()
-        if let r = ltext.range(of: lq),
-           let lower = AttributedString.Index(r.lowerBound, within: attr),
-           let upper = AttributedString.Index(r.upperBound, within: attr) {
+        let normText = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        let normQuery = query.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        guard !normQuery.isEmpty,
+              let r = normText.range(of: normQuery) else { return attr }
+
+        // Map normalized range back to original string by character offsets
+        let lowerOffset = normText.distance(from: normText.startIndex, to: r.lowerBound)
+        let upperOffset = normText.distance(from: normText.startIndex, to: r.upperBound)
+        let origLower = text.index(text.startIndex, offsetBy: lowerOffset)
+        let origUpper = text.index(text.startIndex, offsetBy: upperOffset)
+
+        if let lower = AttributedString.Index(origLower, within: attr),
+           let upper = AttributedString.Index(origUpper, within: attr) {
             attr[lower..<upper].foregroundColor = .accentColor
             attr[lower..<upper].font = .headline.bold()
         }

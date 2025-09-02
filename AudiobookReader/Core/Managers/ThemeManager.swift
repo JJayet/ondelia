@@ -394,21 +394,6 @@ extension Color {
         }
     }
     
-    @MainActor static var cardBackground: Color {
-        switch ThemeManager.shared.currentTheme {
-        case .sepia:
-            return Color(red: 0.917, green: 0.843, blue: 0.725) // #EAD7B9
-        case .dark:
-            return Color(red: 0.13, green: 0.13, blue: 0.14)
-        case .dim:
-            return Color(red: 0.165, green: 0.173, blue: 0.192) // #2A2C31
-        case .light:
-            return Color(.secondarySystemGroupedBackground)
-        case .system:
-            return Color(.secondarySystemGroupedBackground)
-        }
-    }
-    
     @MainActor static var primaryText: Color {
         switch ThemeManager.shared.currentTheme {
         case .sepia:
