@@ -181,13 +181,13 @@ final class SpeechTranscriptionManager {
 }
 
 // MARK: - Data Structures
-struct TranscriptionResult {
+struct TranscriptionResult: Sendable {
     let text: String
     let segments: [TranscriptionSegment]
     let language: String
 }
 
-struct TranscriptionSegment: Codable, Equatable {
+struct TranscriptionSegment: Codable, Equatable, Sendable {
     let text: String
     let start: Double
     let end: Double

@@ -15,6 +15,7 @@ final class TranscriptionManager {
     var modelLoadingProgress: Double = 0
         
     private let swiftDataController = SwiftDataController.shared
+    private var transcriptionStore: TranscriptionStore?
     private let themeManager = ThemeManager.shared
     private let speechManager = SpeechTranscriptionManager.shared
     private let translationManager = TranslationManager.shared
@@ -25,6 +26,15 @@ final class TranscriptionManager {
     
     var isReady: Bool {
         return speechManager.isReady
+    }
+
+    /// Built on first use: reading `container` before the store has loaded would trap.
+    private func store() -> TranscriptionStore? {
+        guard swiftDataController.isLoaded else { return nil }
+        if let transcriptionStore { return transcriptionStore }
+        let store = TranscriptionStore(modelContainer: swiftDataController.container)
+        transcriptionStore = store
+        return store
     }
     
     // MARK: - Transcription Methods
@@ -69,7 +79,10 @@ final class TranscriptionManager {
             throw TranscriptionError.chapterNotFound
         }
         
-        if let existingResult = await MainActor.run(body: { getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: Int16(currentChapterIndex)) }) {
+        let audiobookID = audiobook.id
+        let chapter = Int16(currentChapterIndex)
+
+        if let existingResult = await store()?.cachedResult(audiobookID: audiobookID, chapterIndex: chapter) {
             Log.transcription.debug("📖 TranscriptionManager: Using cached transcription")
             await MainActor.run {
                 isTranscribing = false
@@ -81,12 +94,14 @@ final class TranscriptionManager {
         // Transcribe the audio file with details
         let transcriptionResult = try await transcribeAudioFileWithDetails(currentChapterURL, for: audiobook, chapterIndex: currentChapterIndex)
         
-        // Cache the transcription result
-        await cacheTranscriptionResult(transcriptionResult, for: audiobook, chapterIndex: Int16(currentChapterIndex))
-        
-        await MainActor.run {
-            isTranscribing = false
-        }
+        await store()?.save(
+            transcriptionResult,
+            audiobookID: audiobookID,
+            chapterIndex: chapter,
+            engine: "SpeechAnalyzer"
+        )
+
+        isTranscribing = false
         return transcriptionResult
     }
     
@@ -107,80 +122,6 @@ final class TranscriptionManager {
         return chaptersData.compactMap { $0["fileName"] as? String }
     }
     
-    // MARK: - Caching
-    @MainActor private func getCachedTranscriptionResult(audiobookID: UUID, chapterIndex: Int16) -> TranscriptionResult? {
-        let context = swiftDataController.context
-        var descriptor = FetchDescriptor<ChapterTranscriptionModel>(
-            predicate: #Predicate { transcription in
-                transcription.chapterIndex == chapterIndex
-                    && transcription.audiobook?.id == audiobookID
-            }
-        )
-        descriptor.fetchLimit = 1
-
-        let matches: [ChapterTranscriptionModel]
-        do {
-            matches = try context.fetch(descriptor)
-        } catch {
-            Log.transcription.error("❌ TranscriptionManager: Error fetching transcriptions: \(error)")
-            return nil
-        }
-        
-        guard let cached = matches.first,
-              let text = cached.transcriptionText else {
-            return nil
-        }
-            
-            // Parse segments if available
-            var segments: [TranscriptionSegment] = []
-            if let segmentsData = cached.segmentsData,
-               let segmentArray = try? JSONDecoder().decode([TranscriptionSegment].self, from: segmentsData) {
-                segments = segmentArray
-            }
-            
-            return TranscriptionResult(
-                text: text,
-                segments: segments,
-                language: cached.language ?? "en"
-            )
-    }
-    
-    @MainActor
-    private func cacheTranscriptionResult(_ result: TranscriptionResult, for audiobook: AudiobookModel, chapterIndex: Int16) async {
-        let context = swiftDataController.context
-        
-        // Remove existing transcription if any
-        let audiobookID = audiobook.id
-        var existingDescriptor = FetchDescriptor<ChapterTranscriptionModel>(
-            predicate: #Predicate { transcription in
-                transcription.chapterIndex == chapterIndex
-                    && transcription.audiobook?.id == audiobookID
-            }
-        )
-        existingDescriptor.fetchLimit = 1
-        if let existingTranscription = try? context.fetch(existingDescriptor).first {
-            context.delete(existingTranscription)
-        }
-        
-        // Create new transcription
-        let transcription = ChapterTranscriptionModel(
-            chapterIndex: chapterIndex,
-            transcriptionText: result.text,
-            language: result.language,
-            transcriptionEngine: "SpeechAnalyzer",
-            dateCreated: Date()
-        )
-        transcription.audiobook = audiobook
-        
-        // Store segments as JSON data
-        if !result.segments.isEmpty {
-            transcription.segmentsData = try? JSONEncoder().encode(result.segments)
-        }
-        
-        context.insert(transcription)
-        swiftDataController.save()
-        Log.transcription.debug("💾 TranscriptionManager: Cached transcription for chapter \(chapterIndex)")
-    }
 }
 
 // MARK: - Error Types
