@@ -1,0 +1,33 @@
+Config/Base.xcconfig
+  s_43c227ab15905c::t_8eeeacb1fe794f 1-4
+.gitignore
+  s_43c227ab15905c::t_0d410d57c1f3ea 1-20
+.github/workflows/ci.yml
+  s_43c227ab15905c::t_bd2ad69a250dbe 11-12,29,60,67,80,134,195
+AGENTS.md
+  s_43c227ab15905c::t_bd2ad69a250dbe 13-16,35
+CLAUDE.md
+  s_43c227ab15905c::t_bd2ad69a250dbe 9-11,35,86
+Config/Secrets.xcconfig.example
+  s_43c227ab15905c::t_ed777c1bdec17d 1-3
+AudiobookReader.xcodeproj/project.pbxproj
+  s_43c227ab15905c::t_8eeeacb1fe794f 64,202,518,584
+AudiobookReader/Resources/PrivacyInfo.xcprivacy
+  s_43c227ab15905c::t_ed2b04d82bda36 5-7,9,11-22
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "74bf956878acc63ec9bb1b159733fa325f62bd6c",
+  "prompts": {},
+  "sessions": {
+    "s_43c227ab15905c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3cd3642-0426-4dce-beeb-9ecb49c2990e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
