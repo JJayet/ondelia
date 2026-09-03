@@ -1,0 +1,91 @@
+AudiobookReader/Features/Player/ChaptersListView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 38,42,49
+AudiobookReader/Features/Library/LibraryHeaderView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 28,53,71
+AudiobookReader/Features/Search/SearchEmptyViews.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 12,16,19
+AudiobookReader/Shared/MiniPlayerBar.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 38
+AudiobookReader/Features/Library/ContinueReadingCardView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 29,41,57
+AudiobookReader/Features/Player/PlayerSheetView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 17
+AudiobookReader/Features/Settings/SettingsView+TranscriptionSection.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 76
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 66,90,100
+AudiobookReader/App/AudiobookReaderApp.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 30
+AudiobookReader/Features/Library/EmptyLibraryView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 8,19,28
+AudiobookReader/Features/Bookmarks/BookmarksView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 20,28,73,79,89,95
+AudiobookReader/Features/Home/HomeComponents.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 14,18,42,46,75,87,92,127,137
+  s_4e7c8d8ef1088c::t_a356944606d4b1 37,103,145
+AudiobookReader/Features/Library/LibraryView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 85
+AudiobookReader/Features/Library/StatisticsCardView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 22,30,38
+  s_4e7c8d8ef1088c::t_0e1d2f3abbac4c 14
+AudiobookReader/Features/Player/PlayerView+Controls.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 49
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 22,81,102
+AudiobookReader/Features/Search/SearchResultRow.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 15,20,27,32,40,57
+AudiobookReader/Features/Player/TranscriptionSubviews.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 26,43,83,136
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 89,97,112,117,143
+AudiobookReader/Features/Library/EnhancedAudiobookRowView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 62
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 29,42,48,83,93,100,108
+AudiobookReader/Features/Settings/StatisticsView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 16,24,48,95
+  s_4e7c8d8ef1088c::t_a356944606d4b1 20
+AudiobookReader/Features/Settings/SettingsView+Sections.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 27,114,117,176
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 9,14,50,55,75,82,93
+AudiobookReader/Features/Player/TranscriptionView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 114
+AudiobookReader/Features/Library/ImagePickerView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 24,49,56,59,67,70,73
+AudiobookReader/Features/Player/Components/ActionButtonView.swift
+  s_4e7c8d8ef1088c::t_0e1d2f3abbac4c 32
+  s_4e7c8d8ef1088c::t_a356944606d4b1 16,22
+AudiobookReaderWidget/NowPlayingLargeWidgetViews.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 26,35,39,45,58,62,75,81,124,130,138,151,162,168
+AudiobookReader/Features/Home/HomeView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 176,201
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 43,53,187
+AudiobookReader/Features/Library/AudiobookGridItemView.swift
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 29,52,58
+  s_4e7c8d8ef1088c::t_a356944606d4b1 64
+AudiobookReader/Features/Settings/StatisticsCards.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 14
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 21,26,32,51,56,61
+AudiobookReaderWidget/NowPlayingWidgetViews.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 58,65,95,105,110,122,129
+AudiobookReader/Features/Library/ImportingIndicatorView.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 11
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 15,19,25
+AudiobookReader/Features/Player/PlayerView+Layout.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 117,184
+  s_4e7c8d8ef1088c::t_b9cc9ec9f36eb4 101,121,140,152,165,234,241
+AudiobookReader/Features/Settings/SettingsRows.swift
+  s_4e7c8d8ef1088c::t_a356944606d4b1 21
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "d9a76a3d70284b3d5a69ce4d859e82144449f423",
+  "prompts": {},
+  "sessions": {
+    "s_4e7c8d8ef1088c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b72d6b5-d1cb-415f-a356-6554d74475bc",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
