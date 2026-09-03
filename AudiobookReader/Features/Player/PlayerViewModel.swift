@@ -18,7 +18,6 @@ final class PlayerViewModel: ObservableObject {
     @Published var playbackRate: Float = 1.0
     @Published var currentChapter: ChapterModel? = nil
 
-    private var sleepTimer: Timer?
     private var progressTimer: Timer?
     private var hasMarkedCompletion = false
     private var lastProgressSave: Date = .distantPast
@@ -40,17 +39,15 @@ final class PlayerViewModel: ObservableObject {
     }
 
     func autoPlayIfNeeded() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-            if self.audioManager.playbackState != .playing {
-                self.audioManager.startPlayback()
-                self.updatePublishedProperties() // Update after state change
-            }
+        if audioManager.playbackState != .playing {
+            // GlobalAudioManager queues this request while an engine is still loading.
+            audioManager.startPlayback()
+            updatePublishedProperties()
         }
     }
     
     func cleanup() {
         stopProgressTimer()
-        cancelSleepTimer()
     }
 
     private func updatePublishedProperties() {
@@ -59,6 +56,7 @@ final class PlayerViewModel: ObservableObject {
         self.currentTime = audioManager.getCurrentTime()
         self.duration = audioManager.getDuration()
         self.playbackRate = audioManager.getPlaybackRate()
+        self.sleepTimeRemaining = audioManager.sleepTimeRemaining
         self.updateCurrentChapter()
     }
     
@@ -85,6 +83,9 @@ final class PlayerViewModel: ObservableObject {
             let now = Date()
             if now.timeIntervalSince(lastProgressSave) >= 3 {
                 audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
+                if let liveAudioManager = audioManager as? GlobalAudioManager {
+                    liveAudioManager.publishPlaybackSnapshot()
+                }
                 lastProgressSave = now
             }
             statistics.addListeningTime(1, playbackRate: playbackRate)
@@ -96,34 +97,19 @@ final class PlayerViewModel: ObservableObject {
         }
     }
 
-    // MARK: - Sleep Timer
+    // MARK: - Sleep Timer (owned by audio manager so App Shortcuts can set it)
     func setSleepTimer(_ seconds: TimeInterval) {
-        cancelSleepTimer()
-        sleepTimeRemaining = seconds
-
-        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
-            guard let self else { return }
-            Task { @MainActor in
-                self.sleepTimeRemaining -= 1
-                if self.sleepTimeRemaining <= 0 {
-                    self.audioManager.pausePlayback()
-                    self.updatePublishedProperties() // Update after state change
-                    timer.invalidate()
-                    self.sleepTimer = nil
-                }
-            }
-        }
+        audioManager.setSleepTimer(seconds)
+        sleepTimeRemaining = audioManager.sleepTimeRemaining
     }
 
-    func setSleepTimerEndOfChapter(currentChapter: ChapterModel?, currentTime: TimeInterval) {
-        guard let currentChapter else { return }
-        let remaining = max(currentChapter.endTime - currentTime, 60) // Min 1 minute
-        setSleepTimer(remaining)
+    func setSleepTimerEndOfChapter() {
+        audioManager.setSleepTimerEndOfChapter()
+        sleepTimeRemaining = audioManager.sleepTimeRemaining
     }
 
     func cancelSleepTimer() {
-        sleepTimer?.invalidate()
-        sleepTimer = nil
+        audioManager.cancelSleepTimer()
         sleepTimeRemaining = 0
     }
     

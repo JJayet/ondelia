@@ -23,6 +23,10 @@ extension GlobalAudioManager {
     }
     
     func resumePlayback() {
+        guard audioEngine != nil || multiFileAudioEngine != nil else {
+            if isLoading { pendingAutoplay = true }
+            return
+        }
         if useMultiFileEngine {
             multiFileAudioEngine?.play()
         } else {
@@ -41,6 +45,10 @@ extension GlobalAudioManager {
     }
     
     func startPlayback() {
+        guard audioEngine != nil || multiFileAudioEngine != nil else {
+            if isLoading { pendingAutoplay = true }
+            return
+        }
         resumePlayback()
         showMiniPlayer = true
         playbackState = .playing
@@ -55,6 +63,7 @@ extension GlobalAudioManager {
     }
     
     func stopPlayback() {
+        pendingAutoplay = false
         pausePlayback()
         showMiniPlayer = false
         playbackState = .stopped
@@ -201,6 +210,19 @@ extension GlobalAudioManager {
     }
     
     // MARK: - Live Activity Management
+    func publishPlaybackSnapshot(reloadTimeline: Bool = false) {
+        NowPlayingSharedStore.write(
+            audiobook: currentAudiobook,
+            isPlaying: playbackState == .playing,
+            currentTime: getCurrentTime(),
+            duration: getDuration(),
+            coverImageData: currentAudiobook?.coverImageData,
+            playbackRate: getPlaybackRate(),
+            reloadTimeline: reloadTimeline
+        )
+        updateLiveActivity()
+    }
+
     private func updateLiveActivity() {
         guard let audiobook = currentAudiobook else {
             liveActivityManager.endLiveActivity()
@@ -215,7 +237,7 @@ extension GlobalAudioManager {
             duration: getDuration(),
             isPlaying: playbackState == .playing,
             playbackRate: getPlaybackRate(),
-            coverImageData: audiobook.coverImageData
+            updatedAt: Date()
         )
         
         // Start live activity if not already started, otherwise update

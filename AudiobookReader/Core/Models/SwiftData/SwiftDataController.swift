@@ -7,6 +7,7 @@ class SwiftDataController: ObservableObject {
     
     @Published private(set) var isLoaded = false
     @Published private(set) var isLoading = true
+    @Published private(set) var loadErrorMessage: String?
     
     private var _container: ModelContainer?
     
@@ -42,7 +43,12 @@ class SwiftDataController: ObservableObject {
         Task { @MainActor in
             do {
                 self.isLoading = true
+                self.isLoaded = false
+                self.loadErrorMessage = nil
                 let container = try self.buildContainer(inMemory: false)
+                #if DEBUG
+                try UITestBootstrap.prepareIfRequested(container: container)
+                #endif
                 self._container = container
                 self.isLoaded = true
                 self.isLoading = false
@@ -50,9 +56,15 @@ class SwiftDataController: ObservableObject {
             } catch {
                 print("❌ SwiftData error: \(error)")
                 self.isLoading = false
-                fatalError("Failed to create SwiftData container: \(error)")
+                self.isLoaded = false
+                self.loadErrorMessage = error.localizedDescription
             }
         }
+    }
+
+    func retryInitialization() {
+        guard !isLoading else { return }
+        initializeAsync()
     }
     
     @MainActor

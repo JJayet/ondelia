@@ -14,6 +14,7 @@ struct AudiobookReaderApp: App {
     // Use StateObject for proper SwiftUI lifecycle management
     @StateObject private var swiftDataController = SwiftDataController.shared
     @StateObject private var globalAudioManager = GlobalAudioManager.shared
+    @StateObject private var playbackCommandCoordinator = PlaybackCommandCoordinator()
     
     var body: some Scene {
         WindowGroup {
@@ -30,7 +31,29 @@ struct AudiobookReaderApp: App {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
-            } else {
+            } else if let errorMessage = swiftDataController.loadErrorMessage {
+                ContentUnavailableView {
+                    Label(
+                        NSLocalizedString("Library Unavailable", comment: "SwiftData startup failure title"),
+                        systemImage: "externaldrive.badge.exclamationmark"
+                    )
+                } description: {
+                    Text(
+                        String(
+                            format: NSLocalizedString(
+                                "Your library could not be opened. Your files have not been deleted.\n%@",
+                                comment: "SwiftData startup failure description"
+                            ),
+                            errorMessage
+                        )
+                    )
+                } actions: {
+                    Button(NSLocalizedString("Try Again", comment: "Retry SwiftData startup button")) {
+                        swiftDataController.retryInitialization()
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+            } else if swiftDataController.isLoaded {
                 // Main app content - loads immediately once SwiftData setup is complete
                 MainTabView()
                     .modelContainer(swiftDataController.container)
@@ -39,6 +62,7 @@ struct AudiobookReaderApp: App {
                     .onAppear {
                         // Initialize widgets on app startup
                         WidgetCenter.shared.reloadAllTimelines()
+                        playbackCommandCoordinator.consumePendingCommand()
                     }
                     .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
                         handleAppWillResignActive()
@@ -63,6 +87,7 @@ struct AudiobookReaderApp: App {
     }
     
     private func handleAppDidBecomeActive() {
+        playbackCommandCoordinator.consumePendingCommand()
         // Refresh Now Playing info when app becomes active
         if globalAudioManager.isPlaying() {
             // Update now playing info to ensure it's current

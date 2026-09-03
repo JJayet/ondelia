@@ -56,8 +56,14 @@ extension AudiobookManager {
             // Stream copy off the main thread to avoid UI blocking
             try streamCopyFile(from: sourceURL, to: destinationURL)
             // Verify the file was copied successfully
+            let sourceAttributes = try fileManager.attributesOfItem(atPath: sourceURL.path)
             let copiedAttributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
+            let sourceSize = sourceAttributes[.size] as? Int64 ?? -1
             let fileSize = copiedAttributes[.size] as? Int64 ?? 0
+            guard sourceSize >= 0, sourceSize == fileSize else {
+                try? fileManager.removeItem(at: destinationURL)
+                throw CocoaError(.fileWriteUnknown)
+            }
             print("✅ AudiobookManager: File copied successfully to: \(destinationURL.path)")
             print("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
             return destinationURL
@@ -67,7 +73,16 @@ extension AudiobookManager {
         }
     }
     
-    func copyFolderToDocuments(from sourceFolderURL: URL, folderAudiobook: FolderAudiobook) async -> URL? {
+    /// - Parameter sourceFiles: the files to copy, keyed by chapter file name. Pass them when the
+    ///   user picked files rather than their folder, since only those URLs are readable then.
+    /// - Parameter onFileCopied: reports each copied file. Providing it also yields between files so
+    ///   the progress it drives can actually be drawn.
+    func copyFolderToDocuments(
+        from sourceFolderURL: URL,
+        folderAudiobook: FolderAudiobook,
+        sourceFiles: [String: URL]? = nil,
+        onFileCopied: ((Int, String) -> Void)? = nil
+    ) async -> URL? {
         let fileManager = FileManager.default
         
         print("📁 AudiobookManager: Copying folder from: \(sourceFolderURL.path)")
@@ -127,9 +142,18 @@ extension AudiobookManager {
             var totalCopiedSize: Int64 = 0
             var copiedFiles = 0
             
-            for folderChapter in folderAudiobook.chapters {
-                let sourceFileURL = sourceFolderURL.appendingPathComponent(folderChapter.fileName)
-                let destinationFileURL = destinationFolderURL.appendingPathComponent(folderChapter.fileName)
+            for (fileIndex, folderChapter) in folderAudiobook.chapters.enumerated() {
+                let sourceFileURL = try sourceFiles?[folderChapter.fileName]
+                    ?? SafeImportPath.existingFileURL(
+                        for: folderChapter.fileName,
+                        inside: sourceFolderURL
+                    )
+                let fileAccess = sourceFiles == nil ? false : sourceFileURL.startAccessingSecurityScopedResource()
+                defer { if fileAccess { sourceFileURL.stopAccessingSecurityScopedResource() } }
+                let destinationFileURL = try SafeImportPath.resolvedURL(
+                    for: folderChapter.fileName,
+                    inside: destinationFolderURL
+                )
                 
                 // Check if source file exists
                 guard fileManager.fileExists(atPath: sourceFileURL.path) else {
@@ -143,11 +167,24 @@ extension AudiobookManager {
                 }
                 
                 // Stream copy each file off the main thread
+                try fileManager.createDirectory(
+                    at: destinationFileURL.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
                 try self.streamCopyFile(from: sourceFileURL, to: destinationFileURL)
-                totalCopiedSize += folderChapter.fileSize
+                let copiedSize = (try fileManager.attributesOfItem(atPath: destinationFileURL.path)[.size] as? Int64) ?? -1
+                let sourceSize = (try fileManager.attributesOfItem(atPath: sourceFileURL.path)[.size] as? Int64) ?? -2
+                guard copiedSize == sourceSize else { throw CocoaError(.fileWriteUnknown) }
+                totalCopiedSize += copiedSize
                 copiedFiles += 1
                 
                 print("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
+                
+                if let onFileCopied {
+                    onFileCopied(fileIndex, folderChapter.fileName)
+                    // Copying runs on the main actor, so give SwiftUI a slot to draw the progress.
+                    await Task.yield()
+                }
             }
             
             // Copy cover image if it exists
@@ -186,30 +223,34 @@ extension AudiobookManager {
     }
 
     // MARK: - Streaming copy with progress
-    private func streamCopyFile(from: URL, to: URL) throws {
+    func streamCopyFile(from: URL, to: URL) throws {
         let fm = FileManager.default
-        if fm.fileExists(atPath: to.path) { try fm.removeItem(at: to) }
-        fm.createFile(atPath: to.path, contents: nil)
-
         let readHandle = try FileHandle(forReadingFrom: from)
-        guard let writeHandle = FileHandle(forWritingAtPath: to.path) else {
-            try? readHandle.close()
-            throw NSError(domain: "AudiobookReader", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to open destination for writing"])
-        }
-        defer {
-            try? readHandle.close()
-            try? writeHandle.close()
-        }
-
-        let chunkSize = 512 * 1024 // 512 KB chunks
-        while autoreleasepool(invoking: {
-            let data = try? readHandle.read(upToCount: chunkSize)
-            if let data, !data.isEmpty {
-                try? writeHandle.write(contentsOf: data)
-                return true
+        var writeHandle: FileHandle?
+        do {
+            if fm.fileExists(atPath: to.path) { try fm.removeItem(at: to) }
+            guard fm.createFile(atPath: to.path, contents: nil) else {
+                throw CocoaError(.fileWriteUnknown)
             }
-            return false
-        }) {}
+            writeHandle = try FileHandle(forWritingTo: to)
+
+            let chunkSize = 512 * 1024 // 512 KB chunks
+            while true {
+                let data = try autoreleasepool {
+                    try readHandle.read(upToCount: chunkSize)
+                }
+                guard let data, !data.isEmpty else { break }
+                try writeHandle?.write(contentsOf: data)
+            }
+            try writeHandle?.synchronize()
+            try readHandle.close()
+            try writeHandle?.close()
+        } catch {
+            try? readHandle.close()
+            try? writeHandle?.close()
+            try? fm.removeItem(at: to)
+            throw error
+        }
     }
     
     private func createFolderManifest(folderAudiobook: FolderAudiobook) throws -> Data {

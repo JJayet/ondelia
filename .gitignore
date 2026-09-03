@@ -19,3 +19,7 @@ xcuserdata/
 
 # Tools
 .serena
+
+# Tools
+.codegraph/
+.testagent/

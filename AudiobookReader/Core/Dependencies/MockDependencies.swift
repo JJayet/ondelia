@@ -81,6 +81,11 @@ class MockGlobalAudioManager: AudioManagerProtocol {
     func seek(to time: TimeInterval) {
         mockCurrentTime = max(0, min(time, mockDuration))
     }
+
+    var sleepTimeRemaining: TimeInterval = 0
+    func setSleepTimer(_ seconds: TimeInterval) { sleepTimeRemaining = seconds }
+    func setSleepTimerEndOfChapter() { sleepTimeRemaining = 60 }
+    func cancelSleepTimer() { sleepTimeRemaining = 0 }
     
     // Helper methods for previews
     func setMockCurrentTime(_ time: TimeInterval) {

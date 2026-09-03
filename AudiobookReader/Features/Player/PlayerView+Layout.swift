@@ -30,6 +30,13 @@ extension PlayerView {
                     alignment: .top
                 )
                 .clipped()
+                .accessibilityLabel(
+                    String(
+                        format: NSLocalizedString("Cover of %@", comment: "Audiobook cover accessibility label"),
+                        audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Unknown title")
+                    )
+                )
+                .accessibilityIdentifier(AccessibilityIdentifiers.Player.coverArt)
         } else {
             // Fallback gradient background
             LinearGradient(
@@ -41,6 +48,7 @@ extension PlayerView {
                 endPoint: .bottom
             )
             .frame(width: geometry.size.width, height: geometry.size.height)
+            .accessibilityHidden(true)
         }
     }
 
@@ -92,6 +100,8 @@ extension PlayerView {
                     .font(.title2)
                     .foregroundColor(.primaryText)
             }
+            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
 
             Spacer()
 
@@ -181,6 +191,7 @@ extension PlayerView {
                     .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 12))
                 }
                 .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityIdentifiers.Player.chaptersButton)
             }
         }
     }

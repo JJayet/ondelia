@@ -8,7 +8,7 @@ struct LibraryView: View {
     @StateObject var audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     @StateObject private var themeManager = ThemeManager.shared
-    @StateObject var statistics = ReadingStatistics()
+    @StateObject var statistics = ReadingStatistics.shared
     @State var showingStatistics = false
     @State var audiobookForImagePicker: AudiobookModel?
     @State var showingRenameAlert = false
@@ -18,6 +18,7 @@ struct LibraryView: View {
     @State var sortOption: SortOption = .lastPlayed
     @State var filterOption: FilterOption = .all
     @State private var showingImporter = false
+    @State private var searchText = ""
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager) {
         _audiobookManager = StateObject(wrappedValue: audiobookManager)
@@ -41,7 +42,9 @@ struct LibraryView: View {
     }
 
     var filteredAudiobooks: [AudiobookModel] {
-        let source = audiobookManager.audiobooks
+        let source = searchText.isEmpty
+            ? audiobookManager.audiobooks
+            : audiobookManager.searchAudiobooks(query: searchText)
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
             switch filterOption {
@@ -84,6 +87,17 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
+                TextField(
+                    NSLocalizedString("Search your audiobooks", comment: "Library search field prompt"),
+                    text: $searchText
+                )
+                .textFieldStyle(.roundedBorder)
+                .textInputAutocapitalization(.never)
+                .autocorrectionDisabled()
+                .accessibilityIdentifier(AccessibilityIdentifiers.Library.searchBar)
+                .padding(.horizontal)
+                .padding(.top, 8)
+
                 if viewMode == .list {
                     listModeContent
                 } else {
@@ -94,7 +108,8 @@ struct LibraryView: View {
             .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
             .navigationBarTitleDisplayMode(.large)
             .overlay {
-                if audiobookManager.isImporting {
+                // The import-style question comes first: no spinner behind it, and its buttons stay live.
+                if audiobookManager.isImporting && audiobookManager.folderImportPrompt == nil {
                     ZStack {
                         Color.black.opacity(0.35).ignoresSafeArea()
                         VStack(spacing: 12) {
@@ -110,7 +125,7 @@ struct LibraryView: View {
                     .transition(.opacity)
                 }
             }
-            .disabled(audiobookManager.isImporting)
+            .disabled(audiobookManager.isImporting && audiobookManager.folderImportPrompt == nil)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingImporter = true }) {
@@ -187,6 +202,43 @@ struct LibraryView: View {
             .disabled(newAudiobookTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         } message: {
             Text(String(format: NSLocalizedString("Enter a new title for '%@'", comment: "Alert message for renaming"), audiobookToRename?.title ?? ""))
+        }
+        .alert(
+            NSLocalizedString("Import Folder", comment: "Folder import style alert title"),
+            isPresented: Binding(
+                get: { audiobookManager.folderImportPrompt != nil },
+                set: { if !$0 { audiobookManager.folderImportPrompt?.respond(false) } }
+            ),
+            presenting: audiobookManager.folderImportPrompt
+        ) { prompt in
+            Button(NSLocalizedString("One Audiobook", comment: "Import folder as a single audiobook")) {
+                prompt.respond(false)
+            }
+            Button(NSLocalizedString("Separate Audiobooks", comment: "Import each file as its own audiobook")) {
+                prompt.respond(true)
+            }
+        } message: { prompt in
+            Text(String(
+                format: NSLocalizedString(
+                    "'%@' contains %d audio files. Import them as one audiobook with chapters, or as separate audiobooks?",
+                    comment: "Folder import style alert message"
+                ),
+                prompt.folderName,
+                prompt.fileCount
+            ))
+        }
+        .alert(
+            NSLocalizedString("Import Failed", comment: "Import error alert title"),
+            isPresented: Binding(
+                get: { audiobookManager.importErrorMessage != nil },
+                set: { if !$0 { audiobookManager.importErrorMessage = nil } }
+            )
+        ) {
+            Button(NSLocalizedString("OK", comment: "Dismiss alert button"), role: .cancel) {
+                audiobookManager.importErrorMessage = nil
+            }
+        } message: {
+            Text(audiobookManager.importErrorMessage ?? "")
         }
     }
 }

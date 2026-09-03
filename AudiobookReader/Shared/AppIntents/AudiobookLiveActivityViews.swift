@@ -11,7 +11,7 @@ struct AudiobookLiveActivityView: View {
         VStack(spacing: 12) {
             HStack(spacing: 12) {
                 // Cover art
-                if let coverImageData = context.state.coverImageData,
+                if let coverImageData = NowPlayingSharedStore.coverImageData(),
                    let coverImage = UIImage(data: coverImageData) {
                     Image(uiImage: coverImage)
                         .resizable()
@@ -63,8 +63,14 @@ struct AudiobookLiveActivityView: View {
             
             // Progress bar with time
             VStack(spacing: 6) {
-                ProgressView(value: context.state.progress)
-                    .progressViewStyle(LinearProgressViewStyle())
+                Group {
+                    if context.state.isPlaying {
+                        ProgressView(timerInterval: context.state.playbackDateInterval, countsDown: false)
+                    } else {
+                        ProgressView(value: context.state.progress)
+                    }
+                }
+                .progressViewStyle(LinearProgressViewStyle())
                     .tint(.accentColor)
                 
                 HStack {
@@ -99,7 +105,7 @@ struct AudiobookExpandedView: View {
         VStack(spacing: 16) {
             // Top section with cover and info
             HStack(spacing: 12) {
-                if let coverImageData = context.state.coverImageData,
+                if let coverImageData = NowPlayingSharedStore.coverImageData(),
                    let coverImage = UIImage(data: coverImageData) {
                     Image(uiImage: coverImage)
                         .resizable()
@@ -152,8 +158,14 @@ struct AudiobookExpandedView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                ProgressView(value: context.state.progress)
-                    .progressViewStyle(LinearProgressViewStyle())
+                Group {
+                    if context.state.isPlaying {
+                        ProgressView(timerInterval: context.state.playbackDateInterval, countsDown: false)
+                    } else {
+                        ProgressView(value: context.state.progress)
+                    }
+                }
+                .progressViewStyle(LinearProgressViewStyle())
                     .tint(.accentColor)
                 
                 // Playback controls

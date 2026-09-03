@@ -70,10 +70,6 @@ class WhisperTranscriptionManager: ObservableObject {
         }
         
         do {
-            // Get audio duration for progress calculation
-            let asset = AVURLAsset(url: audioURL)
-            let audioDuration = try await asset.load(.duration).seconds
-            
             // Start transcription using simplified API
             let result = try await whisperKit.transcribe(audioPath: audioURL.path)
             
@@ -85,18 +81,11 @@ class WhisperTranscriptionManager: ObservableObject {
                 transcriptionProgress = 1.0
             }
             
-            let finalTranscription = result.first?.text ?? ""
-            var segments: [TranscriptionSegment] = []
-            
-            // In a full implementation, you would extract segments from result segments
-            // For now, create a simple segment covering the entire audio
-            if !finalTranscription.isEmpty {
-                segments = [TranscriptionSegment(
-                    text: finalTranscription,
-                    start: 0.0,
-                    end: audioDuration
-                )]
-            }
+            let whisperResult = result.first
+            let finalTranscription = whisperResult?.text ?? ""
+            let segments = Self.makeSegments(
+                whisperResult?.segments.map { ($0.text, $0.start, $0.end) } ?? []
+            )
             
             await MainActor.run {
                 currentTranscription = finalTranscription
@@ -108,12 +97,26 @@ class WhisperTranscriptionManager: ObservableObject {
             return TranscriptionResult(
                 text: finalTranscription,
                 segments: segments,
-                language: themeManager.transcriptionLanguage.rawValue
+                language: whisperResult?.language ?? themeManager.transcriptionLanguage.rawValue
             )
             
         } catch {
             print("❌ WhisperTranscriptionManager: Transcription error: \(error)")
             throw WhisperTranscriptionError.transcriptionFailed(error)
+        }
+    }
+
+    static func makeSegments(_ segments: [(text: String, start: Float, end: Float)]) -> [TranscriptionSegment] {
+        segments.compactMap { segment in
+            guard segment.start.isFinite,
+                  segment.end.isFinite,
+                  segment.start >= 0,
+                  segment.end >= segment.start else { return nil }
+            return TranscriptionSegment(
+                text: segment.text,
+                start: Double(segment.start),
+                end: Double(segment.end)
+            )
         }
     }
     
@@ -156,7 +159,7 @@ struct TranscriptionResult {
     let language: String
 }
 
-struct TranscriptionSegment: Codable {
+struct TranscriptionSegment: Codable, Equatable {
     let text: String
     let start: Double
     let end: Double

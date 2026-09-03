@@ -56,6 +56,7 @@ struct LibraryHeaderView: View {
                 .background(Color.accentColor.opacity(0.1))
                 .cornerRadius(8)
             }
+            .accessibilityIdentifier(AccessibilityIdentifiers.Library.sortButton)
 
             Spacer()
 
@@ -69,6 +70,12 @@ struct LibraryHeaderView: View {
                     .font(.title3)
                     .foregroundColor(.accentColor)
             }
+            .accessibilityLabel(
+                viewMode == .list
+                    ? NSLocalizedString("Show Grid", comment: "Switch library to grid")
+                    : NSLocalizedString("Show List", comment: "Switch library to list")
+            )
+            .accessibilityIdentifier(AccessibilityIdentifiers.Library.viewModeToggle)
         }
     }
 }

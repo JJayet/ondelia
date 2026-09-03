@@ -4,38 +4,32 @@ import Combine
 import Foundation
 
 // MARK: - App Intents for Controls
-struct PlayPauseIntent: AudioIntent {
+struct PlayPauseIntent: AudioIntent, AudioPlaybackIntent {
     static var title: LocalizedStringResource = "Play/Pause"
     static var description = IntentDescription("Toggle playback")
     
     func perform() async throws -> some IntentResult {
-        // Use the shared store to communicate with the main app
-//        if let data = NowPlayingSharedStore.read() {
-//            // Send notification to main app to toggle playback
-//            NotificationCenter.default.post(name: .togglePlaybackFromWidget, object: nil)
-//        }
+        NowPlayingSharedStore.send(.toggle)
         return .result()
     }
 }
 
-struct SkipForwardIntent: AudioIntent {
+struct SkipForwardIntent: AudioIntent, AudioPlaybackIntent {
     static var title: LocalizedStringResource = "Skip Forward"
     static var description = IntentDescription("Skip forward 15 seconds")
     
     func perform() async throws -> some IntentResult {
-        // Send notification to main app to skip forward
-        NotificationCenter.default.post(name: .skipForwardFromWidget, object: nil)
+        NowPlayingSharedStore.send(.skipForward)
         return .result()
     }
 }
 
-struct SkipBackwardIntent: AudioIntent {
+struct SkipBackwardIntent: AudioIntent, AudioPlaybackIntent {
     static var title: LocalizedStringResource = "Skip Backward"  
     static var description = IntentDescription("Skip backward 15 seconds")
     
     func perform() async throws -> some IntentResult {
-        // Send notification to main app to skip backward
-        NotificationCenter.default.post(name: .skipBackwardFromWidget, object: nil)
+        NowPlayingSharedStore.send(.skipBackward)
         return .result()
     }
 }
@@ -89,11 +83,4 @@ class LiveActivityManager: ObservableObject {
             print("🛑 Live Activity ended")
         }
     }
-}
-
-// MARK: - Notification Names
-extension Notification.Name {
-    static let togglePlaybackFromWidget = Notification.Name("togglePlaybackFromWidget")
-    static let skipForwardFromWidget = Notification.Name("skipForwardFromWidget") 
-    static let skipBackwardFromWidget = Notification.Name("skipBackwardFromWidget")
 }

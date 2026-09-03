@@ -21,42 +21,51 @@ extension AudiobookManager {
             return
         }
         
-        // Create audiobook entity (single file, not folder)
+        // Create the model on the main context so it can be safely presented and edited by SwiftUI.
         do {
-            let bg = swiftDataController.backgroundContext()
-            let audiobook = AudiobookModel(
-                title: cueFile.title ?? metadata.title,
-                author: cueFile.performer ?? metadata.author,
-                narrator: metadata.narrator,
-                fileURL: localURL.path,
-                duration: metadata.duration,
-                currentPosition: 0,
-                isFinished: false,
-                coverImageData: nil,
-                dateAdded: Date(),
-                lastPlayed: Date.distantPast
-            )
-            if let coverImage = metadata.coverImage {
-                audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
-            }
-            for (index, track) in cueFile.tracks.enumerated() {
-                let endTime = (index + 1 < cueFile.tracks.count) ? cueFile.tracks[index + 1].startTime : metadata.duration
-                let chapter = ChapterModel(
-                    title: track.title,
-                    chapterNumber: Int16(track.number),
-                    startTime: track.startTime,
-                    endTime: endTime
+            try await MainActor.run {
+                let context = swiftDataController.context
+                let audiobook = AudiobookModel(
+                    title: cueFile.title ?? metadata.title,
+                    author: cueFile.performer ?? metadata.author,
+                    narrator: metadata.narrator,
+                    fileURL: localURL.path,
+                    duration: metadata.duration,
+                    currentPosition: 0,
+                    isFinished: false,
+                    coverImageData: metadata.coverImage?.jpegData(compressionQuality: 0.8),
+                    dateAdded: Date(),
+                    lastPlayed: Date.distantPast
                 )
-                chapter.audiobook = audiobook
-                bg.insert(chapter)
+                context.insert(audiobook)
+                for (index, track) in cueFile.tracks.enumerated() {
+                    let endTime = (index + 1 < cueFile.tracks.count)
+                        ? cueFile.tracks[index + 1].startTime
+                        : metadata.duration
+                    let chapter = ChapterModel(
+                        title: track.title,
+                        chapterNumber: Int16(track.number),
+                        startTime: track.startTime,
+                        endTime: endTime
+                    )
+                    chapter.audiobook = audiobook
+                    context.insert(chapter)
+                }
+                try context.save()
+                fetchAudiobooks()
             }
-            bg.insert(audiobook)
-            try? bg.save()
+        } catch {
+            try? FileManager.default.removeItem(at: localURL)
+            reportImportFailure(error)
         }
-        await MainActor.run { fetchAudiobooks() }
     }
     
-    func importAudiobook(from url: URL) async {
+    /// Imports one audio file.
+    /// - Parameters:
+    ///   - fallbackCover: used when the file carries no artwork of its own.
+    ///   - inCoverBatch: when true the audiobook joins `coverBatch` instead of raising the cover
+    ///     picker on its own, so a folder split into many books only asks once, at the end.
+    func importAudiobook(from url: URL, fallbackCover: UIImage? = nil, inCoverBatch: Bool = false) async {
         await MainActor.run { isImporting = true }
         
         print("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
@@ -110,39 +119,53 @@ extension AudiobookManager {
         // Extract chapters
         let chapterInfos = await MetadataExtractor.extractChapters(from: localURL)
         
-        // Create audiobook entity
+        // Create the model on the main context so cover selection never crosses contexts.
         do {
-            let bg = swiftDataController.backgroundContext()
-            let audiobook = AudiobookModel(
-                title: metadata.title,
-                author: metadata.author,
-                narrator: metadata.narrator,
-                fileURL: localURL.path,
-                duration: metadata.duration,
-                currentPosition: 0,
-                isFinished: false,
-                coverImageData: nil,
-                dateAdded: Date(),
-                lastPlayed: Date.distantPast
-            )
-            if let coverImage = metadata.coverImage {
-                audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
-            } else {
-                await MainActor.run { self.audiobookNeedingCover = audiobook }
-            }
-            for chapterInfo in chapterInfos {
-                let chapter = ChapterModel(
-                    title: chapterInfo.title,
-                    chapterNumber: Int16(chapterInfo.chapterNumber),
-                    startTime: chapterInfo.startTime,
-                    endTime: chapterInfo.endTime
+            try await MainActor.run {
+                let context = swiftDataController.context
+                let coverImage = metadata.coverImage ?? fallbackCover
+                let audiobook = AudiobookModel(
+                    title: metadata.title,
+                    author: metadata.author,
+                    narrator: metadata.narrator,
+                    fileURL: localURL.path,
+                    duration: metadata.duration,
+                    currentPosition: 0,
+                    isFinished: false,
+                    coverImageData: coverImage?.jpegData(compressionQuality: 0.8),
+                    dateAdded: Date(),
+                    lastPlayed: Date.distantPast
                 )
-                chapter.audiobook = audiobook
-                bg.insert(chapter)
+                context.insert(audiobook)
+                for chapterInfo in chapterInfos {
+                    let chapter = ChapterModel(
+                        title: chapterInfo.title,
+                        chapterNumber: Int16(chapterInfo.chapterNumber),
+                        startTime: chapterInfo.startTime,
+                        endTime: chapterInfo.endTime
+                    )
+                    chapter.audiobook = audiobook
+                    context.insert(chapter)
+                }
+                try context.save()
+                if inCoverBatch {
+                    coverBatch.append(audiobook)
+                } else if coverImage == nil {
+                    audiobookNeedingCover = audiobook
+                }
+                fetchAudiobooks()
             }
-            bg.insert(audiobook)
-            try? bg.save()
+        } catch {
+            try? FileManager.default.removeItem(at: localURL)
+            reportImportFailure(error)
         }
-        await MainActor.run { fetchAudiobooks() }
+    }
+
+    @MainActor
+    private func reportImportFailure(_ error: Error) {
+        importErrorMessage = String(
+            format: NSLocalizedString("The audiobook could not be saved: %@", comment: "Import persistence error"),
+            error.localizedDescription
+        )
     }
 }

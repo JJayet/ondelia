@@ -17,6 +17,7 @@ var mockAudioURL: URL {
 }
 
 @MainActor
+@Suite(.serialized)
 struct AudioEngineTests {
     
     // MARK: - Initialization Tests
@@ -34,18 +35,16 @@ struct AudioEngineTests {
     @Test("AudioEngine should properly deinitialize and cleanup")
     func audioEngineDeinitialization() async throws {
         var audioEngine: AudioEngine? = AudioEngine()
-        let weakRef = audioEngine
+        weak var weakRef = audioEngine
         
         // Load audio to initialize internal state
         audioEngine?.loadAudio(url: mockAudioURL)
         
-        // Wait a moment for async operations
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
+        #expect(await waitUntil { audioEngine?.player != nil })
         
         audioEngine = nil
         
-        // Verify cleanup
-        #expect(weakRef?.isPlaying == false)
+        #expect(await waitUntil { weakRef == nil })
     }
     
     // MARK: - Audio Loading Tests
@@ -59,8 +58,7 @@ struct AudioEngineTests {
         
         audioEngine.loadAudio(url: audioURL)
         
-        // Wait for async loading
-        try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
+        #expect(await waitUntil { audioEngine.duration > 30 })
         
         // Verify initial state after loading
         #expect(audioEngine.isPlaying == false)
@@ -76,12 +74,10 @@ struct AudioEngineTests {
         
         audioEngine.loadAudio(url: invalidURL)
         
-        // Wait for async loading attempt
-        try await Task.sleep(nanoseconds: 500_000_000) // 0.5 seconds
-        
         // Should not crash and maintain safe state
         #expect(audioEngine.isPlaying == false)
         #expect(audioEngine.currentTime == 0)
+        #expect(audioEngine.player == nil)
     }
     
     // MARK: - Playback Control Tests
@@ -91,15 +87,11 @@ struct AudioEngineTests {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        // Wait for loading
-        try await Task.sleep(nanoseconds: 300_000_000) // 0.3 seconds
+        #expect(await waitUntil { audioEngine.player != nil })
         
         audioEngine.play()
         
-        // Wait for play state change
-        try await Task.sleep(nanoseconds: 100_000_000) // 0.1 seconds
-        
-        #expect(audioEngine.isPlaying == true)
+        #expect(await waitUntil { audioEngine.isPlaying })
     }
     
     @Test("AudioEngine should handle pause command")
@@ -107,18 +99,13 @@ struct AudioEngineTests {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        // Wait for loading
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         audioEngine.play()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        #expect(audioEngine.isPlaying == true)
+        #expect(await waitUntil { audioEngine.isPlaying })
         
         audioEngine.pause()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        #expect(audioEngine.isPlaying == false)
+        #expect(await waitUntil { !audioEngine.isPlaying })
     }
     
     // MARK: - Seek Operation Tests
@@ -128,16 +115,13 @@ struct AudioEngineTests {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        // Wait for loading
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // Test seeking to specific time
         audioEngine.seek(to: 1000.0) // 16:40
-        try await Task.sleep(nanoseconds: 200_000_000)
-        
-        // Note: In real implementation, currentTime would update
-        // For testing, we verify the seek operation was called without error
-        #expect(audioEngine.currentTime >= 0) // Should not be negative
+        #expect(await waitUntil {
+            (audioEngine.player?.currentTime().seconds ?? 0) >= 999
+        })
     }
     
     @Test("AudioEngine should handle skip forward")
@@ -145,15 +129,13 @@ struct AudioEngineTests {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.duration > 30 })
         
         let initialTime = audioEngine.currentTime
         audioEngine.skipForward(30) // Skip 30 seconds
-        
-        try await Task.sleep(nanoseconds: 200_000_000)
-        
-        // Verify skip was attempted (exact time may vary due to async nature)
-        #expect(audioEngine.currentTime >= initialTime)
+        #expect(await waitUntil {
+            (audioEngine.player?.currentTime().seconds ?? 0) >= initialTime + 29
+        })
     }
     
     @Test("AudioEngine should handle skip backward")
@@ -161,16 +143,18 @@ struct AudioEngineTests {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // First seek to a position where we can skip backward
         audioEngine.seek(to: 60.0)
-        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(await waitUntil {
+            (audioEngine.player?.currentTime().seconds ?? 0) >= 59
+        })
         
         audioEngine.skipBackward(30)
-        try await Task.sleep(nanoseconds: 200_000_000)
-        
-        // Should not go below 0
-        #expect(audioEngine.currentTime >= 0)
+        #expect(await waitUntil {
+            let time = audioEngine.player?.currentTime().seconds ?? .infinity
+            return time >= 29 && time <= 31
+        })
     }
 }

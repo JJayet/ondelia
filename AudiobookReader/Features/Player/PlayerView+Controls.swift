@@ -21,6 +21,8 @@ extension PlayerView {
                 .font(.title)
                 .foregroundColor(.primaryText)
             }
+            .accessibilityLabel(NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipBackwardButton)
 
             Button {
                 withHapticFeedback(.medium) {
@@ -56,6 +58,12 @@ extension PlayerView {
             }
             .frame(width: 80, height: 80)
             .disabled(audioManager.playbackState == .loading)
+            .accessibilityLabel(
+                viewModel.isPlaying
+                    ? NSLocalizedString("Pause", comment: "Pause playback accessibility label")
+                    : NSLocalizedString("Play", comment: "Play playback accessibility label")
+            )
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.playPauseButton)
 
             Button {
                 let skipInterval = themeManager.skipInterval.seconds
@@ -72,6 +80,8 @@ extension PlayerView {
                 .font(.title)
                 .foregroundColor(.primaryText)
             }
+            .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipForwardButton)
         }
     }
 
@@ -91,13 +101,19 @@ extension PlayerView {
             .font(.caption)
             .foregroundColor(.secondaryText)
 
-            HStack(spacing: 8) {
+            Menu {
                 speedButton(for: 0.75)
                 speedButton(for: 1.0)
                 speedButton(for: 1.25)
                 speedButton(for: 1.5)
                 speedButton(for: 2.0)
+            } label: {
+                Label(String(format: "%.2fx", viewModel.playbackRate), systemImage: "speedometer")
+                    .font(.caption.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
             }
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.speedControl)
         }
     }
 
@@ -113,19 +129,7 @@ extension PlayerView {
                 }
             }
         }
-        .font(.caption)
         .fontWeight(isSelected ? .bold : .regular)
-        .padding(.horizontal, 12)
-        .padding(.vertical, 6)
-        .background {
-            if isSelected {
-                Color.accentColor
-            } else {
-                Color.clear
-            }
-        }
-        .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-        .foregroundColor(isSelected ? .white : .primaryText)
     }
 
     // MARK: - Action Buttons
@@ -138,7 +142,8 @@ extension PlayerView {
                     "Bookmarks",
                     comment: "Bookmarks button title"
                 ),
-                count: bookmarks.count
+                count: bookmarks.count,
+                accessibilityIdentifier: AccessibilityIdentifiers.Player.bookmarksButton
             ) {
                 showingBookmarks = true
             }

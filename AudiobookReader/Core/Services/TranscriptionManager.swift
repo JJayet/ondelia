@@ -66,7 +66,15 @@ class TranscriptionManager: ObservableObject {
             throw TranscriptionError.chapterNotFound
         }
         
-        let currentChapterURL = folderURL.appendingPathComponent(chapterFiles[currentChapterIndex])
+        let currentChapterURL: URL
+        do {
+            currentChapterURL = try SafeImportPath.existingFileURL(
+                for: chapterFiles[currentChapterIndex],
+                inside: folderURL
+            )
+        } catch {
+            throw TranscriptionError.chapterNotFound
+        }
         
         if let existingResult = await MainActor.run(body: { getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: Int16(currentChapterIndex)) }) {
             print("📖 TranscriptionManager: Using cached transcription")
@@ -117,21 +125,23 @@ class TranscriptionManager: ObservableObject {
 
     @MainActor private func getCachedTranscriptionResult(audiobookID: UUID, chapterIndex: Int16) -> TranscriptionResult? {
         let context = swiftDataController.context
-        let descriptor = FetchDescriptor<ChapterTranscriptionModel>()
-        
-        // Fetch all transcriptions and filter in memory to avoid complex predicate issues
-        let allTranscriptions: [ChapterTranscriptionModel]
+        var descriptor = FetchDescriptor<ChapterTranscriptionModel>(
+            predicate: #Predicate { transcription in
+                transcription.chapterIndex == chapterIndex
+                    && transcription.audiobook?.id == audiobookID
+            }
+        )
+        descriptor.fetchLimit = 1
+
+        let matches: [ChapterTranscriptionModel]
         do {
-            allTranscriptions = try context.fetch(descriptor)
+            matches = try context.fetch(descriptor)
         } catch {
             print("❌ TranscriptionManager: Error fetching transcriptions: \(error)")
             return nil
         }
         
-        // Filter in memory
-        guard let cached = allTranscriptions.first(where: { 
-            $0.chapterIndex == chapterIndex && $0.audiobook?.id == audiobookID 
-        }),
+        guard let cached = matches.first,
               let text = cached.transcriptionText else {
             return nil
         }
@@ -165,11 +175,15 @@ class TranscriptionManager: ObservableObject {
         let context = swiftDataController.context
         
         // Remove existing transcription if any
-        let allDescriptor = FetchDescriptor<ChapterTranscriptionModel>()
-        if let allTranscriptions = try? context.fetch(allDescriptor),
-           let existingTranscription = allTranscriptions.first(where: { 
-               $0.chapterIndex == chapterIndex && $0.audiobook?.id == audiobook.id 
-           }) {
+        let audiobookID = audiobook.id
+        var existingDescriptor = FetchDescriptor<ChapterTranscriptionModel>(
+            predicate: #Predicate { transcription in
+                transcription.chapterIndex == chapterIndex
+                    && transcription.audiobook?.id == audiobookID
+            }
+        )
+        existingDescriptor.fetchLimit = 1
+        if let existingTranscription = try? context.fetch(existingDescriptor).first {
             context.delete(existingTranscription)
         }
         

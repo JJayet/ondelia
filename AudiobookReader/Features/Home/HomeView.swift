@@ -8,7 +8,7 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var audiobookManager = AudiobookManager.shared
-    @StateObject private var statistics = ReadingStatistics()
+    @StateObject private var statistics = ReadingStatistics.shared
     @StateObject private var themeManager = ThemeManager.shared
     @State private var selectedAudiobook: AudiobookModel?
     @Environment(\.setTabSelection) private var setTabSelection

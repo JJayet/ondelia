@@ -16,15 +16,26 @@ struct AudiobookLiveActivityAttributes: ActivityAttributes {
         var duration: TimeInterval
         var isPlaying: Bool
         var playbackRate: Float
-        var coverImageData: Data?
+        var updatedAt: Date
         
         var progress: Double {
             guard duration > 0 else { return 0 }
-            return currentTime / duration
+            return effectiveCurrentTime / duration
+        }
+
+        var effectiveCurrentTime: TimeInterval {
+            let elapsed = isPlaying ? max(Date().timeIntervalSince(updatedAt), 0) * Double(playbackRate) : 0
+            return min(max(currentTime + elapsed, 0), duration)
+        }
+
+        var playbackDateInterval: ClosedRange<Date> {
+            let rate = max(Double(playbackRate), 0.01)
+            let start = updatedAt.addingTimeInterval(-currentTime / rate)
+            return start...start.addingTimeInterval(duration / rate)
         }
         
         var formattedCurrentTime: String {
-            return formatTime(currentTime)
+            return formatTime(effectiveCurrentTime)
         }
         
         var formattedDuration: String {
@@ -32,7 +43,7 @@ struct AudiobookLiveActivityAttributes: ActivityAttributes {
         }
         
         var remainingTime: TimeInterval {
-            return duration - currentTime
+            return duration - effectiveCurrentTime
         }
         
         var formattedRemainingTime: String {
@@ -83,7 +94,7 @@ struct AudiobookCompactLeadingView: View {
     let context: ActivityViewContext<AudiobookLiveActivityAttributes>
     
     var body: some View {
-        if let coverImageData = context.state.coverImageData,
+        if let coverImageData = NowPlayingSharedStore.coverImageData(),
            let coverImage = UIImage(data: coverImageData) {
             Image(uiImage: coverImage)
                 .resizable()

@@ -137,10 +137,7 @@ struct PlayerView: View {
                 viewModel.setSleepTimer(1800)
             }
             Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
-                viewModel.setSleepTimerEndOfChapter(
-                    currentChapter: viewModel.currentChapter,
-                    currentTime: viewModel.currentTime
-                )  // Use @Published property directly
+                viewModel.setSleepTimerEndOfChapter()
             }
             Button(
                 NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),

@@ -14,7 +14,8 @@ struct MiniPlayerBar: View {
     }
 
     var body: some View {
-        HStack(spacing: 12) {
+        VStack(spacing: 4) {
+            HStack(spacing: 12) {
             // Cover
             (cover ?? Image(systemName: "book.closed"))
                 .resizable()
@@ -63,17 +64,35 @@ struct MiniPlayerBar: View {
                         }
                     }
                 }
+                .accessibilityLabel(isPlaying ? NSLocalizedString("Pause", comment: "Pause playback") : NSLocalizedString("Play", comment: "Play playback"))
+                .accessibilityIdentifier(AccessibilityIdentifiers.MiniPlayer.playPauseButton)
                 Button {
                     audio.skipForward(15)
                 } label: {
                     Image(systemName: "goforward.15")
                 }
+                Button {
+                    audio.stopPlayback()
+                } label: {
+                    Image(systemName: "xmark")
+                }
+                .accessibilityLabel(NSLocalizedString("Close Player", comment: "Close mini player"))
+                .accessibilityIdentifier(AccessibilityIdentifiers.MiniPlayer.closeButton)
             }
             .font(.title3)
+            }
+
+            ProgressView(
+                value: min(max(audio.getCurrentTime(), 0), max(audio.getDuration(), 1)),
+                total: max(audio.getDuration(), 1)
+            )
+            .accessibilityIdentifier(AccessibilityIdentifiers.MiniPlayer.progressBar)
         }
         .padding(.horizontal, 16)
         .safeAreaPadding(.vertical, 6)
         .glassEffect(.clear)
+        .accessibilityElement(children: .contain)
+        .accessibilityIdentifier(AccessibilityIdentifiers.MiniPlayer.container)
     }
 }
 

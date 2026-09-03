@@ -70,6 +70,15 @@ extension AudioEngine {
     func loadAudio(url: URL) {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
+
+        guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
+            DispatchQueue.main.async { [weak self] in
+                self?.isPlaying = false
+                self?.currentTime = 0
+                self?.duration = 0
+            }
+            return
+        }
         
         // Setup audio session once; flag is set inside on success so failures retry next load
         if !hasSetupAudioSession {
@@ -110,9 +119,9 @@ extension AudioEngine {
     // MARK: - Playback Controls
     func play() {
         audioQueue.async { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, let player = self.player else { return }
             
-            self.player?.play()
+            player.play()
             
             DispatchQueue.main.async {
                 self.isPlaying = true
@@ -178,6 +187,7 @@ extension AudioEngine {
     }
     
     func setPlaybackRate(_ rate: Float) {
+        guard rate.isFinite, rate > 0 else { return }
         audioQueue.async { [weak self] in
             guard let self = self else { return }
             

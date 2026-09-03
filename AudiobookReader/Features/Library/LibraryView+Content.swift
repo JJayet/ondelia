@@ -98,6 +98,7 @@ extension LibraryView {
                             ], spacing: 16) {
                                 ForEach(filteredAudiobooks, id: \.id) { audiobook in
                                     AudiobookGridItemView(audiobook: audiobook) { playAndPresent(audiobook) }
+                                    .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
                                     .contextMenu {
                                         Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                             audiobookToRename = audiobook
@@ -138,6 +139,7 @@ extension LibraryView {
     @ViewBuilder
     func libraryRow(audiobook: AudiobookModel) -> some View {
         EnhancedAudiobookRowView(audiobook: audiobook) { playAndPresent(audiobook) }
+            .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))

@@ -9,11 +9,11 @@ enum AppTheme: Int, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .system: return "System"
-        case .light: return "Light"
-        case .dark: return "Dark"
-        case .sepia: return "Sepia"
-        case .dim: return "Dim"
+        case .system: return NSLocalizedString("System", comment: "System appearance theme")
+        case .light: return NSLocalizedString("Light", comment: "Light appearance theme")
+        case .dark: return NSLocalizedString("Dark", comment: "Dark appearance theme")
+        case .sepia: return NSLocalizedString("Sepia", comment: "Sepia appearance theme")
+        case .dim: return NSLocalizedString("Dim", comment: "Dim appearance theme")
         }
     }
     
@@ -38,12 +38,12 @@ enum AccentColor: Int, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .blue: return "Blue"
-        case .green: return "Green"
-        case .orange: return "Orange"
-        case .purple: return "Purple"
-        case .red: return "Red"
-        case .teal: return "Teal"
+        case .blue: return NSLocalizedString("Blue", comment: "Blue accent color")
+        case .green: return NSLocalizedString("Green", comment: "Green accent color")
+        case .orange: return NSLocalizedString("Orange", comment: "Orange accent color")
+        case .purple: return NSLocalizedString("Purple", comment: "Purple accent color")
+        case .red: return NSLocalizedString("Red", comment: "Red accent color")
+        case .teal: return NSLocalizedString("Teal", comment: "Teal accent color")
         }
     }
     
@@ -101,7 +101,11 @@ enum TranscriptionEngine: Int, CaseIterable {
     
     var description: String {
         switch self {
-        case .whisperKit: return "On-device AI transcription with timestamps and translation"
+        case .whisperKit:
+            return NSLocalizedString(
+                "On-device AI transcription with timestamps and translation",
+                comment: "WhisperKit transcription engine description"
+            )
         }
     }
 }
@@ -115,21 +119,21 @@ enum WhisperModel: String, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .tiny: return "Tiny"
-        case .base: return "Base"
-        case .small: return "Small"
-        case .medium: return "Medium"
-        case .largeV3: return "Large v3"
+        case .tiny: return NSLocalizedString("Tiny", comment: "Tiny Whisper model")
+        case .base: return NSLocalizedString("Base", comment: "Base Whisper model")
+        case .small: return NSLocalizedString("Small", comment: "Small Whisper model")
+        case .medium: return NSLocalizedString("Medium", comment: "Medium Whisper model")
+        case .largeV3: return NSLocalizedString("Large v3", comment: "Large Whisper model")
         }
     }
     
     var description: String {
         switch self {
-        case .tiny: return "Fastest (~39 MB) - Basic accuracy"
-        case .base: return "Balanced (~74 MB) - Good accuracy"
-        case .small: return "Better (~244 MB) - High accuracy"
-        case .medium: return "High (~769 MB) - Very high accuracy"
-        case .largeV3: return "Best (~1550 MB) - Highest accuracy"
+        case .tiny: return NSLocalizedString("Fastest (~39 MB) - Basic accuracy", comment: "Tiny model description")
+        case .base: return NSLocalizedString("Balanced (~74 MB) - Good accuracy", comment: "Base model description")
+        case .small: return NSLocalizedString("Better (~244 MB) - High accuracy", comment: "Small model description")
+        case .medium: return NSLocalizedString("High (~769 MB) - Very high accuracy", comment: "Medium model description")
+        case .largeV3: return NSLocalizedString("Best (~1550 MB) - Highest accuracy", comment: "Large model description")
         }
     }
     
@@ -177,15 +181,15 @@ enum TranscriptionLanguage: String, CaseIterable {
     
     var displayName: String {
         switch self {
-        case .english: return "English"
-        case .spanish: return "Spanish"
-        case .french: return "French"
-        case .german: return "German"
-        case .italian: return "Italian"
-        case .portuguese: return "Portuguese"
-        case .japanese: return "Japanese"
-        case .korean: return "Korean"
-        case .chinese: return "Chinese"
+        case .english: return NSLocalizedString("English", comment: "English language")
+        case .spanish: return NSLocalizedString("Spanish", comment: "Spanish language")
+        case .french: return NSLocalizedString("French", comment: "French language")
+        case .german: return NSLocalizedString("German", comment: "German language")
+        case .italian: return NSLocalizedString("Italian", comment: "Italian language")
+        case .portuguese: return NSLocalizedString("Portuguese", comment: "Portuguese language")
+        case .japanese: return NSLocalizedString("Japanese", comment: "Japanese language")
+        case .korean: return NSLocalizedString("Korean", comment: "Korean language")
+        case .chinese: return NSLocalizedString("Chinese", comment: "Chinese language")
         }
     }
     

@@ -11,6 +11,7 @@ import MediaPlayer
 @testable import AudiobookReader
 
 @MainActor
+@Suite(.serialized)
 struct AudioEngineTests_Part2 {
 
     // MARK: - Playback Rate Tests
@@ -20,16 +21,14 @@ struct AudioEngineTests_Part2 {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // Test various playback rates
         let testRates: [Float] = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0]
         
         for rate in testRates {
             audioEngine.setPlaybackRate(rate)
-            try await Task.sleep(nanoseconds: 100_000_000)
-            
-            #expect(audioEngine.playbackRate == rate)
+            #expect(await waitUntil { audioEngine.playbackRate == rate })
         }
     }
     
@@ -38,23 +37,20 @@ struct AudioEngineTests_Part2 {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // Test edge cases
         audioEngine.setPlaybackRate(0.25) // Very slow
-        try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(audioEngine.playbackRate == 0.25)
+        #expect(await waitUntil { audioEngine.playbackRate == 0.25 })
         
         audioEngine.setPlaybackRate(3.0) // Very fast
-        try await Task.sleep(nanoseconds: 100_000_000)
-        #expect(audioEngine.playbackRate == 3.0)
+        #expect(await waitUntil { audioEngine.playbackRate == 3.0 })
         
-        // Test invalid rates (should be handled gracefully)
+        // Invalid rates are ignored rather than forwarded to AVPlayer.
         audioEngine.setPlaybackRate(-1.0) // Negative rate
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
         audioEngine.setPlaybackRate(0.0) // Zero rate
-        try await Task.sleep(nanoseconds: 100_000_000)
+        await Task.yield()
+        #expect(audioEngine.playbackRate == 3.0)
     }
     
     // MARK: - Memory Management Tests
@@ -66,12 +62,16 @@ struct AudioEngineTests_Part2 {
         // Load first file
         let audioURL1 = TestDataFactory.createMockAudioFile(named: "test1", duration: 1800)
         audioEngine.loadAudio(url: audioURL1)
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil {
+            (audioEngine.playerItem?.asset as? AVURLAsset)?.url == audioURL1
+        })
         
         // Load second file (should replace first)
         let audioURL2 = TestDataFactory.createMockAudioFile(named: "test2", duration: 3600)
         audioEngine.loadAudio(url: audioURL2)
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil {
+            (audioEngine.playerItem?.asset as? AVURLAsset)?.url == audioURL2
+        })
         
         // Should still be in valid state
         #expect(audioEngine.isPlaying == false)
@@ -84,24 +84,22 @@ struct AudioEngineTests_Part2 {
         weak var weakEngine = audioEngine
         
         audioEngine?.loadAudio(url: mockAudioURL)
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine?.player != nil })
         
         audioEngine?.play()
-        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(await waitUntil { audioEngine?.isPlaying == true })
         
         audioEngine?.pause()
-        try await Task.sleep(nanoseconds: 100_000_000)
+        #expect(await waitUntil { audioEngine?.isPlaying == false })
         
         audioEngine?.seek(to: 500.0)
-        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(await waitUntil {
+            (audioEngine?.player?.currentTime().seconds ?? 0) >= 499
+        })
         
         audioEngine = nil
         
-        // Give time for cleanup
-        try await Task.sleep(nanoseconds: 200_000_000)
-        
-        // Should be deallocated
-        #expect(weakEngine == nil)
+        #expect(await waitUntil { weakEngine == nil })
     }
     
     // MARK: - Thread Safety Tests
@@ -111,7 +109,7 @@ struct AudioEngineTests_Part2 {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // Simulate concurrent operations
         await withTaskGroup(of: Void.self) { group in
@@ -119,7 +117,7 @@ struct AudioEngineTests_Part2 {
             group.addTask {
                 for _ in 0..<10 {
                     audioEngine.togglePlayback()
-                    try? await Task.sleep(nanoseconds: 10_000_000) // 0.01 seconds
+                    await Task.yield()
                 }
             }
             
@@ -127,7 +125,7 @@ struct AudioEngineTests_Part2 {
             group.addTask {
                 for i in 0..<10 {
                     audioEngine.seek(to: Double(i * 60)) // Seek to different positions
-                    try? await Task.sleep(nanoseconds: 10_000_000)
+                    await Task.yield()
                 }
             }
             
@@ -136,13 +134,12 @@ struct AudioEngineTests_Part2 {
                 let rates: [Float] = [1.0, 1.25, 1.5, 1.0]
                 for rate in rates {
                     audioEngine.setPlaybackRate(rate)
-                    try? await Task.sleep(nanoseconds: 25_000_000) // 0.025 seconds
+                    await Task.yield()
                 }
             }
         }
         
-        // Wait for all operations to complete
-        try await Task.sleep(nanoseconds: 200_000_000)
+        #expect(await waitUntil { audioEngine.playbackRate == 1.0 })
         
         // Engine should still be in a valid state
         #expect(audioEngine.playbackRate >= 0.5)
@@ -157,12 +154,10 @@ struct AudioEngineTests_Part2 {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         audioEngine.play()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        #expect(audioEngine.isPlaying == true)
+        #expect(await waitUntil { audioEngine.isPlaying })
         
         // Simulate audio interruption by manually calling the interruption handler
         let interruptionNotification = Notification(
@@ -175,11 +170,7 @@ struct AudioEngineTests_Part2 {
         
         NotificationCenter.default.post(interruptionNotification)
         
-        // Wait for interruption handling
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        // Should pause playback during interruption
-        #expect(audioEngine.isPlaying == false)
+        #expect(await waitUntil { !audioEngine.isPlaying })
     }
     
     // MARK: - Performance Tests
@@ -192,8 +183,7 @@ struct AudioEngineTests_Part2 {
         
         audioEngine.loadAudio(url: mockAudioURL)
         
-        // Wait for basic loading to complete
-        try await Task.sleep(nanoseconds: 500_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         let loadTime = CFAbsoluteTimeGetCurrent() - startTime
         
@@ -208,15 +198,15 @@ struct AudioEngineTests_Part2 {
         let audioEngine = AudioEngine()
         audioEngine.loadAudio(url: mockAudioURL)
         
-        try await Task.sleep(nanoseconds: 300_000_000)
+        #expect(await waitUntil { audioEngine.player != nil })
         
         // Rapid state changes
         for _ in 0..<20 {
             audioEngine.play()
-            try await Task.sleep(nanoseconds: 50_000_000) // 0.05 seconds
+            #expect(await waitUntil { audioEngine.isPlaying })
             
             audioEngine.pause()
-            try await Task.sleep(nanoseconds: 50_000_000)
+            #expect(await waitUntil { !audioEngine.isPlaying })
         }
         
         // Final state should be consistent

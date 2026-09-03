@@ -35,6 +35,17 @@ extension FolderImporter {
         return "Chapter \(index)"
     }
     
+    static let audioFileExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
+
+    /// Audio files directly inside `folderURL`, sorted by file name.
+    static func audioFiles(in folderURL: URL) -> [URL] {
+        let audioExtensions = audioFileExtensions
+        let contents = (try? FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.isRegularFileKey])) ?? []
+        return contents
+            .filter { audioExtensions.contains($0.pathExtension.lowercased()) }
+            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+    }
+
     static func findCoverImage(in folderURL: URL) async -> UIImage? {
         let imageExtensions = ["jpg", "jpeg", "png", "gif", "webp"]
         let commonNames = ["cover", "folder", "albumart", "front"]

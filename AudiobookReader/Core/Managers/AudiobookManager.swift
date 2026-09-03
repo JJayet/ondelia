@@ -2,6 +2,15 @@ import Foundation
 import SwiftData
 import UIKit
 
+/// Asks the user how a folder holding several audio files should be imported.
+struct FolderImportPrompt: Identifiable {
+    let id = UUID()
+    let folderName: String
+    let fileCount: Int
+    /// `true` imports each file as its own audiobook, `false` merges them into one.
+    let respond: (Bool) -> Void
+}
+
 class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     static let shared = AudiobookManager()
     let swiftDataController: SwiftDataController
@@ -13,8 +22,12 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     @Published var currentImportFileName: String? = nil
     @Published var isLoadingLibrary = false
     @Published var audiobookNeedingCover: AudiobookModel?
+    @Published var importErrorMessage: String?
+    @Published var folderImportPrompt: FolderImportPrompt?
     
     var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
+    /// Audiobooks split out of one folder: they all receive the cover picked for `audiobookNeedingCover`.
+    var coverBatch: [AudiobookModel] = []
 
     init(swiftDataController: SwiftDataController = .shared) {
         self.swiftDataController = swiftDataController
@@ -70,7 +83,12 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     // MARK: - Cover Image Management
     @MainActor
     func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
-        audiobook.coverImageData = image.jpegData(compressionQuality: 0.8)
+        let imageData = image.jpegData(compressionQuality: 0.8)
+        audiobook.coverImageData = imageData
+        for sibling in coverBatch where sibling.persistentModelID != audiobook.persistentModelID {
+            sibling.coverImageData = imageData
+        }
+        coverBatch.removeAll()
         swiftDataController.save()
         fetchAudiobooks()
         

@@ -25,6 +25,11 @@ protocol AudioManagerProtocol: ObservableObject {
     func skipForward(_ seconds: TimeInterval)
     func skipBackward(_ seconds: TimeInterval)
     func seek(to time: TimeInterval)
+
+    var sleepTimeRemaining: TimeInterval { get }
+    func setSleepTimer(_ seconds: TimeInterval)
+    func setSleepTimerEndOfChapter()
+    func cancelSleepTimer()
 }
 
 // MARK: - Theme Manager Protocol
@@ -82,9 +87,10 @@ class LiveDependencies: AudiobookDependencies {
     lazy var themeManager: any ThemeManagerProtocol = ThemeManager.shared
     lazy var audiobookManager: AudiobookManagerProtocol = AudiobookManager.shared
     lazy var swiftDataController: SwiftDataController = SwiftDataController.shared
+    private lazy var readingStatistics = ReadingStatistics.shared
     
     func createReadingStatistics() -> any ReadingStatisticsProtocol {
-        return ReadingStatistics()
+        return readingStatistics
     }
 }
 

@@ -4,6 +4,7 @@ struct PlayerActionButton: View {
     let icon: String
     let title: String
     var count: Int? = nil
+    var accessibilityIdentifier: String? = nil
     let action: () -> Void
     
     var body: some View {
@@ -32,5 +33,6 @@ struct PlayerActionButton: View {
             }
         }
         .buttonStyle(PlainButtonStyle())
+        .accessibilityIdentifier(accessibilityIdentifier ?? "")
     }
 }

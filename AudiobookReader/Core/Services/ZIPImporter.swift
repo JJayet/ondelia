@@ -2,6 +2,10 @@ import Foundation
 import ZIPFoundation
 
 class ZIPImporter {
+    static let maximumEntryCount = 10_000
+    static let maximumEntrySize: UInt64 = 4 * 1_024 * 1_024 * 1_024
+    static let maximumExpandedSize: UInt64 = 20 * 1_024 * 1_024 * 1_024
+    static let maximumCompressionRatio: UInt64 = 200
     
     static func importZIPFile(from zipURL: URL) async -> URL? {
         print("📦 ZIPImporter: Starting ZIP import from: \(zipURL.lastPathComponent)")
@@ -69,10 +73,38 @@ class ZIPImporter {
                     print("📊 ZIPImporter: Starting ZIP extraction...")
                     
                     var extractedCount = 0
+                    var expandedSize: UInt64 = 0
                     
                     // Extract all entries
                     for entry in archive {
-                        let entryDestinationURL = destinationURL.appendingPathComponent(entry.path)
+                        guard extractedCount < maximumEntryCount else {
+                            throw ZIPImportError.tooManyEntries
+                        }
+                        guard entry.type != .symlink else {
+                            throw ZIPImportError.symbolicLink(entry.path)
+                        }
+                        guard entry.uncompressedSize <= maximumEntrySize else {
+                            throw ZIPImportError.entryTooLarge(entry.path)
+                        }
+                        let (newExpandedSize, overflow) = expandedSize.addingReportingOverflow(entry.uncompressedSize)
+                        guard !overflow, newExpandedSize <= maximumExpandedSize else {
+                            throw ZIPImportError.archiveTooLarge
+                        }
+                        if entry.compressedSize == 0 {
+                            guard entry.uncompressedSize == 0 else {
+                                throw ZIPImportError.suspiciousCompression(entry.path)
+                            }
+                        } else {
+                            guard entry.uncompressedSize / entry.compressedSize <= maximumCompressionRatio else {
+                                throw ZIPImportError.suspiciousCompression(entry.path)
+                            }
+                        }
+
+                        let entryDestinationURL = try SafeImportPath.resolvedURL(
+                            for: entry.path,
+                            inside: destinationURL
+                        )
+                        expandedSize = newExpandedSize
                         
                         // Ensure the directory structure exists
                         let entryDirectory = entryDestinationURL.deletingLastPathComponent()
@@ -82,6 +114,7 @@ class ZIPImporter {
                         
                         // Skip if it's a directory entry
                         if entry.type == .directory {
+                            extractedCount += 1
                             continue
                         }
                         
@@ -196,6 +229,29 @@ class ZIPImporter {
             print("🗑️ ZIPImporter: Cleaned up temporary directory")
         } catch {
             print("⚠️ ZIPImporter: Failed to cleanup temporary directory: \(error)")
+        }
+    }
+}
+
+private enum ZIPImportError: LocalizedError {
+    case tooManyEntries
+    case entryTooLarge(String)
+    case archiveTooLarge
+    case suspiciousCompression(String)
+    case symbolicLink(String)
+
+    var errorDescription: String? {
+        switch self {
+        case .tooManyEntries:
+            return "The archive contains too many entries."
+        case .entryTooLarge(let path):
+            return "The archive entry is too large: \(path)"
+        case .archiveTooLarge:
+            return "The expanded archive is too large."
+        case .suspiciousCompression(let path):
+            return "The archive has a suspicious compression ratio: \(path)"
+        case .symbolicLink(let path):
+            return "Symbolic links are not allowed in audiobook archives: \(path)"
         }
     }
 }

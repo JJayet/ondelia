@@ -3,6 +3,7 @@ import SwiftData
 
 @MainActor
 class ReadingStatistics: ReadingStatisticsProtocol {
+    static let shared = ReadingStatistics()
     private let swiftDataController = SwiftDataController.shared
     
     @Published var totalListeningTime: TimeInterval = 0

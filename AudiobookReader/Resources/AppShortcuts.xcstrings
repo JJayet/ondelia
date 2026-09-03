@@ -1,0 +1,111 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "Continue listening in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer l'écoute dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Pause ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Pause ${applicationName}",
+              "Pause my book in ${applicationName}"
+            ]
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Mettre ${applicationName} en pause"
+          }
+        }
+      }
+    },
+    "Pause my book in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suspendre la lecture dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Resume last book in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre le dernier livre dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Resume my book in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Resume my book in ${applicationName}",
+              "Resume last book in ${applicationName}",
+              "Continue listening in ${applicationName}"
+            ]
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Reprendre mon livre dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Sleep at end of chapter in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Sleep at end of chapter in ${applicationName}",
+              "Stop at end of chapter in ${applicationName}"
+            ]
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Fin du chapitre en cours dans ${applicationName}"
+          }
+        }
+      }
+    },
+    "Stop at end of chapter in ${applicationName}" : {
+      "extractionState" : "stale",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêter à la fin du chapitre dans ${applicationName}"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}

@@ -4,7 +4,7 @@ struct SettingsView: View {
     // State is internal (not private) so the section extensions in
     // SettingsView+Sections.swift / SettingsView+TranscriptionSection.swift can drive it.
     @StateObject var themeManager = ThemeManager.shared
-    @StateObject var statistics = ReadingStatistics()
+    @StateObject var statistics = ReadingStatistics.shared
     @StateObject var whisperManager = WhisperTranscriptionManager.shared
     @Environment(\.dismiss) private var dismiss
     @State var showingGoalEditor = false

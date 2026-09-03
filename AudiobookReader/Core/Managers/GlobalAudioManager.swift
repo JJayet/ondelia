@@ -15,6 +15,10 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     @Published var isReady = false
     @Published var showMiniPlayer = false
     @Published var playbackState: PlaybackState = .stopped
+    @Published var sleepTimeRemaining: TimeInterval = 0
+    var sleepTimer: Timer?
+    var pendingAutoplay = false
+    var loadRequestID = UUID()
     
     let liveActivityManager = LiveActivityManager()
     
@@ -27,13 +31,15 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     }
     
     func loadAudiobook(_ audiobook: AudiobookModel) {
-        // If we're already playing this audiobook, don't reload
+        // Do not start a second load for the same book while its engine is being prepared.
         if let current = currentAudiobook,
            current.id == audiobook.id,
-           (audioEngine != nil || multiFileAudioEngine != nil) {
+           (isLoading || audioEngine != nil || multiFileAudioEngine != nil) {
             print("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
-            showMiniPlayer = true
-            playbackState = isPlaying() ? .playing : .paused
+            if !isLoading {
+                showMiniPlayer = true
+                playbackState = isPlaying() ? .playing : .paused
+            }
             return
         }
         
@@ -56,6 +62,9 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         self.isLoading = true
         self.isReady = false
         self.playbackState = .loading
+        self.pendingAutoplay = false
+        let requestID = UUID()
+        self.loadRequestID = requestID
         
         // Clean up existing engines immediately to prevent conflicts
         cleanupEngines()
@@ -73,7 +82,8 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             
             await MainActor.run {
                 // Stale completion: another loadAudiobook ran meanwhile
-                guard self.currentAudiobook?.id == audiobook.id else { return }
+                guard self.currentAudiobook?.id == audiobook.id,
+                      self.loadRequestID == requestID else { return }
                 switch fileOperationResult {
                 case .success(let isDirectory):
                     if isDirectory {
@@ -132,6 +142,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         self.isLoading = false
         self.isReady = true
         self.playbackState = .paused
+        startPendingPlaybackIfNeeded()
     }
     
     private func loadSingleFileAudiobook(_ audiobook: AudiobookModel, filePath: String) {
@@ -147,6 +158,13 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         self.isLoading = false
         self.isReady = true
         self.playbackState = .paused
+        startPendingPlaybackIfNeeded()
+    }
+
+    private func startPendingPlaybackIfNeeded() {
+        guard pendingAutoplay else { return }
+        pendingAutoplay = false
+        resumePlayback()
     }
     
     private func cleanupEngines() {
