@@ -53,6 +53,18 @@ struct FolderImportStyleTests {
         #expect(manager.commonAudioFolder(of: [folder, other]) == nil)
     }
 
+    @Test("Files on an unreadable file provider are still recognised as one folder")
+    func commonAudioFolderNeedsNoFileAccess() {
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        // Nothing exists at these paths, standing in for a provider whose scope is not claimed yet.
+        let folder = URL(fileURLWithPath: "/private/var/mobile/Containers/Shared/Provider/Book", isDirectory: true)
+        let files = ["101 - Opening Credits.mp3", "102 - Epigraph (I).mp3"]
+            .map { folder.appendingPathComponent($0) }
+
+        #expect(manager.commonAudioFolder(of: files) == folder.standardizedFileURL)
+        #expect(manager.commonAudioFolder(of: files + [folder]) == nil)
+    }
+
     @Test("One cover picked at the end of a split import covers the whole batch")
     func coverBatchSharesPickedImage() throws {
         let manager = AudiobookManager(swiftDataController: .inMemory())

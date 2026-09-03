@@ -115,14 +115,14 @@ extension AudiobookManager {
 
     /// The folder shared by a selection of two or more plain audio files, if there is one.
     /// Anything else (a single file, a ZIP, a folder, a mixed bag) is unambiguous and returns nil.
+    ///
+    /// Judged from the URLs alone. Picked files can live on a file provider outside the sandbox,
+    /// where nothing is readable, not even `fileExists`, until their security scope is claimed.
     func commonAudioFolder(of urls: [URL]) -> URL? {
         guard urls.count > 1 else { return nil }
         let audioExtensions = Set(FolderImporter.audioFileExtensions)
-        var isDirectory: ObjCBool = false
         for url in urls {
-            guard audioExtensions.contains(url.pathExtension.lowercased()),
-                  FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory),
-                  !isDirectory.boolValue
+            guard audioExtensions.contains(url.pathExtension.lowercased()), !url.hasDirectoryPath
             else { return nil }
         }
         let folders = Set(urls.map { $0.deletingLastPathComponent().standardizedFileURL })
