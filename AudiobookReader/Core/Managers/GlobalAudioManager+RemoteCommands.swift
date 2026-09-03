@@ -91,9 +91,19 @@ extension GlobalAudioManager {
             MPNowPlayingInfoPropertyIsLiveStream: false
         ]
         if let data = audiobook.coverImageData, let image = UIImage(data: data) {
-            info[MPMediaItemPropertyArtwork] = MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+            info[MPMediaItemPropertyArtwork] = Self.artwork(for: image)
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info
+    }
+
+    /// Builds the artwork outside any actor.
+    ///
+    /// `MPMediaItemArtwork` keeps the request handler and calls it later on MediaPlayer's own
+    /// queue. Declared inside a main-actor member the closure inherits that isolation, and the
+    /// first call from MediaPlayer trips Swift's executor check and traps. Nothing here needs
+    /// the main actor: it reads an image and hands it back.
+    private nonisolated static func artwork(for image: UIImage) -> MPMediaItemArtwork {
+        MPMediaItemArtwork(boundsSize: image.size) { _ in image }
     }
 
     /// Publishes position and rate. Cheap enough to call on every state change.

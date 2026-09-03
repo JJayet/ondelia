@@ -132,6 +132,13 @@ final class AudiobookPlayer {
     /// Seeks to a position in the book, crossing into another file when needed.
     func seek(to time: TimeInterval) {
         guard !tracks.isEmpty else { return }
+        // NaN has to be rejected before the clamp, not after: `max(NaN, 0)` is NaN, because
+        // every comparison against NaN is false, so it would sail through into an invalid
+        // CMTime and AVPlayer would raise on the seek.
+        guard time.isFinite else {
+            Log.audio.warning("⚠️ AudiobookPlayer: Ignoring a seek to a non-finite time")
+            return
+        }
         let target = min(max(time, 0), duration)
         let index = trackIndex(at: target)
 

@@ -124,6 +124,18 @@ struct AudiobookPlayerTimelineTests {
         #expect(index(10_000) == 2)     // past the end
     }
 
+    @Test("A book whose stored duration is not a number yields no tracks")
+    func nonFiniteStoredDurationIsRejected() async throws {
+        let folder = try makeFolder("nan")
+        let file = try writeFile("book.m4a", in: folder)
+
+        // The file is not decodable, so the stored duration is the only candidate.
+        for bad in [Double.nan, .infinity, -1, 0] {
+            let tracks = await AudiobookPlayer.makeTracks(at: file, fallbackDuration: bad)
+            #expect(tracks.isEmpty, "duration \(bad) should not produce a track")
+        }
+    }
+
     @Test("An empty timeline maps every position to zero instead of trapping")
     func emptyTimelineIsSafe() {
         #expect(AudiobookPlayer.trackIndex(at: 0, in: []) == 0)

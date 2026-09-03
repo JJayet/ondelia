@@ -14,7 +14,13 @@ extension AudiobookPlayer {
         }
 
         guard isDirectory.boolValue else {
-            let duration = await assetDuration(of: url) ?? fallbackDuration
+            // The stored duration is only a fallback and has been through metadata parsing,
+            // so it is not trusted to be a usable number.
+            let stored = fallbackDuration.isFinite && fallbackDuration > 0 ? fallbackDuration : nil
+            guard let duration = await assetDuration(of: url) ?? stored else {
+                Log.audio.error("❌ AudiobookPlayer: No usable duration for \(url.lastPathComponent)")
+                return []
+            }
             return [AudiobookTrack(url: url, start: 0, duration: duration)]
         }
 

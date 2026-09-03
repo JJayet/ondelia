@@ -163,6 +163,21 @@ struct AudiobookPlayerTests {
         #expect(abs(player.currentTime - player.duration) < 0.05)
     }
 
+    @Test("A seek to a non-finite position is ignored rather than trapping")
+    func nonFiniteSeekIsIgnored() async throws {
+        let player = AudiobookPlayer()
+        #expect(await player.load(try singleFileBook()))
+
+        player.seek(to: 1)
+        let before = player.currentTime
+
+        player.seek(to: .nan)
+        player.seek(to: .infinity)
+        player.seek(to: -.infinity)
+
+        #expect(player.currentTime == before)
+    }
+
     // MARK: - Chapters
 
     @Test("Seeking past a chapter boundary switches chapter and keeps book time")
