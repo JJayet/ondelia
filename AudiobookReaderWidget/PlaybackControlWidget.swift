@@ -29,8 +29,8 @@ struct PlaybackControlWidget: ControlWidget {
                      : NSLocalizedString("Paused", comment: "Control widget state"))
             }
         }
-        .displayName("Play / Pause")
-        .description("Play or pause the current audiobook.")
+        .displayName("Play/Pause")
+        .description("Toggle playback")
     }
 }
 
@@ -56,8 +56,8 @@ struct PlaybackStateProvider: ControlValueProvider {
 /// `SetValueIntent` is what a toggle control requires; `AudioPlaybackIntent` is what lets the
 /// system start audio on our behalf when the app is not already running.
 struct TogglePlaybackControlIntent: SetValueIntent, AudioPlaybackIntent {
-    static let title: LocalizedStringResource = "Play / Pause"
-    static let description = IntentDescription("Play or pause the current audiobook.")
+    static let title: LocalizedStringResource = "Play/Pause"
+    static let description = IntentDescription("Toggle playback")
 
     @Parameter(title: "Playing")
     var value: Bool
