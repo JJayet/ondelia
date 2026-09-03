@@ -80,15 +80,12 @@
 "About" = "À propos";
 "Version" = "Version";
 "GitHub" = "GitHub";
-"Monthly Goal" = "Objectif mensuel";
 "Hours" = "Heures";
 "Set your monthly listening goal in hours" = "Définissez votre objectif d'écoute mensuel en heures";
 
 // MARK: - Statistics View
-"This Month" = "Ce mois-ci";
 "Achievements" = "Réussites";
 "Total Time" = "Temps total";
-"Longest Streak" = "Plus longue série";
 "First Book" = "Premier livre";
 "10 Hours" = "10 heures";
 "Complete" = "Terminé";
@@ -216,3 +213,35 @@
 "Reset Listening Stats" = "Réinitialiser les statistiques d'écoute";
 "Reset Stats?" = "Réinitialiser les statistiques ?";
 "This will clear your listening time, streaks, and monthly progress. Your books and goals remain." = "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés.";
+
+// MARK: Player
+"Loading…" = "Chargement…";
+"Transcribing" = "Transcription en cours";
+"Enjoying your book" = "Profitez bien de votre livre";
+"Almost done..." = "Presque terminé...";
+"You're in for a good time" = "Un bon moment vous attend";
+
+// MARK: Live Activity
+"Play/Pause" = "Lecture/Pause";
+"Toggle playback" = "Basculer la lecture";
+"Skip Forward" = "Avancer";
+"Skip forward 15 seconds" = "Avancer de 15 secondes";
+"Skip Backward" = "Reculer";
+"Skip backward 15 seconds" = "Reculer de 15 secondes";
+
+// MARK: Library/Home/Search/Settings
+"Filter" = "Filtre";
+"Sort by" = "Trier par";
+"Clear" = "Effacer";
+"Clear Filters" = "Effacer les filtres";
+"Relevance" = "Pertinence";
+"Search" = "Rechercher";
+"Search your audiobooks" = "Recherchez vos livres audio";
+"Type a title or author to find a book in your library." = "Saisissez un titre ou un auteur pour trouver un livre dans votre bibliothèque.";
+"No results" = "Aucun résultat";
+"Try a different term or check spelling." = "Essayez un autre terme ou vérifiez l'orthographe.";
+"%@, %@ of %@" = "%@, %@ sur %@";
+"%@ of %@" = "%@ sur %@";
+"Please be patient while your file(s) are being imported" = "Veuillez patienter pendant l'importation de vos fichiers";
+"Download" = "Télécharger";
+"Download %@ model for offline transcription?" = "Télécharger le modèle %@ pour la transcription hors ligne ?";

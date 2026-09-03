@@ -17,7 +17,10 @@ class SwiftDataController: ObservableObject {
         return container
     }
     
-    static let preview: SwiftDataController = {
+    static let preview: SwiftDataController = inMemory()
+
+    /// Fresh, already-loaded in-memory store (previews, tests).
+    static func inMemory() -> SwiftDataController {
         let controller = SwiftDataController(initiallyLoad: false)
         do {
             let container = try controller.buildContainer(inMemory: true)
@@ -25,10 +28,10 @@ class SwiftDataController: ObservableObject {
             controller.isLoaded = true
             controller.isLoading = false
         } catch {
-            fatalError("Preview SwiftData error: \(error)")
+            fatalError("In-memory SwiftData error: \(error)")
         }
         return controller
-    }()
+    }
     
     @MainActor
     var context: ModelContext {

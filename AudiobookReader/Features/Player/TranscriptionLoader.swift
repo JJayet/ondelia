@@ -5,12 +5,17 @@ struct TranscriptionLoader: View {
     private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
     @State private var thinking: Bool = false
     
-    let phrases = [
-        "Transcribing             ",
-        "Enjoying your book       ",
-        "Almost done...           ",
-        "You're in for a good time",
-    ]
+    // Padded to equal length so the animated HStack keeps a stable width.
+    let phrases: [String] = {
+        let raw = [
+            NSLocalizedString("Transcribing", comment: "Transcription loader phrase"),
+            NSLocalizedString("Enjoying your book", comment: "Transcription loader phrase"),
+            NSLocalizedString("Almost done...", comment: "Transcription loader phrase"),
+            NSLocalizedString("You're in for a good time", comment: "Transcription loader phrase"),
+        ]
+        let width = raw.map(\.count).max() ?? 0
+        return raw.map { $0.padding(toLength: width, withPad: " ", startingAt: 0) }
+    }()
     
     var body: some View {
         HStack(spacing: 8) {

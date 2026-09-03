@@ -19,7 +19,7 @@ struct ImagePickerView: View {
                         .font(.title2)
                         .fontWeight(.semibold)
                     
-                    Text(String(format: NSLocalizedString("for %@", comment: "Cover image for audiobook title"), audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Default audiobook title")))
+                    Text(String(format: NSLocalizedString("for %@", comment: "Cover image for audiobook title"), audiobook.title ?? AudiobookModel.unknownTitle))
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                         .multilineTextAlignment(.center)

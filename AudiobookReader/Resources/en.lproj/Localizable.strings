@@ -80,15 +80,12 @@
 "About" = "About";
 "Version" = "Version";
 "GitHub" = "GitHub";
-"Monthly Goal" = "Monthly Goal";
 "Hours" = "Hours";
 "Set your monthly listening goal in hours" = "Set your monthly listening goal in hours";
 
 // MARK: - Statistics View
-"This Month" = "This Month";
 "Achievements" = "Achievements";
 "Total Time" = "Total Time";
-"Longest Streak" = "Longest Streak";
 "First Book" = "First Book";
 "10 Hours" = "10 Hours";
 "Complete" = "Complete";
@@ -216,3 +213,35 @@
 "Reset Listening Stats" = "Reset Listening Stats";
 "Reset Stats?" = "Reset Stats?";
 "This will clear your listening time, streaks, and monthly progress. Your books and goals remain." = "This will clear your listening time, streaks, and monthly progress. Your books and goals remain.";
+
+// MARK: Player
+"Loading…" = "Loading…";
+"Transcribing" = "Transcribing";
+"Enjoying your book" = "Enjoying your book";
+"Almost done..." = "Almost done...";
+"You're in for a good time" = "You're in for a good time";
+
+// MARK: Live Activity
+"Play/Pause" = "Play/Pause";
+"Toggle playback" = "Toggle playback";
+"Skip Forward" = "Skip Forward";
+"Skip forward 15 seconds" = "Skip forward 15 seconds";
+"Skip Backward" = "Skip Backward";
+"Skip backward 15 seconds" = "Skip backward 15 seconds";
+
+// MARK: Library/Home/Search/Settings
+"Filter" = "Filter";
+"Sort by" = "Sort by";
+"Clear" = "Clear";
+"Clear Filters" = "Clear Filters";
+"Relevance" = "Relevance";
+"Search" = "Search";
+"Search your audiobooks" = "Search your audiobooks";
+"Type a title or author to find a book in your library." = "Type a title or author to find a book in your library.";
+"No results" = "No results";
+"Try a different term or check spelling." = "Try a different term or check spelling.";
+"%@, %@ of %@" = "%@, %@ of %@";
+"%@ of %@" = "%@ of %@";
+"Please be patient while your file(s) are being imported" = "Please be patient while your file(s) are being imported";
+"Download" = "Download";
+"Download %@ model for offline transcription?" = "Download %@ model for offline transcription?";

@@ -7,7 +7,8 @@
 
 import XCTest
 
-final class PlayerViewUITests: XCTestCase {
+/// Shared launch, teardown and player navigation for the PlayerViewUITests* classes.
+class PlayerViewUITestCase: XCTestCase {
     var app: XCUIApplication!
     
     override func setUpWithError() throws {
@@ -27,7 +28,37 @@ final class PlayerViewUITests: XCTestCase {
         app.terminate()
         app = nil
     }
-    
+
+    func navigateToPlayer() throws {
+        // Navigate to library
+        let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
+        if libraryTab.exists {
+            libraryTab.tap()
+        }
+        
+        // Wait for library to load
+        sleep(1)
+        
+        // Find and tap the first audiobook (assuming test data exists)
+        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
+        
+        if !firstAudiobook.exists {
+            // If no audiobook exists, we need to import one first
+            // For UI tests, we should ensure test data is available
+            throw XCTSkip("No audiobooks available for testing - test data should be pre-loaded")
+        }
+        
+        firstAudiobook.tap()
+        
+        // Wait for player to appear
+        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
+        let playerLoaded = playPauseButton.waitForExistence(timeout: 5)
+        XCTAssertTrue(playerLoaded, "Player should load after tapping audiobook")
+    }
+}
+
+final class PlayerViewUITests: PlayerViewUITestCase {
+
     // MARK: - Player Interface Interaction Tests
     
     func testPlayerBasicControls() throws {
@@ -198,129 +229,4 @@ final class PlayerViewUITests: XCTestCase {
         XCTAssertTrue(playPauseButton.exists, "Button should exist after press interaction")
         XCTAssertTrue(playPauseButton.isEnabled, "Button should remain enabled after press")
     }
-    
-    // MARK: - Accessibility Testing
-    
-    func testVoiceOverSupport() throws {
-        // Enable VoiceOver simulation
-        app.launchArguments.append("--voiceover-testing")
-        try navigateToPlayer()
-        
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        
-        // Check accessibility label exists and is meaningful
-        XCTAssertFalse(playPauseButton.label.isEmpty, "Play/pause button should have accessibility label")
-        XCTAssertTrue(playPauseButton.label.lowercased().contains("play") || 
-                     playPauseButton.label.lowercased().contains("pause"),
-                     "Accessibility label should indicate play/pause state")
-        
-        // Check accessibility hint
-        let hint = playPauseButton.value as? String ?? ""
-        XCTAssertFalse(hint.isEmpty, "Button should have accessibility hint")
-    }
-    
-    func testDynamicTypeSupport() throws {
-        // Test with large text size
-        app.launchArguments.append("--dynamic-type-xxxlarge")
-        try navigateToPlayer()
-        
-        // Verify essential controls are still accessible
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        XCTAssertTrue(playPauseButton.exists, "Play/pause button should exist with large text")
-        XCTAssertTrue(playPauseButton.isHittable, "Play/pause button should be hittable with large text")
-        
-        // Test that text doesn't overlap or get truncated excessively
-        let frame = playPauseButton.frame
-        XCTAssertGreaterThan(frame.width, 0, "Button should have positive width")
-        XCTAssertGreaterThan(frame.height, 0, "Button should have positive height")
-    }
-    
-    // MARK: - Orientation Change Tests
-    
-    func testOrientationChanges() throws {
-        try navigateToPlayer()
-        
-        let device = XCUIDevice.shared
-        
-        // Test portrait to landscape
-        device.orientation = .landscapeLeft
-        
-        // Allow UI to adapt
-        sleep(1)
-        
-        // Verify controls are still accessible
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        XCTAssertTrue(playPauseButton.exists, "Play/pause button should exist in landscape")
-        XCTAssertTrue(playPauseButton.isHittable, "Play/pause button should be hittable in landscape")
-        
-        // Test landscape to portrait
-        device.orientation = .portrait
-        sleep(1)
-        
-        XCTAssertTrue(playPauseButton.exists, "Play/pause button should exist in portrait")
-        XCTAssertTrue(playPauseButton.isHittable, "Play/pause button should be hittable in portrait")
-    }
-    
-    // MARK: - Chapter and Bookmark Interface Tests
-    
-    func testChaptersListAccess() throws {
-        try navigateToPlayer()
-        
-        let chaptersButton = app.buttons[AccessibilityIdentifiers.Player.chaptersButton]
-        XCTAssertTrue(chaptersButton.exists, "Chapters button should exist")
-        
-        chaptersButton.tap()
-        
-        // Should show chapters list (assuming it's presented as a sheet or navigation)
-        // Wait for sheet or navigation to appear
-        sleep(1)
-        
-        // The exact implementation depends on how chapters are presented
-        // This is a basic test to ensure the button works
-        XCTAssertTrue(chaptersButton.exists, "Chapters button should still exist after tap")
-    }
-    
-    func testBookmarksAccess() throws {
-        try navigateToPlayer()
-        
-        let bookmarksButton = app.buttons[AccessibilityIdentifiers.Player.bookmarksButton]
-        XCTAssertTrue(bookmarksButton.exists, "Bookmarks button should exist")
-        
-        bookmarksButton.tap()
-        
-        // Should show bookmarks interface
-        sleep(1)
-        
-        XCTAssertTrue(bookmarksButton.exists, "Bookmarks button should still exist after tap")
-    }
-    
-    // MARK: - Helper Methods
-    
-    private func navigateToPlayer() throws {
-        // Navigate to library
-        let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
-        if libraryTab.exists {
-            libraryTab.tap()
-        }
-        
-        // Wait for library to load
-        sleep(1)
-        
-        // Find and tap the first audiobook (assuming test data exists)
-        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
-        
-        if !firstAudiobook.exists {
-            // If no audiobook exists, we need to import one first
-            // For UI tests, we should ensure test data is available
-            throw XCTSkip("No audiobooks available for testing - test data should be pre-loaded")
-        }
-        
-        firstAudiobook.tap()
-        
-        // Wait for player to appear
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        let playerLoaded = playPauseButton.waitForExistence(timeout: 5)
-        XCTAssertTrue(playerLoaded, "Player should load after tapping audiobook")
-    }
 }
-

@@ -116,12 +116,12 @@ struct SearchView: View {
                                 audio.startPlayback()
                             }
                             .swipeActions(edge: .leading) {
-                                Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "") : NSLocalizedString("Mark Read", comment: "")) {
+                                Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                                     if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }
                                 }.tint(book.isFinished ? .orange : .green)
                             }
                             .swipeActions(edge: .trailing) {
-                                Button(NSLocalizedString("Delete", comment: "Delete"), role: .destructive) {
+                                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                                     audiobookManager.deleteAudiobook(book)
                                 }
                             }
@@ -143,12 +143,12 @@ struct SearchView: View {
                     self.debouncedQuery = newValue
                 }
             }
-                    }
+        }
     }
 
     private var header: some View {
         HStack(spacing: 12) {
-            Picker("Filter", selection: $filter) {
+            Picker(NSLocalizedString("Filter", comment: "Search filter picker label"), selection: $filter) {
                 ForEach(Filter.allCases, id: \.self) { f in Text(f.label).tag(f) }
             }
             .pickerStyle(.segmented)
@@ -156,7 +156,7 @@ struct SearchView: View {
             Spacer(minLength: 8)
 
             Menu {
-                Picker("Sort by", selection: $sort) {
+                Picker(NSLocalizedString("Sort by", comment: "Search sort picker label"), selection: $sort) {
                     ForEach(Sort.allCases, id: \.self) { s in Text(s.label).tag(s) }
                 }
             } label: {
@@ -183,117 +183,14 @@ struct SearchView: View {
     }
 }
 
-private struct SearchResultRow: View {
-    let audiobook: AudiobookModel
-    let query: String
-
-    var body: some View {
-        HStack(spacing: 12) {
-            cover
-            VStack(alignment: .leading, spacing: 6) {
-                if let title = audiobook.title, !title.isEmpty {
-                    Text(highlighted(title, query: query))
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(2)
-                } else {
-                    Text(NSLocalizedString("Unknown Title", comment: ""))
-                        .font(.headline)
-                        .foregroundColor(.primaryText)
-                        .lineLimit(2)
-                }
-
-                if let author = audiobook.author, !author.isEmpty {
-                    Text(highlighted(author, query: query))
-                        .font(.subheadline)
-                        .foregroundColor(.secondaryText)
-                        .lineLimit(1)
-                } else {
-                    Text(NSLocalizedString("Unknown Author", comment: ""))
-                        .font(.subheadline)
-                        .foregroundColor(.secondaryText)
-                        .lineLimit(1)
-                }
-            }
-            Spacer()
-            Text(percentageString)
-                .font(.subheadline) // a little bigger than caption
-                .fontWeight(.semibold)
-                .foregroundColor(.secondaryText)
-                .monospacedDigit()
-                .accessibilityLabel(accessibilityProgress)
-        }
-        .padding(.vertical, 6)
-    }
-
-    private var cover: some View {
-        Group {
-            if let data = audiobook.coverImageData, let image = UIImage(data: data) {
-                Image(uiImage: image)
-                    .resizable()
-                    .aspectRatio(1, contentMode: .fill)
-            } else {
-                ZStack {
-                    RoundedRectangle(cornerRadius: 8).fill(Color.secondaryBackground)
-                    Image(systemName: "book.closed")
-                        .foregroundColor(.secondaryText)
-                }
-            }
-        }
-        .frame(width: 60, height: 60)
-        .clipShape(RoundedRectangle(cornerRadius: 8))
-    }
-
-    private var percent: Double {
-        guard audiobook.duration > 0 else { return 0 }
-        return min(max(audiobook.currentPosition / audiobook.duration, 0), 1)
-    }
-
-    private var percentageString: String {
-        "\(Int(percent * 100))%"
-    }
-
-    private var accessibilityProgress: String {
-        let elapsed = audiobook.currentPosition
-        let total = audiobook.duration
-        func fmt(_ t: TimeInterval) -> String {
-            let h = Int(t) / 3600
-            let m = (Int(t) % 3600) / 60
-            if h > 0 { return "\(h)h \(m)m" } else { return "\(m)m" }
-        }
-        return "\(percentageString), \(fmt(elapsed)) of \(fmt(total))"
-    }
-
-    private func highlighted(_ text: String, query: String) -> AttributedString {
-        var attr = AttributedString(text)
-        let normText = text.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        let normQuery = query.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
-        guard !normQuery.isEmpty,
-              let r = normText.range(of: normQuery) else { return attr }
-
-        // Map normalized range back to original string by character offsets
-        let lowerOffset = normText.distance(from: normText.startIndex, to: r.lowerBound)
-        let upperOffset = normText.distance(from: normText.startIndex, to: r.upperBound)
-        let origLower = text.index(text.startIndex, offsetBy: lowerOffset)
-        let origUpper = text.index(text.startIndex, offsetBy: upperOffset)
-
-        if let lower = AttributedString.Index(origLower, within: attr),
-           let upper = AttributedString.Index(origUpper, within: attr) {
-            attr[lower..<upper].foregroundColor = .accentColor
-            attr[lower..<upper].font = .headline.bold()
-        }
-        return attr
-    }
-}
-
 // MARK: - Facets & Sorts
 private enum Filter: CaseIterable { case all, inProgress, completed, notStarted
     var label: String {
         switch self {
-        case .all: return NSLocalizedString("All", comment: "")
-        case .inProgress: return NSLocalizedString("In Progress", comment: "")
-        case .completed: return NSLocalizedString("Completed", comment: "")
-        case .notStarted: return NSLocalizedString("Not Started", comment: "")
+        case .all: return NSLocalizedString("All", comment: "Filter: all audiobooks")
+        case .inProgress: return NSLocalizedString("In Progress", comment: "Filter: books in progress")
+        case .completed: return NSLocalizedString("Completed", comment: "Filter: completed books")
+        case .notStarted: return NSLocalizedString("Not Started", comment: "Filter: books not started")
         }
     }
 }
@@ -301,61 +198,11 @@ private enum Filter: CaseIterable { case all, inProgress, completed, notStarted
 private enum Sort: CaseIterable { case relevance, recent, title, author, progress
     var label: String {
         switch self {
-        case .relevance: return NSLocalizedString("Relevance", comment: "")
-        case .recent: return NSLocalizedString("Recently Played", comment: "")
-        case .title: return NSLocalizedString("Title", comment: "")
-        case .author: return NSLocalizedString("Author", comment: "")
-        case .progress: return NSLocalizedString("Progress", comment: "")
+        case .relevance: return NSLocalizedString("Relevance", comment: "Sort by relevance")
+        case .recent: return NSLocalizedString("Recently Played", comment: "Sort by recently played")
+        case .title: return NSLocalizedString("Title", comment: "Sort by title")
+        case .author: return NSLocalizedString("Author", comment: "Sort by author")
+        case .progress: return NSLocalizedString("Progress", comment: "Sort by progress")
         }
-    }
-}
-
-private struct EmptyPromptView: View {
-    let title: String
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 40))
-                .foregroundColor(.secondaryText)
-            Text(title)
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.primaryText)
-            Text(message)
-                .font(.subheadline)
-                .foregroundColor(.secondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(Color.primaryBackground)
-    }
-}
-
-// Same visuals as EmptyPromptView, but suitable for inside List
-private struct EmptyRowView: View {
-    let title: String
-    let message: String
-
-    var body: some View {
-        VStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 28))
-                .foregroundColor(.secondaryText)
-            Text(title)
-                .font(.headline)
-                .fontWeight(.semibold)
-                .foregroundColor(.primaryText)
-            Text(message)
-                .font(.subheadline)
-                .foregroundColor(.secondaryText)
-                .multilineTextAlignment(.center)
-                .padding(.horizontal)
-        }
-        .frame(maxWidth: .infinity, alignment: .center)
-        .padding(.vertical, 24)
-        .background(Color.clear)
     }
 }

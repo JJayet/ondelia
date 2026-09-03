@@ -14,11 +14,11 @@ struct ChapterListView: View {
                     }
                 }
             }
-            .navigationTitle("Chapters")
+            .navigationTitle(NSLocalizedString("Chapters", comment: "Chapter list sheet title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") { dismiss() }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
             }
         }
@@ -32,7 +32,7 @@ struct ChapterRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 2) {
-                Text(chapter.title ?? "Chapter \(chapter.chapterNumber)")
+                Text(chapter.title ?? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapter.chapterNumber))
                     .font(.subheadline)
                     .fontWeight(.medium)
                     .foregroundColor(.primary)

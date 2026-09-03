@@ -25,13 +25,13 @@ struct MiniPlayerBar: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text(
                     book?.title
-                        ?? NSLocalizedString("Unknown Title", comment: "")
+                        ?? NSLocalizedString("Unknown Title", comment: "Default title for audiobooks without title")
                 )
                 .font(.subheadline).fontWeight(.semibold)
                 .lineLimit(1)
                 Text(
                     book?.author
-                        ?? NSLocalizedString("Unknown Author", comment: "")
+                        ?? NSLocalizedString("Unknown Author", comment: "Default author for audiobooks without author")
                 )
                 .font(.caption)
                 .foregroundColor(.secondary)

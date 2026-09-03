@@ -1,0 +1,16 @@
+// MARK: Now Playing Widget
+"Now Playing" = "Now Playing";
+"See what's currently playing and control playback" = "See what's currently playing and control playback";
+"Playing" = "Playing";
+"Paused" = "Paused";
+"Sample Audiobook" = "Sample Audiobook";
+"Sample Author" = "Sample Author";
+"Chapter 1: Introduction" = "Chapter 1: Introduction";
+
+// MARK: Live Activity
+"Play/Pause" = "Play/Pause";
+"Toggle playback" = "Toggle playback";
+"Skip Forward" = "Skip Forward";
+"Skip forward 15 seconds" = "Skip forward 15 seconds";
+"Skip Backward" = "Skip Backward";
+"Skip backward 15 seconds" = "Skip backward 15 seconds";
