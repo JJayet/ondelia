@@ -8,7 +8,7 @@ class ZIPImporter {
     static let maximumCompressionRatio: UInt64 = 200
     
     static func importZIPFile(from zipURL: URL) async -> URL? {
-        print("📦 ZIPImporter: Starting ZIP import from: \(zipURL.lastPathComponent)")
+        Log.library.debug("📦 ZIPImporter: Starting ZIP import from: \(zipURL.lastPathComponent)")
         
         // Create temporary extraction directory
         let tempDirectory = FileManager.default.temporaryDirectory
@@ -16,41 +16,41 @@ class ZIPImporter {
             .appendingPathComponent(UUID().uuidString)
         
         guard createDirectory(at: tempDirectory) else {
-            print("❌ ZIPImporter: Failed to create temporary directory")
+            Log.library.error("❌ ZIPImporter: Failed to create temporary directory")
             return nil
         }
         
         // Extract ZIP file
         guard await extractZIP(from: zipURL, to: tempDirectory) else {
-            print("❌ ZIPImporter: Failed to extract ZIP file")
+            Log.library.error("❌ ZIPImporter: Failed to extract ZIP file")
             cleanupDirectory(at: tempDirectory)
             return nil
         }
         
         // Validate audiobook content
         guard let audiobookFolder = await validateAudiobookContent(in: tempDirectory) else {
-            print("❌ ZIPImporter: No valid audiobook content found")
+            Log.library.error("❌ ZIPImporter: No valid audiobook content found")
             cleanupDirectory(at: tempDirectory)
             return nil
         }
         
-        print("✅ ZIPImporter: Successfully validated audiobook content")
+        Log.library.debug("✅ ZIPImporter: Successfully validated audiobook content")
         return audiobookFolder
     }
     
     private static func createDirectory(at url: URL) -> Bool {
         do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-            print("📁 ZIPImporter: Created temporary directory: \(url.path)")
+            Log.library.debug("📁 ZIPImporter: Created temporary directory: \(url.path)")
             return true
         } catch {
-            print("❌ ZIPImporter: Failed to create directory: \(error)")
+            Log.library.error("❌ ZIPImporter: Failed to create directory: \(error)")
             return false
         }
     }
     
     private static func extractZIP(from zipURL: URL, to destinationURL: URL) async -> Bool {
-        print("📦 ZIPImporter: Extracting ZIP file \(zipURL.lastPathComponent) to \(destinationURL.path)")
+        Log.library.debug("📦 ZIPImporter: Extracting ZIP file \(zipURL.lastPathComponent) to \(destinationURL.path)")
         
         return await withCheckedContinuation { continuation in
             DispatchQueue.global(qos: .userInitiated).async {
@@ -65,12 +65,12 @@ class ZIPImporter {
                     do {
                         archive = try Archive(url: zipURL, accessMode: .read)
                     } catch {
-                        print("❌ ZIPImporter: Failed to open ZIP archive: \(error)")
+                        Log.library.error("❌ ZIPImporter: Failed to open ZIP archive: \(error)")
                         continuation.resume(returning: false)
                         return
                     }
                     
-                    print("📊 ZIPImporter: Starting ZIP extraction...")
+                    Log.library.debug("📊 ZIPImporter: Starting ZIP extraction...")
                     
                     var extractedCount = 0
                     var expandedSize: UInt64 = 0
@@ -121,14 +121,14 @@ class ZIPImporter {
                         // Extract the file
                         _ = try archive.extract(entry, to: entryDestinationURL)
                         extractedCount += 1
-                        print("   ✅ Extracted: \(entry.path)")
+                        Log.library.debug("   ✅ Extracted: \(entry.path)")
                     }
                     
-                    print("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
+                    Log.library.debug("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
                     continuation.resume(returning: true)
                     
                 } catch {
-                    print("❌ ZIPImporter: Failed to extract ZIP file: \(error.localizedDescription)")
+                    Log.library.error("❌ ZIPImporter: Failed to extract ZIP file: \(error.localizedDescription)")
                     continuation.resume(returning: false)
                 }
             }
@@ -173,20 +173,20 @@ class ZIPImporter {
             
             // Validate audiobook criteria
             guard !audioFiles.isEmpty else {
-                print("❌ ZIPImporter: No audio files found")
+                Log.library.error("❌ ZIPImporter: No audio files found")
                 return nil
             }
             
             // Check for CUE files in the target directory
             let cueFiles = CUEParser.findCUEFiles(in: targetDirectory)
             if !cueFiles.isEmpty {
-                print("🎵 ZIPImporter: Found \(cueFiles.count) CUE file(s) in extracted content")
+                Log.library.debug("🎵 ZIPImporter: Found \(cueFiles.count) CUE file(s) in extracted content")
                 
                 // If we have CUE files, validate that we can parse them and find associated audio
                 for cueFileURL in cueFiles {
                     if let parsedCUE = CUEParser.parseCUEFile(at: cueFileURL) {
                         if let _ = CUEParser.matchCUEWithAudioFile(cueFile: parsedCUE, in: targetDirectory) {
-                            print("✅ ZIPImporter: Valid CUE-based audiobook found")
+                            Log.library.debug("✅ ZIPImporter: Valid CUE-based audiobook found")
                             return targetDirectory
                         }
                     }
@@ -209,16 +209,16 @@ class ZIPImporter {
             }
             
             guard validAudioFiles >= 1 && totalSize > 10_000_000 else { // 10MB minimum total
-                print("❌ ZIPImporter: Insufficient valid audio content. Files: \(validAudioFiles), Size: \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
+                Log.library.error("❌ ZIPImporter: Insufficient valid audio content. Files: \(validAudioFiles), Size: \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
                 return nil
             }
             
-            print("✅ ZIPImporter: Valid audiobook found - \(validAudioFiles) files, \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
+            Log.library.debug("✅ ZIPImporter: Valid audiobook found - \(validAudioFiles) files, \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
             
             return targetDirectory
             
         } catch {
-            print("❌ ZIPImporter: Error validating content: \(error)")
+            Log.library.error("❌ ZIPImporter: Error validating content: \(error)")
             return nil
         }
     }
@@ -226,9 +226,9 @@ class ZIPImporter {
     static func cleanupDirectory(at url: URL) {
         do {
             try FileManager.default.removeItem(at: url)
-            print("🗑️ ZIPImporter: Cleaned up temporary directory")
+            Log.library.debug("🗑️ ZIPImporter: Cleaned up temporary directory")
         } catch {
-            print("⚠️ ZIPImporter: Failed to cleanup temporary directory: \(error)")
+            Log.library.warning("⚠️ ZIPImporter: Failed to cleanup temporary directory: \(error)")
         }
     }
 }

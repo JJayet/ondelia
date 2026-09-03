@@ -1,9 +1,9 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @StateObject private var themeManager = ThemeManager.shared
-    @StateObject private var globalAudioManager = GlobalAudioManager.shared
-    @StateObject private var playerRouter = PlayerRouter()
+    private let themeManager = ThemeManager.shared
+    private let globalAudioManager = GlobalAudioManager.shared
+    @State private var playerRouter = PlayerRouter()
     @State private var selectedTab = 1
     @State private var searchText: String = ""
     @Namespace private var namespace
@@ -59,14 +59,19 @@ struct MainTabView: View {
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
         .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .accentColor(themeManager.accentColor.color)
-        .environment(\.theme, themeManager)
+        .tint(themeManager.accentColor.color)
         .environment(\.playerRouter, playerRouter)
         .environment(\.setTabSelection) { index in selectedTab = index }
         .fullScreenCover(item: $playerRouter.presented) { presentation in
             PlayerSheetView(bookID: presentation.id).navigationTransition(.zoom(sourceID: "MINIPLAYER", in: namespace))
         }
         .onOpenURL { url in
+            // "Open in AudiobookReader" from Files, Mail or AirDrop hands over a file URL.
+            guard !url.isFileURL else {
+                selectedTab = 1
+                AudiobookManager.shared.handleImportRequest(urls: [url])
+                return
+            }
             guard url.scheme == "audiobookreader", url.host == "player" else { return }
             selectedTab = 1
             if let book = globalAudioManager.currentAudiobook {

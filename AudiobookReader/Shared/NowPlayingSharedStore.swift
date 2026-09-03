@@ -9,7 +9,7 @@ enum PlaybackCommand: String, Codable, Sendable {
 }
 
 enum NowPlayingSharedStore {
-    static var appGroupID: String = "group.io.jayet.AudiobookReader"
+    static let appGroupID = "group.io.jayet.AudiobookReader"
     static let commandNotificationName = "group.io.jayet.AudiobookReader.playback-command"
     private static let coverFileName = "now-playing-cover.jpg"
 

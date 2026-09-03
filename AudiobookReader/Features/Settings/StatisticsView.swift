@@ -1,8 +1,8 @@
 import SwiftUI
 
 struct StatisticsView: View {
-    @ObservedObject var statistics: ReadingStatistics
-    @StateObject private var themeManager = ThemeManager.shared
+    let statistics: ReadingStatistics
+    private let themeManager = ThemeManager.shared
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {

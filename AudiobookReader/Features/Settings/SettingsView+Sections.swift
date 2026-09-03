@@ -62,6 +62,42 @@ extension SettingsView {
                 }
             }
             .modifier(SettingsRowCard())
+
+            // Off by default: a speed picked for one narrator rarely suits the next one.
+            Toggle(isOn: Binding(
+                get: { themeManager.globalSpeedEnabled },
+                set: { themeManager.setGlobalSpeedEnabled($0) }
+            )) {
+                Label(
+                    NSLocalizedString("Same Speed For All Books", comment: "Global playback speed toggle"),
+                    systemImage: "speedometer"
+                )
+                .foregroundColor(.primaryText)
+            }
+            .modifier(SettingsRowCard())
+
+            if themeManager.globalSpeedEnabled {
+                HStack {
+                    Label("", systemImage: "gauge.with.dots.needle.50percent")
+                        .foregroundColor(.primaryText)
+                    Spacer()
+                    Picker(
+                        NSLocalizedString("Speed", comment: "Playback speed picker label"),
+                        selection: Binding(
+                            get: { themeManager.globalSpeed },
+                            set: { themeManager.setGlobalSpeed($0) }
+                        )
+                    ) {
+                        ForEach(PlaybackSpeed.choices, id: \.self) { speed in
+                            Text(PlaybackSpeed.displayName(speed))
+                                .foregroundColor(.primaryText)
+                                .tag(speed)
+                        }
+                    }
+                    .pickerStyle(MenuPickerStyle())
+                }
+                .modifier(SettingsRowCard())
+            }
         }
     }
 

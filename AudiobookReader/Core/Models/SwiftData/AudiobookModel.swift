@@ -14,6 +14,9 @@ final class AudiobookModel {
     var coverImageData: Data?
     var dateAdded: Date
     var lastPlayed: Date
+    /// Playback speed remembered for this book. Optional so adding it never blocks the store
+    /// from opening; read it through `speed`, which supplies the 1.0 default.
+    var playbackSpeed: Double?
     
     @Relationship(deleteRule: .cascade, inverse: \BookmarkModel.audiobook)
     var bookmarks: [BookmarkModel] = []
@@ -35,7 +38,8 @@ final class AudiobookModel {
         isFinished: Bool = false,
         coverImageData: Data? = nil,
         dateAdded: Date = Date(),
-        lastPlayed: Date = Date.distantPast
+        lastPlayed: Date = Date.distantPast,
+        playbackSpeed: Double? = nil
     ) {
         self.id = id
         self.title = title
@@ -48,5 +52,19 @@ final class AudiobookModel {
         self.coverImageData = coverImageData
         self.dateAdded = dateAdded
         self.lastPlayed = lastPlayed
+        self.playbackSpeed = playbackSpeed
+    }
+
+    /// Speed this book plays at, 1.0 until the listener changes it.
+    var speed: Float {
+        get { playbackSpeed.map(Float.init) ?? 1.0 }
+        set { playbackSpeed = Double(newValue) }
+    }
+
+    /// How far through the book the listener is, 0...1. Sorting and progress bars want this
+    /// rather than `currentPosition`, which makes a long book at 3% outrank a short one at 95%.
+    var progressFraction: Double {
+        guard duration > 0 else { return 0 }
+        return min(max(currentPosition / duration, 0), 1)
     }
 }

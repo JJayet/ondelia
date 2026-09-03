@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StatisticsCardView: View {
-    @ObservedObject var statistics: ReadingStatistics
+    let statistics: ReadingStatistics
     let onTap: () -> Void
 
     var body: some View {

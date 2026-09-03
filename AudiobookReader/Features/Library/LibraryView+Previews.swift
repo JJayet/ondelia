@@ -15,9 +15,10 @@ import SwiftData
 // MARK: - Importing State Preview
 @MainActor
 private struct LibraryImportingPreview: View {
-    @StateObject private var manager: AudiobookManager
+    private let manager: AudiobookManager
     init() {
-        _manager = StateObject(wrappedValue: AudiobookManager())
+        let manager = AudiobookManager()
+        self.manager = manager
         manager.isImporting = true
         manager.importQueueTotal = 3
         manager.importQueueCompleted = 1

@@ -1,18 +1,5 @@
 import SwiftUI
 
-// MARK: - Theme Environment
-struct ThemeEnvironment: EnvironmentKey {
-    @MainActor
-    static var defaultValue: ThemeManager { ThemeManager.shared }
-}
-
-extension EnvironmentValues {
-    var theme: ThemeManager {
-        get { self[ThemeEnvironment.self] }
-        set { self[ThemeEnvironment.self] = newValue }
-    }
-}
-
 // MARK: - Custom Colors
 extension Color {
     @MainActor static var primaryBackground: Color {

@@ -4,16 +4,13 @@ extension GlobalAudioManager {
     func setSleepTimer(_ seconds: TimeInterval) {
         cancelSleepTimer()
         sleepTimeRemaining = seconds
-        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+        sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
             Task { @MainActor in
                 guard let self else { return }
                 self.sleepTimeRemaining -= 1
-                if self.sleepTimeRemaining <= 0 {
-                    self.pausePlayback()
-                    timer.invalidate()
-                    self.sleepTimer = nil
-                    self.sleepTimeRemaining = 0
-                }
+                guard self.sleepTimeRemaining <= 0 else { return }
+                self.pausePlayback()
+                self.cancelSleepTimer()
             }
         }
     }

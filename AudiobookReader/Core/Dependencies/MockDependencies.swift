@@ -4,12 +4,13 @@ import SwiftData
 
 // MARK: - Mock Global Audio Manager
 @MainActor
+@Observable
 class MockGlobalAudioManager: AudioManagerProtocol {
-    @Published var playbackState: GlobalAudioManager.PlaybackState = .stopped
-    @Published var showMiniPlayer: Bool = false
-    @Published var currentAudiobook: AudiobookModel? = nil
-    @Published var isLoading: Bool = false
-    @Published var isReady: Bool = true
+    var playbackState: GlobalAudioManager.PlaybackState = .stopped
+    var showMiniPlayer: Bool = false
+    var currentAudiobook: AudiobookModel? = nil
+    var isLoading: Bool = false
+    var isReady: Bool = true
     
     // Mock playback data
     private var mockCurrentTime: TimeInterval = 450.0 // 7:30
@@ -99,11 +100,12 @@ class MockGlobalAudioManager: AudioManagerProtocol {
 
 // MARK: - Mock Theme Manager
 @MainActor
+@Observable
 class MockThemeManager: ThemeManagerProtocol {
-    @Published var currentTheme: AppTheme = .system
-    @Published var accentColor: AccentColor = .blue
-    @Published var skipInterval: SkipInterval = .fifteen
-    @Published var autoPlay: Bool = true
+    var currentTheme: AppTheme = .system
+    var accentColor: AccentColor = .blue
+    var skipInterval: SkipInterval = .fifteen
+    var autoPlay: Bool = true
     
     func setTheme(_ theme: AppTheme) {
         currentTheme = theme
@@ -166,11 +168,12 @@ class MockAudiobookManager: AudiobookManagerProtocol {
 
 // MARK: - Mock Reading Statistics
 @MainActor
+@Observable
 class MockReadingStatistics: ReadingStatisticsProtocol {
-    @Published var totalListeningTime: TimeInterval = 125400.0 // ~34.8 hours
-    @Published var booksCompleted: Int = 12
-    @Published var currentStreak: Int = 7
-    @Published var averageSpeed: Float = 1.3
+    var totalListeningTime: TimeInterval = 125400.0 // ~34.8 hours
+    var booksCompleted: Int = 12
+    var currentStreak: Int = 7
+    var averageSpeed: Float = 1.3
     
     func addListeningTime(_ time: TimeInterval, playbackRate: Float) {
         totalListeningTime += time

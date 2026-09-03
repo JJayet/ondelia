@@ -2,17 +2,18 @@ import Foundation
 import SwiftData
 
 @MainActor
-class ReadingStatistics: ReadingStatisticsProtocol {
+@Observable
+final class ReadingStatistics: ReadingStatisticsProtocol {
     static let shared = ReadingStatistics()
     private let swiftDataController = SwiftDataController.shared
     
-    @Published var totalListeningTime: TimeInterval = 0
-    @Published var booksCompleted: Int = 0
-    @Published var currentStreak: Int = 0
-    @Published var longestStreak: Int = 0
-    @Published var averageSpeed: Float = 1.0
-    @Published var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
-    @Published var monthlyProgress: TimeInterval = 0
+    var totalListeningTime: TimeInterval = 0
+    var booksCompleted: Int = 0
+    var currentStreak: Int = 0
+    var longestStreak: Int = 0
+    var averageSpeed: Float = 1.0
+    var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
+    var monthlyProgress: TimeInterval = 0
     private var monthlyAnchor: Date = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
     
     init() {
@@ -140,9 +141,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         
         // Recalculate monthly progress to update UI immediately
         calculateCurrentMonthProgress()
-        
-        // Force UI update by sending change (already on @MainActor)
-        self.objectWillChange.send()
+
     }
     
     // MARK: - Computed Properties

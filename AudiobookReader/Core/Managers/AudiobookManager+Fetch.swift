@@ -41,37 +41,33 @@ extension AudiobookManager {
             )
         do {
             let fetched = try context.fetch(descriptor)
-            var valid: [AudiobookModel] = []
-            var toDelete: [AudiobookModel] = []
-            for book in fetched {
-                if validateAudiobookFile(book) { valid.append(book) } else { toDelete.append(book) }
+            // Rows written before paths went relative hold a container-absolute path, which a
+            // reinstall or a restore from backup invalidates. Rewrite them on sight.
+            let migrated = fetched.filter { $0.migrateToRelativePath() }.count > 0
+            // Books whose file is missing stay in the library. Deleting them silently threw
+            // away progress and bookmarks over what is often a recoverable file, and a re-import
+            // of the same file now restores the entry instead of duplicating it.
+            for book in fetched where !hasFile(book) {
+                Log.library.warning("⚠️ AudiobookManager: File missing for '\(book.title ?? "Unknown")'")
+            }
+            let valid = fetched
+            if migrated {
+                do { try context.save() } catch {
+                    Log.library.error("❌ AudiobookManager: Failed to save migrated paths: \(error)")
+                }
             }
             self.audiobooks = valid
             self.isLoadingLibrary = false
             self.processPendingImports()
-            if !toDelete.isEmpty {
-                for b in toDelete { context.delete(b) }
-                do { try context.save() } catch {
-                    print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
-                }
-            }
         } catch {
-            print("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
+            Log.library.error("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
             self.isLoadingLibrary = false
         }
     }
     
-    private func validateAudiobookFile(_ audiobook: AudiobookModel) -> Bool {
-        guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
-            print("⚠️ AudiobookManager: No file path for audiobook '\(audiobook.title ?? "Unknown")'")
-            return false
-        }
-        
-        let fileExists = FileManager.default.fileExists(atPath: filePath)
-        if !fileExists {
-            print("⚠️ AudiobookManager: File does not exist at path: \(filePath)")
-        }
-        
-        return fileExists
+    /// Whether the audio this entry names is on disk right now.
+    func hasFile(_ audiobook: AudiobookModel) -> Bool {
+        guard let fileURL = audiobook.resolvedFileURL else { return false }
+        return FileManager.default.fileExists(atPath: fileURL.path)
     }
 }

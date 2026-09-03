@@ -17,16 +17,16 @@
 - Open in Xcode: `open AudiobookReader.xcodeproj` and run the `AudiobookReader` scheme.
 
 ## Coding Style & Naming Conventions
-- Swift 5.9+, 4‑space indentation, max ~120 cols; avoid force‑unwraps; prefer `guard` early exits.
+- Swift 5 language mode (Swift 6 migration in progress), iOS 26 minimum, 4‑space indentation, max ~120 cols; avoid force‑unwraps; prefer `guard` early exits.
 - Types: PascalCase; methods/properties/locals: lowerCamelCase; constants allowed in upperCamelCase.
 - Files named after primary type; SwiftUI views end with `View` (e.g., `PlayerView.swift`).
 - Place code by layer: Managers→`Core/Managers`, Services→`Core/Services`, Features→`Features/<Feature>`.
 - Accessibility IDs centralized in `Shared/AccessibilityIdentifiers.swift`.
 
 ## Testing Guidelines
-- Framework: XCTest. File names end with `Tests.swift` and mirror source paths.
-- Coverage targets: 85%+ overall; prioritize Core and Player.
-- UI tests: live under `AudiobookReaderUITests` (compilation fixes in progress). Prefer `AccessibilityIdentifiers` for queries.
+- Framework: Swift Testing (`@Test` / `#expect`) for unit tests in `AudiobookReaderTests`; XCTest for UI tests in `AudiobookReaderUITests`. File names end with `Tests.swift` and mirror source paths.
+- Prioritize coverage of Core and Player.
+- UI tests: live under `AudiobookReaderUITests`. Prefer `AccessibilityIdentifiers` for queries.
 - Run focused tests with `-only-testing:` (see commands above).
 
 ## Commit & Pull Request Guidelines

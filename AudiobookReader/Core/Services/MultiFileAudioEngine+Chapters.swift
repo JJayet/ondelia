@@ -19,7 +19,7 @@ extension MultiFileAudioEngine {
             currentPlayer.pause()
         }
         
-        // Update indices; @Published write goes to main
+        // Update indices; observable write goes to main
         currentPlayerIndex = chapterIndex
         DispatchQueue.main.async { [weak self] in
             self?.currentChapterIndex = chapterIndex
@@ -35,7 +35,7 @@ extension MultiFileAudioEngine {
         preloadAdjacentChapters()
         unloadDistantChapters()
         
-        print("📖 MultiFileAudioEngine: Switched to chapter \(chapterIndex + 1)")
+        Log.audio.debug("📖 MultiFileAudioEngine: Switched to chapter \(chapterIndex + 1)")
     }
     
     func findChapterIndex(for time: TimeInterval) -> Int {
@@ -98,7 +98,7 @@ extension MultiFileAudioEngine {
         
         let nextChapterIndex = currentPlayerIndex + 1
         
-        print("🔄 MultiFileAudioEngine: Transitioning to chapter \(nextChapterIndex + 1)")
+        Log.audio.debug("🔄 MultiFileAudioEngine: Transitioning to chapter \(nextChapterIndex + 1)")
         
         // Step 1: Clean up current player's time observer
         if let observer = timeObserver, 
@@ -112,7 +112,7 @@ extension MultiFileAudioEngine {
             currentPlayer.pause()
         }
         
-        // Step 3: Switch to next chapter; @Published write goes to main
+        // Step 3: Switch to next chapter; observable write goes to main
         currentPlayerIndex = nextChapterIndex
         DispatchQueue.main.async { [weak self] in
             self?.currentChapterIndex = nextChapterIndex
@@ -149,14 +149,14 @@ extension MultiFileAudioEngine {
     private func validatePlayerState() -> Bool {
         // Ensure current indices are within bounds
         guard currentPlayerIndex >= 0 && currentPlayerIndex < chapterFiles.count else {
-            print("⚠️ MultiFileAudioEngine: Invalid currentPlayerIndex: \(currentPlayerIndex), resetting to 0")
+            Log.audio.warning("⚠️ MultiFileAudioEngine: Invalid currentPlayerIndex: \(self.currentPlayerIndex), resetting to 0")
             currentPlayerIndex = 0
             DispatchQueue.main.async { [weak self] in self?.currentChapterIndex = 0 }
             return false
         }
 
         guard currentChapterIndex >= 0 && currentChapterIndex < chapters.count else {
-            print("⚠️ MultiFileAudioEngine: Invalid currentChapterIndex: \(currentChapterIndex), resetting to 0")
+            Log.audio.warning("⚠️ MultiFileAudioEngine: Invalid currentChapterIndex: \(self.currentChapterIndex), resetting to 0")
             DispatchQueue.main.async { [weak self] in self?.currentChapterIndex = 0 }
             return false
         }

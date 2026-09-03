@@ -5,8 +5,7 @@ import MediaPlayer
 extension MultiFileAudioEngine {
     // MARK: - Load Multi-File Audiobook
     func loadMultiFileAudiobook(_ audiobook: AudiobookModel) {
-        print("🎵 MultiFileAudioEngine: Loading multi-file audiobook: \(audiobook.title ?? "Unknown")")
-        
+        Log.audio.debug("🎵 MultiFileAudioEngine: Loading multi-file audiobook: \(audiobook.title ?? "Unknown")")
         // Setup audio session on first load; flag is only set on success so failures retry
         if !hasSetupAudioSession {
             setupAudioSession()
@@ -17,16 +16,16 @@ extension MultiFileAudioEngine {
         self.audiobook = audiobook
         
         // Check if this is a folder-based audiobook
-        guard let folderPath = audiobook.fileURL,
+        guard let folderPath = audiobook.resolvedFileURL?.path,
               FileManager.default.fileExists(atPath: folderPath) else {
-            print("❌ MultiFileAudioEngine: Folder path not found: \(audiobook.fileURL ?? "nil")")
+            Log.audio.error("❌ MultiFileAudioEngine: Folder path not found: \(audiobook.fileURL ?? "nil")")
             return
         }
         
         var isDirectory: ObjCBool = false
         guard FileManager.default.fileExists(atPath: folderPath, isDirectory: &isDirectory),
               isDirectory.boolValue else {
-            print("📄 MultiFileAudioEngine: Single file detected, using regular audio engine")
+            Log.audio.debug("📄 MultiFileAudioEngine: Single file detected, using regular audio engine")
             loadSingleFile(audiobook)
             return
         }
@@ -36,8 +35,7 @@ extension MultiFileAudioEngine {
     }
     
     private func loadSingleFile(_ audiobook: AudiobookModel) {
-        guard let filePath = audiobook.fileURL else { return }
-        let fileURL = URL(fileURLWithPath: filePath)
+        guard let fileURL = audiobook.resolvedFileURL else { return }
         
         let asset = AVURLAsset(url: fileURL)
         let playerItem = AVPlayerItem(asset: asset)
@@ -55,7 +53,7 @@ extension MultiFileAudioEngine {
         playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
         hasAddedObservers.insert(playerItem)
         
-        print("✅ MultiFileAudioEngine: Single file loaded successfully")
+        Log.audio.debug("✅ MultiFileAudioEngine: Single file loaded successfully")
     }
     
     private func loadChaptersFromFolder(folderPath: String, audiobook: AudiobookModel) {
@@ -66,7 +64,7 @@ extension MultiFileAudioEngine {
         chapters = audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
         
         guard !chapters.isEmpty else {
-            print("❌ MultiFileAudioEngine: No chapters found")
+            Log.audio.error("❌ MultiFileAudioEngine: No chapters found")
             return
         }
         
@@ -90,7 +88,7 @@ extension MultiFileAudioEngine {
                 
                 let fileURL = folderURL.appendingPathComponent(fileName)
                 guard FileManager.default.fileExists(atPath: fileURL.path) else {
-                    print("⚠️ MultiFileAudioEngine: Chapter file not found: \(fileName)")
+                    Log.audio.warning("⚠️ MultiFileAudioEngine: Chapter file not found: \(fileName)")
                     continue
                 }
                 
@@ -103,9 +101,9 @@ extension MultiFileAudioEngine {
             chapterFiles = validChapterFiles.map(\.fileName)
             duration = totalDuration
             
-            print("✅ MultiFileAudioEngine: Validated \(chapterFiles.count) chapter files")
+            Log.audio.debug("✅ MultiFileAudioEngine: Validated \(self.chapterFiles.count) chapter files")
         } else {
-            print("⚠️ MultiFileAudioEngine: No manifest found, trying to load files directly")
+            Log.audio.warning("⚠️ MultiFileAudioEngine: No manifest found, trying to load files directly")
             loadChaptersDirectly(folderPath: folderPath, audiobook: audiobook)
             return
         }
@@ -127,10 +125,10 @@ extension MultiFileAudioEngine {
             self.setupNowPlayingInfo(for: audiobook)
         }
         
-        print("✅ MultiFileAudioEngine: Multi-file audiobook initialized successfully")
-        print("   Total duration: \(formatTime(duration))")
-        print("   Chapters: \(chapterFiles.count)")
-        print("   Starting chapter: \(currentChapterIndex + 1)")
+        Log.audio.debug("✅ MultiFileAudioEngine: Multi-file audiobook initialized successfully")
+        Log.audio.debug("   Total duration: \(self.formatTime(self.duration))")
+        Log.audio.debug("   Chapters: \(self.chapterFiles.count)")
+        Log.audio.debug("   Starting chapter: \(self.currentChapterIndex + 1)")
     }
     
     private func loadChaptersDirectly(folderPath: String, audiobook: AudiobookModel) {
@@ -155,7 +153,7 @@ extension MultiFileAudioEngine {
                 playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
                 hasAddedObservers.insert(playerItem)
                 
-                print("📖 MultiFileAudioEngine: Loaded file \(index + 1): \(fileURL.lastPathComponent)")
+                Log.audio.debug("📖 MultiFileAudioEngine: Loaded file \(index + 1): \(fileURL.lastPathComponent)")
             }
             
             currentPlayerIndex = 0
@@ -169,7 +167,7 @@ extension MultiFileAudioEngine {
             }
             
         } catch {
-            print("❌ MultiFileAudioEngine: Failed to load chapter files directly: \(error)")
+            Log.audio.error("❌ MultiFileAudioEngine: Failed to load chapter files directly: \(error)")
         }
     }
     
@@ -193,7 +191,7 @@ extension MultiFileAudioEngine {
         playerItem.addObserver(self, forKeyPath: "status", options: [.new, .initial], context: nil)
         hasAddedObservers.insert(playerItem)
         
-        print("🔄 MultiFileAudioEngine: Lazy loaded chapter \(chapterIndex + 1): \(fileName)")
+        Log.audio.debug("🔄 MultiFileAudioEngine: Lazy loaded chapter \(chapterIndex + 1): \(fileName)")
     }
     
     func preloadAdjacentChapters() {
@@ -240,6 +238,6 @@ extension MultiFileAudioEngine {
         players.removeValue(forKey: chapterIndex)
         playerItems.removeValue(forKey: chapterIndex)
         
-        print("🗑️ MultiFileAudioEngine: Unloaded distant chapter \(chapterIndex + 1)")
+        Log.audio.debug("🗑️ MultiFileAudioEngine: Unloaded distant chapter \(chapterIndex + 1)")
     }
 }

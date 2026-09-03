@@ -36,12 +36,13 @@ class MockDependencies: AudiobookDependencies {
 }
 
 // MARK: - Mock Audio Manager for Testing
+@Observable
 class MockAudioManager: AudioManagerProtocol {
-    @Published var playbackState: GlobalAudioManager.PlaybackState = .stopped
-    @Published var showMiniPlayer: Bool = false
-    @Published var currentAudiobook: AudiobookModel? = nil
-    @Published var isLoading: Bool = false
-    @Published var isReady: Bool = true
+    var playbackState: GlobalAudioManager.PlaybackState = .stopped
+    var showMiniPlayer: Bool = false
+    var currentAudiobook: AudiobookModel? = nil
+    var isLoading: Bool = false
+    var isReady: Bool = true
     
     // Mock data
     private var mockCurrentTime: TimeInterval = 0

@@ -6,11 +6,11 @@ extension AudiobookManager {
     // MARK: - CUE-based Audiobook Import
     
     func importCUEBasedAudiobook(audioFile: URL, cueFile: CUEFile) async {
-        print("🎵 AudiobookManager: Starting CUE-based audiobook import")
+        Log.library.debug("🎵 AudiobookManager: Starting CUE-based audiobook import")
         
         // Extract metadata from the audio file
         guard let metadata = await MetadataExtractor.extractMetadata(from: audioFile) else {
-            print("❌ AudiobookManager: Failed to extract metadata from audio file")
+            Log.library.error("❌ AudiobookManager: Failed to extract metadata from audio file")
             // Early exit: mark progress handled by outer defer
             return
         }
@@ -29,7 +29,7 @@ extension AudiobookManager {
                     title: cueFile.title ?? metadata.title,
                     author: cueFile.performer ?? metadata.author,
                     narrator: metadata.narrator,
-                    fileURL: localURL.path,
+                    fileURL: AudiobookModel.storedPath(for: localURL),
                     duration: metadata.duration,
                     currentPosition: 0,
                     isFinished: false,
@@ -52,6 +52,7 @@ extension AudiobookManager {
                     context.insert(chapter)
                 }
                 try context.save()
+                importBatch.append(audiobook)
                 fetchAudiobooks()
             }
         } catch {
@@ -68,9 +69,9 @@ extension AudiobookManager {
     func importAudiobook(from url: URL, fallbackCover: UIImage? = nil, inCoverBatch: Bool = false) async {
         await MainActor.run { isImporting = true }
         
-        print("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
-        print("   File extension: \(url.pathExtension)")
-        print("   File path: \(url.path)")
+        Log.library.debug("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
+        Log.library.debug("   File extension: \(url.pathExtension)")
+        Log.library.debug("   File path: \(url.path)")
         
         // Check if file exists and get size
         let fileManager = FileManager.default
@@ -78,12 +79,12 @@ extension AudiobookManager {
             do {
                 let attributes = try fileManager.attributesOfItem(atPath: url.path)
                 let fileSize = attributes[.size] as? Int64 ?? 0
-                print("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
+                Log.library.debug("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
             } catch {
-                print("   ⚠️ Could not get file attributes: \(error)")
+                Log.library.debug("   ⚠️ Could not get file attributes: \(error)")
             }
         } else {
-            print("   ❌ File does not exist at path!")
+            Log.library.debug("   ❌ File does not exist at path!")
         }
         
         // Ensure we have security-scoped resource access
@@ -95,18 +96,22 @@ extension AudiobookManager {
             }
         }
         
-        print("🎵 AudiobookManager: Extracting metadata...")
+        // A file the library already holds is either a duplicate to skip, or the missing file
+        // of a book that is still in the library and can be put straight back.
+        if await resolveExistingEntry(for: url) { return }
+
+        Log.library.debug("🎵 AudiobookManager: Extracting metadata...")
         // Extract metadata
         guard let metadata = await MetadataExtractor.extractMetadata(from: url) else {
-            print("❌ AudiobookManager: Failed to extract metadata from file")
+            Log.library.error("❌ AudiobookManager: Failed to extract metadata from file")
             await MainActor.run { }
             return
         }
         
-        print("✅ AudiobookManager: Metadata extracted successfully:")
-        print("   Title: \(metadata.title)")
-        print("   Author: \(metadata.author)")
-        print("   Duration: \(metadata.duration)s")
+        Log.library.debug("✅ AudiobookManager: Metadata extracted successfully:")
+        Log.library.debug("   Title: \(metadata.title)")
+        Log.library.debug("   Author: \(metadata.author)")
+        Log.library.debug("   Duration: \(metadata.duration)s")
         
         // Copy file to documents directory
         guard let localURL = await copyFileToDocuments(from: url) else {
@@ -128,7 +133,7 @@ extension AudiobookManager {
                     title: metadata.title,
                     author: metadata.author,
                     narrator: metadata.narrator,
-                    fileURL: localURL.path,
+                    fileURL: AudiobookModel.storedPath(for: localURL),
                     duration: metadata.duration,
                     currentPosition: 0,
                     isFinished: false,
@@ -148,6 +153,12 @@ extension AudiobookManager {
                     context.insert(chapter)
                 }
                 try context.save()
+                importBatch.append(audiobook)
+                // The album tag names the book these chapter files belong to. It is the only
+                // place that name survives when a file provider stages each file separately.
+                if pendingMergeTitle == nil, let album = metadata.album, !album.isEmpty {
+                    pendingMergeTitle = album
+                }
                 if inCoverBatch {
                     coverBatch.append(audiobook)
                 } else if coverImage == nil {

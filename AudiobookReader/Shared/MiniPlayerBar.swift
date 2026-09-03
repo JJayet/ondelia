@@ -2,7 +2,7 @@ import SwiftUI
 import UIKit
 
 struct MiniPlayerBar: View {
-    @ObservedObject var audio = GlobalAudioManager.shared
+    let audio = GlobalAudioManager.shared
 
     private var book: AudiobookModel? { audio.currentAudiobook }
     private var isPlaying: Bool { audio.playbackState == .playing }

@@ -4,7 +4,7 @@ import SwiftData
 
 // MARK: - Audio Manager Protocol
 @MainActor
-protocol AudioManagerProtocol: ObservableObject {
+protocol AudioManagerProtocol: AnyObject {
     var playbackState: GlobalAudioManager.PlaybackState { get set }
     var showMiniPlayer: Bool { get set }
     var currentAudiobook: AudiobookModel? { get set }
@@ -34,7 +34,7 @@ protocol AudioManagerProtocol: ObservableObject {
 
 // MARK: - Theme Manager Protocol
 @MainActor
-protocol ThemeManagerProtocol: ObservableObject {
+protocol ThemeManagerProtocol: AnyObject {
     var currentTheme: AppTheme { get set }
     var accentColor: AccentColor { get set }
     var skipInterval: SkipInterval { get set }
@@ -57,7 +57,7 @@ protocol AudiobookManagerProtocol {
 
 // MARK: - Reading Statistics Protocol
 @MainActor
-protocol ReadingStatisticsProtocol: ObservableObject {
+protocol ReadingStatisticsProtocol: AnyObject {
     var totalListeningTime: TimeInterval { get set }
     var booksCompleted: Int { get set }
     var currentStreak: Int { get set }

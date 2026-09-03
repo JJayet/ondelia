@@ -2,8 +2,8 @@ import SwiftUI
 
 struct BookmarksView: View {
     let audiobook: AudiobookModel
-    @ObservedObject var globalAudioManager: GlobalAudioManager
-    @StateObject private var audiobookManager = AudiobookManager.shared
+    let globalAudioManager: GlobalAudioManager
+    private let audiobookManager = AudiobookManager.shared
     @Environment(\.dismiss) private var dismiss
     
     private var bookmarks: [BookmarkModel] {
@@ -35,7 +35,7 @@ struct BookmarksView: View {
                             BookmarkRowView(
                                 bookmark: bookmark,
                                 onTap: {
-                                    print("🔖 Seeking to bookmark at \(bookmark.timestamp) seconds")
+                                    Log.ui.debug("🔖 Seeking to bookmark at \(bookmark.timestamp) seconds")
                                     globalAudioManager.seek(to: bookmark.timestamp)
                                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { dismiss() }
                                 },

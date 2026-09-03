@@ -103,7 +103,7 @@ extension LibraryView {
                                         Button(NSLocalizedString("Rename", comment: "Rename button")) {
                                             audiobookToRename = audiobook
                                             newAudiobookTitle = audiobook.title ?? ""
-                                            showingRenameAlert = true
+                                            activeAlert = .rename
                                         }
 
                                         Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {
@@ -166,7 +166,7 @@ extension LibraryView {
                 Button(NSLocalizedString("Rename", comment: "Rename button")) {
                     audiobookToRename = audiobook
                     newAudiobookTitle = audiobook.title ?? ""
-                    showingRenameAlert = true
+                    activeAlert = .rename
                 }
                 .tint(.blue)
             }
@@ -174,7 +174,7 @@ extension LibraryView {
                 Button(NSLocalizedString("Rename", comment: "Rename button")) {
                     audiobookToRename = audiobook
                     newAudiobookTitle = audiobook.title ?? ""
-                    showingRenameAlert = true
+                    activeAlert = .rename
                 }
 
                 Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {

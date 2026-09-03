@@ -12,9 +12,9 @@ import WidgetKit
 @main
 struct AudiobookReaderApp: App {
     // Use StateObject for proper SwiftUI lifecycle management
-    @StateObject private var swiftDataController = SwiftDataController.shared
-    @StateObject private var globalAudioManager = GlobalAudioManager.shared
-    @StateObject private var playbackCommandCoordinator = PlaybackCommandCoordinator()
+    private let swiftDataController = SwiftDataController.shared
+    private let globalAudioManager = GlobalAudioManager.shared
+    @State private var playbackCommandCoordinator = PlaybackCommandCoordinator()
     
     var body: some Scene {
         WindowGroup {
@@ -57,8 +57,6 @@ struct AudiobookReaderApp: App {
                 // Main app content - loads immediately once SwiftData setup is complete
                 MainTabView()
                     .modelContainer(swiftDataController.container)
-                    .environment(\.theme, ThemeManager.shared)
-                    .environmentObject(globalAudioManager)
                     .onAppear {
                         // Initialize widgets on app startup
                         WidgetCenter.shared.reloadAllTimelines()
@@ -75,19 +73,17 @@ struct AudiobookReaderApp: App {
     }
     
     private func handleAppWillResignActive() {
-        // Save current playback position when app goes to background
-        if let audiobook = globalAudioManager.currentAudiobook {
-            let currentTime = globalAudioManager.getCurrentTime()
-            let audiobookManager = AudiobookManager.shared
-            audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
-            
-            // Save SwiftData context
-            swiftDataController.save()
-        }
+        // Save current playback position when app goes to background. The manager owns the same
+        // write on a timer, so this only shortens the window, and it shares the guard that keeps
+        // a still-loading book from saving a position of zero.
+        globalAudioManager.persistProgress()
+        swiftDataController.save()
     }
     
     private func handleAppDidBecomeActive() {
         playbackCommandCoordinator.consumePendingCommand()
+        // Files can be handed over while the app is in the background.
+        AudiobookManager.shared.importInboxFiles()
         // Refresh Now Playing info when app becomes active
         if globalAudioManager.isPlaying() {
             // Update now playing info to ensure it's current

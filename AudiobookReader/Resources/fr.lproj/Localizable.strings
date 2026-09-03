@@ -61,14 +61,10 @@
 "Playback" = "Lecture";
 "Skip Interval" = "Intervalle de saut";
 "Transcription" = "Transcription";
-"WhisperKit Model" = "Modèle WhisperKit";
-"Downloading %@..." = "Téléchargement de %@...";
-"Download Model?" = "Télécharger le modèle ?";
 "Language" = "Langue";
 "Enable Translation" = "Activer la traduction";
 "Translate To" = "Traduire vers";
 "Translation" = "Traduction";
-"Requires iOS 17.4+" = "Nécessite iOS 17.4+";
 "Reading Goals" = "Objectifs de lecture";
 "Monthly Goal" = "Objectif mensuel";
 "Statistics" = "Statistiques";
@@ -244,7 +240,6 @@
 "%@ of %@" = "%@ sur %@";
 "Please be patient while your file(s) are being imported" = "Veuillez patienter pendant l'importation de vos fichiers";
 "Download" = "Télécharger";
-"Download %@ model for offline transcription?" = "Télécharger le modèle %@ pour la transcription hors ligne ?";
 
 // MARK: Valeurs des réglages et récupération
 "System" = "Système";
@@ -258,17 +253,6 @@
 "Purple" = "Violet";
 "Red" = "Rouge";
 "Teal" = "Sarcelle";
-"Tiny" = "Minuscule";
-"Base" = "Base";
-"Small" = "Petit";
-"Medium" = "Moyen";
-"Large v3" = "Grand v3";
-"Fastest (~39 MB) - Basic accuracy" = "Le plus rapide (~39 Mo) - Précision élémentaire";
-"Balanced (~74 MB) - Good accuracy" = "Équilibré (~74 Mo) - Bonne précision";
-"Better (~244 MB) - High accuracy" = "Amélioré (~244 Mo) - Haute précision";
-"High (~769 MB) - Very high accuracy" = "Avancé (~769 Mo) - Très haute précision";
-"Best (~1550 MB) - Highest accuracy" = "Optimal (~1 550 Mo) - Précision maximale";
-"On-device AI transcription with timestamps and translation" = "Transcription IA sur l’appareil avec horodatage et traduction";
 "English" = "Anglais";
 "Spanish" = "Espagnol";
 "French" = "Français";
@@ -279,12 +263,6 @@
 "Korean" = "Coréen";
 "Chinese" = "Chinois";
 "Import Failed" = "Échec de l’importation";
-"Import Folder" = "Importer un dossier";
-"Analyzing %@" = "Analyse de %@";
-"Copying %@" = "Copie de %@";
-"One Audiobook" = "Un seul livre audio";
-"Separate Audiobooks" = "Livres audio séparés";
-"'%@' contains %d audio files. Import them as one audiobook with chapters, or as separate audiobooks?" = "« %1$@ » contient %2$d fichiers audio. Les importer comme un seul livre audio avec chapitres, ou comme des livres audio séparés ?";
 "The audiobook could not be saved: %@" = "Le livre audio n’a pas pu être enregistré : %@";
 "Library Unavailable" = "Bibliothèque indisponible";
 "Your library could not be opened. Your files have not been deleted.\n%@" = "Votre bibliothèque n’a pas pu être ouverte. Vos fichiers n’ont pas été supprimés.\n%@";
@@ -308,3 +286,20 @@
 "No audiobook in your library" = "Aucun livre audio dans votre bibliothèque";
 "Nothing is playing" = "Aucune lecture en cours";
 "Sleep timer set" = "Minuteur de sommeil activé";
+
+/* Merge */
+"Merge Audiobooks" = "Fusionner les livres audio";
+"Merge" = "Fusionner";
+"Keep Separate" = "Garder séparés";
+"Imported %d audio files from '%@'. Merge them into one audiobook with chapters?" = "%1$d fichiers audio importés depuis « %2$@ ». Les fusionner en un seul livre audio avec chapitres ?";
+"The audiobooks could not be merged: %@" = "Les livres audio n'ont pas pu être fusionnés : %@";
+"At least two single-file audiobooks are needed to merge." = "Au moins deux livres audio à fichier unique sont nécessaires pour fusionner.";
+
+/* Transcription (SpeechAnalyzer) */
+"Language Model" = "Modèle linguistique";
+"Ready" = "Prêt";
+"Not supported" = "Non pris en charge";
+"Downloading language model..." = "Téléchargement du modèle linguistique...";
+"Chapter file not found" = "Fichier du chapitre introuvable";
+"Transcription failed: %@" = "Échec de la transcription : %@";
+"The language model could not be downloaded" = "Le modèle linguistique n’a pas pu être téléchargé";

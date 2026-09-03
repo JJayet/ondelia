@@ -1,4 +1,3 @@
-import Combine
 import CoreFoundation
 import Foundation
 
@@ -15,7 +14,8 @@ private func playbackCommandCallback(
 }
 
 @MainActor
-final class PlaybackCommandCoordinator: ObservableObject {
+@Observable
+final class PlaybackCommandCoordinator {
     init() {
         CFNotificationCenterAddObserver(
             CFNotificationCenterGetDarwinNotifyCenter(),

@@ -31,7 +31,7 @@ struct PlayerSheetView: View {
             let result = try context.fetch(descriptor)
             self.book = result.first
         } catch {
-            print("❌ PlayerSheetView: Failed to fetch audiobook by ID: \(error)")
+            Log.ui.error("❌ PlayerSheetView: Failed to fetch audiobook by ID: \(error)")
         }
     }
 }

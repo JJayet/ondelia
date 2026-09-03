@@ -2,29 +2,29 @@ import Foundation
 import Speech
 import AVFoundation
 import SwiftData
-import WhisperKit
 
 @MainActor
-class TranscriptionManager: ObservableObject {
+@Observable
+final class TranscriptionManager {
     static let shared = TranscriptionManager()
     
-    @Published var isTranscribing = false
-    @Published var currentTranscription = ""
-    @Published var transcriptionProgress: Double = 0
-    @Published var isModelLoading = false
-    @Published var modelLoadingProgress: Double = 0
+    var isTranscribing = false
+    var currentTranscription = ""
+    var transcriptionProgress: Double = 0
+    var isModelLoading = false
+    var modelLoadingProgress: Double = 0
         
     private let swiftDataController = SwiftDataController.shared
     private let themeManager = ThemeManager.shared
-    private let whisperManager = WhisperTranscriptionManager.shared
-    private var translationManager: AnyObject?
+    private let speechManager = SpeechTranscriptionManager.shared
+    private let translationManager = TranslationManager.shared
     
     deinit {
         // Avoid calling @MainActor methods during deinit
     }
     
     var isReady: Bool {
-        return whisperManager.isReady
+        return speechManager.isReady
     }
     
     // MARK: - Transcription Methods
@@ -34,20 +34,13 @@ class TranscriptionManager: ObservableObject {
     }
     
     func transcribeAudioFileWithDetails(_ audioURL: URL, for audiobook: AudiobookModel, chapterIndex: Int) async throws -> TranscriptionResult {
-        await MainActor.run {
-            isModelLoading = whisperManager.isModelLoading
-            modelLoadingProgress = whisperManager.modelLoadingProgress
-        }
+        isModelLoading = speechManager.isModelLoading
+        modelLoadingProgress = speechManager.modelLoadingProgress
+
+        let result = try await speechManager.transcribeAudioFile(audioURL, for: audiobook, chapterIndex: chapterIndex)
         
-        let result = try await whisperManager.transcribeAudioFile(audioURL, for: audiobook, chapterIndex: chapterIndex)
-        
-        if themeManager.enableTranslation && TranslationManager.isAvailable {
-            if let translationManager = translationManager as? TranslationManager {
-                return try await translationManager.translateTranscriptionResult(result)
-            }
-        }
-        
-        return result
+        guard themeManager.enableTranslation else { return result }
+        return try await translationManager.translateTranscriptionResult(result)
     }
         
     func transcribeCurrentChapter(for audiobook: AudiobookModel, currentChapterIndex: Int) async throws -> String {
@@ -60,7 +53,7 @@ class TranscriptionManager: ObservableObject {
     
     func transcribeCurrentChapterWithDetails(for audiobook: AudiobookModel, currentChapterIndex: Int) async throws -> TranscriptionResult {
         // Get the current chapter file URL
-        guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)),
+        guard let folderURL = audiobook.resolvedFileURL,
               let chapterFiles = getChapterFiles(from: folderURL),
               currentChapterIndex < chapterFiles.count else {
             throw TranscriptionError.chapterNotFound
@@ -77,7 +70,7 @@ class TranscriptionManager: ObservableObject {
         }
         
         if let existingResult = await MainActor.run(body: { getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: Int16(currentChapterIndex)) }) {
-            print("📖 TranscriptionManager: Using cached transcription")
+            Log.transcription.debug("📖 TranscriptionManager: Using cached transcription")
             await MainActor.run {
                 isTranscribing = false
                 currentTranscription = existingResult.text
@@ -115,14 +108,6 @@ class TranscriptionManager: ObservableObject {
     }
     
     // MARK: - Caching
-    @MainActor private func getCachedTranscription(for audiobook: AudiobookModel, chapterIndex: Int) -> String? {
-        return getCachedTranscriptionResult(for: audiobook, chapterIndex: Int16(chapterIndex))?.text
-    }
-    
-    @MainActor private func getCachedTranscriptionResult(for audiobook: AudiobookModel, chapterIndex: Int16) -> TranscriptionResult? {
-        return getCachedTranscriptionResult(audiobookID: audiobook.id, chapterIndex: chapterIndex)
-    }
-
     @MainActor private func getCachedTranscriptionResult(audiobookID: UUID, chapterIndex: Int16) -> TranscriptionResult? {
         let context = swiftDataController.context
         var descriptor = FetchDescriptor<ChapterTranscriptionModel>(
@@ -137,7 +122,7 @@ class TranscriptionManager: ObservableObject {
         do {
             matches = try context.fetch(descriptor)
         } catch {
-            print("❌ TranscriptionManager: Error fetching transcriptions: \(error)")
+            Log.transcription.error("❌ TranscriptionManager: Error fetching transcriptions: \(error)")
             return nil
         }
         
@@ -158,16 +143,6 @@ class TranscriptionManager: ObservableObject {
                 segments: segments,
                 language: cached.language ?? "en"
             )
-    }
-    
-    private func cacheTranscription(_ text: String, for audiobook: AudiobookModel, chapterIndex: Int) async {
-        // Create a simple TranscriptionResult for backward compatibility
-        let result = TranscriptionResult(
-            text: text,
-            segments: [],
-            language: themeManager.transcriptionLanguage.rawValue
-        )
-        await cacheTranscriptionResult(result, for: audiobook, chapterIndex: Int16(chapterIndex))
     }
     
     @MainActor
@@ -192,7 +167,7 @@ class TranscriptionManager: ObservableObject {
             chapterIndex: chapterIndex,
             transcriptionText: result.text,
             language: result.language,
-            transcriptionEngine: themeManager.transcriptionEngine.displayName,
+            transcriptionEngine: "SpeechAnalyzer",
             dateCreated: Date()
         )
         transcription.audiobook = audiobook
@@ -204,7 +179,7 @@ class TranscriptionManager: ObservableObject {
         
         context.insert(transcription)
         swiftDataController.save()
-        print("💾 TranscriptionManager: Cached transcription for chapter \(chapterIndex)")
+        Log.transcription.debug("💾 TranscriptionManager: Cached transcription for chapter \(chapterIndex)")
     }
 }
 

@@ -61,14 +61,10 @@
 "Playback" = "Playback";
 "Skip Interval" = "Skip Interval";
 "Transcription" = "Transcription";
-"WhisperKit Model" = "WhisperKit Model";
-"Downloading %@..." = "Downloading %@...";
-"Download Model?" = "Download Model?";
 "Language" = "Language";
 "Enable Translation" = "Enable Translation";
 "Translate To" = "Translate To";
 "Translation" = "Translation";
-"Requires iOS 17.4+" = "Requires iOS 17.4+";
 "Reading Goals" = "Reading Goals";
 "Monthly Goal" = "Monthly Goal";
 "Statistics" = "Statistics";
@@ -244,7 +240,6 @@
 "%@ of %@" = "%@ of %@";
 "Please be patient while your file(s) are being imported" = "Please be patient while your file(s) are being imported";
 "Download" = "Download";
-"Download %@ model for offline transcription?" = "Download %@ model for offline transcription?";
 
 // MARK: Settings values and recovery
 "System" = "System";
@@ -258,17 +253,6 @@
 "Purple" = "Purple";
 "Red" = "Red";
 "Teal" = "Teal";
-"Tiny" = "Tiny";
-"Base" = "Base";
-"Small" = "Small";
-"Medium" = "Medium";
-"Large v3" = "Large v3";
-"Fastest (~39 MB) - Basic accuracy" = "Fastest (~39 MB) - Basic accuracy";
-"Balanced (~74 MB) - Good accuracy" = "Balanced (~74 MB) - Good accuracy";
-"Better (~244 MB) - High accuracy" = "Better (~244 MB) - High accuracy";
-"High (~769 MB) - Very high accuracy" = "High (~769 MB) - Very high accuracy";
-"Best (~1550 MB) - Highest accuracy" = "Best (~1550 MB) - Highest accuracy";
-"On-device AI transcription with timestamps and translation" = "On-device AI transcription with timestamps and translation";
 "English" = "English";
 "Spanish" = "Spanish";
 "French" = "French";
@@ -279,12 +263,6 @@
 "Korean" = "Korean";
 "Chinese" = "Chinese";
 "Import Failed" = "Import Failed";
-"Import Folder" = "Import Folder";
-"Analyzing %@" = "Analyzing %@";
-"Copying %@" = "Copying %@";
-"One Audiobook" = "One Audiobook";
-"Separate Audiobooks" = "Separate Audiobooks";
-"'%@' contains %d audio files. Import them as one audiobook with chapters, or as separate audiobooks?" = "'%@' contains %d audio files. Import them as one audiobook with chapters, or as separate audiobooks?";
 "The audiobook could not be saved: %@" = "The audiobook could not be saved: %@";
 "Library Unavailable" = "Library Unavailable";
 "Your library could not be opened. Your files have not been deleted.\n%@" = "Your library could not be opened. Your files have not been deleted.\n%@";
@@ -308,3 +286,20 @@
 "No audiobook in your library" = "No audiobook in your library";
 "Nothing is playing" = "Nothing is playing";
 "Sleep timer set" = "Sleep timer set";
+
+/* Merge */
+"Merge Audiobooks" = "Merge Audiobooks";
+"Merge" = "Merge";
+"Keep Separate" = "Keep Separate";
+"Imported %d audio files from '%@'. Merge them into one audiobook with chapters?" = "Imported %1$d audio files from '%2$@'. Merge them into one audiobook with chapters?";
+"The audiobooks could not be merged: %@" = "The audiobooks could not be merged: %@";
+"At least two single-file audiobooks are needed to merge." = "At least two single-file audiobooks are needed to merge.";
+
+/* Transcription (SpeechAnalyzer) */
+"Language Model" = "Language Model";
+"Ready" = "Ready";
+"Not supported" = "Not supported";
+"Downloading language model..." = "Downloading language model...";
+"Chapter file not found" = "Chapter file not found";
+"Transcription failed: %@" = "Transcription failed: %@";
+"The language model could not be downloaded" = "The language model could not be downloaded";

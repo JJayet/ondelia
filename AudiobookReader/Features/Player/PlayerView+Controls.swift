@@ -44,7 +44,7 @@ extension PlayerView {
                         Image(
                             systemName: viewModel.isPlaying
                                 ? "pause.circle.fill" : "play.circle.fill"
-                        )  // Use @Published property directly
+                        )
                         .font(.system(size: 80))
                         .foregroundColor(.accentColor)
                         .shadow(
@@ -97,7 +97,7 @@ extension PlayerView {
                     ),
                     viewModel.playbackRate
                 )
-            )  // Use @Published property directly
+            )
             .font(.caption)
             .foregroundColor(.secondaryText)
 
@@ -120,7 +120,7 @@ extension PlayerView {
     // MARK: - Speed Button Helper
     @ViewBuilder
     func speedButton(for speed: Double) -> some View {
-        let isSelected = viewModel.playbackRate == Float(speed)  // Use @Published property directly
+        let isSelected = viewModel.playbackRate == Float(speed)
 
         Button(String(format: "%.2fx", speed)) {
             withHapticFeedback {

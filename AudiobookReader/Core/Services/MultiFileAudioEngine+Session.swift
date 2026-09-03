@@ -24,13 +24,13 @@ extension MultiFileAudioEngine {
         try audioSession.setPreferredInput(nil)
         try audioSession.setPreferredOutputNumberOfChannels(2)
         
-        print("✨ MultiFileAudioEngine: Enhanced quality audio enabled")
+        Log.audio.debug("✨ MultiFileAudioEngine: Enhanced quality audio enabled")
         
         try audioSession.setActive(true)
         hasSetupAudioSession = true
 
     } catch {
-        print("❌ MultiFileAudioEngine: Failed to set up audio session: \(error)")
+        Log.audio.error("❌ MultiFileAudioEngine: Failed to set up audio session: \(error)")
     }
 }
 
@@ -44,7 +44,7 @@ extension MultiFileAudioEngine {
         
         switch type {
         case .began:
-            print("🎵 MultiFileAudioEngine: Audio session interrupted - pausing playback")
+            Log.audio.debug("🎵 MultiFileAudioEngine: Audio session interrupted - pausing playback")
             pause()
             
         case .ended:
@@ -52,7 +52,7 @@ extension MultiFileAudioEngine {
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
             
             if options.contains(.shouldResume) {
-                print("🎵 MultiFileAudioEngine: Audio session interruption ended - resuming playback")
+                Log.audio.debug("🎵 MultiFileAudioEngine: Audio session interruption ended - resuming playback")
                 // Resume after a short delay to ensure audio session is ready
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
                     guard let self = self, !self.isCleanedUp else { return }
@@ -75,16 +75,16 @@ extension MultiFileAudioEngine {
         switch reason {
         case .oldDeviceUnavailable:
             // Headphones unplugged - pause playback
-            print("🎧 MultiFileAudioEngine: Audio device disconnected - pausing playback")
+            Log.audio.debug("🎧 MultiFileAudioEngine: Audio device disconnected - pausing playback")
             pause()
             
         case .newDeviceAvailable:
-            print("🎧 MultiFileAudioEngine: New audio device connected")
+            Log.audio.debug("🎧 MultiFileAudioEngine: New audio device connected")
             // Configure for the new device and potentially resume if we were playing
             configureForCurrentAudioRoute()
             
         case .routeConfigurationChange:
-            print("🎧 MultiFileAudioEngine: Audio route configuration changed")
+            Log.audio.debug("🎧 MultiFileAudioEngine: Audio route configuration changed")
             configureForCurrentAudioRoute()
             
         default:
@@ -108,13 +108,13 @@ extension MultiFileAudioEngine {
                 // Note: setSpatialAudioEnabled is not available in iOS 26 SDK
                 // Instead, we'll configure the audio session for optimal spatial audio support
                 try audioSession.setCategory(.playback, mode: .default, options: [.allowBluetoothA2DP, .allowAirPlay])
-                print("✨ MultiFileAudioEngine: Audio session configured for spatial audio capable route")
+                Log.audio.debug("✨ MultiFileAudioEngine: Audio session configured for spatial audio capable route")
                 
                 // Optimize buffer settings for the current route
                 optimizeAudioBufferForRoute(currentRoute)
                 
             } catch {
-                print("⚠️ MultiFileAudioEngine: Failed to configure audio session for spatial audio: \(error)")
+                Log.audio.warning("⚠️ MultiFileAudioEngine: Failed to configure audio session for spatial audio: \(error)")
             }
         }
     }
@@ -136,10 +136,9 @@ extension MultiFileAudioEngine {
                 try audioSession.setPreferredIOBufferDuration(0.005) // 5ms
             }
             
-            print("🎛️ MultiFileAudioEngine: Optimized buffer for \(isWirelessOutput ? "wireless" : "wired") output")
-            
+            Log.audio.debug("🎛️ MultiFileAudioEngine: Optimized buffer for \(isWirelessOutput ? "wireless" : "wired") output")
         } catch {
-            print("⚠️ MultiFileAudioEngine: Failed to optimize audio buffer: \(error)")
+            Log.audio.warning("⚠️ MultiFileAudioEngine: Failed to optimize audio buffer: \(error)")
         }
     }
 
@@ -158,7 +157,7 @@ extension MultiFileAudioEngine {
                     for inputParameters in audioMix.inputParameters {
                         if inputParameters is AVMutableAudioMixInputParameters {
                             // Apply compression settings
-                            print("📊 MultiFileAudioEngine: Dynamic range compression enabled - Threshold: \(threshold)dB, Ratio: \(ratio):1")
+                            Log.audio.debug("📊 MultiFileAudioEngine: Dynamic range compression enabled - Threshold: \(threshold)dB, Ratio: \(ratio):1")
                         }
                     }
                     

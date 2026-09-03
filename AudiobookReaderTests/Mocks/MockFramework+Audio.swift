@@ -10,13 +10,14 @@ import AVFoundation
 @testable import AudiobookReader
 
 // MARK: - Mock Audio Engine
-class MockAudioEngine: ObservableObject {
-    @Published var currentTime: TimeInterval = 0
-    @Published var duration: TimeInterval = 3600
-    @Published var isPlaying: Bool = false
-    @Published var isReady: Bool = true
-    @Published var playbackRate: Float = 1.0
-    @Published var currentChapterIndex: Int = 0
+@Observable
+class MockAudioEngine {
+    var currentTime: TimeInterval = 0
+    var duration: TimeInterval = 3600
+    var isPlaying: Bool = false
+    var isReady: Bool = true
+    var playbackRate: Float = 1.0
+    var currentChapterIndex: Int = 0
     
     var audiobook: AudiobookModel?
     var shouldFailOperations = false

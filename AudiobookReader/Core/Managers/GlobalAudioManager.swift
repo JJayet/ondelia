@@ -1,26 +1,26 @@
 import Foundation
 import SwiftUI
-import ActivityKit
-import Combine
 
 @MainActor
-class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
+@Observable
+final class GlobalAudioManager: AudioManagerProtocol {
     static let shared = GlobalAudioManager()
     
-    @Published var currentAudiobook: AudiobookModel?
-    @Published var audioEngine: AudioEngine?
-    @Published var multiFileAudioEngine: MultiFileAudioEngine?
-    @Published var useMultiFileEngine = false
-    @Published var isLoading = false
-    @Published var isReady = false
-    @Published var showMiniPlayer = false
-    @Published var playbackState: PlaybackState = .stopped
-    @Published var sleepTimeRemaining: TimeInterval = 0
+    var currentAudiobook: AudiobookModel?
+    var audioEngine: AudioEngine?
+    var multiFileAudioEngine: MultiFileAudioEngine?
+    var useMultiFileEngine = false
+    var isLoading = false
+    var isReady = false
+    var showMiniPlayer = false
+    var playbackState: PlaybackState = .stopped
+    var sleepTimeRemaining: TimeInterval = 0
     var sleepTimer: Timer?
+    /// Writes the playback position to the library while a book plays. See `+Progress`.
+    var progressTimer: Timer?
     var pendingAutoplay = false
     var loadRequestID = UUID()
     
-    let liveActivityManager = LiveActivityManager()
     
     enum PlaybackState {
         case stopped
@@ -35,7 +35,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         if let current = currentAudiobook,
            current.id == audiobook.id,
            (isLoading || audioEngine != nil || multiFileAudioEngine != nil) {
-            print("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
+            Log.audio.debug("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
             if !isLoading {
                 showMiniPlayer = true
                 playbackState = isPlaying() ? .playing : .paused
@@ -43,13 +43,10 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             return
         }
         
-        print("🎵 GlobalAudioManager: Loading audiobook: \(audiobook.title ?? "Unknown")")
-        
+        Log.audio.debug("🎵 GlobalAudioManager: Loading audiobook: \(audiobook.title ?? "Unknown")")
         // Save current playback position before switching
-        if let current = currentAudiobook, (audioEngine != nil || multiFileAudioEngine != nil) {
-            let currentTime = getCurrentTime()
-            print("💾 GlobalAudioManager: Saving position \(formatTime(currentTime)) for \(current.title ?? "Unknown")")
-            // Save to Core Data or user defaults here if needed
+        if currentAudiobook != nil, audioEngine != nil || multiFileAudioEngine != nil {
+            persistProgress()
         }
         
         // Stop current playback immediately to prevent audio conflicts
@@ -69,8 +66,8 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         // Clean up existing engines immediately to prevent conflicts
         cleanupEngines()
         
-        guard let filePath = audiobook.fileURL, !filePath.isEmpty else {
-            print("❌ GlobalAudioManager: No file path found")
+        guard let filePath = audiobook.resolvedFileURL?.path else {
+            Log.audio.error("❌ GlobalAudioManager: No file path found")
             self.isLoading = false
             self.playbackState = .failed
             return
@@ -87,16 +84,16 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
                 switch fileOperationResult {
                 case .success(let isDirectory):
                     if isDirectory {
-                        print("📁 GlobalAudioManager: Loading multi-file audiobook")
+                        Log.audio.debug("📁 GlobalAudioManager: Loading multi-file audiobook")
                         self.useMultiFileEngine = true
                         self.loadMultiFileAudiobook(audiobook, filePath: filePath)
                     } else {
-                        print("📄 GlobalAudioManager: Loading single audio file")
+                        Log.audio.debug("📄 GlobalAudioManager: Loading single audio file")
                         self.useMultiFileEngine = false
                         self.loadSingleFileAudiobook(audiobook, filePath: filePath)
                     }
                 case .failure(let error):
-                    print("❌ GlobalAudioManager: File error: \(error)")
+                    Log.audio.error("❌ GlobalAudioManager: File error: \(error)")
                     self.isLoading = false
                     self.playbackState = .failed
                 }
@@ -139,6 +136,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         if audiobook.currentPosition > 0 {
             self.multiFileAudioEngine?.seek(to: audiobook.currentPosition)
         }
+        applyStoredSpeed(for: audiobook)
         self.isLoading = false
         self.isReady = true
         self.playbackState = .paused
@@ -155,6 +153,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         if audiobook.currentPosition > 0 {
             self.audioEngine?.seek(to: audiobook.currentPosition)
         }
+        applyStoredSpeed(for: audiobook)
         self.isLoading = false
         self.isReady = true
         self.playbackState = .paused
@@ -168,7 +167,7 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
     }
     
     private func cleanupEngines() {
-        print("🧹 GlobalAudioManager: Starting engine cleanup...")
+        Log.audio.debug("🧹 GlobalAudioManager: Starting engine cleanup...")
         
         // Store strong references to ensure cleanup completes before deallocation
         let currentAudioEngine = audioEngine
@@ -188,6 +187,6 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
         
         // Cleanup engines synchronously to prevent weak reference issues
         // The engines' deinit will handle the actual cleanup when references are released
-        print("✅ GlobalAudioManager: Engine cleanup completed (engines will deinit naturally)")
+        Log.audio.debug("✅ GlobalAudioManager: Engine cleanup completed (engines will deinit naturally)")
     }
 }

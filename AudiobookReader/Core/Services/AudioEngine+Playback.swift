@@ -7,12 +7,12 @@ extension AudioEngine {
     func cleanup() {
         // Prevent multiple cleanup calls
         guard !isCleanedUp else { 
-            print("⚠️ AudioEngine: Cleanup already performed")
+            Log.audio.warning("⚠️ AudioEngine: Cleanup already performed")
             return 
         }
         isCleanedUp = true
         
-        print("🧹 AudioEngine: Starting cleanup...")
+        Log.audio.debug("🧹 AudioEngine: Starting cleanup...")
         
         // Stop playback first on current thread
         player?.pause()
@@ -34,12 +34,12 @@ extension AudioEngine {
         player = nil
         playerItem = nil
         
-        // Only called from deinit: never block on main here; skip the @Published write off-main
+        // Only called from deinit: never block on main here; skip the observable write off-main
         if Thread.isMainThread {
             isPlaying = false
         }
 
-        print("✅ AudioEngine: Cleanup completed")
+        Log.audio.debug("✅ AudioEngine: Cleanup completed")
     }
 
     private func cleanupPlayerDirectly() {
@@ -68,8 +68,8 @@ extension AudioEngine {
 
     // MARK: - Load Audio File
     func loadAudio(url: URL) {
-        print("AudioEngine: Loading audio from URL: \(url)")
-        print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
+        Log.audio.debug("AudioEngine: Loading audio from URL: \(url)")
+        Log.audio.debug("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
 
         guard url.isFileURL, FileManager.default.fileExists(atPath: url.path) else {
             DispatchQueue.main.async { [weak self] in

@@ -4,8 +4,8 @@ import UIKit
 struct PlayerView: View {
     let audiobook: AudiobookModel
     @Environment(\.dependencies) var deps
-    @StateObject var statistics: ReadingStatistics
-    @StateObject var viewModel: PlayerViewModel
+    @State var statistics: ReadingStatistics
+    @State var viewModel: PlayerViewModel
 
     // Access dependencies through the container
     var audioManager: any AudioManagerProtocol { deps.audioManager }
@@ -22,8 +22,8 @@ struct PlayerView: View {
             ?? (ProcessInfo.isPreview
                 ? PreviewDependencies() : LiveDependencies())
         let stats = (deps.createReadingStatistics() as? ReadingStatistics) ?? ReadingStatistics()
-        self._statistics = StateObject(wrappedValue: stats)
-        self._viewModel = StateObject(
+        self._statistics = State(wrappedValue: stats)
+        self._viewModel = State(
             wrappedValue: PlayerViewModel(
                 audiobook: audiobook,
                 dependencies: deps,
@@ -79,7 +79,7 @@ struct PlayerView: View {
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
                 onSave: {
-                    let bookmarkTime = viewModel.currentTime  // Use @Published property directly
+                    let bookmarkTime = viewModel.currentTime
                     audiobookManager.createBookmark(
                         for: audiobook,
                         at: bookmarkTime,
@@ -114,7 +114,7 @@ struct PlayerView: View {
                 currentChapterIndex: Int(
                     viewModel.currentChapter?.chapterNumber ?? 0
                 ),
-                currentTime: viewModel.currentTime  // Use @Published property directly
+                currentTime: viewModel.currentTime
             )
         }
         .confirmationDialog(

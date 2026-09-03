@@ -1,50 +1,6 @@
 {
-  "originHash" : "19415328fe71c1eae2f4fc65f8e2b752e49cc63fb0e75a472cd2a8efd6cb5e5b",
+  "originHash" : "d0d4edfdf2bf3cd05b3ba2dec0af1a9c271c93f944cbba8677cc647f74a6b323",
   "pins" : [
-    {
-      "identity" : "jinja",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/johnmai-dev/Jinja",
-      "state" : {
-        "revision" : "5c0a87846dfd36ca6621795ad2f09fdaab82b739",
-        "version" : "1.3.0"
-      }
-    },
-    {
-      "identity" : "swift-argument-parser",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-argument-parser.git",
-      "state" : {
-        "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
-        "version" : "1.8.2"
-      }
-    },
-    {
-      "identity" : "swift-collections",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/apple/swift-collections.git",
-      "state" : {
-        "revision" : "a0cb0954ecb21e4e31b0070e6ed5674e8556685a",
-        "version" : "1.6.0"
-      }
-    },
-    {
-      "identity" : "swift-transformers",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/huggingface/swift-transformers.git",
-      "state" : {
-        "revision" : "8a83416cc00ab07a5de9991e6ad817a9b8588d20",
-        "version" : "0.1.15"
-      }
-    },
-    {
-      "identity" : "whisperkit",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/argmaxinc/WhisperKit",
-      "state" : {
-        "revision" : "0a064c3ba8b424887ce691c2f6c85ddffde0ce89"
-      }
-    },
     {
       "identity" : "zipfoundation",
       "kind" : "remoteSourceControl",

@@ -2,7 +2,8 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 
-class MultiFileAudioEngine: NSObject, ObservableObject {
+@Observable
+class MultiFileAudioEngine: NSObject {
     var players: [Int: AVPlayer] = [:] // Sparse array for lazy loading
     var playerItems: [Int: AVPlayerItem] = [:] // Sparse array for lazy loading
     var currentPlayerIndex = 0
@@ -16,11 +17,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     var hasSetupAudioSession = false
     var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
 
-    @Published var isPlaying = false
-    @Published var currentTime: TimeInterval = 0
-    @Published var duration: TimeInterval = 0
-    @Published var playbackRate: Float = 1.0
-    @Published var currentChapterIndex = 0
+    var isPlaying = false
+    var currentTime: TimeInterval = 0
+    var duration: TimeInterval = 0
+    var playbackRate: Float = 1.0
+    var currentChapterIndex = 0
     
     var isTransitioning = false
     
@@ -63,16 +64,16 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                 
                 switch item.status {
                 case .readyToPlay:
-                    print("✅ MultiFileAudioEngine: Player item ready")
+                    Log.audio.debug("✅ MultiFileAudioEngine: Player item ready")
                 case .failed:
                     let errorDescription = item.error?.localizedDescription ?? "Unknown error"
-                    print("❌ MultiFileAudioEngine: Player item failed: \(errorDescription)")
+                    Log.audio.error("❌ MultiFileAudioEngine: Player item failed: \(errorDescription)")
                     
                     // Attempt recovery for failed player items
                     self.recoverFromPlayerFailure(item: item)
                     
                 case .unknown:
-                    print("⚠️ MultiFileAudioEngine: Player item status unknown")
+                    Log.audio.warning("⚠️ MultiFileAudioEngine: Player item status unknown")
                 @unknown default:
                     break
                 }
@@ -87,7 +88,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             // Find which player failed
             for (index, playerItem) in self.playerItems {
                 if playerItem === item {
-                    print("🔧 MultiFileAudioEngine: Attempting to recover failed chapter \(index + 1)")
+                    Log.audio.debug("🔧 MultiFileAudioEngine: Attempting to recover failed chapter \(index + 1)")
                     
                     // Remove the failed player
                     if self.hasAddedObservers.contains(playerItem) {
@@ -101,7 +102,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                     
                     // If this was the current player, try to reload it
                     if index == self.currentPlayerIndex {
-                        print("🔄 MultiFileAudioEngine: Reloading current chapter after failure")
+                        Log.audio.debug("🔄 MultiFileAudioEngine: Reloading current chapter after failure")
                         self.loadChapterPlayer(index)
                         
                         // If we were playing, try to resume
@@ -112,7 +113,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                         }
                     } else {
                         // For non-current players, just mark for lazy reload
-                        print("📝 MultiFileAudioEngine: Non-current chapter \(index + 1) will be reloaded when needed")
+                        Log.audio.debug("📝 MultiFileAudioEngine: Non-current chapter \(index + 1) will be reloaded when needed")
                     }
                     
                     break
@@ -123,7 +124,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
 
     // MARK: - Cleanup
     func cleanup() {
-        print("🧹 MultiFileAudioEngine: Starting cleanup...")
+        Log.audio.debug("🧹 MultiFileAudioEngine: Starting cleanup...")
 
         // Remove time observer only from the current player that has it
         if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
@@ -148,12 +149,12 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         folderURL = nil
         currentPlayerIndex = 0
         
-        // Possibly in deinit: never block on main here; skip the @Published write off-main
+        // Possibly in deinit: never block on main here; skip the observable write off-main
         if Thread.isMainThread {
             isPlaying = false
         }
 
-        print("✅ MultiFileAudioEngine: Cleanup completed")
+        Log.audio.debug("✅ MultiFileAudioEngine: Cleanup completed")
     }
     
     private func deactivateAudioSession() {
@@ -161,9 +162,9 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             do {
                 try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
                 hasSetupAudioSession = false
-                print("✅ MultiFileAudioEngine: Audio session deactivated")
+                Log.audio.debug("✅ MultiFileAudioEngine: Audio session deactivated")
             } catch {
-                print("⚠️ MultiFileAudioEngine: Error deactivating audio session: \(error)")
+                Log.audio.warning("⚠️ MultiFileAudioEngine: Error deactivating audio session: \(error)")
             }
         }
     }

@@ -90,84 +90,6 @@ enum SkipInterval: Int, CaseIterable {
     }
 }
 
-enum TranscriptionEngine: Int, CaseIterable {
-    case whisperKit = 0
-    
-    var displayName: String {
-        switch self {
-        case .whisperKit: return "WhisperKit"
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .whisperKit:
-            return NSLocalizedString(
-                "On-device AI transcription with timestamps and translation",
-                comment: "WhisperKit transcription engine description"
-            )
-        }
-    }
-}
-
-enum WhisperModel: String, CaseIterable {
-    case tiny = "openai_whisper-tiny"
-    case base = "openai_whisper-base"
-    case small = "openai_whisper-small"
-    case medium = "openai_whisper-medium"
-    case largeV3 = "openai_whisper-large-v3"
-    
-    var displayName: String {
-        switch self {
-        case .tiny: return NSLocalizedString("Tiny", comment: "Tiny Whisper model")
-        case .base: return NSLocalizedString("Base", comment: "Base Whisper model")
-        case .small: return NSLocalizedString("Small", comment: "Small Whisper model")
-        case .medium: return NSLocalizedString("Medium", comment: "Medium Whisper model")
-        case .largeV3: return NSLocalizedString("Large v3", comment: "Large Whisper model")
-        }
-    }
-    
-    var description: String {
-        switch self {
-        case .tiny: return NSLocalizedString("Fastest (~39 MB) - Basic accuracy", comment: "Tiny model description")
-        case .base: return NSLocalizedString("Balanced (~74 MB) - Good accuracy", comment: "Base model description")
-        case .small: return NSLocalizedString("Better (~244 MB) - High accuracy", comment: "Small model description")
-        case .medium: return NSLocalizedString("High (~769 MB) - Very high accuracy", comment: "Medium model description")
-        case .largeV3: return NSLocalizedString("Best (~1550 MB) - Highest accuracy", comment: "Large model description")
-        }
-    }
-    
-    var sizeDescription: String {
-        switch self {
-        case .tiny: return "39 MB"
-        case .base: return "74 MB"
-        case .small: return "244 MB"
-        case .medium: return "769 MB"
-        case .largeV3: return "1.5 GB"
-        }
-    }
-    
-    var speedRating: Int {
-        switch self {
-        case .tiny: return 5
-        case .base: return 4
-        case .small: return 3
-        case .medium: return 2
-        case .largeV3: return 1
-        }
-    }
-    
-    var accuracyRating: Int {
-        switch self {
-        case .tiny: return 2
-        case .base: return 3
-        case .small: return 4
-        case .medium: return 4
-        case .largeV3: return 5
-        }
-    }
-}
-
 enum TranscriptionLanguage: String, CaseIterable {
     case english = "en"
     case spanish = "es"
@@ -195,5 +117,14 @@ enum TranscriptionLanguage: String, CaseIterable {
     
     var locale: Locale {
         return Locale(identifier: rawValue)
+    }
+}
+
+/// The speeds offered in Settings and in the player.
+enum PlaybackSpeed {
+    static let choices: [Float] = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]
+
+    static func displayName(_ speed: Float) -> String {
+        String(format: "%gx", speed)
     }
 }

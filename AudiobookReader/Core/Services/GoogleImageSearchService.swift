@@ -1,7 +1,8 @@
 import Foundation
 import UIKit
 
-class GoogleImageSearchService {
+// No stored state: every property reads the bundle, so the shared instance is safe to share.
+final class GoogleImageSearchService: Sendable {
     static let shared = GoogleImageSearchService()
     
     // Google Custom Search API configuration

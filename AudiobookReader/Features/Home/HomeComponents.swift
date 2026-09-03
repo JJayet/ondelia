@@ -111,7 +111,7 @@ struct RecentlyPlayedCardView: View {
 }
 
 struct MonthlyGoalCardView: View {
-    @ObservedObject var statistics: ReadingStatistics
+    let statistics: ReadingStatistics
 
     var body: some View {
         VStack(spacing: 16) {

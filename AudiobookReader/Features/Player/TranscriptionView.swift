@@ -6,9 +6,9 @@ struct TranscriptionView: View {
     let currentChapterIndex: Int
     let currentTime: TimeInterval
     
-    @StateObject private var transcriptionManager = TranscriptionManager.shared
-    @StateObject private var themeManager = ThemeManager.shared
-    @StateObject private var translationManager = TranslationManager.shared
+    private let transcriptionManager = TranscriptionManager.shared
+    private let themeManager = ThemeManager.shared
+    private let translationManager = TranslationManager.shared
     @Environment(\.dismiss) private var dismiss
     
     @State private var transcriptionText = ""
@@ -36,7 +36,7 @@ struct TranscriptionView: View {
                 )
                 
                 // Translation toggle if available
-                if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                if !transcriptionText.isEmpty && themeManager.enableTranslation {
                     HStack {
                         Picker(NSLocalizedString("View", comment: "View picker label"), selection: $showingTranslation) {
                             Text(NSLocalizedString("Original", comment: "Original text option")).tag(false)
@@ -102,7 +102,7 @@ struct TranscriptionView: View {
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                    if !transcriptionText.isEmpty && themeManager.enableTranslation {
                         Button(action: {
                             if translatedText.isEmpty {
                                 translateText()
@@ -148,7 +148,7 @@ struct TranscriptionView: View {
     }
     
     private func translateText() {
-        guard !transcriptionText.isEmpty && TranslationManager.isAvailable else { return }
+        guard !transcriptionText.isEmpty else { return }
         
         isTranslating = true
         
@@ -180,7 +180,7 @@ struct TranscriptionView: View {
     }
     
     private func getChapterTitle(for audiobook: AudiobookModel, chapterIndex: Int) -> String {
-        guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
+        guard let folderURL = audiobook.resolvedFileURL else {
             return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
         }
         

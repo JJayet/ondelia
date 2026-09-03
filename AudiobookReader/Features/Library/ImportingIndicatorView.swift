@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct ImportingIndicatorView: View {
-    @ObservedObject var manager: AudiobookManager
+    let manager: AudiobookManager
     init(manager: AudiobookManager) { self.manager = manager }
     init() { self.manager = AudiobookManager.shared }
 

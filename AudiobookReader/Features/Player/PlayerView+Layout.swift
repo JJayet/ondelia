@@ -217,26 +217,26 @@ extension PlayerView {
         VStack(spacing: 8) {
             PlayerProgressSlider(
                 value: Binding(
-                    get: { viewModel.currentTime },  // Use @Published property directly
+                    get: { viewModel.currentTime },
                     set: { newValue in
                         audioManager.seek(to: newValue)
                     }
                 ),
-                range: 0...max(viewModel.duration, 1),  // Use @Published property directly
+                range: 0...max(viewModel.duration, 1),
                 onEditingChanged: { editing in
                     viewModel.isSeekingManually = editing
                 }
             )
 
             HStack {
-                Text(formatTime(viewModel.currentTime))  // Use @Published property directly
+                Text(formatTime(viewModel.currentTime))
                     .font(.caption)
                     .foregroundColor(.secondaryText)
                     .monospacedDigit()
 
                 Spacer()
 
-                Text(formatTime(viewModel.duration))  // Use @Published property directly
+                Text(formatTime(viewModel.duration))
                     .font(.caption)
                     .foregroundColor(.secondaryText)
                     .monospacedDigit()

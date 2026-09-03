@@ -52,7 +52,7 @@ struct ChapterRowView: View {
         .padding(.horizontal, 4)
         .contentShape(Rectangle()) // Make entire area tappable
         .onTapGesture {
-            print("📖 Chapter tapped: \(chapter.title ?? "Chapter \(chapter.chapterNumber)") at \(formatTime(chapter.startTime))")
+            Log.ui.debug("📖 Chapter tapped: \(chapter.title ?? "Chapter \(chapter.chapterNumber)") at \(formatTime(chapter.startTime))")
             onTap()
         }
     }

@@ -10,7 +10,8 @@ import Foundation
 import AVFoundation
 import MediaPlayer
 
-class AudioEngine: NSObject, ObservableObject {
+@Observable
+class AudioEngine: NSObject {
     var player: AVPlayer?
     var playerItem: AVPlayerItem?
     var timeObserver: Any?
@@ -19,10 +20,10 @@ class AudioEngine: NSObject, ObservableObject {
     var isCleanedUp = false
     var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
 
-    @Published var isPlaying = false
-    @Published var currentTime: TimeInterval = 0
-    @Published var duration: TimeInterval = 0
-    @Published var playbackRate: Float = 1.0
+    var isPlaying = false
+    var currentTime: TimeInterval = 0
+    var duration: TimeInterval = 0
+    var playbackRate: Float = 1.0
     
     // Thread-safe queue for audio operations
     let audioQueue = DispatchQueue(label: "com.audiobookreader.audioengine", qos: .userInitiated)
@@ -80,13 +81,13 @@ class AudioEngine: NSObject, ObservableObject {
             DispatchQueue.main.async {
                 switch item.status {
                 case .readyToPlay:
-                    print("AudioEngine: Player item ready to play")
+                    Log.audio.debug("AudioEngine: Player item ready to play")
                 case .failed:
-                    print("AudioEngine: Player item failed to load: \(item.error?.localizedDescription ?? "Unknown error")")
+                    Log.audio.debug("AudioEngine: Player item failed to load: \(item.error?.localizedDescription ?? "Unknown error")")
                 case .unknown:
-                    print("AudioEngine: Player item status unknown")
+                    Log.audio.debug("AudioEngine: Player item status unknown")
                 @unknown default:
-                    print("AudioEngine: Player item unknown status")
+                    Log.audio.debug("AudioEngine: Player item unknown status")
                 }
             }
         }

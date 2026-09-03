@@ -2,12 +2,14 @@ import Foundation
 import SwiftData
 import SwiftUI
 
-class SwiftDataController: ObservableObject {
+@MainActor
+@Observable
+final class SwiftDataController {
     static let shared = SwiftDataController()
     
-    @Published private(set) var isLoaded = false
-    @Published private(set) var isLoading = true
-    @Published private(set) var loadErrorMessage: String?
+    private(set) var isLoaded = false
+    private(set) var isLoading = true
+    private(set) var loadErrorMessage: String?
     
     private var _container: ModelContainer?
     
@@ -52,9 +54,13 @@ class SwiftDataController: ObservableObject {
                 self._container = container
                 self.isLoaded = true
                 self.isLoading = false
-                print("✅ SwiftData loaded successfully")
+                Log.store.debug("✅ SwiftData loaded successfully")
+                // After the store is known good, so a broken store is never copied over a good backup.
+                Task.detached(priority: .utility) {
+                    DatabaseBackupService.backupIfDue(container: container)
+                }
             } catch {
-                print("❌ SwiftData error: \(error)")
+                Log.store.error("❌ SwiftData error: \(error)")
                 self.isLoading = false
                 self.isLoaded = false
                 self.loadErrorMessage = error.localizedDescription
@@ -69,13 +75,10 @@ class SwiftDataController: ObservableObject {
     
     @MainActor
     func save() {
+        guard let container = _container else { return }
         let context = container.mainContext
         guard context.hasChanges else { return }
-        do { try context.save() } catch { print("Save error: \(error)") }
-    }
-    
-    func backgroundContext() -> ModelContext {
-        return ModelContext(container)
+        do { try context.save() } catch { Log.store.debug("Save error: \(error)") }
     }
     
     init(initiallyLoad: Bool = true) {

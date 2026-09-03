@@ -5,8 +5,8 @@ import SwiftData
 // background when needed, so these talk to GlobalAudioManager directly.
 
 struct ResumeLastBookIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Resume Last Book"
-    static var description = IntentDescription("Resume the most recently played audiobook")
+    static let title: LocalizedStringResource = "Resume Last Book"
+    static let description = IntentDescription("Resume the most recently played audiobook")
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -35,8 +35,8 @@ struct ResumeLastBookIntent: AudioPlaybackIntent {
 }
 
 struct PausePlaybackIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Pause Playback"
-    static var description = IntentDescription("Pause the current audiobook")
+    static let title: LocalizedStringResource = "Pause Playback"
+    static let description = IntentDescription("Pause the current audiobook")
 
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -46,8 +46,8 @@ struct PausePlaybackIntent: AudioPlaybackIntent {
 }
 
 struct SleepEndOfChapterIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Sleep at End of Chapter"
-    static var description = IntentDescription("Stop playback when the current chapter ends")
+    static let title: LocalizedStringResource = "Sleep at End of Chapter"
+    static let description = IntentDescription("Stop playback when the current chapter ends")
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -59,7 +59,7 @@ struct SleepEndOfChapterIntent: AudioPlaybackIntent {
 }
 
 struct AudiobookShortcuts: AppShortcutsProvider {
-    static var shortcutTileColor: ShortcutTileColor = .navy
+    static let shortcutTileColor: ShortcutTileColor = .navy
 
     static var appShortcuts: [AppShortcut] {
         AppShortcut(

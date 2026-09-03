@@ -21,30 +21,30 @@ extension AudioEngine {
         do {
             try audioSession.setPreferredSampleRate(44100.0) // Standard CD quality
         } catch {
-            print("⚠️ AudioEngine: Could not set sample rate: \(error)")
+            Log.audio.warning("⚠️ AudioEngine: Could not set sample rate: \(error)")
         }
         
         do {
             try audioSession.setPreferredIOBufferDuration(0.02) // 20ms buffer for stability
         } catch {
-            print("⚠️ AudioEngine: Could not set buffer duration: \(error)")
+            Log.audio.warning("⚠️ AudioEngine: Could not set buffer duration: \(error)")
         }
         
         // Configure audio routing
         do {
             try audioSession.setPreferredOutputNumberOfChannels(2)
         } catch {
-            print("⚠️ AudioEngine: Could not set output channels: \(error)")
+            Log.audio.warning("⚠️ AudioEngine: Could not set output channels: \(error)")
         }
         
         // Activate the session
         try audioSession.setActive(true)
         hasSetupAudioSession = true
 
-        print("✅ AudioEngine: Audio session configured successfully")
+        Log.audio.debug("✅ AudioEngine: Audio session configured successfully")
 
     } catch {
-        print("❌ AudioEngine: Failed to set up audio session: \(error)")
+        Log.audio.error("❌ AudioEngine: Failed to set up audio session: \(error)")
         // Try a minimal fallback configuration
         setupFallbackAudioSession()
     }
@@ -54,17 +54,17 @@ extension AudioEngine {
         do {
             let audioSession = AVAudioSession.sharedInstance()
             
-            print("🔄 AudioEngine: Attempting fallback audio session setup")
+            Log.audio.debug("🔄 AudioEngine: Attempting fallback audio session setup")
             
             // Minimal configuration that should always work
             try audioSession.setCategory(.playback, mode: .default)
             try audioSession.setActive(true)
             hasSetupAudioSession = true
 
-            print("✅ AudioEngine: Fallback audio session configured")
+            Log.audio.debug("✅ AudioEngine: Fallback audio session configured")
             
         } catch {
-            print("❌ AudioEngine: Even fallback audio session failed: \(error)")
+            Log.audio.error("❌ AudioEngine: Even fallback audio session failed: \(error)")
         }
     }
 
@@ -78,7 +78,7 @@ extension AudioEngine {
         
         switch type {
         case .began:
-            print("🎵 AudioEngine: Audio session interrupted - pausing playback")
+            Log.audio.debug("🎵 AudioEngine: Audio session interrupted - pausing playback")
             pause()
             
         case .ended:
@@ -86,7 +86,7 @@ extension AudioEngine {
             let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
             
             if options.contains(.shouldResume) {
-                print("🎵 AudioEngine: Audio session interruption ended - resuming playback")
+                Log.audio.debug("🎵 AudioEngine: Audio session interruption ended - resuming playback")
                 // Resume after a short delay to ensure audio session is ready
                 DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { [weak self] in
                     guard let self = self, !self.isCleanedUp else { return }
@@ -109,16 +109,16 @@ extension AudioEngine {
         switch reason {
         case .oldDeviceUnavailable:
             // Headphones unplugged - pause playback
-            print("🎧 AudioEngine: Audio device disconnected - pausing playback")
+            Log.audio.debug("🎧 AudioEngine: Audio device disconnected - pausing playback")
             pause()
             
         case .newDeviceAvailable:
-            print("🎧 AudioEngine: New audio device connected")
+            Log.audio.debug("🎧 AudioEngine: New audio device connected")
             // Optionally configure for the new device
             configureForCurrentAudioRoute()
             
         case .routeConfigurationChange:
-            print("🎧 AudioEngine: Audio route configuration changed")
+            Log.audio.debug("🎧 AudioEngine: Audio route configuration changed")
             configureForCurrentAudioRoute()
             
         default:
@@ -141,9 +141,9 @@ extension AudioEngine {
             do {
                 // Configure optimal settings for spatial audio capable devices
                 try audioSession.setPreferredSampleRate(48000.0)
-                print("✨ AudioEngine: Enhanced audio settings enabled for spatial audio capable route")
+                Log.audio.debug("✨ AudioEngine: Enhanced audio settings enabled for spatial audio capable route")
             } catch {
-                print("⚠️ AudioEngine: Failed to configure enhanced audio settings: \(error)")
+                Log.audio.warning("⚠️ AudioEngine: Failed to configure enhanced audio settings: \(error)")
             }
         }
     }
@@ -153,9 +153,9 @@ func deactivateAudioSession() {
         do {
             try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
             hasSetupAudioSession = false
-            print("✅ AudioEngine: Audio session deactivated")
+            Log.audio.debug("✅ AudioEngine: Audio session deactivated")
         } catch {
-            print("⚠️ AudioEngine: Failed to deactivate audio session: \(error)")
+            Log.audio.warning("⚠️ AudioEngine: Failed to deactivate audio session: \(error)")
         }
     }
 }

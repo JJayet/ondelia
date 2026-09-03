@@ -37,19 +37,43 @@ extension LibraryView {
             }
         }
 
-        var descriptor: SortDescriptor<AudiobookModel> {
+        /// Titles and authors compare the way Finder and the Files app compare them, so
+        /// "Chapter 10" lands after "Chapter 2" instead of before it.
+        func isOrderedBefore(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
             switch self {
             case .title:
-                return SortDescriptor(\AudiobookModel.title)
+                return Self.byTitle(lhs, rhs)
             case .author:
-                return SortDescriptor(\AudiobookModel.author)
+                let names = (lhs.author ?? "").localizedStandardCompare(rhs.author ?? "")
+                return names == .orderedSame ? Self.byTitle(lhs, rhs) : names == .orderedAscending
             case .lastPlayed:
-                return SortDescriptor(\AudiobookModel.lastPlayed, order:.reverse)
+                guard lhs.lastPlayed == rhs.lastPlayed else { return lhs.lastPlayed > rhs.lastPlayed }
+                return Self.byImportOrder(lhs, rhs)
             case .dateAdded:
-                return SortDescriptor(\AudiobookModel.dateAdded, order:.reverse)
+                guard lhs.dateAdded != rhs.dateAdded else { return Self.byTitle(lhs, rhs) }
+                return lhs.dateAdded > rhs.dateAdded
             case .progress:
-                return SortDescriptor(\AudiobookModel.currentPosition, order:.reverse)
+                // How far through, not how many seconds in.
+                guard lhs.progressFraction == rhs.progressFraction else {
+                    return lhs.progressFraction > rhs.progressFraction
+                }
+                return Self.byImportOrder(lhs, rhs)
             }
+        }
+
+        /// Ties are broken by import order, not left to `sorted`, which is not stable. A library of
+        /// books that were never played has every `lastPlayed` equal, and without this the file
+        /// order the import took such care to preserve comes out shuffled.
+        private static func byImportOrder(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
+            guard lhs.dateAdded == rhs.dateAdded else { return lhs.dateAdded < rhs.dateAdded }
+            return byTitle(lhs, rhs)
+        }
+
+        private static func byTitle(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
+            let titles = (lhs.title ?? "").localizedStandardCompare(rhs.title ?? "")
+            return titles == .orderedSame
+                ? lhs.id.uuidString < rhs.id.uuidString
+                : titles == .orderedAscending
         }
     }
 

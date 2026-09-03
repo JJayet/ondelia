@@ -55,7 +55,7 @@ extension AudioEngine {
                     MPNowPlayingInfoCenter.default().nowPlayingInfo = nowPlayingInfo
                 }
             } catch {
-                print("Failed to load metadata: \(error)")
+                Log.audio.debug("Failed to load metadata: \(error)")
                 do {
                     let durationCMTime = try await asset.load(.duration)
                     await MainActor.run {

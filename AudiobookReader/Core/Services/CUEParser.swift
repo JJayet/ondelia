@@ -20,10 +20,10 @@ struct CUETrack {
 class CUEParser {
     
     static func parseCUEFile(at url: URL) -> CUEFile? {
-        print("🎵 CUEParser: Starting to parse CUE file: \(url.lastPathComponent)")
+        Log.library.debug("🎵 CUEParser: Starting to parse CUE file: \(url.lastPathComponent)")
         
         guard let content = try? String(contentsOf: url, encoding: .utf8) else {
-            print("❌ CUEParser: Failed to read CUE file content")
+            Log.library.error("❌ CUEParser: Failed to read CUE file content")
             return nil
         }
         
@@ -102,7 +102,7 @@ class CUEParser {
             ))
         }
         
-        print("✅ CUEParser: Successfully parsed \(tracks.count) tracks from CUE file")
+        Log.library.debug("✅ CUEParser: Successfully parsed \(tracks.count) tracks from CUE file")
         
         return CUEFile(
             fileName: fileName,
@@ -154,7 +154,7 @@ class CUEParser {
         // Parse MM:SS:FF format (Minutes:Seconds:Frames where 75 frames = 1 second)
         let components = timeString.components(separatedBy: ":")
         guard components.count == 3 else {
-            print("⚠️ CUEParser: Invalid time format: \(timeString)")
+            Log.library.warning("⚠️ CUEParser: Invalid time format: \(timeString)")
             return 0
         }
         
@@ -179,11 +179,11 @@ class CUEParser {
             )
             
             let cueFiles = contents.filter { $0.pathExtension.lowercased() == "cue" }
-            print("🔍 CUEParser: Found \(cueFiles.count) CUE files in directory")
+            Log.library.debug("🔍 CUEParser: Found \(cueFiles.count) CUE files in directory")
             
             return cueFiles
         } catch {
-            print("❌ CUEParser: Failed to scan directory for CUE files: \(error)")
+            Log.library.error("❌ CUEParser: Failed to scan directory for CUE files: \(error)")
             return []
         }
     }
@@ -194,7 +194,7 @@ class CUEParser {
         let referencedFileURL = directoryURL.appendingPathComponent(referencedFileName)
         
         if FileManager.default.fileExists(atPath: referencedFileURL.path) {
-            print("✅ CUEParser: Found referenced audio file: \(referencedFileName)")
+            Log.library.debug("✅ CUEParser: Found referenced audio file: \(referencedFileName)")
             return referencedFileURL
         }
         
@@ -205,12 +205,12 @@ class CUEParser {
         for ext in audioExtensions {
             let candidateURL = directoryURL.appendingPathComponent("\(baseName).\(ext)")
             if FileManager.default.fileExists(atPath: candidateURL.path) {
-                print("✅ CUEParser: Found matching audio file: \(candidateURL.lastPathComponent)")
+                Log.library.debug("✅ CUEParser: Found matching audio file: \(candidateURL.lastPathComponent)")
                 return candidateURL
             }
         }
         
-        print("⚠️ CUEParser: No matching audio file found for CUE: \(referencedFileName)")
+        Log.library.warning("⚠️ CUEParser: No matching audio file found for CUE: \(referencedFileName)")
         return nil
     }
     
@@ -232,7 +232,7 @@ class CUEParser {
             )
             
             chapters.append(chapter)
-            print("📖 CUEParser: Chapter \(track.number): \(track.title) (\(formatTime(duration)))")
+            Log.library.debug("📖 CUEParser: Chapter \(track.number): \(track.title) (\(formatTime(duration)))")
         }
         
         return chapters

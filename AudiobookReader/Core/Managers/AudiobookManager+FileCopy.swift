@@ -6,21 +6,21 @@ extension AudiobookManager {
     nonisolated func copyFileToDocuments(from sourceURL: URL) async -> URL? {
         let fileManager = FileManager.default
         
-        print("🎵 AudiobookManager: Copying file from: \(sourceURL.path)")
+        Log.library.debug("🎵 AudiobookManager: Copying file from: \(sourceURL.path)")
         
         // Ensure we have access to the security-scoped resource
         let hasAccess = sourceURL.startAccessingSecurityScopedResource()
         defer { 
             if hasAccess { 
                 sourceURL.stopAccessingSecurityScopedResource() 
-                print("🔓 AudiobookManager: Released security-scoped resource access")
+                Log.library.debug("🔓 AudiobookManager: Released security-scoped resource access")
             }
         }
 
         // NOTE: Reverted iCloud handling to simple copy to avoid regressions.
         
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("❌ AudiobookManager: Failed to get documents directory")
+            Log.library.error("❌ AudiobookManager: Failed to get documents directory")
             return nil
         }
         
@@ -30,9 +30,9 @@ extension AudiobookManager {
         if !fileManager.fileExists(atPath: audiobooksDirectory.path) {
             do {
                 try fileManager.createDirectory(at: audiobooksDirectory, withIntermediateDirectories: true)
-                print("✅ AudiobookManager: Created audiobooks directory at: \(audiobooksDirectory.path)")
+                Log.library.debug("✅ AudiobookManager: Created audiobooks directory at: \(audiobooksDirectory.path)")
             } catch {
-                print("❌ AudiobookManager: Failed to create audiobooks directory: \(error)")
+                Log.library.error("❌ AudiobookManager: Failed to create audiobooks directory: \(error)")
                 return nil
             }
         }
@@ -64,11 +64,12 @@ extension AudiobookManager {
                 try? fileManager.removeItem(at: destinationURL)
                 throw CocoaError(.fileWriteUnknown)
             }
-            print("✅ AudiobookManager: File copied successfully to: \(destinationURL.path)")
-            print("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
+            destinationURL.disableFileProtection()
+            Log.library.debug("✅ AudiobookManager: File copied successfully to: \(destinationURL.path)")
+            Log.library.debug("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
             return destinationURL
         } catch {
-            print("❌ AudiobookManager: Failed to copy file: \(error)")
+            Log.library.error("❌ AudiobookManager: Failed to copy file: \(error)")
             return nil
         }
     }
@@ -84,19 +85,19 @@ extension AudiobookManager {
     ) async -> URL? {
         let fileManager = FileManager.default
         
-        print("📁 AudiobookManager: Copying folder from: \(sourceFolderURL.path)")
+        Log.library.debug("📁 AudiobookManager: Copying folder from: \(sourceFolderURL.path)")
         
         // Ensure we have access to the security-scoped resource
         let hasAccess = sourceFolderURL.startAccessingSecurityScopedResource()
         defer { 
             if hasAccess { 
                 sourceFolderURL.stopAccessingSecurityScopedResource() 
-                print("🔓 AudiobookManager: Released folder security-scoped resource access")
+                Log.library.debug("🔓 AudiobookManager: Released folder security-scoped resource access")
             }
         }
         
         guard let documentsDirectory = fileManager.urls(for: .documentDirectory, in: .userDomainMask).first else {
-            print("❌ AudiobookManager: Failed to get documents directory")
+            Log.library.error("❌ AudiobookManager: Failed to get documents directory")
             return nil
         }
         
@@ -107,7 +108,7 @@ extension AudiobookManager {
             do {
                 try fileManager.createDirectory(at: audiobooksDirectory, withIntermediateDirectories: true)
             } catch {
-                print("❌ AudiobookManager: Failed to create audiobooks directory: \(error)")
+                Log.library.error("❌ AudiobookManager: Failed to create audiobooks directory: \(error)")
                 return nil
             }
         }
@@ -126,12 +127,12 @@ extension AudiobookManager {
             
             // Prevent infinite loop
             if counter > 100 {
-                print("❌ AudiobookManager: Too many duplicate folders, aborting")
+                Log.library.error("❌ AudiobookManager: Too many duplicate folders, aborting")
                 return nil
             }
         }
         
-        print("📂 AudiobookManager: Creating destination folder: \(destinationFolderURL.lastPathComponent)")
+        Log.library.debug("📂 AudiobookManager: Creating destination folder: \(destinationFolderURL.lastPathComponent)")
         
         do {
             // Create destination folder
@@ -156,7 +157,7 @@ extension AudiobookManager {
                 
                 // Check if source file exists
                 guard fileManager.fileExists(atPath: sourceFileURL.path) else {
-                    print("⚠️ AudiobookManager: Source file not found: \(folderChapter.fileName)")
+                    Log.library.warning("⚠️ AudiobookManager: Source file not found: \(folderChapter.fileName)")
                     continue
                 }
                 
@@ -177,7 +178,7 @@ extension AudiobookManager {
                 totalCopiedSize += copiedSize
                 copiedFiles += 1
                 
-                print("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
+                Log.library.debug("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
                 
                 onFileCopied?(fileIndex, folderChapter.fileName)
             }
@@ -187,7 +188,7 @@ extension AudiobookManager {
                 let coverImageURL = destinationFolderURL.appendingPathComponent("cover.jpg")
                 if let imageData = coverImage.jpegData(compressionQuality: 0.8) {
                     try imageData.write(to: coverImageURL)
-            print("   🖼️ Saved cover image")
+            Log.library.debug("   🖼️ Saved cover image")
         }
             }
             
@@ -197,20 +198,21 @@ extension AudiobookManager {
             try manifestData.write(to: manifestURL)
             
             guard copiedFiles > 0 else {
-                print("❌ AudiobookManager: No files were copied successfully")
+                Log.library.error("❌ AudiobookManager: No files were copied successfully")
                 // Clean up empty folder
                 try? fileManager.removeItem(at: destinationFolderURL)
                 return nil
             }
             
-            print("✅ AudiobookManager: Folder copied successfully to: \(destinationFolderURL.path)")
-            print("   Total size: \(ByteCountFormatter.string(fromByteCount: totalCopiedSize, countStyle: .file))")
-            print("   Files: \(copiedFiles)/\(folderAudiobook.chapters.count)")
+            destinationFolderURL.disableFileProtection()
+            Log.library.debug("✅ AudiobookManager: Folder copied successfully to: \(destinationFolderURL.path)")
+            Log.library.debug("   Total size: \(ByteCountFormatter.string(fromByteCount: totalCopiedSize, countStyle: .file))")
+            Log.library.debug("   Files: \(copiedFiles)/\(folderAudiobook.chapters.count)")
             
             return destinationFolderURL
             
         } catch {
-            print("❌ AudiobookManager: Failed to copy folder: \(error)")
+            Log.library.error("❌ AudiobookManager: Failed to copy folder: \(error)")
             // Clean up partial copy
             try? fileManager.removeItem(at: destinationFolderURL)
             return nil
@@ -248,7 +250,7 @@ extension AudiobookManager {
         }
     }
     
-    nonisolated private func createFolderManifest(folderAudiobook: FolderAudiobook) throws -> Data {
+    nonisolated func createFolderManifest(folderAudiobook: FolderAudiobook) throws -> Data {
         let manifest: [String: Any] = [
             "title": folderAudiobook.title,
             "author": folderAudiobook.author ?? "Unknown Author",

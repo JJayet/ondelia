@@ -2,7 +2,7 @@ import Foundation
 import UIKit
 
 // MARK: - Timeout Helper
-func withTimeout<T>(seconds: TimeInterval, operation: @escaping @Sendable () async throws -> T) async throws -> T {
+func withTimeout<T: Sendable>(seconds: TimeInterval, operation: @escaping @Sendable () async throws -> T) async throws -> T {
     return try await withThrowingTaskGroup(of: T?.self) { group in
         // Add the main operation task
         group.addTask {

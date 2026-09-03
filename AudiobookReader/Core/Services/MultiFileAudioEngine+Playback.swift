@@ -26,7 +26,7 @@ extension MultiFileAudioEngine {
             self.preloadAdjacentChapters()
             self.unloadDistantChapters()
             
-            print("▶️ MultiFileAudioEngine: Playing chapter \(self.currentPlayerIndex + 1)")
+            Log.audio.debug("▶️ MultiFileAudioEngine: Playing chapter \(self.currentPlayerIndex + 1)")
         }
     }
     
@@ -44,7 +44,7 @@ extension MultiFileAudioEngine {
                 self.updateNowPlayingInfo()
             }
             
-            print("⏸️ MultiFileAudioEngine: Paused")
+            Log.audio.debug("⏸️ MultiFileAudioEngine: Paused")
         }
     }
     
@@ -79,6 +79,12 @@ extension MultiFileAudioEngine {
             guard let currentPlayer = self.players[self.currentPlayerIndex] else { return }
             let cmTime = CMTime(seconds: timeWithinChapter, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
             currentPlayer.seek(to: cmTime)
+
+            // switchToChapter() pauses the outgoing player; resume the new one if we were playing
+            if self.isPlaying {
+                currentPlayer.rate = self.playbackRate
+                currentPlayer.play()
+            }
             
             DispatchQueue.main.async { [weak self] in
                 guard let self = self, !self.isCleanedUp else { return }
@@ -86,7 +92,7 @@ extension MultiFileAudioEngine {
                 self.updateNowPlayingInfo()
             }
             
-            print("⏭️ MultiFileAudioEngine: Seeked to \(self.formatTime(time)) (Chapter \(targetChapterIndex + 1))")
+            Log.audio.debug("⏭️ MultiFileAudioEngine: Seeked to \(self.formatTime(time)) (Chapter \(targetChapterIndex + 1))")
         }
     }
     
