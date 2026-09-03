@@ -13,6 +13,7 @@ struct MergePrompt: Identifiable {
     let respond: @MainActor (Bool) -> Void
 }
 
+@MainActor
 @Observable
 class AudiobookManager: AudiobookManagerProtocol {
     static let shared = AudiobookManager()
@@ -28,7 +29,7 @@ class AudiobookManager: AudiobookManagerProtocol {
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
+    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?)] = []
     /// True from the moment an import starts until its merge offer has been answered.
     /// Imports run one at a time; see `handleImportRequest`.
     var isImportRunning = false

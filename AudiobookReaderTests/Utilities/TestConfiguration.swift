@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import XCTest
 import SwiftData
 @testable import AudiobookReader
 
@@ -92,82 +91,3 @@ extension ProcessInfo {
 }
 
 /// XCTestCase extensions for common test patterns
-extension XCTestCase {
-    
-    // MARK: - Async Testing Helpers
-    func waitForCondition(
-        _ condition: @escaping () -> Bool,
-        timeout: TimeInterval = TestConfiguration.testTimeout,
-        description: String = "Condition"
-    ) {
-        let expectation = XCTestExpectation(description: description)
-        
-        let timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { timer in
-            if condition() {
-                expectation.fulfill()
-                timer.invalidate()
-            }
-        }
-        
-        wait(for: [expectation], timeout: timeout)
-        timer.invalidate()
-    }
-    
-    // MARK: - Memory Leak Testing
-    func validateMemoryLeak<T: AnyObject>(
-        _ instance: T,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) {
-        addTeardownBlock { [weak instance] in
-            XCTAssertNil(
-                instance,
-                "Memory leak detected: Instance should have been deallocated",
-                file: file,
-                line: line
-            )
-        }
-    }
-    
-    // MARK: - SwiftData Testing Helpers
-    @MainActor
-    func createInMemorySwiftDataController() -> SwiftDataController {
-        let controller = SwiftDataController.preview
-        return controller
-    }
-    
-    func createTestAudiobook(
-        title: String = TestConfiguration.mockAudiobookTitle,
-        author: String = TestConfiguration.mockAuthor,
-        duration: TimeInterval = TestConfiguration.mockDuration
-    ) -> AudiobookModel {
-        let audiobook = AudiobookModel(
-            title: title,
-            author: author,
-            narrator: TestConfiguration.mockNarrator,
-            fileURL: nil,
-            duration: duration,
-            currentPosition: 0,
-            isFinished: false,
-            dateAdded: Date()
-        )
-        return audiobook
-    }
-    
-    func createTestChapter(
-        for audiobook: AudiobookModel,
-        title: String = "Test Chapter",
-        chapterNumber: Int = 1,
-        startTime: TimeInterval = 0,
-        endTime: TimeInterval = 1800
-    ) -> ChapterModel {
-        let chapter = ChapterModel(
-            title: title,
-            chapterNumber: Int16(chapterNumber),
-            startTime: startTime,
-            endTime: endTime
-        )
-        chapter.audiobook = audiobook
-        return chapter
-    }
-}

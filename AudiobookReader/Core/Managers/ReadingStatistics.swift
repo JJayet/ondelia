@@ -3,7 +3,7 @@ import SwiftData
 
 @MainActor
 @Observable
-final class ReadingStatistics: ReadingStatisticsProtocol {
+final class ReadingStatistics {
     static let shared = ReadingStatistics()
     private let swiftDataController = SwiftDataController.shared
     

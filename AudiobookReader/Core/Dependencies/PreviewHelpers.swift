@@ -23,12 +23,6 @@ struct PreviewWrapper<Content: View>: View {
 // MARK: - View Extension for Preview Dependencies
 @MainActor
 extension View {
-    func previewDependencies(_ dependencies: AudiobookDependencies? = nil) -> some View {
-        PreviewWrapper(dependencies: dependencies) {
-            self
-        }
-    }
-    
     func previewWithMockAudio(
         state: GlobalAudioManager.PlaybackState = .playing,
         currentTime: TimeInterval = 450.0,
@@ -50,75 +44,8 @@ extension View {
         }
     }
     
-    func previewWithTheme(
-        theme: AppTheme = .system,
-        accentColor: AccentColor = .blue
-    ) -> some View {
-        let deps = PreviewDependencies()
-        let mockTheme = deps.themeManager as! MockThemeManager
-        
-        mockTheme.currentTheme = theme
-        mockTheme.accentColor = accentColor
-        
-        return PreviewWrapper(dependencies: deps) {
-            self
-        }
-    }
 }
 
-// MARK: - Preview State Configurator
-@MainActor
-class PreviewStateConfigurator {
-    private let dependencies = PreviewDependencies()
-    
-    var audioManager: MockGlobalAudioManager {
-        return dependencies.audioManager as! MockGlobalAudioManager
-    }
-    
-    var themeManager: MockThemeManager {
-        return dependencies.themeManager as! MockThemeManager
-    }
-    
-    var audiobookManager: MockAudiobookManager {
-        return dependencies.audiobookManager as! MockAudiobookManager
-    }
-    
-    func configurePlaybackState(_ state: GlobalAudioManager.PlaybackState) -> PreviewStateConfigurator {
-        audioManager.playbackState = state
-        return self
-    }
-    
-    func configureCurrentTime(_ time: TimeInterval) -> PreviewStateConfigurator {
-        audioManager.setMockCurrentTime(time)
-        return self
-    }
-    
-    func configureDuration(_ duration: TimeInterval) -> PreviewStateConfigurator {
-        audioManager.setMockDuration(duration)
-        return self
-    }
-    
-    func configureTheme(_ theme: AppTheme) -> PreviewStateConfigurator {
-        themeManager.currentTheme = theme
-        return self
-    }
-    
-    func configureAccentColor(_ color: AccentColor) -> PreviewStateConfigurator {
-        themeManager.accentColor = color
-        return self
-    }
-    
-    func configureMiniPlayer(show: Bool) -> PreviewStateConfigurator {
-        audioManager.showMiniPlayer = show
-        return self
-    }
-    
-    func build() -> AudiobookDependencies {
-        return dependencies
-    }
-}
-
-// MARK: - Preview Content Factory
 struct PreviewContent {
     static func audiobook(
         title: String = "The Art of War",
@@ -181,63 +108,5 @@ struct PreviewContent {
             timestamp: 450.0,
             dateCreated: Date()
         )
-    }
-    
-    @MainActor static func readingStatistics() -> any ReadingStatisticsProtocol {
-        return MockReadingStatistics()
-    }
-}
-
-// MARK: - Preview Device Configurations
-extension PreviewDevice {
-    static let iPhone16 = PreviewDevice(rawValue: "iPhone 16")
-    static let iPhone16Pro = PreviewDevice(rawValue: "iPhone 16 Pro")
-    static let iPhone16Plus = PreviewDevice(rawValue: "iPhone 16 Plus")
-    static let iPhone16ProMax = PreviewDevice(rawValue: "iPhone 16 Pro Max")
-}
-
-// MARK: - Common Preview Configurations
-extension View {
-    func previewAllDevices() -> some View {
-        Group {
-            self.previewDevice(.iPhone16)
-                .previewDisplayName("iPhone 16")
-            
-            self.previewDevice(.iPhone16Pro)
-                .previewDisplayName("iPhone 16 Pro")
-            
-            self.previewDevice(.iPhone16Plus)
-                .previewDisplayName("iPhone 16 Plus")
-        }
-        .previewDependencies()
-    }
-    
-    func previewAllStates() -> some View {
-        Group {
-            self.previewWithMockAudio(state: .playing)
-                .previewDisplayName("Playing")
-            
-            self.previewWithMockAudio(state: .paused)
-                .previewDisplayName("Paused")
-            
-            self.previewWithMockAudio(state: .loading)
-                .previewDisplayName("Loading")
-            
-            self.previewWithMockAudio(state: .stopped, showMiniPlayer: false)
-                .previewDisplayName("Stopped")
-        }
-    }
-    
-    func previewAllThemes() -> some View {
-        Group {
-            self.previewWithTheme(theme: .light, accentColor: .blue)
-                .previewDisplayName("Light Theme")
-            
-            self.previewWithTheme(theme: .dark, accentColor: .purple)
-                .previewDisplayName("Dark Theme")
-            
-            self.previewWithTheme(theme: .system, accentColor: .green)
-                .previewDisplayName("System Theme")
-        }
     }
 }

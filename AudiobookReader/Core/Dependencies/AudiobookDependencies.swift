@@ -32,18 +32,6 @@ protocol AudioManagerProtocol: AnyObject {
     func cancelSleepTimer()
 }
 
-// MARK: - Theme Manager Protocol
-@MainActor
-protocol ThemeManagerProtocol: AnyObject {
-    var currentTheme: AppTheme { get set }
-    var accentColor: AccentColor { get set }
-    var skipInterval: SkipInterval { get set }
-    
-    func setTheme(_ theme: AppTheme)
-    func setAccentColor(_ color: AccentColor)
-    func setSkipInterval(_ interval: SkipInterval)
-}
-
 // MARK: - Audiobook Manager Protocol
 @MainActor
 protocol AudiobookManagerProtocol {
@@ -55,56 +43,40 @@ protocol AudiobookManagerProtocol {
     func resetProgress(for audiobook: AudiobookModel)
 }
 
-// MARK: - Reading Statistics Protocol
-@MainActor
-protocol ReadingStatisticsProtocol: AnyObject {
-    var totalListeningTime: TimeInterval { get set }
-    var booksCompleted: Int { get set }
-    var currentStreak: Int { get set }
-    var averageSpeed: Float { get set }
-    
-    func addListeningTime(_ time: TimeInterval, playbackRate: Float)
-    func markBookCompleted()
-    func updateStreak()
-    func getAverageSpeed() -> Float
-}
-
 // MARK: - Dependency Container
 @MainActor
 protocol AudiobookDependencies {
     var audioManager: any AudioManagerProtocol { get }
-    var themeManager: any ThemeManagerProtocol { get }
     var audiobookManager: AudiobookManagerProtocol { get }
+    var themeManager: ThemeManager { get }
+    var readingStatistics: ReadingStatistics { get }
     var swiftDataController: SwiftDataController { get }
-    
-    func createReadingStatistics() -> any ReadingStatisticsProtocol
 }
 
 // MARK: - Live Dependencies
 @MainActor
 class LiveDependencies: AudiobookDependencies {
+    nonisolated init() {}
+
     lazy var audioManager: any AudioManagerProtocol = GlobalAudioManager.shared
-    lazy var themeManager: any ThemeManagerProtocol = ThemeManager.shared
     lazy var audiobookManager: AudiobookManagerProtocol = AudiobookManager.shared
+    lazy var themeManager: ThemeManager = .shared
+    lazy var readingStatistics: ReadingStatistics = .shared
     lazy var swiftDataController: SwiftDataController = SwiftDataController.shared
-    private lazy var readingStatistics = ReadingStatistics.shared
-    
-    func createReadingStatistics() -> any ReadingStatisticsProtocol {
-        return readingStatistics
-    }
 }
 
 // MARK: - Preview Dependencies
 @MainActor
 class PreviewDependencies: AudiobookDependencies {
+    nonisolated init() {}
+
+    // Audio and library are mocked so a preview never touches real playback or the store.
+    // Theme and statistics are cheap value holders, so previews use fresh real ones.
     lazy var audioManager: any AudioManagerProtocol = MockGlobalAudioManager()
-    lazy var themeManager: any ThemeManagerProtocol = MockThemeManager()
     lazy var audiobookManager: AudiobookManagerProtocol = MockAudiobookManager()
+    lazy var themeManager: ThemeManager = .shared
+    lazy var readingStatistics = ReadingStatistics()
     lazy var swiftDataController: SwiftDataController = SwiftDataController.preview
-    
-    func createReadingStatistics() -> any ReadingStatisticsProtocol {
-        return MockReadingStatistics()
-    }
 }
 
 // MARK: - Environment Detection
@@ -115,16 +87,7 @@ extension ProcessInfo {
 }
 
 // MARK: - Environment Key
-private struct DependencyEnvironmentKey: EnvironmentKey {
-    @MainActor
-    static var defaultValue: AudiobookDependencies {
-        ProcessInfo.isPreview ? PreviewDependencies() : LiveDependencies()
-    }
-}
-
 extension EnvironmentValues {
-    var dependencies: AudiobookDependencies {
-        get { self[DependencyEnvironmentKey.self] }
-        set { self[DependencyEnvironmentKey.self] = newValue }
-    }
+    @Entry var dependencies: AudiobookDependencies =
+        ProcessInfo.isPreview ? PreviewDependencies() : LiveDependencies()
 }

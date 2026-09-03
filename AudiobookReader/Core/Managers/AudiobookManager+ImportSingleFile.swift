@@ -5,7 +5,7 @@ import UIKit
 extension AudiobookManager {
     // MARK: - CUE-based Audiobook Import
     
-    func importCUEBasedAudiobook(audioFile: URL, cueFile: CUEFile) async {
+    nonisolated func importCUEBasedAudiobook(audioFile: URL, cueFile: CUEFile) async {
         Log.library.debug("🎵 AudiobookManager: Starting CUE-based audiobook import")
         
         // Extract metadata from the audio file
@@ -57,7 +57,7 @@ extension AudiobookManager {
             }
         } catch {
             try? FileManager.default.removeItem(at: localURL)
-            reportImportFailure(error)
+            await reportImportFailure(error)
         }
     }
     
@@ -66,7 +66,7 @@ extension AudiobookManager {
     ///   - fallbackCover: used when the file carries no artwork of its own.
     ///   - inCoverBatch: when true the audiobook joins `coverBatch` instead of raising the cover
     ///     picker on its own, so a folder split into many books only asks once, at the end.
-    func importAudiobook(from url: URL, fallbackCover: UIImage? = nil, inCoverBatch: Bool = false) async {
+    nonisolated func importAudiobook(from url: URL, fallbackCover: UIImage? = nil, inCoverBatch: Bool = false) async {
         await MainActor.run { isImporting = true }
         
         Log.library.debug("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
@@ -168,7 +168,7 @@ extension AudiobookManager {
             }
         } catch {
             try? FileManager.default.removeItem(at: localURL)
-            reportImportFailure(error)
+            await reportImportFailure(error)
         }
     }
 

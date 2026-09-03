@@ -11,7 +11,7 @@ extension AudiobookManager {
     /// resets them under the first — which is exactly how the merge offer went missing: whichever
     /// run finished second found `pendingMergeTitle` already consumed and silently offered nothing.
     @MainActor
-    func handleImportRequest(urls: [URL], completion: (() -> Void)? = nil) {
+    func handleImportRequest(urls: [URL], completion: (@Sendable () -> Void)? = nil) {
         guard swiftDataController.isLoaded, !isLoadingLibrary, !isImportRunning else {
             Log.library.debug("📚 AudiobookManager: Busy, queueing import of \(urls.count) item(s)")
             pendingImports.append((urls: urls, completion: completion))
@@ -39,7 +39,7 @@ extension AudiobookManager {
         }
     }
 
-    private func processImport(unsortedURLs: [URL], completion: (() -> Void)? = nil) {
+    private nonisolated func processImport(unsortedURLs: [URL], completion: (@Sendable () -> Void)? = nil) {
         // Neither the document picker nor a directory listing promises an order, and import order
         // is the only record of it: titles come from file metadata and say nothing about sequence.
         let urls = unsortedURLs.sorted {
@@ -49,8 +49,8 @@ extension AudiobookManager {
         Task.detached(priority: .userInitiated) {
             // Picking every file of a folder is the same ambiguity as picking the folder itself,
             // so both end up offering the same merge once the files are safely in the library.
-            let isMultiFilePick = await manager.isMultiFileAudioPick(urls)
-            let folderName = await manager.commonAudioFolder(of: urls)?.lastPathComponent
+            let isMultiFilePick = manager.isMultiFileAudioPick(urls)
+            let folderName = manager.commonAudioFolder(of: urls)?.lastPathComponent
             await MainActor.run {
                 manager.importBatch.removeAll()
                 manager.coverBatch.removeAll()
@@ -101,7 +101,7 @@ extension AudiobookManager {
         handleImportRequest(urls: next.urls, completion: next.completion)
     }
 
-    func importZIPAudiobook(from zipURL: URL) async {
+    nonisolated func importZIPAudiobook(from zipURL: URL) async {
         await MainActor.run { isImporting = true }
 
         Log.library.debug("📦 AudiobookManager: Starting ZIP audiobook import from: \(zipURL.lastPathComponent)")
@@ -138,7 +138,7 @@ extension AudiobookManager {
     ///
     /// Non-audio strays are ignored rather than disqualifying the pick: a `cover.jpg` says
     /// nothing about whether the audio is one book or several.
-    func isMultiFileAudioPick(_ urls: [URL]) -> Bool {
+    nonisolated func isMultiFileAudioPick(_ urls: [URL]) -> Bool {
         let audioFiles = urls.filter { !$0.hasDirectoryPath && FolderImporter.isAudioFile($0) }
         return audioFiles.count > 1 && !urls.contains(where: { $0.hasDirectoryPath })
     }
@@ -148,7 +148,7 @@ extension AudiobookManager {
     ///
     /// Judged from the URLs alone. Picked files can live outside the sandbox, where nothing is
     /// readable, not even `fileExists`, until their security scope is claimed.
-    func commonAudioFolder(of urls: [URL]) -> URL? {
+    nonisolated func commonAudioFolder(of urls: [URL]) -> URL? {
         guard isMultiFileAudioPick(urls) else { return nil }
         let audioFiles = urls.filter { !$0.hasDirectoryPath && FolderImporter.isAudioFile($0) }
         let folders = Set(audioFiles.map { $0.deletingLastPathComponent().standardizedFileURL })
@@ -157,7 +157,7 @@ extension AudiobookManager {
     }
 
     /// True when the folder already declares how it is meant to be read, leaving nothing to ask.
-    func hasStructuredLayout(_ folderURL: URL) -> Bool {
+    nonisolated func hasStructuredLayout(_ folderURL: URL) -> Bool {
         FileManager.default.fileExists(atPath: folderURL.appendingPathComponent("complete.json").path)
             || !CUEParser.findCUEFiles(in: folderURL).isEmpty
     }
@@ -221,7 +221,7 @@ extension AudiobookManager {
     }
 
     /// Imports every file as its own audiobook, sharing the folder cover and asking for one only at the end.
-    private func importFilesAsSeparateAudiobooks(_ audioFiles: [URL], from folderURL: URL) async {
+    private nonisolated func importFilesAsSeparateAudiobooks(_ audioFiles: [URL], from folderURL: URL) async {
         Log.library.debug("📚 AudiobookManager: Importing \(audioFiles.count) files as separate audiobooks")
         let folderCover = await FolderImporter.findCoverImage(in: folderURL)
 
@@ -241,7 +241,7 @@ extension AudiobookManager {
         }
     }
 
-    func importAudiobookFolder(from folderURL: URL) async {
+    nonisolated func importAudiobookFolder(from folderURL: URL) async {
         await MainActor.run {
             isImporting = true
         }
@@ -283,7 +283,7 @@ extension AudiobookManager {
     }
 
     /// Copies a folder audiobook into the library and stores it with its chapters.
-    private func copyAndPersist(_ folderAudiobook: FolderAudiobook, sourceFolderURL: URL) async {
+    private nonisolated func copyAndPersist(_ folderAudiobook: FolderAudiobook, sourceFolderURL: URL) async {
         guard let localFolderURL = await copyFolderToDocuments(
             from: sourceFolderURL,
             folderAudiobook: folderAudiobook

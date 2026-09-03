@@ -16,11 +16,7 @@ extension GlobalAudioManager {
     func applyStoredSpeed(for audiobook: AudiobookModel) {
         let speed = storedSpeed(for: audiobook)
         guard speed != 1.0 else { return }
-        if useMultiFileEngine {
-            multiFileAudioEngine?.setPlaybackRate(speed)
-        } else {
-            audioEngine?.setPlaybackRate(speed)
-        }
+        player?.setPlaybackRate(speed)
     }
 
     /// Records a speed change so the next launch, and the next time this book is opened, keep it.

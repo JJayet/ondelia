@@ -42,31 +42,11 @@ struct AudiobookReaderTests {
         MockAVAudioSession.reset()
         #expect(MockAVAudioSession.shouldFailSetup == false)
         #expect(MockAVAudioSession.preferredSampleRate == 44100.0)
-        
-        // Test mock CUE parser
-        MockCUEParser.reset()
-        #expect(MockCUEParser.shouldFailParsing == false)
+
         
         // Test data factory
         let testURL = TestDataFactory.createMockAudioFile(named: "test", duration: 1800)
         #expect(FileManager.default.fileExists(atPath: testURL.path))
-    }
-    
-    @Test("Dependencies should be properly configured for testing")
-    func dependenciesConfiguration() async throws {
-        // Test live dependencies
-        let liveDeps = LiveDependencies()
-        #expect(liveDeps.audioManager is GlobalAudioManager)
-        #expect(liveDeps.themeManager is ThemeManager)
-        #expect(liveDeps.audiobookManager is AudiobookManager)
-        #expect(liveDeps.swiftDataController === SwiftDataController.shared)
-        
-        // Test preview dependencies
-        let previewDeps = PreviewDependencies()
-        #expect(previewDeps.audioManager is MockGlobalAudioManager)
-        #expect(previewDeps.themeManager is MockThemeManager)
-        #expect(previewDeps.audiobookManager is MockAudiobookManager)
-        #expect(previewDeps.swiftDataController === SwiftDataController.preview)
     }
     
     @Test("Test data resources should be accessible")

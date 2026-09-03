@@ -8,10 +8,11 @@
 import XCTest
 
 /// Shared launch, teardown and player navigation for the PlayerViewUITests* classes.
+@MainActor
 class PlayerViewUITestCase: XCTestCase {
     var app: XCUIApplication!
     
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments.append("--uitesting")
@@ -24,7 +25,7 @@ class PlayerViewUITestCase: XCTestCase {
         XCTAssertTrue(exists, "App should launch successfully")
     }
     
-    override func tearDownWithError() throws {
+    override func tearDown() async throws {
         app.terminate()
         app = nil
     }

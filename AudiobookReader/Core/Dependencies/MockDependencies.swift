@@ -98,28 +98,6 @@ class MockGlobalAudioManager: AudioManagerProtocol {
     }
 }
 
-// MARK: - Mock Theme Manager
-@MainActor
-@Observable
-class MockThemeManager: ThemeManagerProtocol {
-    var currentTheme: AppTheme = .system
-    var accentColor: AccentColor = .blue
-    var skipInterval: SkipInterval = .fifteen
-    var autoPlay: Bool = true
-    
-    func setTheme(_ theme: AppTheme) {
-        currentTheme = theme
-    }
-    
-    func setAccentColor(_ color: AccentColor) {
-        accentColor = color
-    }
-    
-    func setSkipInterval(_ interval: SkipInterval) {
-        skipInterval = interval
-    }
-}
-
 // MARK: - Mock Audiobook Manager
 @MainActor
 class MockAudiobookManager: AudiobookManagerProtocol {
@@ -163,35 +141,5 @@ class MockAudiobookManager: AudiobookManagerProtocol {
     func resetProgress(for audiobook: AudiobookModel) {
         audiobook.currentPosition = 0
         audiobook.isFinished = false
-    }
-}
-
-// MARK: - Mock Reading Statistics
-@MainActor
-@Observable
-class MockReadingStatistics: ReadingStatisticsProtocol {
-    var totalListeningTime: TimeInterval = 125400.0 // ~34.8 hours
-    var booksCompleted: Int = 12
-    var currentStreak: Int = 7
-    var averageSpeed: Float = 1.3
-    
-    func addListeningTime(_ time: TimeInterval, playbackRate: Float) {
-        totalListeningTime += time
-        // Update average speed calculation
-        let weightedSpeed = (averageSpeed * 0.95) + (playbackRate * 0.05)
-        averageSpeed = weightedSpeed
-    }
-    
-    func markBookCompleted() {
-        booksCompleted += 1
-        currentStreak += 1
-    }
-    
-    func updateStreak() {
-        // Mock streak calculation
-    }
-    
-    func getAverageSpeed() -> Float {
-        return averageSpeed
     }
 }

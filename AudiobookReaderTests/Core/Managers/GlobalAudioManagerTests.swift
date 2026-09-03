@@ -7,15 +7,12 @@
 
 import Testing
 import Foundation
-import Combine
 @testable import AudiobookReader
 
 @MainActor
 @Suite("GlobalAudioManager Tests", .serialized, .tags(.manager))
 struct GlobalAudioManagerTests {
-    
-    var cancellables: Set<AnyCancellable> = []
-    
+
     init() {
         // Reset mock framework for each test
         MockAVAudioSession.reset()
@@ -29,9 +26,7 @@ struct GlobalAudioManagerTests {
         let manager = GlobalAudioManager.shared
         
         #expect(manager.currentAudiobook == nil)
-        #expect(manager.audioEngine == nil)
-        #expect(manager.multiFileAudioEngine == nil)
-        #expect(manager.useMultiFileEngine == false)
+        #expect(manager.player == nil)
         #expect(manager.isLoading == false)
         #expect(manager.isReady == false)
         #expect(manager.showMiniPlayer == false)
@@ -40,7 +35,7 @@ struct GlobalAudioManagerTests {
     
     // MARK: - Engine Selection Tests
     
-    @Test("Single file audiobook loads with AudioEngine")
+    @Test("A single-file book loads as one track")
     func testSingleFileEngineSelection() async throws {
         let manager = GlobalAudioManager.shared
         let audiobook = createTestAudiobook(isMultiFile: false)
@@ -52,43 +47,38 @@ struct GlobalAudioManagerTests {
         // Mock file existence
         MockFileManager.setFileExists(tempURL.path, exists: true)
         
-        await manager.loadAudiobook(audiobook)
+        manager.loadAudiobook(audiobook)
         
         // Wait for loading to complete
         try await Task.sleep(for: .milliseconds(500))
         
-        #expect(manager.useMultiFileEngine == false)
-        #expect(manager.audioEngine != nil)
-        #expect(manager.multiFileAudioEngine == nil)
+        #expect(manager.player?.tracks.count == 1)
         #expect(manager.currentAudiobook?.id == audiobook.id)
     }
     
-    @Test("Multi-file audiobook loads with MultiFileAudioEngine")
+    @Test("A folder book loads one track per chapter")
     func testMultiFileEngineSelection() async throws {
         let manager = GlobalAudioManager.shared
         let audiobook = createTestAudiobook(isMultiFile: true)
         
-        // Create temp directory for testing
-        let tempDir = createTempDirectory(named: "test_multifile")
+        let tempDir = createTestChapterFolder(named: "test_multifile", chapters: 3)
         audiobook.fileURL = tempDir.path
         
         // Mock directory existence
         MockFileManager.setFileExists(tempDir.path, exists: true)
         
-        await manager.loadAudiobook(audiobook)
+        manager.loadAudiobook(audiobook)
         
         // Wait for loading to complete
         try await Task.sleep(for: .milliseconds(500))
         
-        #expect(manager.useMultiFileEngine == true)
-        #expect(manager.multiFileAudioEngine != nil)
-        #expect(manager.audioEngine == nil)
+        #expect(manager.player?.tracks.count == 3)
         #expect(manager.currentAudiobook?.id == audiobook.id)
     }
     
     // MARK: - Engine Switching Tests
     
-    @Test("Switching between audiobooks properly cleans up engines")
+    @Test("Switching books replaces the player and its timeline")
     func testEngineSwitching() async throws {
         let manager = GlobalAudioManager.shared
         
@@ -98,24 +88,21 @@ struct GlobalAudioManagerTests {
         audiobook1.fileURL = tempURL1.path
         MockFileManager.setFileExists(tempURL1.path, exists: true)
         
-        await manager.loadAudiobook(audiobook1)
+        manager.loadAudiobook(audiobook1)
         try await Task.sleep(for: .milliseconds(300))
         
-        #expect(manager.useMultiFileEngine == false)
-        #expect(manager.audioEngine != nil)
+        #expect(manager.player?.tracks.count == 1)
         
         // Load second audiobook (multi-file)
         let audiobook2 = createTestAudiobook(isMultiFile: true)
-        let tempDir2 = createTempDirectory(named: "test2_multifile")
+        let tempDir2 = createTestChapterFolder(named: "test2_multifile", chapters: 2)
         audiobook2.fileURL = tempDir2.path
         MockFileManager.setFileExists(tempDir2.path, exists: true)
         
-        await manager.loadAudiobook(audiobook2)
+        manager.loadAudiobook(audiobook2)
         try await Task.sleep(for: .milliseconds(300))
         
-        #expect(manager.useMultiFileEngine == true)
-        #expect(manager.multiFileAudioEngine != nil)
-        #expect(manager.audioEngine == nil) // Should be cleaned up
+        #expect(manager.player?.tracks.count == 2)
         #expect(manager.currentAudiobook?.id == audiobook2.id)
     }
     
@@ -131,7 +118,7 @@ struct GlobalAudioManagerTests {
         MockFileManager.setFileExists(tempURL.path, exists: true)
         
         // Start loading
-        await manager.loadAudiobook(audiobook)
+        manager.loadAudiobook(audiobook)
         
         // Should be loading immediately
         #expect(manager.isLoading == true)
@@ -156,7 +143,7 @@ struct GlobalAudioManagerTests {
         MockFileManager.setFileExists(tempURL.path, exists: true)
         
         // Load audiobook
-        await manager.loadAudiobook(audiobook)
+        manager.loadAudiobook(audiobook)
         try await Task.sleep(for: .milliseconds(300))
         
         // Test play state

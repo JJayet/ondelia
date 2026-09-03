@@ -8,10 +8,11 @@
 import XCTest
 
 /// Shared launch, teardown and player navigation for the AccessibilityTests* classes.
+@MainActor
 class AccessibilityUITestCase: XCTestCase {
     var app: XCUIApplication!
     
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments.append("--uitesting")
@@ -19,7 +20,7 @@ class AccessibilityUITestCase: XCTestCase {
         app.launch()
     }
     
-    override func tearDownWithError() throws {
+    override func tearDown() async throws {
         app.terminate()
         app = nil
     }

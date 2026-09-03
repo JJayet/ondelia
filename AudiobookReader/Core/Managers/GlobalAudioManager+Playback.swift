@@ -1,151 +1,77 @@
 import Foundation
 import SwiftUI
 
-// MARK: - Playback controls, Live Activity, helpers
+// MARK: - Playback controls and helpers
+//
+// One player means these are all plain forwarding now. Each of them used to branch on
+// `useMultiFileEngine` and address one of two engines.
 extension GlobalAudioManager {
     func pausePlayback() {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.pause()
-        } else {
-            audioEngine?.pause()
-        }
+        player?.pause()
         playbackState = .paused
         playbackStateDidChange()
     }
-    
+
     func resumePlayback() {
-        guard audioEngine != nil || multiFileAudioEngine != nil else {
+        guard let player else {
+            // Nothing to resume yet: remember the intent so the load can honour it.
             if isLoading { pendingAutoplay = true }
             return
         }
-        if useMultiFileEngine {
-            multiFileAudioEngine?.play()
-        } else {
-            audioEngine?.play()
-        }
+        player.play()
         showMiniPlayer = true
         playbackState = .playing
         playbackStateDidChange()
     }
-    
+
     func startPlayback() {
-        guard audioEngine != nil || multiFileAudioEngine != nil else {
-            if isLoading { pendingAutoplay = true }
-            return
-        }
         resumePlayback()
-        showMiniPlayer = true
-        playbackState = .playing
-        playbackStateDidChange()
     }
-    
+
     func stopPlayback() {
         pendingAutoplay = false
-        pausePlayback()
+        player?.pause()
         showMiniPlayer = false
         playbackState = .stopped
         playbackStateDidChange()
     }
-    
-    func isPlaying() -> Bool {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.isPlaying ?? false
+
+    func togglePlayback() {
+        if isPlaying() {
+            pausePlayback()
         } else {
-            return audioEngine?.isPlaying ?? false
+            resumePlayback()
         }
     }
-    
-    func getCurrentTime() -> TimeInterval {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.currentTime ?? 0
-        } else {
-            return audioEngine?.currentTime ?? 0
-        }
-    }
-    
-    func getDuration() -> TimeInterval {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.duration ?? 0
-        } else {
-            return audioEngine?.duration ?? 0
-        }
-    }
-    
-    func getPlaybackRate() -> Float {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.playbackRate ?? 1.0
-        } else {
-            return audioEngine?.playbackRate ?? 1.0
-        }
-    }
-    
+
+    func isPlaying() -> Bool { player?.isPlaying ?? false }
+    func getCurrentTime() -> TimeInterval { player?.currentTime ?? 0 }
+    func getDuration() -> TimeInterval { player?.duration ?? 0 }
+    func getPlaybackRate() -> Float { player?.playbackRate ?? 1 }
+
     func setPlaybackRate(_ rate: Float) {
         rememberSpeed(rate)
-        if useMultiFileEngine {
-            multiFileAudioEngine?.setPlaybackRate(rate)
-        } else {
-            audioEngine?.setPlaybackRate(rate)
-        }
+        player?.setPlaybackRate(rate)
         playbackStateDidChange()
     }
-    
+
     func skipForward(_ interval: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.skipForward(interval)
-        } else {
-            audioEngine?.skipForward(interval)
-        }
+        player?.skipForward(interval)
         playbackStateDidChange()
     }
-    
+
     func skipBackward(_ interval: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.skipBackward(interval)
-        } else {
-            audioEngine?.skipBackward(interval)
-        }
+        player?.skipBackward(interval)
         playbackStateDidChange()
     }
-    
-    func togglePlayback() {
-        let wasPlaying = isPlaying()
-        
-        if useMultiFileEngine {
-            multiFileAudioEngine?.togglePlayback()
-        } else {
-            audioEngine?.togglePlayback()
-        }
-        
-        // Update state based on toggle result
-        if wasPlaying {
-            playbackState = .paused
-        } else {
-            playbackState = .playing
-            showMiniPlayer = true
-        }
-        playbackStateDidChange()
-    }
-    
+
     func seek(to time: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.seek(to: time)
-        } else {
-            audioEngine?.seek(to: time)
-        }
+        player?.seek(to: time)
         // A deliberate jump is worth writing straight away rather than waiting for the save timer.
         persistProgress()
         playbackStateDidChange()
     }
 
-    
-    // MARK: - Enhanced Audio Processing Controls
-    func enableDynamicRangeCompression(_ enabled: Bool, threshold: Float = -12.0, ratio: Float = 4.0) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.enableDynamicRangeCompression(enabled, threshold: threshold, ratio: ratio)
-        }
-        // Note: Single file engine doesn't have this method yet, but could be added similarly
-    }
-    
     // MARK: - Now Playing Snapshot
     func publishPlaybackSnapshot(reloadTimeline: Bool = false) {
         NowPlayingSharedStore.write(
@@ -164,7 +90,7 @@ extension GlobalAudioManager {
         let hours = Int(time) / 3600
         let minutes = (Int(time) % 3600) / 60
         let seconds = Int(time) % 60
-        
+
         if hours > 0 {
             return String(format: "%d:%02d:%02d", hours, minutes, seconds)
         } else {

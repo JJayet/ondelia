@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 @Observable
-final class ThemeManager: ThemeManagerProtocol {    
+final class ThemeManager {    
     static let shared = ThemeManager()
     
     var currentTheme: AppTheme = .system

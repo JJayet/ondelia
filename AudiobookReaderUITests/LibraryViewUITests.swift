@@ -8,10 +8,11 @@
 import XCTest
 
 /// Shared launch, teardown and player navigation for the LibraryViewUITests* classes.
+@MainActor
 class LibraryViewUITestCase: XCTestCase {
     var app: XCUIApplication!
     
-    override func setUpWithError() throws {
+    override func setUp() async throws {
         continueAfterFailure = false
         app = XCUIApplication()
         app.launchArguments.append("--uitesting")
@@ -28,7 +29,7 @@ class LibraryViewUITestCase: XCTestCase {
         sleep(1)
     }
     
-    override func tearDownWithError() throws {
+    override func tearDown() async throws {
         app.terminate()
         app = nil
     }

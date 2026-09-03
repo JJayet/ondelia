@@ -8,7 +8,10 @@ enum PlaybackCommand: String, Codable, Sendable {
     case skipBackward
 }
 
-enum NowPlayingSharedStore {
+/// Nonisolated on purpose: the widget extension and the App Intents both read and write this
+/// from outside the main actor. It owns no state of its own — everything lives in the shared
+/// UserDefaults suite and one file in the app group container.
+nonisolated enum NowPlayingSharedStore {
     static let appGroupID = "group.io.jayet.AudiobookReader"
     static let commandNotificationName = "group.io.jayet.AudiobookReader.playback-command"
     private static let coverFileName = "now-playing-cover.jpg"

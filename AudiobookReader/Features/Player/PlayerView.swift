@@ -9,7 +9,7 @@ struct PlayerView: View {
 
     // Access dependencies through the container
     var audioManager: any AudioManagerProtocol { deps.audioManager }
-    var themeManager: any ThemeManagerProtocol { deps.themeManager }
+    var themeManager: ThemeManager { deps.themeManager }
     var audiobookManager: AudiobookManagerProtocol {
         deps.audiobookManager
     }
@@ -21,7 +21,7 @@ struct PlayerView: View {
             dependencies
             ?? (ProcessInfo.isPreview
                 ? PreviewDependencies() : LiveDependencies())
-        let stats = (deps.createReadingStatistics() as? ReadingStatistics) ?? ReadingStatistics()
+        let stats = deps.readingStatistics
         self._statistics = State(wrappedValue: stats)
         self._viewModel = State(
             wrappedValue: PlayerViewModel(

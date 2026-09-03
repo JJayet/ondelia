@@ -14,24 +14,21 @@ import XCTest
 // MARK: - Mock Dependencies Container
 class MockDependencies: AudiobookDependencies {
     let audioManager: any AudioManagerProtocol
-    let themeManager: any ThemeManagerProtocol
     let audiobookManager: AudiobookManagerProtocol
+    // Theme and statistics are plain value holders, so a test gets real ones. Only audio and
+    // the library have side effects worth substituting.
+    let themeManager = ThemeManager.shared
+    let readingStatistics = ReadingStatistics()
     let swiftDataController: SwiftDataController
-    
+
     init(
         audioManager: (any AudioManagerProtocol)? = nil,
-        themeManager: (any ThemeManagerProtocol)? = nil,
         audiobookManager: AudiobookManagerProtocol? = nil,
         swiftDataController: SwiftDataController? = nil
     ) {
         self.audioManager = audioManager ?? MockGlobalAudioManager()
-        self.themeManager = themeManager ?? MockThemeManager()
         self.audiobookManager = audiobookManager ?? MockAudiobookManager()
         self.swiftDataController = swiftDataController ?? SwiftDataController.preview
-    }
-    
-    func createReadingStatistics() -> any ReadingStatisticsProtocol {
-        return MockReadingStatistics()
     }
 }
 
