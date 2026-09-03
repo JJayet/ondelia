@@ -1,0 +1,209 @@
+AudiobookReaderUITests/WidgetAndLiveActivitiesUITests2.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-161
+AudiobookReader/Core/Managers/AudiobookManager+ImportSingleFile.swift
+  s_43c227ab15905c::t_d33d12d7b4f512 1-148
+AudiobookReaderTests/Core/Managers/GlobalAudioManagerTests2.swift
+  s_43c227ab15905c::t_6965a12ba6f850 1-189
+AudiobookReader/Features/Library/ImagePickerView.swift
+  s_43c227ab15905c::t_3bab49cb0a5a5f 22
+AudiobookReaderTests/Core/Services/AudioEngineTests2.swift
+  s_43c227ab15905c::t_6965a12ba6f850 1-229
+AudiobookReaderWidget/NowPlayingWidgetViews.swift
+  s_43c227ab15905c::t_1935adcb2e5ba7 1-140
+AudiobookReader/Core/Dependencies/MockDependencies+Models.swift
+  s_43c227ab15905c::t_2a6878726bce55 1-126
+AudiobookReader/Core/Services/MultiFileAudioEngine+Chapters.swift
+  s_43c227ab15905c::t_05730a57c897da 1-6,8-40,42-52,54-171
+  s_43c227ab15905c::t_e7eab4766ad86e 7,41,53
+AudiobookReader/Core/Services/AudioEngine.swift
+  s_43c227ab15905c::t_e7eab4766ad86e 14-20,28-29,59
+AudiobookReader/Features/Library/LibraryView+Previews.swift
+  s_43c227ab15905c::t_39943e12335255 1-63
+AudiobookReader/Features/Player/TranscriptionLoader.swift
+  s_43c227ab15905c::t_7ada147d3d5087 8-18
+AudiobookReaderUITests/AccessibilityTests3.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-209
+AudiobookReaderUITests/AccessibilityTests2.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-203
+AudiobookReaderWidget/NowPlayingWidget.swift
+  s_43c227ab15905c::t_1935adcb2e5ba7 30-32,61-62
+AudiobookReader/Features/Library/LibraryView+Options.swift
+  s_43c227ab15905c::t_7e7d7e0b17ab7d 1-84
+AudiobookReaderUITests/PlayerViewUITests2.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-106
+AudiobookReaderTests/Core/Managers/GlobalAudioManagerTests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 189
+AudiobookReader/Shared/AppIntents/AudiobookLiveActivityViews.swift
+  s_43c227ab15905c::t_2b056d60c28a21 1-198
+AudiobookReader/Core/Services/FolderImporter.swift
+  s_43c227ab15905c::t_05730a57c897da 2-3
+AudiobookReader/Core/Managers/AudiobookManager+Fetch.swift
+  s_43c227ab15905c::t_d33d12d7b4f512 1-77
+AudiobookReader/Core/Managers/AudiobookManager+FileCopy.swift
+  s_43c227ab15905c::t_d33d12d7b4f512 1-245
+AudiobookReader.xcodeproj/project.pbxproj
+  s_43c227ab15905c::t_8aaace6277a073 90-91
+  s_43c227ab15905c::t_186d37ca3637e2 312,522,589
+AudiobookReader/Core/Services/AudioEngine+Playback.swift
+  s_43c227ab15905c::t_05730a57c897da 1-6,8-195
+  s_43c227ab15905c::t_e7eab4766ad86e 7
+AudiobookReader/Features/Player/PlayerView.swift
+  s_43c227ab15905c::t_69e1110756ec28 6-8,11-13,35-41,43-45,47,52,56
+  s_43c227ab15905c::t_7ada147d3d5087 127,130,133,136,139,146
+AudiobookReader/Core/Services/MultiFileAudioEngine+Session.swift
+  s_43c227ab15905c::t_e7eab4766ad86e 7,38,68
+  s_43c227ab15905c::t_05730a57c897da 1-6,8-37,39-67,69-176
+AudiobookReader/Core/Managers/GlobalAudioManager+Playback.swift
+  s_43c227ab15905c::t_cc0e588d8399c7 1-249
+AudiobookReaderTests/Core/Services/AudioEngineTests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 13-18,176
+AudiobookReaderUITests/LibraryViewUITests2.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-203
+AudiobookReader/Core/Models/SwiftData/SwiftDataController.swift
+  s_43c227ab15905c::t_7e5045c1d24027 20-23,31,34
+AudiobookReader/Features/Library/EnhancedAudiobookRowView.swift
+  s_43c227ab15905c::t_a1fe0c7a4f38c3 1-126
+AudiobookReader/Core/Managers/AudiobookManager.swift
+  s_43c227ab15905c::t_d6cc6efdb43f00 18-22
+  s_43c227ab15905c::t_d33d12d7b4f512 7,17
+AudiobookReader/Core/Managers/AudiobookManager+Import.swift
+  s_43c227ab15905c::t_d33d12d7b4f512 1-168
+AudiobookReader/Features/Player/ChaptersListView.swift
+  s_43c227ab15905c::t_7ada147d3d5087 17,21,35
+AudiobookReader/Features/Library/ContinueReadingCardView.swift
+  s_43c227ab15905c::t_b959f361209cb3 1-66
+AudiobookReader/Core/Managers/ThemeManager+Colors.swift
+  s_43c227ab15905c::t_7e5045c1d24027 1-87
+AudiobookReader/Features/Settings/SettingsRows.swift
+  s_43c227ab15905c::t_9641f0d3f85620 1-24
+AudiobookReader/Features/Search/SearchView.swift
+  s_43c227ab15905c::t_ce6352a1f4f7e5 119,124,146,151,159,190-193,201-205
+AudiobookReader/Shared/AppIntents/AudiobookPlaybackIntents.swift
+  s_43c227ab15905c::t_2b056d60c28a21 1-99
+AudiobookReader/Features/Search/SearchResultRow.swift
+  s_43c227ab15905c::t_ffbf02645a2663 1-108
+AudiobookReaderUITests/AccessibilityTests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 10-11,26-47,264
+AudiobookReader/Features/Library/LibraryView.swift
+  s_43c227ab15905c::t_5ec4dadb97c64b 6-8,11-19,42-43,64,70-71,78,90,174,179
+AudiobookReader/Features/Library/LibraryView+Content.swift
+  s_43c227ab15905c::t_5b0764bf8b337c 1-191
+AudiobookReader/Features/Home/HomeComponents.swift
+  s_43c227ab15905c::t_7267ebc29f804d 1-157
+AudiobookReader/Core/Services/MultiFileAudioEngine+RemoteCommands.swift
+  s_43c227ab15905c::t_05730a57c897da 1-6,8-20,22-29,31-69
+  s_43c227ab15905c::t_e7eab4766ad86e 7,21,30
+AudiobookReaderTests/Core/Services/AudioEnginePlaybackTests.swift
+  s_43c227ab15905c::t_35d2e1743749b6 6-8,40-43
+  s_43c227ab15905c::t_f7a94223307eae 1-5,9-39,44-57
+AudiobookReader/Features/Player/PlayerView+Controls.swift
+  s_43c227ab15905c::t_69e1110756ec28 1-216
+AudiobookReaderTests/Core/Managers/GlobalAudioManagerTests+Helpers.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-34
+AudiobookReader/Features/Settings/StatisticsView.swift
+  s_43c227ab15905c::t_da97904933f216 1-143
+AudiobookReader/Features/Player/TranscriptionSubviews.swift
+  s_43c227ab15905c::t_69e1110756ec28 1-177
+AudiobookReader/Core/Services/MultiFileAudioEngine+Playback.swift
+  s_43c227ab15905c::t_05730a57c897da 1-110
+AudiobookReader/Core/Services/MultiFileAudioEngine.swift
+  s_43c227ab15905c::t_05730a57c897da 190
+  s_43c227ab15905c::t_e7eab4766ad86e 6-17,25,28,125,172
+AudiobookReader/Features/Library/AudiobookGridItemView.swift
+  s_43c227ab15905c::t_1225c5ba59f63b 1-81
+AudiobookReader/Features/Settings/SettingsView.swift
+  s_43c227ab15905c::t_cea2ae64561f0e 4-8,10-15,19-25,32
+AudiobookReader/Resources/en.lproj/Localizable.strings
+  s_43c227ab15905c::t_1935adcb2e5ba7 223-230
+  s_43c227ab15905c::t_45dee9af4495c5 231-247
+  s_43c227ab15905c::t_8277a329be3333 216-222
+AudiobookReaderTests/Core/Managers/AudiobookManagerTests.swift
+  s_43c227ab15905c::t_dd274353ae74e7 1-108
+AudiobookReaderWidget/fr.lproj/Localizable.strings
+  s_43c227ab15905c::t_1935adcb2e5ba7 1-16
+AudiobookReader/Shared/MiniPlayerBar.swift
+  s_43c227ab15905c::t_7ada147d3d5087 28,34
+AudiobookReader/Features/Library/ContinueReadingSection.swift
+  s_43c227ab15905c::t_9d6c5438df956c 1-32
+AudiobookReaderUITests/PlayerViewUITests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 10-11,31-61
+AudiobookReader/Resources/fr.lproj/Localizable.strings
+  s_43c227ab15905c::t_1935adcb2e5ba7 223-230
+  s_43c227ab15905c::t_45dee9af4495c5 231-247
+  s_43c227ab15905c::t_8277a329be3333 216-222
+AudiobookReader/Features/Library/EmptyLibraryView.swift
+  s_43c227ab15905c::t_a4e90bccbcd30a 1-39
+AudiobookReader/Core/Managers/ThemeManager+Typography.swift
+  s_43c227ab15905c::t_7e5045c1d24027 1-69
+AudiobookReaderUITests/LibraryViewUITests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 10-11,35-52
+AudiobookReader/Core/Services/AudioEngine+Session.swift
+  s_43c227ab15905c::t_e7eab4766ad86e 72,102,151
+  s_43c227ab15905c::t_05730a57c897da 1-71,73-101,103-150,152-162
+AudiobookReader/Features/Settings/SettingsView+TranscriptionSection.swift
+  s_43c227ab15905c::t_014c84b1fb3905 1-115
+AudiobookReaderTests/Mocks/TestDataFactory.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-48
+AudiobookReader/Shared/AppIntents/AudiobookLiveActivity.swift
+  s_43c227ab15905c::t_2b056d60c28a21 127
+AudiobookReader/Core/Services/FolderImporter+Helpers.swift
+  s_43c227ab15905c::t_e7eab4766ad86e 6,16,25,38,72
+  s_43c227ab15905c::t_05730a57c897da 1-5,7-15,17-24,26-37,39-71,73-83
+AudiobookReader/Core/Managers/ThemeManager+Settings.swift
+  s_43c227ab15905c::t_7e5045c1d24027 1-195
+AudiobookReaderWidget/NowPlayingLargeWidgetViews.swift
+  s_43c227ab15905c::t_1935adcb2e5ba7 1-179
+AudiobookReader/Core/Models/SwiftData/AudiobookModel+Display.swift
+  s_43c227ab15905c::t_3305698a342740 1-8
+AudiobookReader/Features/Settings/SettingsView+Sections.swift
+  s_43c227ab15905c::t_b542fd77307c02 1-148
+AudiobookReaderWidget/en.lproj/Localizable.strings
+  s_43c227ab15905c::t_1935adcb2e5ba7 1-16
+AudiobookReader/Features/Library/LibraryHeaderView.swift
+  s_43c227ab15905c::t_8f43ac9ec20c17 1-74
+AudiobookReader/Features/Settings/StatisticsCards.swift
+  s_43c227ab15905c::t_e48d27b487b7cd 1-69
+AudiobookReader/Features/Search/SearchEmptyViews.swift
+  s_43c227ab15905c::t_c8a39f8f17889d 1-2,4-27
+  s_43c227ab15905c::t_68fb4020c4aff1 3
+AudiobookReaderTests/Mocks/MockFramework+Audio.swift
+  s_43c227ab15905c::t_2cb8315a07543c 1-234
+AudiobookReaderUITests/WidgetAndLiveActivitiesUITests.swift
+  s_43c227ab15905c::t_2cb8315a07543c 10-11,26-43,45-61
+AudiobookReader/Core/Services/FolderImporterModels.swift
+  s_43c227ab15905c::t_05730a57c897da 1-110
+AudiobookReader/Features/Player/TranscriptionView.swift
+  s_43c227ab15905c::t_7ada147d3d5087 203
+AudiobookReader/Core/Services/MultiFileAudioEngine+Loading.swift
+  s_43c227ab15905c::t_05730a57c897da 1-176,178-198,200-210,212-245
+  s_43c227ab15905c::t_e7eab4766ad86e 177,199,211
+AudiobookReader/Core/Managers/GlobalAudioManager.swift
+  s_43c227ab15905c::t_cc0e588d8399c7 19
+AudiobookReader/Features/Player/PlayerView+Layout.swift
+  s_43c227ab15905c::t_69e1110756ec28 1-235
+AudiobookReader/Core/Services/AudioEngine+NowPlaying.swift
+  s_43c227ab15905c::t_e7eab4766ad86e 7,81,95
+  s_43c227ab15905c::t_05730a57c897da 1-6,8-80,82-94,96-135
+AudiobookReader/Features/Library/StatisticsCardView.swift
+  s_43c227ab15905c::t_7dd93b7d85f319 1-52
+AudiobookReader/Features/Library/ImportingIndicatorView.swift
+  s_43c227ab15905c::t_15b62eb8ee0d1b 1-33
+AudiobookReader.xcodeproj/xcshareddata/xcschemes/AudiobookReader.xcscheme
+  s_43c227ab15905c::t_37bf5eddad0923 3
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "e423b3e606705e20bf6abf4d9287430206ab3baa",
+  "prompts": {},
+  "sessions": {
+    "s_43c227ab15905c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3cd3642-0426-4dce-beeb-9ecb49c2990e",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
