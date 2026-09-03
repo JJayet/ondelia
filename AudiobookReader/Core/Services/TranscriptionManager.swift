@@ -61,7 +61,7 @@ final class TranscriptionManager {
         
         let currentChapterURL: URL
         do {
-            currentChapterURL = try SafeImportPath.existingFileURL(
+            currentChapterURL = try SafeImportPath.containedFileURL(
                 for: chapterFiles[currentChapterIndex],
                 inside: folderURL
             )

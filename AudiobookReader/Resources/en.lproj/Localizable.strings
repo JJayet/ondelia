@@ -303,3 +303,8 @@
 "Chapter file not found" = "Chapter file not found";
 "Transcription failed: %@" = "Transcription failed: %@";
 "The language model could not be downloaded" = "The language model could not be downloaded";
+
+/* Control Center playback control */
+"Audiobook" = "Audiobook";
+"Playing" = "Playing";
+"Paused" = "Paused";

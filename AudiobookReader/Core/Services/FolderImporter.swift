@@ -52,7 +52,7 @@ class FolderImporter {
                 let audioFileURL: URL
                 do {
                     fileName = try SafeImportPath.normalizedRelativePath(rawPath)
-                    audioFileURL = try SafeImportPath.existingFileURL(for: fileName, inside: folderURL)
+                    audioFileURL = try SafeImportPath.containedFileURL(for: fileName, inside: folderURL)
                 } catch {
                     Log.library.warning("⚠️ FolderImporter: Rejected unsafe audio path: \(entry.path)")
                     continue

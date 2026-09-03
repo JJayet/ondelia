@@ -64,7 +64,11 @@ enum SafeImportPath {
         return candidate
     }
 
-    static func existingFileURL(for rawPath: String, inside root: URL) throws -> URL {
+    /// Resolves an imported relative path and proves the result stays inside `root`,
+    /// following symlinks first so a link cannot point out of it.
+    ///
+    /// Says nothing about whether the file exists — callers that need that must check.
+    static func containedFileURL(for rawPath: String, inside root: URL) throws -> URL {
         let candidate = try resolvedURL(for: rawPath, inside: root)
         let resolvedRoot = root.resolvingSymlinksInPath().standardizedFileURL
         let resolvedCandidate = candidate.resolvingSymlinksInPath().standardizedFileURL

@@ -303,3 +303,8 @@
 "Chapter file not found" = "Fichier du chapitre introuvable";
 "Transcription failed: %@" = "Échec de la transcription : %@";
 "The language model could not be downloaded" = "Le modèle linguistique n’a pas pu être téléchargé";
+
+/* Control Center playback control */
+"Audiobook" = "Livre audio";
+"Playing" = "En lecture";
+"Paused" = "En pause";

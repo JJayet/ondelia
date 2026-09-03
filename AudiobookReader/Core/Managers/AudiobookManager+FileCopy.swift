@@ -144,7 +144,7 @@ extension AudiobookManager {
             
             for (fileIndex, folderChapter) in folderAudiobook.chapters.enumerated() {
                 let sourceFileURL = try sourceFiles?[folderChapter.fileName]
-                    ?? SafeImportPath.existingFileURL(
+                    ?? SafeImportPath.containedFileURL(
                         for: folderChapter.fileName,
                         inside: sourceFolderURL
                     )

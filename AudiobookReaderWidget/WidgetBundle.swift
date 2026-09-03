@@ -7,5 +7,6 @@ import WidgetKit
 struct AudiobookWidgetBundle: WidgetBundle {
     var body: some Widget {
         NowPlayingWidget()
+        PlaybackControlWidget()
     }
 }

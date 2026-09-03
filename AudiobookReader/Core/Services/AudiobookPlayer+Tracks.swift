@@ -41,9 +41,8 @@ extension AudiobookPlayer {
             guard let fileName = entry["fileName"] as? String else { continue }
             let fileURL: URL
             do {
-                // Containment only: despite the name, `existingFileURL` does not check that the
-                // file is there, so the manifest can still name a chapter that was never copied.
-                fileURL = try SafeImportPath.existingFileURL(for: fileName, inside: folder)
+                // Containment only, so a missing chapter still has to be caught below.
+                fileURL = try SafeImportPath.containedFileURL(for: fileName, inside: folder)
             } catch {
                 Log.audio.warning("⚠️ AudiobookPlayer: Chapter path rejected: \(fileName)")
                 continue
