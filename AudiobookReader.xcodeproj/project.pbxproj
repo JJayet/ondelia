@@ -61,6 +61,7 @@
 		F1A887012E66445100718F1B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		F1A8871A2E6644BA00718F1B /* AudiobookReaderWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AudiobookReaderWidgetExtension.entitlements; sourceTree = "<group>"; };
 		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		F1F056362E65D0B300C6E809 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -198,6 +199,7 @@
 			isa = PBXGroup;
 			children = (
 				F1F056352E65D0B300C6E809 /* Secrets.xcconfig */,
+				F1F056362E65D0B300C6E809 /* Base.xcconfig */,
 			);
 			path = Config;
 			sourceTree = "<group>";
@@ -513,6 +515,7 @@
 		};
 		F13289C72E4DBA6D004EC064 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F1F056362E65D0B300C6E809 /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -578,6 +581,7 @@
 		};
 		F13289C82E4DBA6D004EC064 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = F1F056362E65D0B300C6E809 /* Base.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;

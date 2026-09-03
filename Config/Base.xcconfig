@@ -1,0 +1,4 @@
+// Project-wide build settings. Committed.
+// Secrets.xcconfig is gitignored; optional include so fresh clones and CI build without it
+// (GoogleImageSearchService falls back to mock results when keys are empty).
+#include? "Secrets.xcconfig"

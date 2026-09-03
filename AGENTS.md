@@ -10,10 +10,10 @@
 - Tests: `AudiobookReaderTests` (unit/integration) and `AudiobookReaderUITests` (UI).
 
 ## Build, Test, and Development Commands
-- Build clean: `xcodebuild clean -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16'`
-- Build for testing: `xcodebuild build-for-testing -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16'`
-- Unit tests only: `xcodebuild test-without-building -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing:AudiobookReaderTests`
-- All tests (when UI tests compile): `xcodebuild test -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16'`
+- Build clean: `xcodebuild clean -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Build for testing: `xcodebuild build-for-testing -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Unit tests only: `xcodebuild test-without-building -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:AudiobookReaderTests`
+- All tests (when UI tests compile): `xcodebuild test -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
 - Open in Xcode: `open AudiobookReader.xcodeproj` and run the `AudiobookReader` scheme.
 
 ## Coding Style & Naming Conventions
@@ -32,7 +32,7 @@
 ## Commit & Pull Request Guidelines
 - Commits: prefer Conventional Commits.
   - Examples: `feat(player): add sleep timer`, `fix(core): handle empty CUE file`.
-- PRs include: concise description, linked issues, simulator screenshots (iPhone 16), test plan (commands run), and notes on localization/entitlements changes.
+- PRs include: concise description, linked issues, simulator screenshots (iPhone 17), test plan (commands run), and notes on localization/entitlements changes.
 
 ## Security & Configuration Tips
 - Do not commit secrets. Configure API keys outside source; never hardcode (see `GoogleImageSearchService`).

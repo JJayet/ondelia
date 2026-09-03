@@ -1,1 +1,21 @@
+# Secrets
+Config/Secrets.xcconfig
+
+# Xcode
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcresult
+
+# macOS
+.DS_Store
+
+# Tools
 .serena

@@ -6,9 +6,9 @@ This is an iOS audiobook reader application built with SwiftUI. The app features
 ## iOS Development Settings
 
 ### Xcode Build Configuration
-- **Always use iPhone 16** as the simulator destination for builds
-- Build command: `xcodebuild -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16' build`
-- Test command: `xcodebuild -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 16' test`
+- **Always use iPhone 17** as the simulator destination for builds
+- Build command: `xcodebuild -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17' build`
+- Test command: `xcodebuild -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17' test`
 
 ### Project Structure
 ```
@@ -32,7 +32,7 @@ AudiobookReader/
 
 ### Development Guidelines
 1. Always test builds before committing changes
-2. Use iPhone 16 simulator for consistent testing
+2. Use iPhone 17 simulator for consistent testing
 3. Follow SwiftUI best practices for UI development
 4. Maintain proper separation between UI and business logic
 
@@ -83,7 +83,7 @@ GlassEffectContainer {
 - **Never use .ultraThinMaterial** - always use proper glassEffect modifiers
 
 ### Testing Commands
-- Build: Use the command above with iPhone 16 destination
+- Build: Use the command above with iPhone 17 destination
 - Run tests: Replace `build` with `test` in the build command
 - Clean build: Add `clean` before `build` in the command
 
