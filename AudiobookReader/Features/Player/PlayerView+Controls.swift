@@ -19,7 +19,7 @@ extension PlayerView {
                         "gobackward.\(Int(themeManager.skipInterval.seconds))"
                 )
                 .font(.title)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
             }
             .accessibilityLabel(NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipBackwardButton)
@@ -46,7 +46,7 @@ extension PlayerView {
                                 ? "pause.circle.fill" : "play.circle.fill"
                         )
                         .font(.system(size: 80))
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.tint)
                         .shadow(
                             color: .accentColor.opacity(0.3),
                             radius: 8,
@@ -78,7 +78,7 @@ extension PlayerView {
                         "goforward.\(Int(themeManager.skipInterval.seconds))"
                 )
                 .font(.title)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
             }
             .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipForwardButton)
@@ -99,7 +99,7 @@ extension PlayerView {
                 )
             )
             .font(.caption)
-            .foregroundColor(.secondaryText)
+            .foregroundStyle(Color.secondaryText)
 
             Menu {
                 speedButton(for: 0.75)

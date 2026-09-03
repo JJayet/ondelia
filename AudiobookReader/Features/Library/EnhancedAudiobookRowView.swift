@@ -26,7 +26,7 @@ struct EnhancedAudiobookRowView: View {
                     } else {
                         Image(systemName: "book.closed")
                             .font(.title2)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
                 .frame(width: 70, height: 70)
@@ -39,13 +39,13 @@ struct EnhancedAudiobookRowView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.headline)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
                     Text(audiobook.author ?? AudiobookModel.unknownAuthor)
                         .font(.subheadline)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
 
                     // Progress Section
@@ -59,7 +59,7 @@ struct EnhancedAudiobookRowView: View {
                                 systemImage: "checkmark.circle.fill"
                             )
                             .font(.caption)
-                            .foregroundColor(.green)
+                            .foregroundStyle(.green)
                         } else if audiobook.currentPosition > 0 {
                             VStack(alignment: .leading, spacing: 4) {
                                 ProgressView(value: progressPercentage)
@@ -80,7 +80,7 @@ struct EnhancedAudiobookRowView: View {
                                     )
                                 )
                                 .font(.caption2)
-                                .foregroundColor(.secondaryText)
+                                .foregroundStyle(Color.secondaryText)
                             }
                         } else {
                             Text(
@@ -90,14 +90,14 @@ struct EnhancedAudiobookRowView: View {
                                 )
                             )
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                         }
 
                         Spacer()
 
                         Text(formatDuration(audiobook.duration))
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
 
@@ -105,7 +105,7 @@ struct EnhancedAudiobookRowView: View {
 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
             .padding(16)
             .glassEffect(in:.rect(cornerRadius: 16))

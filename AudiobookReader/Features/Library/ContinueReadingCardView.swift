@@ -26,7 +26,7 @@ struct ContinueReadingCardView: View {
                     } else {
                         Image(systemName: "book.closed")
                             .font(.system(size: 30))
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
                 .frame(width: 140, height: 100)
@@ -38,7 +38,7 @@ struct ContinueReadingCardView: View {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
 
                     ProgressView(value: progressPercentage)
@@ -54,7 +54,7 @@ struct ContinueReadingCardView: View {
                         )
                     )
                     .font(.caption2)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                 }
             }
             .frame(width: 140)

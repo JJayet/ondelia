@@ -63,7 +63,7 @@ extension SettingsView {
                     NSLocalizedString("Language Model", comment: "On-device speech model label"),
                     systemImage: "waveform.badge.mic"
                 )
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
                 Spacer()
                 switch assetStatus {
                 case .installed:
@@ -73,7 +73,7 @@ extension SettingsView {
                     )
                     .labelStyle(.titleAndIcon)
                     .font(.caption)
-                    .foregroundColor(.green)
+                    .foregroundStyle(.green)
                 case .downloading:
                     ProgressView().scaleEffect(0.8)
                 case .supported:
@@ -87,7 +87,7 @@ extension SettingsView {
                 case .unsupported, .none:
                     Text(NSLocalizedString("Not supported", comment: "Speech model unsupported"))
                         .font(.caption)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                 @unknown default:
                     EmptyView()
                 }
@@ -97,7 +97,7 @@ extension SettingsView {
                 ProgressView(value: speechManager.modelLoadingProgress)
                 Text(NSLocalizedString("Downloading language model...", comment: "Speech model downloading status"))
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
         }
     }

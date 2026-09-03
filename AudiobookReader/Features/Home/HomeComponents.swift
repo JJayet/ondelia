@@ -11,11 +11,11 @@ struct HomeSection<Content: View>: View {
                 Text(title)
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
 
                 Text(subtitle)
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
             .padding(.horizontal)
 
@@ -34,16 +34,16 @@ struct QuickStatView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(color)
+                .foregroundStyle(color)
 
             Text(value)
                 .font(.headline)
                 .fontWeight(.bold)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
 
             Text(title)
                 .font(.caption)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
         }
         .padding(.vertical, 8)
         .frame(maxWidth: .infinity)
@@ -72,7 +72,7 @@ struct RecentlyPlayedCardView: View {
                     } else {
                         Image(systemName: "book.closed")
                             .font(.system(size: 30))
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
                 .frame(width: 120, height: 80)
@@ -84,12 +84,12 @@ struct RecentlyPlayedCardView: View {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
 
                     Text(audiobook.author ?? AudiobookModel.unknownAuthor)
                         .font(.caption)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
 
                     if audiobook.lastPlayed > Date.distantPast {
@@ -100,7 +100,7 @@ struct RecentlyPlayedCardView: View {
                             )
                         )
                         .font(.caption2)
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.tint)
                     }
                 }
             }
@@ -124,7 +124,7 @@ struct MonthlyGoalCardView: View {
                         )
                     )
                     .font(.headline)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
 
                     Text(
                         String(
@@ -134,7 +134,7 @@ struct MonthlyGoalCardView: View {
                         )
                     )
                     .font(.subheadline)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                 }
 
                 Spacer()
@@ -142,7 +142,7 @@ struct MonthlyGoalCardView: View {
                 Text("\(Int(statistics.monthlyGoalProgress * 100))%")
                     .font(.title2)
                     .fontWeight(.bold)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
             }
 
             ProgressView(value: statistics.monthlyGoalProgress)

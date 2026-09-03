@@ -6,12 +6,12 @@ extension SettingsView {
         Section(NSLocalizedString("Appearance", comment: "Settings section: Appearance")) {
             HStack {
                 Label(NSLocalizedString("Theme", comment: "Theme setting label"), systemImage: "paintbrush")
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
                 Spacer()
                 Picker("", selection: $themeManager.currentTheme) {
                     ForEach(AppTheme.allCases, id: \.rawValue) { theme in
                         Text(theme.displayName)
-                            .foregroundColor(.primaryText)
+                            .foregroundStyle(Color.primaryText)
                             .tag(theme)
                     }
                 }
@@ -24,7 +24,7 @@ extension SettingsView {
 
             HStack {
                 Label(NSLocalizedString("Accent Color", comment: "Accent color setting label"), systemImage: "circle.fill")
-                    .foregroundColor(themeManager.accentColor.color)
+                    .foregroundStyle(themeManager.accentColor.color)
                 Spacer()
                 Picker("", selection: $themeManager.accentColor) {
                     ForEach(AccentColor.allCases, id: \.rawValue) { color in
@@ -47,12 +47,12 @@ extension SettingsView {
         Section(NSLocalizedString("Playback", comment: "Settings section: Playback")) {
             HStack {
                 Label("", systemImage: "goforward")
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
                 Spacer()
                 Picker(NSLocalizedString("Skip Interval", comment: "Skip interval picker label"), selection: $themeManager.skipInterval) {
                     ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
                         Text(interval.displayName)
-                            .foregroundColor(.primaryText)
+                            .foregroundStyle(Color.primaryText)
                             .tag(interval)
                     }
                 }
@@ -72,14 +72,14 @@ extension SettingsView {
                     NSLocalizedString("Same Speed For All Books", comment: "Global playback speed toggle"),
                     systemImage: "speedometer"
                 )
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
             }
             .modifier(SettingsRowCard())
 
             if themeManager.globalSpeedEnabled {
                 HStack {
                     Label("", systemImage: "gauge.with.dots.needle.50percent")
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                     Spacer()
                     Picker(
                         NSLocalizedString("Speed", comment: "Playback speed picker label"),
@@ -90,7 +90,7 @@ extension SettingsView {
                     ) {
                         ForEach(PlaybackSpeed.choices, id: \.self) { speed in
                             Text(PlaybackSpeed.displayName(speed))
-                                .foregroundColor(.primaryText)
+                                .foregroundStyle(Color.primaryText)
                                 .tag(speed)
                         }
                     }
@@ -111,10 +111,10 @@ extension SettingsView {
                     Label(NSLocalizedString("Monthly Goal", comment: "Monthly goal setting label"), systemImage: "target")
                     Spacer()
                     Text(statistics.formattedMonthlyGoal)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
-            .foregroundColor(.primary)
+            .foregroundStyle(.primary)
         }
     }
 
@@ -173,7 +173,7 @@ extension SettingsView {
                 Label(NSLocalizedString("Version", comment: "App version label"), systemImage: "info.circle")
                 Spacer()
                 Text("1.0.0")
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
 
             Link(destination: URL(string: "https://github.com")!) {

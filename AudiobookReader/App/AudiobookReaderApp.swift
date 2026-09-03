@@ -27,7 +27,7 @@ struct AudiobookReaderApp: App {
                         .progressViewStyle(CircularProgressViewStyle())
                     Text(NSLocalizedString("Starting up...", comment: "App startup loading message"))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))

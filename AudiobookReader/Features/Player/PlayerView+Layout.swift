@@ -98,7 +98,7 @@ extension PlayerView {
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.title2)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
             }
             .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
@@ -114,11 +114,11 @@ extension PlayerView {
                         systemImage: "moon.fill"
                     )
                     .font(.caption)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                 } else {
                     Image(systemName: "moon")
                         .font(.title2)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                 }
             }
         }
@@ -137,7 +137,7 @@ extension PlayerView {
                     )
             )
             .font(.title2)
-            .foregroundColor(.primaryText)
+            .foregroundStyle(Color.primaryText)
             .multilineTextAlignment(.center)
             .lineLimit(2)
 
@@ -149,7 +149,7 @@ extension PlayerView {
                     )
             )
             .font(.headline)
-            .foregroundColor(.secondaryText)
+            .foregroundStyle(Color.secondaryText)
 
             if let narrator = audiobook.narrator {
                 Text(
@@ -162,7 +162,7 @@ extension PlayerView {
                     )
                 )
                 .font(.subheadline)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
             }
 
             // Current Chapter
@@ -181,7 +181,7 @@ extension PlayerView {
                             )
                     )
                     .font(.footnote)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .glassEffect(
@@ -231,14 +231,14 @@ extension PlayerView {
             HStack {
                 Text(formatTime(viewModel.currentTime))
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
 
                 Spacer()
 
                 Text(formatTime(viewModel.duration))
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
             }
         }

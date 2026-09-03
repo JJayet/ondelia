@@ -82,7 +82,7 @@ struct LibraryView: View {
                     ProgressView().scaleEffect(1.2)
                     Text(NSLocalizedString("Please be patient while your file(s) are being imported", comment: "Blocking import message"))
                         .font(.body)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }

@@ -5,7 +5,7 @@ struct EmptyLibraryView: View {
         VStack(spacing: 24) {
             Image(systemName: "books.vertical")
                 .font(.system(size: 80))
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
 
             VStack(spacing: 8) {
                 Text(
@@ -16,7 +16,7 @@ struct EmptyLibraryView: View {
                 )
                 .font(.title2)
                 .fontWeight(.bold)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
 
                 Text(
                     NSLocalizedString(
@@ -25,7 +25,7 @@ struct EmptyLibraryView: View {
                     )
                 )
                 .font(.body)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
                 .multilineTextAlignment(.center)
             }
         }

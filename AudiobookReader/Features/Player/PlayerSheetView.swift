@@ -14,7 +14,7 @@ struct PlayerSheetView: View {
                     ProgressView()
                     Text(NSLocalizedString("Loading…", comment: "Loading player content"))
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .task { await loadBook() }
             }

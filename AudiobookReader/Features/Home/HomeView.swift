@@ -40,7 +40,7 @@ struct HomeView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text(greetingMessage)
                                     .font(.title2)
-                                    .foregroundColor(.secondaryText)
+                                    .foregroundStyle(Color.secondaryText)
 
                                 Text(
                                     NSLocalizedString(
@@ -50,7 +50,7 @@ struct HomeView: View {
                                 )
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
-                                .foregroundColor(.primaryText)
+                                .foregroundStyle(Color.primaryText)
                             }
                             Spacer()
                         }
@@ -173,7 +173,7 @@ struct HomeView: View {
                         VStack(spacing: 24) {
                             Image(systemName: "headphones.circle.fill")
                                 .font(.system(size: 80))
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.tint)
 
                             VStack(spacing: 12) {
                                 Text(
@@ -184,7 +184,7 @@ struct HomeView: View {
                                 )
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.primaryText)
+                                .foregroundStyle(Color.primaryText)
                                 .multilineTextAlignment(.center)
                             }
 
@@ -198,7 +198,7 @@ struct HomeView: View {
                                     )
                                 )
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .padding()
                                 .frame(maxWidth: .infinity)
                                 .background(Color.accentColor)

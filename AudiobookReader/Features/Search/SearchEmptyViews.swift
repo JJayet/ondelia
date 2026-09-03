@@ -9,14 +9,14 @@ struct EmptyRowView: View {
         VStack(spacing: 12) {
             Image(systemName: "magnifyingglass")
                 .font(.system(size: 28))
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
             Text(title)
                 .font(.headline)
                 .fontWeight(.semibold)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
             Text(message)
                 .font(.subheadline)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal)
         }

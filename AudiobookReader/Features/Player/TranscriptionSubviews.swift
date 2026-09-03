@@ -23,7 +23,7 @@ struct TranscriptionHeaderView: View {
                         highlightedRange = nil
                         showingSearch = false
                     }
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                 }
                 .padding(.horizontal)
                 .transition(.move(edge: .top).combined(with: .opacity))
@@ -40,7 +40,7 @@ struct TranscriptionHeaderView: View {
                     }
                 }) {
                     Image(systemName: "magnifyingglass")
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.tint)
                 }
                 
                 Spacer()
@@ -80,13 +80,13 @@ struct TranscriptionLoadingView: View {
         VStack(spacing: 16) {
             Image(systemName: "waveform")
                 .font(.system(size: 50))
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.tint)
                 .scaleEffect(1.0 + sin(Date().timeIntervalSince1970 * 2) * 0.1)
                 .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: UUID())
             
             Text(NSLocalizedString("Transcribing...", comment: "Transcription in progress text"))
                 .font(.headline)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
             
             ProgressView(value: progress)
                 .progressViewStyle(LinearProgressViewStyle())
@@ -94,7 +94,7 @@ struct TranscriptionLoadingView: View {
             
             Text(String(format: NSLocalizedString("%.0f%% complete", comment: "Transcription progress percentage"), progress * 100))
                 .font(.caption)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -109,12 +109,12 @@ struct TranscriptionEmptyView: View {
         VStack(spacing: 20) {
             Image(systemName: "doc.text")
                 .font(.system(size: 60))
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
             
             Text(NSLocalizedString("No transcription available", comment: "No transcription available title"))
                 .font(.title2)
                 .fontWeight(.semibold)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
         }
         .padding()
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -133,14 +133,14 @@ struct TranscriptionTextView: View {
             // Transcription metadata
             HStack {
                 Label(NSLocalizedString("Transcribed", comment: "Transcription completed status"), systemImage: "checkmark.circle")
-                    .foregroundColor(.green)
+                    .foregroundStyle(.green)
                     .font(.caption)
                 
                 Spacer()
                 
                 Text(Date(), style: .date)
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
             
             Divider()

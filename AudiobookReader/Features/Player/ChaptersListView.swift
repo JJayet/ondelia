@@ -35,18 +35,18 @@ struct ChapterRowView: View {
                 Text(chapter.title ?? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapter.chapterNumber))
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(.primary)
+                    .foregroundStyle(.primary)
                 
                 Text(formatTime(chapter.startTime))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             
             Spacer()
             
             Image(systemName: "play.fill")
                 .font(.caption)
-                .foregroundColor(.blue)
+                .foregroundStyle(.blue)
         }
         .padding(.vertical, 8)
         .padding(.horizontal, 4)

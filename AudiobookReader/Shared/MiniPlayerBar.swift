@@ -35,7 +35,7 @@ struct MiniPlayerBar: View {
                         ?? NSLocalizedString("Unknown Author", comment: "Default author for audiobooks without author")
                 )
                 .font(.caption)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
                 .lineLimit(1)
             }
 

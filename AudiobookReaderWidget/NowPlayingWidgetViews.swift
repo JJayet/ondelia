@@ -55,14 +55,14 @@ struct SmallNowPlayingView: View {
                 Button(intent: PlayPauseIntent()) {
                     Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                         .font(.title2)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
                 
                 // Title (truncated)
                 if let audiobook = entry.audiobook {
                     Text(audiobook.title)
                         .font(.caption.weight(.medium))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -92,7 +92,7 @@ struct MediumNowPlayingView: View {
                     .frame(width: 60, height: 60)
                     .overlay {
                         Image(systemName: "book")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
             }
             
@@ -102,12 +102,12 @@ struct MediumNowPlayingView: View {
                     Text(audiobook.title)
                         .font(.headline)
                         .lineLimit(1)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     
                     // Author
                     Text(audiobook.author)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                     
                     // Progress bar
@@ -119,14 +119,14 @@ struct MediumNowPlayingView: View {
                     HStack {
                         Text(formatTime(entry.currentTime))
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         
                         Spacer()
                         
                         Button(intent: PlayPauseIntent()) {
                             Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                                 .font(.caption)
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.tint)
                         }
                     }
                 }

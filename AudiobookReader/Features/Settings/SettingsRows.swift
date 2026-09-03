@@ -18,7 +18,7 @@ struct StatisticRowView: View {
             Label(title, systemImage: icon)
             Spacer()
             Text(value)
-                .foregroundColor(.secondary)
+                .foregroundStyle(.secondary)
         }
     }
 }

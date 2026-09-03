@@ -25,7 +25,7 @@ struct LibraryHeaderView: View {
                         .font(.caption)
                 }
                 .font(.caption)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.tint)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Color.accentColor.opacity(0.1))
@@ -50,7 +50,7 @@ struct LibraryHeaderView: View {
                         .font(.caption)
                 }
                 .font(.caption)
-                .foregroundColor(.accentColor)
+                .foregroundStyle(.tint)
                 .padding(.horizontal, 12)
                 .padding(.vertical, 6)
                 .background(Color.accentColor.opacity(0.1))
@@ -68,7 +68,7 @@ struct LibraryHeaderView: View {
             } label: {
                 Image(systemName: viewMode.icon)
                     .font(.title3)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
             }
             .accessibilityLabel(
                 viewMode == .list

@@ -11,25 +11,25 @@ struct StatCardView: View {
         VStack(spacing: 12) {
             Image(systemName: icon)
                 .font(.title2)
-                .foregroundColor(color)
+                .foregroundStyle(color)
 
             VStack(spacing: 4) {
                 HStack(spacing: 4) {
                     Text(value)
                         .font(.title3)
                         .fontWeight(.bold)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
 
                     if !subtitle.isEmpty {
                         Text(subtitle)
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
 
                 Text(title)
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
         }
         .padding()
@@ -48,17 +48,17 @@ struct AchievementView: View {
         VStack(spacing: 8) {
             Image(systemName: icon)
                 .font(.title3)
-                .foregroundColor(isUnlocked ? .yellow : .secondaryText)
+                .foregroundStyle(isUnlocked ? .yellow : Color.secondaryText)
 
             Text(title)
                 .font(.caption2)
                 .fontWeight(.medium)
-                .foregroundColor(.primaryText)
+                .foregroundStyle(Color.primaryText)
                 .multilineTextAlignment(.center)
 
             Text(value)
                 .font(.caption2)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
         }
         .padding(.vertical, 12)
         .padding(.horizontal, 8)

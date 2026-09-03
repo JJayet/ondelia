@@ -17,7 +17,7 @@ struct BookmarksView: View {
                     VStack(spacing: 20) {
                         Image(systemName: "bookmark")
                             .font(.system(size: 60))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         
                         Text(NSLocalizedString("No bookmarks yet", comment: "No bookmarks empty state title"))
                             .font(.title2)
@@ -25,7 +25,7 @@ struct BookmarksView: View {
                         
                         Text(NSLocalizedString("Create your first bookmark by tapping the bookmark button while listening", comment: "No bookmarks instructions"))
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                             .padding(.horizontal)
                     }
@@ -70,13 +70,13 @@ struct BookmarkRowView: View {
                 HStack {
                     Text(bookmark.title ?? NSLocalizedString("Bookmark", comment: "Default bookmark title"))
                         .font(.headline)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     
                     Spacer()
                     
                     Text(formatTime(bookmark.timestamp))
                         .font(.caption)
-                        .foregroundColor(.blue)
+                        .foregroundStyle(.blue)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(Color.blue.opacity(0.1))
@@ -86,13 +86,13 @@ struct BookmarkRowView: View {
                 if let note = bookmark.note, !note.isEmpty {
                     Text(note)
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(3)
                 }
                 
                 Text(formatDate(bookmark.dateCreated))
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
             }
             .padding(.vertical, 4)
         }

@@ -13,13 +13,13 @@ struct PlayerActionButton: View {
                 ZStack {
                     Image(systemName: icon)
                         .font(.title3)
-                        .foregroundColor(.accentColor)
+                        .foregroundStyle(.tint)
                     
                     if let count = count, count > 0 {
                         Text("\(count)")
                             .font(.caption2)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundStyle(.white)
                             .padding(4)
                             .background(Color.red)
                             .clipShape(Circle())
@@ -29,7 +29,7 @@ struct PlayerActionButton: View {
                 
                 Text(title)
                     .font(.caption)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
             }
         }
         .buttonStyle(PlainButtonStyle())

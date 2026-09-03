@@ -21,7 +21,7 @@ struct ImagePickerView: View {
                     
                     Text(String(format: NSLocalizedString("for %@", comment: "Cover image for audiobook title"), audiobook.title ?? AudiobookModel.unknownTitle))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding()
@@ -46,17 +46,17 @@ struct ImagePickerView: View {
                         ProgressView()
                         Text(NSLocalizedString("Searching for images...", comment: "Searching for images loading text"))
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let error = errorMessage {
                     VStack {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.largeTitle)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text(error)
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -64,13 +64,13 @@ struct ImagePickerView: View {
                     VStack {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 60))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(NSLocalizedString("No images found", comment: "No images found message"))
                             .font(.headline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(NSLocalizedString("Try searching for images or choose from your photos", comment: "No images found instructions"))
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)

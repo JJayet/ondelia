@@ -111,7 +111,7 @@ struct TranscriptionView: View {
                             }
                         }) {
                             Image(systemName: showingTranslation ? "textformat" : "translate")
-                                .foregroundColor(showingTranslation ? .primary : .accentColor)
+                                .foregroundStyle(showingTranslation ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
                         }
                         .disabled(isTranslating)
                     }

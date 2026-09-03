@@ -26,7 +26,7 @@ struct AudiobookGridItemView: View {
                     } else {
                         Image(systemName: "book.closed")
                             .font(.system(size: 40))
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
                 .frame(width: 120, height: 120)
@@ -49,19 +49,19 @@ struct AudiobookGridItemView: View {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
 
                     Text(audiobook.author ?? AudiobookModel.unknownAuthor)
                         .font(.caption)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
 
                     // Progress Indicator
                     if audiobook.isFinished {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundStyle(.green)
                             .font(.caption)
                     } else if audiobook.currentPosition > 0 {
                         ProgressView(value: progressPercentage)

@@ -13,15 +13,15 @@ struct StatisticsView: View {
                         VStack(spacing: 8) {
                             Text(NSLocalizedString("This Month", comment: "This month progress header"))
                                 .font(.headline)
-                                .foregroundColor(.primaryText)
+                                .foregroundStyle(Color.primaryText)
 
                             Text(statistics.formattedMonthlyProgress)
                                 .font(.system(size: 48, weight: .bold, design: .rounded))
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.tint)
 
                             Text(String(format: NSLocalizedString("of %@ goal", comment: "Monthly goal progress text"), statistics.formattedMonthlyGoal))
                                 .font(.subheadline)
-                                .foregroundColor(.secondaryText)
+                                .foregroundStyle(Color.secondaryText)
                         }
 
                         // Progress Ring
@@ -45,7 +45,7 @@ struct StatisticsView: View {
                             Text("\(Int(statistics.monthlyGoalProgress * 100))%")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(.primaryText)
+                                .foregroundStyle(Color.primaryText)
                         }
                         .frame(width: 150, height: 150)
                     }
@@ -92,7 +92,7 @@ struct StatisticsView: View {
                         Text(NSLocalizedString("Achievements", comment: "Achievements section header"))
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.primaryText)
+                            .foregroundStyle(Color.primaryText)
 
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
