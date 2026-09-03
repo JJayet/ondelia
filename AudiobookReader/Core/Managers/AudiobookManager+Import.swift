@@ -170,11 +170,11 @@ extension AudiobookManager {
             sourceFolderURL: folderURL,
             sourceFiles: sourceFiles,
             onFileCopied: { [weak self] index, fileName in
-                self?.reportMergeProgress(
-                    index,
-                    fileName,
-                    format: NSLocalizedString("Copying %@", comment: "Merge import progress, file being copied")
-                )
+                // Copying now runs off the main actor, so hop back to touch published state.
+                let label = NSLocalizedString("Copying %@", comment: "Merge import progress, file being copied")
+                Task { @MainActor in
+                    self?.reportMergeProgress(index, fileName, format: label)
+                }
             }
         )
     }
@@ -283,7 +283,7 @@ extension AudiobookManager {
         _ folderAudiobook: FolderAudiobook,
         sourceFolderURL: URL,
         sourceFiles: [String: URL]? = nil,
-        onFileCopied: ((Int, String) -> Void)? = nil
+        onFileCopied: (@Sendable (Int, String) -> Void)? = nil
     ) async {
         guard let localFolderURL = await copyFolderToDocuments(
             from: sourceFolderURL,

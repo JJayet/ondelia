@@ -3,7 +3,7 @@ import SwiftData
 import UIKit
 
 extension AudiobookManager {
-    func copyFileToDocuments(from sourceURL: URL) async -> URL? {
+    nonisolated func copyFileToDocuments(from sourceURL: URL) async -> URL? {
         let fileManager = FileManager.default
         
         print("🎵 AudiobookManager: Copying file from: \(sourceURL.path)")
@@ -75,13 +75,12 @@ extension AudiobookManager {
     
     /// - Parameter sourceFiles: the files to copy, keyed by chapter file name. Pass them when the
     ///   user picked files rather than their folder, since only those URLs are readable then.
-    /// - Parameter onFileCopied: reports each copied file. Providing it also yields between files so
-    ///   the progress it drives can actually be drawn.
-    func copyFolderToDocuments(
+    /// - Parameter onFileCopied: reports each copied file, off the main actor.
+    nonisolated func copyFolderToDocuments(
         from sourceFolderURL: URL,
         folderAudiobook: FolderAudiobook,
         sourceFiles: [String: URL]? = nil,
-        onFileCopied: ((Int, String) -> Void)? = nil
+        onFileCopied: (@Sendable (Int, String) -> Void)? = nil
     ) async -> URL? {
         let fileManager = FileManager.default
         
@@ -180,11 +179,7 @@ extension AudiobookManager {
                 
                 print("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
                 
-                if let onFileCopied {
-                    onFileCopied(fileIndex, folderChapter.fileName)
-                    // Copying runs on the main actor, so give SwiftUI a slot to draw the progress.
-                    await Task.yield()
-                }
+                onFileCopied?(fileIndex, folderChapter.fileName)
             }
             
             // Copy cover image if it exists
@@ -223,7 +218,7 @@ extension AudiobookManager {
     }
 
     // MARK: - Streaming copy with progress
-    func streamCopyFile(from: URL, to: URL) throws {
+    nonisolated func streamCopyFile(from: URL, to: URL) throws {
         let fm = FileManager.default
         let readHandle = try FileHandle(forReadingFrom: from)
         var writeHandle: FileHandle?
@@ -253,7 +248,7 @@ extension AudiobookManager {
         }
     }
     
-    private func createFolderManifest(folderAudiobook: FolderAudiobook) throws -> Data {
+    nonisolated private func createFolderManifest(folderAudiobook: FolderAudiobook) throws -> Data {
         let manifest: [String: Any] = [
             "title": folderAudiobook.title,
             "author": folderAudiobook.author ?? "Unknown Author",
@@ -273,7 +268,7 @@ extension AudiobookManager {
         return try JSONSerialization.data(withJSONObject: manifest, options: .prettyPrinted)
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
+    nonisolated private func formatTime(_ time: TimeInterval) -> String {
         let hours = Int(time) / 3600
         let minutes = (Int(time) % 3600) / 60
         
