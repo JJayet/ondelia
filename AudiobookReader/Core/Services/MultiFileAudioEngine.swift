@@ -14,7 +14,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     private var folderURL: URL?
     private var isCleanedUp = false
     private var hasSetupAudioSession = false
-    
+    private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
@@ -28,10 +29,28 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        // Defer audio session and remote control setup until needed
+        // Audio session is configured lazily on first load; observers and remote controls register once here
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionRouteChange),
+            name: AVAudioSession.routeChangeNotification,
+            object: nil
+        )
+        setupRemoteTransportControls()
     }
-    
+
     deinit {
+        NotificationCenter.default.removeObserver(self)
+        for (command, target) in remoteCommandTargets {
+            command.removeTarget(target)
+        }
+        isCleanedUp = true
         cleanup()
         deactivateAudioSession()
     }
@@ -61,22 +80,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         
         try audioSession.setActive(true)
         hasSetupAudioSession = true
-        
-        // Handle audio session interruptions and route changes
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAudioSessionInterruption),
-            name: AVAudioSession.interruptionNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAudioSessionRouteChange),
-            name: AVAudioSession.routeChangeNotification,
-            object: nil
-        )
-        
+
     } catch {
         print("❌ MultiFileAudioEngine: Failed to set up audio session: \(error)")
     }
@@ -193,97 +197,6 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
 
     
     // MARK: - Enhanced Audio Processing
-    private func enableEnhancedAudioProcessing(for playerItem: AVPlayerItem) {
-        // Configure audio processing for better speech clarity
-        let audioMix = AVMutableAudioMix()
-        let audioMixInputParameters = AVMutableAudioMixInputParameters(track: nil)
-        
-        // Configure dynamic range compression for consistent volume
-        audioMixInputParameters.setVolume(1.0, at: .zero)
-        
-        audioMix.inputParameters = [audioMixInputParameters]
-        playerItem.audioMix = audioMix
-        
-        print("🎛️ MultiFileAudioEngine: Enhanced audio processing enabled")
-    }
-    
-    func enableNoiseSuppression(_ enabled: Bool) {
-        
-        playerQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Apply to all loaded player items
-            for (_, playerItem) in self.playerItems {
-                if enabled {
-                    let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-                    
-                    // Configure noise suppression parameters
-                    for inputParameters in audioMix.inputParameters {
-                        if inputParameters is AVMutableAudioMixInputParameters {
-                            print("🔇 MultiFileAudioEngine: Noise suppression enabled")
-                        }
-                    }
-                    
-                    playerItem.audioMix = audioMix
-                } else {
-                    playerItem.audioMix = nil
-                }
-            }
-            
-            print("🔇 MultiFileAudioEngine: Noise suppression \(enabled ? "enabled" : "disabled") for \(self.playerItems.count) chapters")
-        }
-    }
-    
-    func setEqualizer(bassBoost: Float, trebleBoost: Float) {
-        
-        playerQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Apply EQ to all loaded player items
-            for (_, playerItem) in self.playerItems {
-                let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-                
-                // Configure EQ parameters
-                for inputParameters in audioMix.inputParameters {
-                    if inputParameters is AVMutableAudioMixInputParameters {
-                        // Apply bass and treble adjustments
-                        print("🎚️ MultiFileAudioEngine: EQ applied - Bass: \(bassBoost), Treble: \(trebleBoost)")
-                    }
-                }
-                
-                playerItem.audioMix = audioMix
-            }
-        }
-    }
-    
-    func enableSpeechEnhancement(_ enabled: Bool) {
-        
-        playerQueue.async { [weak self] in
-            guard let self = self else { return }
-            
-            // Apply to all loaded player items
-            for (_, playerItem) in self.playerItems {
-                if enabled {
-                    let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-                    
-                    // Configure speech enhancement
-                    for inputParameters in audioMix.inputParameters {
-                        if inputParameters is AVMutableAudioMixInputParameters {
-                            print("🗣️ MultiFileAudioEngine: Speech enhancement enabled")
-                        }
-                    }
-                    
-                    playerItem.audioMix = audioMix
-                    self.enableEnhancedAudioProcessing(for: playerItem)
-                } else {
-                    playerItem.audioMix = nil
-                }
-            }
-            
-            print("🗣️ MultiFileAudioEngine: Speech enhancement \(enabled ? "enabled" : "disabled") for \(self.playerItems.count) chapters")
-        }
-    }
-    
     func enableDynamicRangeCompression(_ enabled: Bool, threshold: Float = -12.0, ratio: Float = 4.0) {
         
         playerQueue.async { [weak self] in
@@ -317,10 +230,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     func loadMultiFileAudiobook(_ audiobook: AudiobookModel) {
         print("🎵 MultiFileAudioEngine: Loading multi-file audiobook: \(audiobook.title ?? "Unknown")")
         
-        // Setup audio session and remote controls on first load
-        setupAudioSession()
-        setupRemoteTransportControls()
-        
+        // Setup audio session on first load; flag is only set on success so failures retry
+        if !hasSetupAudioSession {
+            setupAudioSession()
+        }
+
         cleanup()
         
         self.audiobook = audiobook
@@ -368,8 +282,9 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     }
     
     private func loadChaptersFromFolder(folderPath: String, audiobook: AudiobookModel) {
-        folderURL = URL(fileURLWithPath: folderPath)
-        
+        let folderURL = URL(fileURLWithPath: folderPath)
+        self.folderURL = folderURL
+
         // Get chapters from SwiftData, sorted by chapter number
         chapters = audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
         
@@ -379,7 +294,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         }
         
         // Load manifest file to get file names (back to sync version for now)
-        let manifestURL = folderURL!.appendingPathComponent("audiobook_manifest.json")
+        let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
         if let manifestData = try? Data(contentsOf: manifestURL),
            let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
            let chaptersData = manifest["chapters"] as? [[String: Any]] {
@@ -396,7 +311,7 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             for chapterData in chaptersData {
                 guard let fileName = chapterData["fileName"] as? String else { continue }
                 
-                let fileURL = folderURL!.appendingPathComponent(fileName)
+                let fileURL = folderURL.appendingPathComponent(fileName)
                 guard FileManager.default.fileExists(atPath: fileURL.path) else {
                     print("⚠️ MultiFileAudioEngine: Chapter file not found: \(fileName)")
                     continue
@@ -672,10 +587,12 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             currentPlayer.pause()
         }
         
-        // Update indices atomically
+        // Update indices; @Published write goes to main
         currentPlayerIndex = chapterIndex
-        currentChapterIndex = chapterIndex
-        
+        DispatchQueue.main.async { [weak self] in
+            self?.currentChapterIndex = chapterIndex
+        }
+
         // Load the new chapter if not already loaded
         loadChapterPlayer(chapterIndex)
         
@@ -763,9 +680,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
             currentPlayer.pause()
         }
         
-        // Step 3: Switch to next chapter atomically
+        // Step 3: Switch to next chapter; @Published write goes to main
         currentPlayerIndex = nextChapterIndex
-        currentChapterIndex = nextChapterIndex
+        DispatchQueue.main.async { [weak self] in
+            self?.currentChapterIndex = nextChapterIndex
+        }
         
         // Step 4: Load the new chapter if not already loaded
         loadChapterPlayer(nextChapterIndex)
@@ -820,42 +739,40 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     // MARK: - Remote Control Events
     private func setupRemoteTransportControls() {
         let commandCenter = MPRemoteCommandCenter.shared()
-        
-        commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play()
-            return .success
-        }
-        
-        commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
-            return .success
-        }
-        
-        commandCenter.skipForwardCommand.addTarget { [weak self] event in
-            if let skipEvent = event as? MPSkipIntervalCommandEvent {
-                self?.skipForward(skipEvent.interval)
-            } else {
-                self?.skipForward()
-            }
-            return .success
-        }
-        
-        commandCenter.skipBackwardCommand.addTarget { [weak self] event in
-            if let skipEvent = event as? MPSkipIntervalCommandEvent {
-                self?.skipBackward(skipEvent.interval)
-            } else {
-                self?.skipBackward()
-            }
-            return .success
-        }
-        
-        commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
-            if let positionEvent = event as? MPChangePlaybackPositionCommandEvent {
-                self?.seek(to: positionEvent.positionTime)
-            }
-            return .success
-        }
-        
+
+        remoteCommandTargets = [
+            (commandCenter.playCommand, commandCenter.playCommand.addTarget { [weak self] _ in
+                self?.play()
+                return .success
+            }),
+            (commandCenter.pauseCommand, commandCenter.pauseCommand.addTarget { [weak self] _ in
+                self?.pause()
+                return .success
+            }),
+            (commandCenter.skipForwardCommand, commandCenter.skipForwardCommand.addTarget { [weak self] event in
+                if let skipEvent = event as? MPSkipIntervalCommandEvent {
+                    self?.skipForward(skipEvent.interval)
+                } else {
+                    self?.skipForward()
+                }
+                return .success
+            }),
+            (commandCenter.skipBackwardCommand, commandCenter.skipBackwardCommand.addTarget { [weak self] event in
+                if let skipEvent = event as? MPSkipIntervalCommandEvent {
+                    self?.skipBackward(skipEvent.interval)
+                } else {
+                    self?.skipBackward()
+                }
+                return .success
+            }),
+            (commandCenter.changePlaybackPositionCommand, commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+                if let positionEvent = event as? MPChangePlaybackPositionCommandEvent {
+                    self?.seek(to: positionEvent.positionTime)
+                }
+                return .success
+            }),
+        ]
+
         commandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: 15)]
         commandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: 15)]
     }
@@ -911,8 +828,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
                         
                         // If we were playing, try to resume
                         if self.isPlaying {
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                                self.play()
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) { [weak self] in
+                                self?.play()
                             }
                         }
                     } else {
@@ -932,13 +849,13 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         guard currentPlayerIndex >= 0 && currentPlayerIndex < chapterFiles.count else {
             print("⚠️ MultiFileAudioEngine: Invalid currentPlayerIndex: \(currentPlayerIndex), resetting to 0")
             currentPlayerIndex = 0
-            currentChapterIndex = 0
+            DispatchQueue.main.async { [weak self] in self?.currentChapterIndex = 0 }
             return false
         }
-        
+
         guard currentChapterIndex >= 0 && currentChapterIndex < chapters.count else {
             print("⚠️ MultiFileAudioEngine: Invalid currentChapterIndex: \(currentChapterIndex), resetting to 0")
-            currentChapterIndex = 0
+            DispatchQueue.main.async { [weak self] in self?.currentChapterIndex = 0 }
             return false
         }
         
@@ -952,23 +869,8 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
     
     // MARK: - Cleanup
     private func cleanup() {
-        // Prevent multiple cleanup calls
-        guard !isCleanedUp else { 
-            print("⚠️ MultiFileAudioEngine: Cleanup already performed")
-            return 
-        }
-        isCleanedUp = true
-        
         print("🧹 MultiFileAudioEngine: Starting cleanup...")
-        
-        // Remove notification observers on current thread
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.interruptionNotification, 
-                                                 object: nil)
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.routeChangeNotification, 
-                                                 object: nil)
-        
+
         // Remove time observer only from the current player that has it
         if let observer = timeObserver, let currentPlayer = players[currentPlayerIndex] {
             currentPlayer.removeTimeObserver(observer)
@@ -992,15 +894,11 @@ class MultiFileAudioEngine: NSObject, ObservableObject {
         folderURL = nil
         currentPlayerIndex = 0
         
-        // Update UI state immediately since we're potentially in deinit
+        // Possibly in deinit: never block on main here; skip the @Published write off-main
         if Thread.isMainThread {
             isPlaying = false
-        } else {
-            DispatchQueue.main.sync {
-                isPlaying = false
-            }
         }
-        
+
         print("✅ MultiFileAudioEngine: Cleanup completed")
     }
     

@@ -72,6 +72,8 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
             let fileOperationResult = await performFileOperations(filePath: filePath)
             
             await MainActor.run {
+                // Stale completion: another loadAudiobook ran meanwhile
+                guard self.currentAudiobook?.id == audiobook.id else { return }
                 switch fileOperationResult {
                 case .success(let isDirectory):
                     if isDirectory {
@@ -359,30 +361,6 @@ class GlobalAudioManager: ObservableObject, AudioManagerProtocol {
 
     
     // MARK: - Enhanced Audio Processing Controls
-    func enableNoiseSuppression(_ enabled: Bool) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.enableNoiseSuppression(enabled)
-        } else {
-            audioEngine?.enableNoiseSuppression(enabled)
-        }
-    }
-    
-    func setEqualizer(bassBoost: Float, trebleBoost: Float) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.setEqualizer(bassBoost: bassBoost, trebleBoost: trebleBoost)
-        } else {
-            audioEngine?.setEqualizer(bassBoost: bassBoost, trebleBoost: trebleBoost)
-        }
-    }
-    
-    func enableSpeechEnhancement(_ enabled: Bool) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.enableSpeechEnhancement(enabled)
-        } else {
-            audioEngine?.enableSpeechEnhancement(enabled)
-        }
-    }
-    
     func enableDynamicRangeCompression(_ enabled: Bool, threshold: Float = -12.0, ratio: Float = 4.0) {
         if useMultiFileEngine {
             multiFileAudioEngine?.enableDynamicRangeCompression(enabled, threshold: threshold, ratio: ratio)

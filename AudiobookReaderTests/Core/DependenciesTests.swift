@@ -9,6 +9,7 @@ import Testing
 import SwiftUI
 @testable import AudiobookReader
 
+@MainActor
 struct DependenciesTests {
     
     // MARK: - Live Dependencies Tests
@@ -20,7 +21,7 @@ struct DependenciesTests {
         #expect(dependencies.audioManager is GlobalAudioManager)
         #expect(dependencies.themeManager is ThemeManager)
         #expect(dependencies.audiobookManager is AudiobookManager)
-        #expect(dependencies.persistenceController === PersistenceController.shared)
+        #expect(dependencies.swiftDataController === SwiftDataController.shared)
         
         let statistics = dependencies.createReadingStatistics()
         #expect(statistics is ReadingStatistics)
@@ -32,7 +33,7 @@ struct DependenciesTests {
         let dependencies2 = LiveDependencies()
         
         // These should be the same shared instances
-        #expect(dependencies1.persistenceController === dependencies2.persistenceController)
+        #expect(dependencies1.swiftDataController === dependencies2.swiftDataController)
     }
     
     // MARK: - Preview Dependencies Tests
@@ -44,7 +45,7 @@ struct DependenciesTests {
         #expect(dependencies.audioManager is MockGlobalAudioManager)
         #expect(dependencies.themeManager is MockThemeManager)
         #expect(dependencies.audiobookManager is MockAudiobookManager)
-        #expect(dependencies.persistenceController === PersistenceController.preview)
+        #expect(dependencies.swiftDataController === SwiftDataController.preview)
         
         let statistics = dependencies.createReadingStatistics()
         #expect(statistics is MockReadingStatistics)
@@ -56,7 +57,7 @@ struct DependenciesTests {
         let dependencies2 = PreviewDependencies()
         
         // These should be the same preview instance
-        #expect(dependencies1.persistenceController === dependencies2.persistenceController)
+        #expect(dependencies1.swiftDataController === dependencies2.swiftDataController)
         
         // But audio managers should be separate instances for isolated testing
         #expect(dependencies1.audioManager !== dependencies2.audioManager)
@@ -112,7 +113,7 @@ struct DependenciesTests {
             }
         }
         
-        let view = await MainActor.run { TestEnvironmentView() }
+        let view = TestEnvironmentView()
         
         // In test environment, should get live dependencies by default
         // (since ProcessInfo.isPreview is false in tests)

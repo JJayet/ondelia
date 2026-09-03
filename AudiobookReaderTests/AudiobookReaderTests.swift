@@ -11,6 +11,7 @@ import Foundation
 
 /// Main test suite for AudiobookReader application
 /// This file serves as the entry point for the comprehensive test infrastructure
+@MainActor
 struct AudiobookReaderTests {
 
     @Test("Test infrastructure should be properly configured")
@@ -19,7 +20,7 @@ struct AudiobookReaderTests {
         #expect(TestConfiguration.testTimeout > 0)
         #expect(TestConfiguration.performanceTimeout > 0)
         #expect(TestConfiguration.audioEngineTimeout > 0)
-        #expect(TestConfiguration.coreDataTimeout > 0)
+        #expect(TestConfiguration.swiftDataTimeout > 0)
         
         // Verify test environment detection
         #expect(ProcessInfo.isRunningTests == true)
@@ -55,17 +56,17 @@ struct AudiobookReaderTests {
     func dependenciesConfiguration() async throws {
         // Test live dependencies
         let liveDeps = LiveDependencies()
-        #expect(liveDeps.audioManager != nil)
-        #expect(liveDeps.themeManager != nil)
-        #expect(liveDeps.audiobookManager != nil)
-        #expect(liveDeps.persistenceController != nil)
+        #expect(liveDeps.audioManager is GlobalAudioManager)
+        #expect(liveDeps.themeManager is ThemeManager)
+        #expect(liveDeps.audiobookManager is AudiobookManager)
+        #expect(liveDeps.swiftDataController === SwiftDataController.shared)
         
         // Test preview dependencies
         let previewDeps = PreviewDependencies()
         #expect(previewDeps.audioManager is MockGlobalAudioManager)
         #expect(previewDeps.themeManager is MockThemeManager)
         #expect(previewDeps.audiobookManager is MockAudiobookManager)
-        #expect(previewDeps.persistenceController === PersistenceController.preview)
+        #expect(previewDeps.swiftDataController === SwiftDataController.preview)
     }
     
     @Test("Test data resources should be accessible")

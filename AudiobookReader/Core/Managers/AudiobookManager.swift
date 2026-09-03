@@ -11,8 +11,6 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     @Published var importQueueTotal: Int = 0
     @Published var importQueueCompleted: Int = 0
     @Published var currentImportFileName: String? = nil
-    @Published var currentBytes: Int64 = 0
-    @Published var totalBytes: Int64 = 0
     @Published var isLoadingLibrary = false
     @Published var audiobookNeedingCover: AudiobookModel?
     
@@ -83,7 +81,16 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                     PreviewContent.audiobookLong()
                 ]
             }
+            // Defer real fetch until the container finishes loading,
+            // then process any pending imports as part of that fetch.
             isLoadingLibrary = false
+            Task { @MainActor in
+                // Poll briefly until SwiftData finishes loading
+                while !self.swiftDataController.isLoaded {
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                }
+                self.fetchAudiobooks()
+            }
             return
         }
         let context = swiftDataController.context
@@ -104,12 +111,9 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             self.isLoadingLibrary = false
             self.processPendingImports()
             if !toDelete.isEmpty {
-                Task.detached(priority: .utility) {
-                    let background = self.swiftDataController.backgroundContext()
-                    for b in toDelete { background.delete(b) }
-                    do { try background.save() } catch {
-                        print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
-                    }
+                for b in toDelete { context.delete(b) }
+                do { try context.save() } catch {
+                    print("❌ AudiobookManager: Failed to save after cleanup: \(error)")
                 }
             }
         } catch {
@@ -134,10 +138,17 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     
     // MARK: - Import Operations
     func handleImportRequest(urls: [URL], completion: (() -> Void)? = nil) {
-        // If library is still loading, queue the import operation
-        if isLoadingLibrary {
-            print("📚 AudiobookManager: Library still loading, queueing import operation")
+        // If library or SwiftData are still loading, queue the import operation
+        if isLoadingLibrary || !swiftDataController.isLoaded {
+            print("📚 AudiobookManager: Library not ready, queueing import operation")
             pendingImports.append((urls: urls, completion: completion))
+            // Kick a lightweight waiter to process once loaded
+            Task { @MainActor in
+                while (!self.swiftDataController.isLoaded) || self.isLoadingLibrary {
+                    try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+                }
+                self.processPendingImports()
+            }
             return
         }
         
@@ -149,49 +160,40 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     }
     
     private func processImport(urls: [URL], completion: (() -> Void)? = nil) {
-        for url in urls {
-            let manager = self
-            Task.detached(priority: .userInitiated) {
+        let manager = self
+        Task.detached(priority: .userInitiated) {
+            for url in urls {
                 print("📂 Processing import: \(url.lastPathComponent)")
-                defer {
-                    Task { @MainActor in
-                        manager.importQueueCompleted += 1
-                        if manager.importQueueCompleted >= manager.importQueueTotal {
-                            manager.isImporting = false
-                            manager.currentImportFileName = nil
-                        }
-                    }
-                }
-                
+                await MainActor.run { manager.currentImportFileName = url.lastPathComponent }
+
                 // Start accessing security-scoped resource
                 let accessing = url.startAccessingSecurityScopedResource()
                 defer { if accessing { url.stopAccessingSecurityScopedResource() } }
-                await MainActor.run { manager.currentImportFileName = url.lastPathComponent }
-                
-                // Check if it's a ZIP file
+
                 if url.pathExtension.lowercased() == "zip" {
                     print("📦 Importing ZIP file: \(url.lastPathComponent)")
                     await manager.importZIPAudiobook(from: url)
                 } else {
                     var isDirectory: ObjCBool = false
-                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory) {
-                        if isDirectory.boolValue {
-                            print("📁 Importing folder: \(url.lastPathComponent)")
-                            await manager.importAudiobookFolder(from: url)
-                        } else {
-                            print("🎵 Importing single file: \(url.lastPathComponent)")
-                            await manager.importAudiobook(from: url)
-                        }
+                    if FileManager.default.fileExists(atPath: url.path, isDirectory: &isDirectory), isDirectory.boolValue {
+                        print("📁 Importing folder: \(url.lastPathComponent)")
+                        await manager.importAudiobookFolder(from: url)
                     } else {
-                        print("🎵 Importing file (fallback): \(url.lastPathComponent)")
+                        print("🎵 Importing single file: \(url.lastPathComponent)")
                         await manager.importAudiobook(from: url)
                     }
                 }
+
+                await MainActor.run {
+                    manager.importQueueCompleted += 1
+                    if manager.importQueueCompleted >= manager.importQueueTotal {
+                        manager.isImporting = false
+                        manager.currentImportFileName = nil
+                    }
+                }
             }
+            completion?()
         }
-        
-        // Call completion handler if provided
-        completion?()
     }
     
     private func processPendingImports() {
@@ -264,49 +266,37 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
         
         // Create audiobook entity with multiple files
-        await MainActor.run {
-            let context = swiftDataController.context
-            let audiobook = AudiobookModel()
-            
-            audiobook.id = UUID()
-            audiobook.title = folderAudiobook.title
-            audiobook.author = folderAudiobook.author ?? "Unknown Author"
-            audiobook.narrator = folderAudiobook.narrator
-            audiobook.duration = folderAudiobook.totalDuration
-            audiobook.fileURL = localFolderURL.path // Store folder path instead of single file
-            audiobook.dateAdded = Date()
-            audiobook.currentPosition = 0
-            audiobook.isFinished = false
-            
+        do {
+            let bg = swiftDataController.backgroundContext()
+            let audiobook = AudiobookModel(
+                title: folderAudiobook.title,
+                author: folderAudiobook.author ?? "Unknown Author",
+                narrator: folderAudiobook.narrator,
+                fileURL: localFolderURL.path,
+                duration: folderAudiobook.totalDuration,
+                currentPosition: 0,
+                isFinished: false,
+                coverImageData: nil,
+                dateAdded: Date(),
+                lastPlayed: Date.distantPast
+            )
             if let coverImage = folderAudiobook.coverImage {
                 audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
             }
-            
-            // Add chapters from folder structure
-            for folderChapter in folderAudiobook.chapters {
+            for ch in folderAudiobook.chapters {
                 let chapter = ChapterModel(
-                    title: folderChapter.title,
-                    chapterNumber: Int16(folderChapter.chapterNumber),
-                    startTime: folderChapter.startTimeInBook,
-                    endTime: folderChapter.startTimeInBook + folderChapter.duration
+                    title: ch.title,
+                    chapterNumber: Int16(ch.chapterNumber),
+                    startTime: ch.startTimeInBook,
+                    endTime: ch.startTimeInBook + ch.duration
                 )
                 chapter.audiobook = audiobook
-                context.insert(chapter)
+                bg.insert(chapter)
             }
-            
-            // Insert the audiobook into the context
-            context.insert(audiobook)
-            
-            print("✅ AudiobookManager: Created multi-file audiobook record:")
-            print("   Title: \(folderAudiobook.title)")
-            print("   Author: \(folderAudiobook.author ?? "Unknown")")
-            print("   Duration: \(formatTime(folderAudiobook.totalDuration))")
-            print("   Chapters: \(folderAudiobook.chapters.count)")
-            print("   Folder Path: \(localFolderURL.path)")
-            
-            swiftDataController.save()
-            fetchAudiobooks()
+            bg.insert(audiobook)
+            try? bg.save()
         }
+        await MainActor.run { fetchAudiobooks() }
     }
 
     
@@ -329,32 +319,25 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
         
         // Create audiobook entity (single file, not folder)
-        await MainActor.run {
-            let context = swiftDataController.context
-            let audiobook = AudiobookModel()
-            
-            audiobook.id = UUID()
-            // Use CUE metadata where available, fallback to audio metadata
-            audiobook.title = cueFile.title ?? metadata.title
-            audiobook.author = cueFile.performer ?? metadata.author
-            audiobook.narrator = metadata.narrator
-            audiobook.duration = metadata.duration
-            audiobook.fileURL = localURL.path // Single file path
-            audiobook.dateAdded = Date()
-            audiobook.currentPosition = 0
-            audiobook.isFinished = false
-            
+        do {
+            let bg = swiftDataController.backgroundContext()
+            let audiobook = AudiobookModel(
+                title: cueFile.title ?? metadata.title,
+                author: cueFile.performer ?? metadata.author,
+                narrator: metadata.narrator,
+                fileURL: localURL.path,
+                duration: metadata.duration,
+                currentPosition: 0,
+                isFinished: false,
+                coverImageData: nil,
+                dateAdded: Date(),
+                lastPlayed: Date.distantPast
+            )
             if let coverImage = metadata.coverImage {
                 audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
-            } else {
-                audiobookNeedingCover = audiobook
             }
-            
-            // Add chapters from CUE file
             for (index, track) in cueFile.tracks.enumerated() {
-                // Calculate end time (next track start or total duration)
-                let endTime = (index + 1 < cueFile.tracks.count) ? 
-                    cueFile.tracks[index + 1].startTime : metadata.duration
+                let endTime = (index + 1 < cueFile.tracks.count) ? cueFile.tracks[index + 1].startTime : metadata.duration
                 let chapter = ChapterModel(
                     title: track.title,
                     chapterNumber: Int16(track.number),
@@ -362,22 +345,12 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                     endTime: endTime
                 )
                 chapter.audiobook = audiobook
-                context.insert(chapter)
+                bg.insert(chapter)
             }
-            
-            // Insert the audiobook into the context
-            context.insert(audiobook)
-            
-            print("✅ AudiobookManager: Created CUE-based audiobook record:")
-            print("   Title: \(audiobook.title ?? "Unknown")")
-            print("   Author: \(audiobook.author ?? "Unknown")")
-            print("   Duration: \(formatTime(metadata.duration))")
-            print("   Chapters: \(cueFile.tracks.count) (from CUE)")
-            print("   File Path: \(localURL.path)")
-            
-            swiftDataController.save()
-            fetchAudiobooks()
+            bg.insert(audiobook)
+            try? bg.save()
         }
+        await MainActor.run { fetchAudiobooks() }
     }
     
     func importAudiobook(from url: URL) async {
@@ -435,33 +408,25 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         let chapterInfos = await MetadataExtractor.extractChapters(from: localURL)
         
         // Create audiobook entity
-        await MainActor.run {
-            let context = swiftDataController.context
-            let audiobook = AudiobookModel()
-            
-            audiobook.id = UUID()
-            audiobook.title = metadata.title
-            audiobook.author = metadata.author
-            audiobook.narrator = metadata.narrator
-            audiobook.duration = metadata.duration
-            audiobook.fileURL = localURL.path
-            audiobook.dateAdded = Date()
-            audiobook.currentPosition = 0
-            audiobook.isFinished = false
-            
-            print("✅ AudiobookManager: Created audiobook record:")
-            print("   Title: \(metadata.title)")
-            print("   Author: \(metadata.author)")
-            print("   Duration: \(Int(metadata.duration))s")
-            print("   File Path: \(localURL.path)")
-            
+        do {
+            let bg = swiftDataController.backgroundContext()
+            let audiobook = AudiobookModel(
+                title: metadata.title,
+                author: metadata.author,
+                narrator: metadata.narrator,
+                fileURL: localURL.path,
+                duration: metadata.duration,
+                currentPosition: 0,
+                isFinished: false,
+                coverImageData: nil,
+                dateAdded: Date(),
+                lastPlayed: Date.distantPast
+            )
             if let coverImage = metadata.coverImage {
                 audiobook.coverImageData = coverImage.jpegData(compressionQuality: 0.8)
             } else {
-                audiobookNeedingCover = audiobook
+                await MainActor.run { self.audiobookNeedingCover = audiobook }
             }
-            
-            // Add chapters
             for chapterInfo in chapterInfos {
                 let chapter = ChapterModel(
                     title: chapterInfo.title,
@@ -470,15 +435,12 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                     endTime: chapterInfo.endTime
                 )
                 chapter.audiobook = audiobook
-                context.insert(chapter)
+                bg.insert(chapter)
             }
-            
-            // Insert the audiobook into the context
-            context.insert(audiobook)
-            
-            swiftDataController.save()
-            fetchAudiobooks()
+            bg.insert(audiobook)
+            try? bg.save()
         }
+        await MainActor.run { fetchAudiobooks() }
     }
     
     // MARK: - Cover Image Management
@@ -544,26 +506,13 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         }
         
         do {
-            // Prepare progress
-            let attributes = try? fileManager.attributesOfItem(atPath: sourceURL.path)
-            let size = (attributes?[.size] as? NSNumber)?.int64Value ?? 0
-            await MainActor.run {
-                self.totalBytes = size
-                self.currentBytes = 0
-            }
-
+            // Stream copy off the main thread to avoid UI blocking
             try streamCopyFile(from: sourceURL, to: destinationURL)
-
             // Verify the file was copied successfully
             let copiedAttributes = try fileManager.attributesOfItem(atPath: destinationURL.path)
             let fileSize = copiedAttributes[.size] as? Int64 ?? 0
-            
             print("✅ AudiobookManager: File copied successfully to: \(destinationURL.path)")
             print("   File size: \(ByteCountFormatter.string(fromByteCount: fileSize, countStyle: .file))")
-            
-            await MainActor.run {
-                self.currentBytes = self.totalBytes
-            }
             return destinationURL
         } catch {
             print("❌ AudiobookManager: Failed to copy file: \(error)")
@@ -646,19 +595,9 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
                     try fileManager.removeItem(at: destinationFileURL)
                 }
                 
-                // Initialize overall progress on first file
-                if self.totalBytes == 0 {
-                    let total = folderAudiobook.chapters.reduce(Int64(0)) { $0 + $1.fileSize }
-                    await MainActor.run {
-                        self.totalBytes = total
-                        self.currentBytes = 0
-                    }
-                }
-
-                // Stream copy to update progress per file
+                // Stream copy each file off the main thread
                 try self.streamCopyFile(from: sourceFileURL, to: destinationFileURL)
                 totalCopiedSize += folderChapter.fileSize
-                await MainActor.run { self.currentBytes = min(self.currentBytes + folderChapter.fileSize, self.totalBytes) }
                 copiedFiles += 1
                 
                 print("   ✅ Copied: \(folderChapter.fileName) (\(ByteCountFormatter.string(fromByteCount: folderChapter.fileSize, countStyle: .file)))")
@@ -715,12 +654,11 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
             try? writeHandle.close()
         }
 
-        let chunkSize = 256 * 1024 // 256 KB
+        let chunkSize = 512 * 1024 // 512 KB chunks
         while autoreleasepool(invoking: {
             let data = try? readHandle.read(upToCount: chunkSize)
             if let data, !data.isEmpty {
                 try? writeHandle.write(contentsOf: data)
-                Task { @MainActor in self.currentBytes = min(self.currentBytes + Int64(data.count), self.totalBytes) }
                 return true
             }
             return false

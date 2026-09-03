@@ -7,7 +7,6 @@
 
 import Foundation
 import AVFoundation
-import CoreData
 @testable import AudiobookReader
 
 // MARK: - Mock AVAudioSession
@@ -189,9 +188,9 @@ class MockAudioEngine: ObservableObject {
     @Published var playbackRate: Float = 1.0
     @Published var currentChapterIndex: Int = 0
     
-    var audiobook: Audiobook?
+    var audiobook: AudiobookModel?
     var shouldFailOperations = false
-    var mockChapters: [Chapter] = []
+    var mockChapters: [ChapterModel] = []
     
     private var playbackTimer: Timer?
     
@@ -204,7 +203,7 @@ class MockAudioEngine: ObservableObject {
         self.currentTime = 0
     }
     
-    func loadAudiobook(_ audiobook: Audiobook) throws {
+    func loadAudiobook(_ audiobook: AudiobookModel) throws {
         guard !shouldFailOperations else {
             throw AudiobookError.fileNotFound("Mock error for testing")
         }
@@ -215,10 +214,7 @@ class MockAudioEngine: ObservableObject {
         self.isReady = true
         
         // Create mock chapters if audiobook has chapters
-        if let chaptersSet = audiobook.chapters,
-           let chapters = Array(chaptersSet) as? [Chapter], !chapters.isEmpty {
-            mockChapters = chapters.sorted { $0.chapterNumber < $1.chapterNumber }
-        }
+        mockChapters = audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
     }
     
     func play() {
@@ -441,6 +437,8 @@ class TestDataFactory {
     
     static func cleanupTempFiles() {
         let tempDir = FileManager.default.temporaryDirectory
-        try? FileManager.default.removeItem(at: tempDir)
+        for item in (try? FileManager.default.contentsOfDirectory(at: tempDir, includingPropertiesForKeys: nil)) ?? [] {
+            try? FileManager.default.removeItem(at: item)
+        }
     }
 }

@@ -54,7 +54,7 @@ struct AudiobookReaderApp: App {
         // Save current playback position when app goes to background
         if let audiobook = globalAudioManager.currentAudiobook {
             let currentTime = globalAudioManager.getCurrentTime()
-            let audiobookManager = AudiobookManager()
+            let audiobookManager = AudiobookManager.shared
             audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
             
             // Save SwiftData context

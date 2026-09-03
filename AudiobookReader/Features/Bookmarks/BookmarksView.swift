@@ -3,7 +3,7 @@ import SwiftUI
 struct BookmarksView: View {
     let audiobook: AudiobookModel
     @ObservedObject var globalAudioManager: GlobalAudioManager
-    @StateObject private var audiobookManager = AudiobookManager()
+    @StateObject private var audiobookManager = AudiobookManager.shared
     @Environment(\.dismiss) private var dismiss
     
     private var bookmarks: [BookmarkModel] {

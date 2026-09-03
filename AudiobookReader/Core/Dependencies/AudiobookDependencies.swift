@@ -80,7 +80,7 @@ protocol AudiobookDependencies {
 class LiveDependencies: AudiobookDependencies {
     lazy var audioManager: any AudioManagerProtocol = GlobalAudioManager.shared
     lazy var themeManager: any ThemeManagerProtocol = ThemeManager.shared
-    lazy var audiobookManager: AudiobookManagerProtocol = AudiobookManager()
+    lazy var audiobookManager: AudiobookManagerProtocol = AudiobookManager.shared
     lazy var swiftDataController: SwiftDataController = SwiftDataController.shared
     
     func createReadingStatistics() -> any ReadingStatisticsProtocol {

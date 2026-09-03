@@ -3,7 +3,7 @@ import UIKit
 
 struct SearchView: View {
     @Binding var query: String
-    @StateObject private var audiobookManager = AudiobookManager()
+    @StateObject private var audiobookManager = AudiobookManager.shared
     @Environment(\.playerRouter) private var playerRouter
     @State private var debouncedQuery: String = ""
     @State private var searchTask: Task<Void, Never>? = nil

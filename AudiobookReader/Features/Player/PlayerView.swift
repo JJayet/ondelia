@@ -21,7 +21,7 @@ struct PlayerView: View {
             dependencies
             ?? (ProcessInfo.isPreview
                 ? PreviewDependencies() : LiveDependencies())
-        let stats = deps.createReadingStatistics() as! ReadingStatistics
+        let stats = (deps.createReadingStatistics() as? ReadingStatistics) ?? ReadingStatistics()
         self._statistics = StateObject(wrappedValue: stats)
         self._viewModel = StateObject(
             wrappedValue: PlayerViewModel(
@@ -71,7 +71,7 @@ struct PlayerView: View {
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(
                 audiobook: audiobook,
-                globalAudioManager: audioManager as! GlobalAudioManager
+                globalAudioManager: (audioManager as? GlobalAudioManager) ?? GlobalAudioManager.shared
             )
         }
         .sheet(isPresented: $showingAddBookmark) {

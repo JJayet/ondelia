@@ -17,7 +17,8 @@ class AudioEngine: NSObject, ObservableObject {
     private var hasAddedObservers = false
     private var hasSetupAudioSession = false
     private var isCleanedUp = false
-    
+    private var remoteCommandTargets: [(MPRemoteCommand, Any)] = []
+
     @Published var isPlaying = false
     @Published var currentTime: TimeInterval = 0
     @Published var duration: TimeInterval = 0
@@ -29,10 +30,27 @@ class AudioEngine: NSObject, ObservableObject {
     
     override init() {
         super.init()
-        // Defer audio session and remote control setup until needed
+        // Audio session is configured lazily in loadAudio(); observers and remote controls register once here
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionInterruption),
+            name: AVAudioSession.interruptionNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleAudioSessionRouteChange),
+            name: AVAudioSession.routeChangeNotification,
+            object: nil
+        )
+        setupRemoteTransportControls()
     }
-    
+
     deinit {
+        NotificationCenter.default.removeObserver(self)
+        for (command, target) in remoteCommandTargets {
+            command.removeTarget(target)
+        }
         cleanup()
         deactivateAudioSession()
     }
@@ -73,24 +91,10 @@ class AudioEngine: NSObject, ObservableObject {
         
         // Activate the session
         try audioSession.setActive(true)
-        
+        hasSetupAudioSession = true
+
         print("✅ AudioEngine: Audio session configured successfully")
-        
-        // Handle audio session interruptions and route changes
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAudioSessionInterruption),
-            name: AVAudioSession.interruptionNotification,
-            object: nil
-        )
-        
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleAudioSessionRouteChange),
-            name: AVAudioSession.routeChangeNotification,
-            object: nil
-        )
-        
+
     } catch {
         print("❌ AudioEngine: Failed to set up audio session: \(error)")
         // Try a minimal fallback configuration
@@ -107,7 +111,8 @@ class AudioEngine: NSObject, ObservableObject {
             // Minimal configuration that should always work
             try audioSession.setCategory(.playback, mode: .default)
             try audioSession.setActive(true)
-            
+            hasSetupAudioSession = true
+
             print("✅ AudioEngine: Fallback audio session configured")
             
         } catch {
@@ -195,92 +200,6 @@ class AudioEngine: NSObject, ObservableObject {
         }
     }
 
-    // MARK: - Enhanced Audio Processing
-    private func enableEnhancedAudioProcessing() {
-        guard let playerItem = playerItem else { return }
-        
-        // Configure audio processing for better speech clarity
-        let audioMix = AVMutableAudioMix()
-        let audioMixInputParameters = AVMutableAudioMixInputParameters(track: nil)
-        
-        // Configure dynamic range compression for consistent volume
-        audioMixInputParameters.setVolume(1.0, at: .zero)
-        
-        audioMix.inputParameters = [audioMixInputParameters]
-        playerItem.audioMix = audioMix
-        
-        print("🎛️ AudioEngine: Enhanced audio processing enabled")
-    }
-    
-    func enableNoiseSuppression(_ enabled: Bool) {
-        
-        audioQueue.async { [weak self] in
-            guard let self = self, let playerItem = self.playerItem else { return }
-            
-            if enabled {
-                // Apply noise suppression settings
-                let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-                
-                // Configure noise suppression parameters
-                for inputParameters in audioMix.inputParameters {
-                    if inputParameters is AVMutableAudioMixInputParameters {
-                        // Add noise suppression processing here
-                        print("🔇 AudioEngine: Noise suppression enabled")
-                    }
-                }
-                
-                playerItem.audioMix = audioMix
-            } else {
-                playerItem.audioMix = nil
-                print("🔇 AudioEngine: Noise suppression disabled")
-            }
-        }
-    }
-    
-    func setEqualizer(bassBoost: Float, trebleBoost: Float) {
-        
-        audioQueue.async { [weak self] in
-            guard let self = self, let playerItem = self.playerItem else { return }
-            
-            let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-            
-            // Configure EQ parameters
-            for inputParameters in audioMix.inputParameters {
-                if inputParameters is AVMutableAudioMixInputParameters {
-                    // Apply bass and treble adjustments
-                    print("🎚️ AudioEngine: EQ applied - Bass: \(bassBoost), Treble: \(trebleBoost)")
-                }
-            }
-            
-            playerItem.audioMix = audioMix
-        }
-    }
-    
-    func enableSpeechEnhancement(_ enabled: Bool) {
-        
-        audioQueue.async { [weak self] in
-            guard let self = self, let playerItem = self.playerItem else { return }
-            
-            if enabled {
-                // Enable speech-optimized processing
-                let audioMix = playerItem.audioMix?.mutableCopy() as? AVMutableAudioMix ?? AVMutableAudioMix()
-                
-                // Configure speech enhancement
-                for inputParameters in audioMix.inputParameters {
-                    if inputParameters is AVMutableAudioMixInputParameters {
-                        print("🗣️ AudioEngine: Speech enhancement enabled")
-                    }
-                }
-                
-                playerItem.audioMix = audioMix
-                self.enableEnhancedAudioProcessing()
-            } else {
-                playerItem.audioMix = nil
-                print("🗣️ AudioEngine: Speech enhancement disabled")
-            }
-        }
-    }
-    
     // MARK: - Cleanup
     private func cleanup() {
         // Prevent multiple cleanup calls
@@ -294,15 +213,7 @@ class AudioEngine: NSObject, ObservableObject {
         
         // Stop playback first on current thread
         player?.pause()
-        
-        // Remove notification observers synchronously on current thread
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.interruptionNotification, 
-                                                 object: nil)
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.routeChangeNotification, 
-                                                 object: nil)
-        
+
         // Remove time observer from current player synchronously
         if let observer = timeObserver, let currentPlayer = player {
             currentPlayer.removeTimeObserver(observer)
@@ -320,28 +231,16 @@ class AudioEngine: NSObject, ObservableObject {
         player = nil
         playerItem = nil
         
-        // Update UI state immediately since we're potentially in deinit
+        // Only called from deinit: never block on main here; skip the @Published write off-main
         if Thread.isMainThread {
             isPlaying = false
-        } else {
-            DispatchQueue.main.sync {
-                isPlaying = false
-            }
         }
-        
+
         print("✅ AudioEngine: Cleanup completed")
     }
 
     private func cleanupPlayerDirectly() {
         // This method runs on audioQueue, so no need for sync
-        // Remove notification observers
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.interruptionNotification, 
-                                                 object: nil)
-        NotificationCenter.default.removeObserver(self, 
-                                                 name: AVAudioSession.routeChangeNotification, 
-                                                 object: nil)
-        
         // Remove time observer from current player
         if let observer = timeObserver, let currentPlayer = player {
             currentPlayer.removeTimeObserver(observer)
@@ -381,11 +280,9 @@ private func deactivateAudioSession() {
         print("AudioEngine: Loading audio from URL: \(url)")
         print("AudioEngine: File exists: \(FileManager.default.fileExists(atPath: url.path))")
         
-        // Setup audio session once on main thread if not already done
+        // Setup audio session once; flag is set inside on success so failures retry next load
         if !hasSetupAudioSession {
             setupAudioSession()
-            setupRemoteTransportControls()
-            hasSetupAudioSession = true
         }
         
         audioQueue.async { [weak self] in
@@ -514,15 +411,15 @@ private func deactivateAudioSession() {
     // MARK: - Key-Value Observing
     override func observeValue(forKeyPath keyPath: String?, of object: Any?, change: [NSKeyValueChangeKey : Any]?, context: UnsafeMutableRawPointer?) {
         if keyPath == "duration", let item = object as? AVPlayerItem {
-            Task {
+            Task { [weak self] in
                 do {
                     let durationCMTime = try await item.asset.load(.duration)
                     await MainActor.run {
-                        self.duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
+                        self?.duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
                     }
                 } catch {
                     await MainActor.run {
-                        self.duration = 0
+                        self?.duration = 0
                     }
                 }
             }
@@ -633,42 +530,40 @@ private func deactivateAudioSession() {
     // MARK: - Remote Control Events
     private func setupRemoteTransportControls() {
         let commandCenter = MPRemoteCommandCenter.shared()
-        
-        commandCenter.playCommand.addTarget { [weak self] _ in
-            self?.play()
-            return .success
-        }
-        
-        commandCenter.pauseCommand.addTarget { [weak self] _ in
-            self?.pause()
-            return .success
-        }
-        
-        commandCenter.skipForwardCommand.addTarget { [weak self] event in
-            if let skipEvent = event as? MPSkipIntervalCommandEvent {
-                self?.skipForward(skipEvent.interval)
-            } else {
-                self?.skipForward()
-            }
-            return .success
-        }
-        
-        commandCenter.skipBackwardCommand.addTarget { [weak self] event in
-            if let skipEvent = event as? MPSkipIntervalCommandEvent {
-                self?.skipBackward(skipEvent.interval)
-            } else {
-                self?.skipBackward()
-            }
-            return .success
-        }
-        
-        commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
-            if let positionEvent = event as? MPChangePlaybackPositionCommandEvent {
-                self?.seek(to: positionEvent.positionTime)
-            }
-            return .success
-        }
-        
+
+        remoteCommandTargets = [
+            (commandCenter.playCommand, commandCenter.playCommand.addTarget { [weak self] _ in
+                self?.play()
+                return .success
+            }),
+            (commandCenter.pauseCommand, commandCenter.pauseCommand.addTarget { [weak self] _ in
+                self?.pause()
+                return .success
+            }),
+            (commandCenter.skipForwardCommand, commandCenter.skipForwardCommand.addTarget { [weak self] event in
+                if let skipEvent = event as? MPSkipIntervalCommandEvent {
+                    self?.skipForward(skipEvent.interval)
+                } else {
+                    self?.skipForward()
+                }
+                return .success
+            }),
+            (commandCenter.skipBackwardCommand, commandCenter.skipBackwardCommand.addTarget { [weak self] event in
+                if let skipEvent = event as? MPSkipIntervalCommandEvent {
+                    self?.skipBackward(skipEvent.interval)
+                } else {
+                    self?.skipBackward()
+                }
+                return .success
+            }),
+            (commandCenter.changePlaybackPositionCommand, commandCenter.changePlaybackPositionCommand.addTarget { [weak self] event in
+                if let positionEvent = event as? MPChangePlaybackPositionCommandEvent {
+                    self?.seek(to: positionEvent.positionTime)
+                }
+                return .success
+            }),
+        ]
+
         // Configure skip intervals
         commandCenter.skipForwardCommand.preferredIntervals = [NSNumber(value: 15)]
         commandCenter.skipBackwardCommand.preferredIntervals = [NSNumber(value: 15)]

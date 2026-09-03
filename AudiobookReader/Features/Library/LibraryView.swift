@@ -3,7 +3,7 @@ import UniformTypeIdentifiers
 import SwiftData
 
 struct LibraryView: View {
-    @StateObject private var audiobookManager = AudiobookManager()
+    @StateObject private var audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     @StateObject private var themeManager = ThemeManager.shared
     @StateObject private var statistics = ReadingStatistics()
@@ -16,7 +16,17 @@ struct LibraryView: View {
     @State private var sortOption: SortOption = .lastPlayed
     @State private var filterOption: FilterOption = .all
     @State private var showingImporter = false
-    
+    // Dependency injection initializer to enable previews/tests to control state
+    init(audiobookManager: AudiobookManager) {
+        _audiobookManager = StateObject(wrappedValue: audiobookManager)
+    }
+
+    // Default initializer creates the manager on the main actor
+    @MainActor
+    init() {
+        self.init(audiobookManager: AudiobookManager.shared)
+    }
+
     private var allowedFileTypes: [UTType] {
         var types: [UTType] = [.folder, .audio, .mp3, .zip]
         if let m4a = UTType(filenameExtension: "m4a") {
@@ -150,75 +160,82 @@ struct LibraryView: View {
         audiobookManager.handleImportRequest(urls: urls)
     }
     
+    // Extracted to help the type-checker
+    @ViewBuilder
+    private var listModeContent: some View {
+        List {
+            // Statistics Card
+            if !audiobookManager.audiobooks.isEmpty {
+                StatisticsCardView(statistics: statistics) { showingStatistics = true }
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+
+            // Continue Reading Section
+            if !continueReadingBooks.isEmpty {
+                continueReadingSection
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+
+            // Header with filters
+            LibraryHeaderView(
+                viewMode: $viewMode,
+                sortOption: $sortOption,
+                filterOption: $filterOption
+            )
+            .listRowBackground(Color.clear)
+            .listRowSeparator(.hidden)
+            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+
+            // Library Items
+            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
+                EmptyLibraryView()
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
+            } else {
+                if audiobookManager.isImporting {
+                    ImportingIndicatorView(manager: audiobookManager)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                }
+
+                ForEach(filteredAudiobooks, id: \.id, content: libraryRow)
+            }
+        }
+        .listStyle(PlainListStyle())
+        .background(Color.primaryBackground)
+    }
+
+    @ViewBuilder
+    private var continueReadingSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
+                    .font(.title2)
+                    .fontWeight(.bold)
+                Spacer()
+            }
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 16) {
+                    ForEach(continueReadingBooks, id: \.id) { (audiobook: AudiobookModel) in
+                        ContinueReadingCardView(audiobook: audiobook) { playAndPresent(audiobook) }
+                    }
+                }
+                .padding(.horizontal, 4)
+            }
+        }
+    }
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
                 if viewMode == .list {
-                    // List mode - use List for proper swipe actions
-                    List {
-                        // Statistics Card
-                        if !audiobookManager.audiobooks.isEmpty {
-                            StatisticsCardView(statistics: statistics) {
-                                showingStatistics = true
-                            }
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        }
-                        
-                        // Continue Reading Section
-                        if !continueReadingBooks.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                HStack {
-                                    Text(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                    Spacer()
-                                }
-                                
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    LazyHStack(spacing: 16) {
-                                        ForEach(continueReadingBooks, id: \.id) { audiobook in
-                                            ContinueReadingCardView(audiobook: audiobook) { playAndPresent(audiobook) }
-                                        }
-                                    }
-                                    .padding(.horizontal, 4)
-                                }
-                            }
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        }
-                        
-                        // Header with filters
-                        LibraryHeaderView(
-                            viewMode: $viewMode,
-                            sortOption: $sortOption,
-                            filterOption: $filterOption
-                        )
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-                        
-                        // Library Items
-                        if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                            EmptyLibraryView()
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
-                        } else {
-                            if audiobookManager.isImporting {
-                                ImportingIndicatorView(manager: audiobookManager)
-                                    .listRowBackground(Color.clear)
-                                    .listRowSeparator(.hidden)
-                                    .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
-                            }
-                            
-                            ForEach(filteredAudiobooks, id: \.id, content: libraryRow)
-                        }
-                    }
-                    .listStyle(PlainListStyle())
-                    .background(Color.primaryBackground)
+                    listModeContent
                 } else {
                     // Grid mode - use ScrollView
                     ScrollView {
@@ -317,6 +334,24 @@ struct LibraryView: View {
             .background(Color.primaryBackground.ignoresSafeArea())
             .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
             .navigationBarTitleDisplayMode(.large)
+            .overlay {
+                if audiobookManager.isImporting {
+                    ZStack {
+                        Color.black.opacity(0.35).ignoresSafeArea()
+                        VStack(spacing: 12) {
+                            ProgressView().scaleEffect(1.2)
+                            Text(NSLocalizedString("Please be patient while your file(s) are being imported", comment: "Blocking import message"))
+                                .font(.body)
+                                .foregroundColor(.primaryText)
+                                .multilineTextAlignment(.center)
+                                .padding(.horizontal)
+                        }
+                        .padding(20)
+                    }
+                    .transition(.opacity)
+                }
+            }
+            .disabled(audiobookManager.isImporting)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingImporter = true }) {
@@ -457,6 +492,26 @@ struct StatisticsCardView: View {
     PreviewWrapper {
         SeededLibraryPreview()
     }
+}
+
+// MARK: - Importing State Preview
+@MainActor
+private struct LibraryImportingPreview: View {
+    @StateObject private var manager: AudiobookManager
+    init() {
+        _manager = StateObject(wrappedValue: AudiobookManager())
+        manager.isImporting = true
+        manager.importQueueTotal = 3
+        manager.importQueueCompleted = 1
+        manager.currentImportFileName = "Sample.m4b"
+    }
+    var body: some View {
+        LibraryView(audiobookManager: manager)
+    }
+}
+
+#Preview("Library importing state") {
+    LibraryImportingPreview()
 }
 
 @MainActor

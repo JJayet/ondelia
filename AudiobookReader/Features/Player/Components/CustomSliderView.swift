@@ -65,7 +65,7 @@ struct PlayerProgressSlider: View {
         }
         .frame(height: 44) // Larger touch target
         .onAppear { localValue = value - range.lowerBound }
-        .onChange(of: value) { new in
+        .onChange(of: value) { _, new in
             // Clear committed override once external value is in place
             if let target = committedTarget {
                 if abs(new - target) <= max(0.15, 0.005 * (range.upperBound - range.lowerBound)) {

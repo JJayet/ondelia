@@ -1,13 +1,11 @@
 import XCTest
 @testable import AudiobookReader
 
+@MainActor
 final class PlayerViewModelTests: XCTestCase {
     func testSleepTimerSetsAndCancels() throws {
-        let mockAudio = MockAudioManager()
-        let deps = MockDependencies(audioManager: mockAudio)
-        let book = AudiobookModel()
-        let stats = deps.createReadingStatistics() as! MockReadingStatistics
-        let sut = PlayerViewModel(audiobook: book, dependencies: deps, statistics: stats)
+        let deps = MockDependencies(audioManager: MockAudioManager())
+        let sut = PlayerViewModel(audiobook: AudiobookModel(), dependencies: deps, statistics: ReadingStatistics())
 
         sut.setSleepTimer(2)
         XCTAssertEqual(sut.sleepTimeRemaining, 2)
@@ -22,14 +20,12 @@ final class PlayerViewModelTests: XCTestCase {
         mockAudio.setMockCurrentTime(10)
         mockAudio.startPlayback()
 
-        let mockManager = MockAudiobookManager()
-        let deps = MockDependencies(audioManager: mockAudio, audiobookManager: mockManager)
-        let book = AudiobookModel()
-        let stats = deps.createReadingStatistics() as! MockReadingStatistics
-        let sut = PlayerViewModel(audiobook: book, dependencies: deps, statistics: stats)
+        let deps = MockDependencies(audioManager: mockAudio, audiobookManager: MockAudiobookManager())
+        let stats = ReadingStatistics()
+        let before = stats.totalListeningTime
+        let sut = PlayerViewModel(audiobook: AudiobookModel(), dependencies: deps, statistics: stats)
 
         sut.onTick()
-        XCTAssertGreaterThanOrEqual(stats.totalListeningTime, 1)
+        XCTAssertEqual(stats.totalListeningTime, before + 1)
     }
 }
-

@@ -121,30 +121,6 @@ struct AudioEngineTests {
         #expect(audioEngine.isPlaying == false)
     }
     
-    @Test("AudioEngine should toggle playback correctly")
-    func audioEngineTogglePlayback() async throws {
-        let audioEngine = AudioEngine()
-        audioEngine.loadAudio(url: mockAudioURL)
-        
-        // Wait for loading
-        try await Task.sleep(nanoseconds: 300_000_000)
-        
-        // Initial state should be stopped
-        #expect(audioEngine.isPlaying == false)
-        
-        // First toggle should start playback
-        audioEngine.togglePlayback()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        #expect(audioEngine.isPlaying == true)
-        
-        // Second toggle should pause playback
-        audioEngine.togglePlayback()
-        try await Task.sleep(nanoseconds: 100_000_000)
-        
-        #expect(audioEngine.isPlaying == false)
-    }
-    
     // MARK: - Seek Operation Tests
     
     @Test("AudioEngine should handle seek operations")

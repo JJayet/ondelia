@@ -52,18 +52,11 @@ class SwiftDataController: ObservableObject {
         }
     }
     
+    @MainActor
     func save() {
-        Task { @MainActor in
-            let context = container.mainContext
-            
-            if context.hasChanges {
-                do {
-                    try context.save()
-                } catch {
-                    print("Save error: \(error)")
-                }
-            }
-        }
+        let context = container.mainContext
+        guard context.hasChanges else { return }
+        do { try context.save() } catch { print("Save error: \(error)") }
     }
     
     func backgroundContext() -> ModelContext {
