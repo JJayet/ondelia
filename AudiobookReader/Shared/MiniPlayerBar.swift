@@ -8,8 +8,7 @@ struct MiniPlayerBar: View {
     private var isPlaying: Bool { audio.playbackState == .playing }
 
     private var cover: Image? {
-        guard let data = book?.coverImageData, let ui = UIImage(data: data)
-        else { return nil }
+        guard let ui = CoverImageCache.image(for: book) else { return nil }
         return Image(uiImage: ui)
     }
 
@@ -44,9 +43,9 @@ struct MiniPlayerBar: View {
             // Controls
             HStack(spacing: 16) {
                 Button {
-                    audio.skipBackward(15)
+                    audio.skipBackward()
                 } label: {
-                    Image(systemName: "gobackward.15")
+                    Image(systemName: "gobackward.\(ThemeManager.shared.skipInterval.rawValue)")
                 }
                 Button {
                     if audio.playbackState != .loading {
@@ -67,9 +66,9 @@ struct MiniPlayerBar: View {
                 .accessibilityLabel(isPlaying ? NSLocalizedString("Pause", comment: "Pause playback") : NSLocalizedString("Play", comment: "Play playback"))
                 .accessibilityIdentifier(AccessibilityIdentifiers.MiniPlayer.playPauseButton)
                 Button {
-                    audio.skipForward(15)
+                    audio.skipForward()
                 } label: {
-                    Image(systemName: "goforward.15")
+                    Image(systemName: "goforward.\(ThemeManager.shared.skipInterval.rawValue)")
                 }
                 Button {
                     audio.stopPlayback()
@@ -98,5 +97,4 @@ struct MiniPlayerBar: View {
 
 #Preview {
     MiniPlayerBar()
-        .previewWithMockAudio(state:.playing)
 }

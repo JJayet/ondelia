@@ -34,7 +34,7 @@ extension LibraryView {
 
             // Library Items
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                EmptyLibraryView()
+                EmptyLibraryView { showingImporter = true }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
@@ -83,7 +83,7 @@ extension LibraryView {
 
                     // Content
                     if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                        EmptyLibraryView()
+                        EmptyLibraryView { showingImporter = true }
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {
@@ -119,7 +119,7 @@ extension LibraryView {
                                         }
 
                                         Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                                            audiobookManager.deleteAudiobook(audiobook)
+                                            activeAlert = .confirmDelete(audiobook)
                                         }
                                     }
                                 }
@@ -143,13 +143,12 @@ extension LibraryView {
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            .swipeActions(edge: .trailing, allowsFullSwipe: true) {
-                Button(NSLocalizedString("Delete", comment: "Delete button")) {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        audiobookManager.deleteAudiobook(audiobook)
-                    }
+            // No full swipe: the gesture used to delete the book, its progress and its
+            // bookmarks with nothing to confirm and nothing to undo.
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                    activeAlert = .confirmDelete(audiobook)
                 }
-                .tint(.red)
             }
             .swipeActions(edge: .leading) {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {

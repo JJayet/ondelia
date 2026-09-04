@@ -5,13 +5,22 @@ extension PlayerView {
     // MARK: - Playback Controls
     @ViewBuilder
     var playbackControls: some View {
-        HStack(spacing: 40) {
+        HStack(spacing: 28) {
+            Button {
+                withHapticFeedback { audioManager.skipToPreviousChapter() }
+            } label: {
+                Image(systemName: "backward.end.fill")
+                    .font(.title3)
+                    .foregroundStyle(Color.primaryText)
+            }
+            .disabled(chapters.isEmpty)
+            .accessibilityLabel(NSLocalizedString("Previous Chapter", comment: "Previous chapter accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.previousChapterButton)
+
             Button {
                 let skipInterval = themeManager.skipInterval.seconds
                 withHapticFeedback {
-                    DispatchQueue.main.async {
-                        audioManager.skipBackward(skipInterval)
-                    }
+                    audioManager.skipBackward(skipInterval)
                 }
             } label: {
                 Image(
@@ -26,10 +35,8 @@ extension PlayerView {
 
             Button {
                 withHapticFeedback(.medium) {
-                    DispatchQueue.main.async {
-                        if audioManager.playbackState != .loading {
-                            audioManager.togglePlayback()
-                        }
+                    if audioManager.playbackState != .loading {
+                        audioManager.togglePlayback()
                     }
                 }
             } label: {
@@ -37,12 +44,11 @@ extension PlayerView {
                     if audioManager.playbackState == .loading {
                         ProgressView()
                             .scaleEffect(1.8)
-                            .progressViewStyle(
-                                CircularProgressViewStyle(tint: .accentColor)
-                            )
+                            .progressViewStyle(.circular)
+                            .tint(.accentColor)
                     } else {
                         Image(
-                            systemName: viewModel.isPlaying
+                            systemName: isPlaying
                                 ? "pause.circle.fill" : "play.circle.fill"
                         )
                         .font(.system(size: 80))
@@ -59,7 +65,7 @@ extension PlayerView {
             .frame(width: 80, height: 80)
             .disabled(audioManager.playbackState == .loading)
             .accessibilityLabel(
-                viewModel.isPlaying
+                isPlaying
                     ? NSLocalizedString("Pause", comment: "Pause playback accessibility label")
                     : NSLocalizedString("Play", comment: "Play playback accessibility label")
             )
@@ -68,9 +74,7 @@ extension PlayerView {
             Button {
                 let skipInterval = themeManager.skipInterval.seconds
                 withHapticFeedback {
-                    DispatchQueue.main.async {
-                        audioManager.skipForward(skipInterval)
-                    }
+                    audioManager.skipForward(skipInterval)
                 }
             } label: {
                 Image(
@@ -82,6 +86,17 @@ extension PlayerView {
             }
             .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipForwardButton)
+
+            Button {
+                withHapticFeedback { audioManager.skipToNextChapter() }
+            } label: {
+                Image(systemName: "forward.end.fill")
+                    .font(.title3)
+                    .foregroundStyle(Color.primaryText)
+            }
+            .disabled(chapters.isEmpty)
+            .accessibilityLabel(NSLocalizedString("Next Chapter", comment: "Next chapter accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.nextChapterButton)
         }
     }
 
@@ -92,23 +107,21 @@ extension PlayerView {
             Text(
                 String(
                     format: NSLocalizedString(
-                        "Speed: %.1fx",
+                        "Speed: %@",
                         comment: "Playback speed display"
                     ),
-                    viewModel.playbackRate
+                    PlaybackSpeed.displayName(playbackRate)
                 )
             )
             .font(.caption)
             .foregroundStyle(Color.secondaryText)
 
             Menu {
-                speedButton(for: 0.75)
-                speedButton(for: 1.0)
-                speedButton(for: 1.25)
-                speedButton(for: 1.5)
-                speedButton(for: 2.0)
+                ForEach(PlaybackSpeed.choices, id: \.self) { speed in
+                    speedButton(for: speed)
+                }
             } label: {
-                Label(String(format: "%.2fx", viewModel.playbackRate), systemImage: "speedometer")
+                Label(PlaybackSpeed.displayName(playbackRate), systemImage: "speedometer")
                     .font(.caption.weight(.semibold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -119,14 +132,12 @@ extension PlayerView {
 
     // MARK: - Speed Button Helper
     @ViewBuilder
-    func speedButton(for speed: Double) -> some View {
-        let isSelected = viewModel.playbackRate == Float(speed)
+    func speedButton(for speed: Float) -> some View {
+        let isSelected = playbackRate == speed
 
-        Button(String(format: "%.2fx", speed)) {
+        Button(PlaybackSpeed.displayName(speed)) {
             withHapticFeedback {
-                DispatchQueue.main.async {
-                    audioManager.setPlaybackRate(Float(speed))
-                }
+                audioManager.setPlaybackRate(speed)
             }
         }
         .fontWeight(isSelected ? .bold : .regular)
@@ -178,17 +189,6 @@ extension PlayerView {
 
     // Sleep timer is handled by PlayerViewModel
 
-    func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
 
     func withHapticFeedback<T>(
         _ intensity: UIImpactFeedbackGenerator.FeedbackStyle = .light,
@@ -205,8 +205,8 @@ extension PlayerView {
         _ currentTime: TimeInterval,
         duration: TimeInterval
     ) -> String {
-        let current = formatTime(currentTime)
-        let total = formatTime(duration)
+        let current = currentTime.clockFormatted
+        let total = duration.clockFormatted
         let percentage = duration > 0 ? Int((currentTime / duration) * 100) : 0
         return String(
             format: NSLocalizedString(

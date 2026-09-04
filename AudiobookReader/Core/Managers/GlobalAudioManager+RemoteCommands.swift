@@ -19,9 +19,20 @@ extension GlobalAudioManager {
         addSkipCommand(center.skipForwardCommand) { $0.skipForward($1) }
         addSkipCommand(center.skipBackwardCommand) { $0.skipBackward($1) }
 
+        addCommand(center.nextTrackCommand) { $0.skipToNextChapter() }
+        addCommand(center.previousTrackCommand) { $0.skipToPreviousChapter() }
+
         addPositionCommand(center.changePlaybackPositionCommand) { $0.seek(to: $1) }
 
+        applyRemoteSkipInterval()
+    }
+
+    /// The lock screen shows the interval in its button glyph, so it has to be re-published
+    /// whenever the setting changes — `setupRemoteCommands` runs before `ThemeManager` has
+    /// even finished loading its defaults.
+    func applyRemoteSkipInterval() {
         let interval = NSNumber(value: ThemeManager.shared.skipInterval.seconds)
+        let center = MPRemoteCommandCenter.shared()
         center.skipForwardCommand.preferredIntervals = [interval]
         center.skipBackwardCommand.preferredIntervals = [interval]
     }
@@ -90,7 +101,7 @@ extension GlobalAudioManager {
             MPMediaItemPropertyPlaybackDuration: getDuration(),
             MPNowPlayingInfoPropertyIsLiveStream: false
         ]
-        if let data = audiobook.coverImageData, let image = UIImage(data: data) {
+        if let image = CoverImageCache.image(for: audiobook) {
             info[MPMediaItemPropertyArtwork] = Self.artwork(for: image)
         }
         MPNowPlayingInfoCenter.default().nowPlayingInfo = info

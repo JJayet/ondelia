@@ -13,6 +13,7 @@ struct SettingsView: View {
     /// nil until the first asset check answers; drives the language-model row.
     @State var assetStatus: AssetInventory.Status? = nil
     @State var showResetStatsConfirm = false
+    @State var showingBackupRestore = false
 
     var body: some View {
         NavigationStack {
@@ -21,7 +22,6 @@ struct SettingsView: View {
                 playbackSection
                 transcriptionSection
                 goalsSection
-                statisticsSection
                 dataSection
                 aboutSection
             }
@@ -38,11 +38,11 @@ struct SettingsView: View {
             } message: {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
+            .sheet(isPresented: $showingBackupRestore) { BackupRestoreView() }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.primaryBackground)
-            .tint(themeManager.accentColor.color)
-            .listRowBackground(Color.clear)
+                .listRowBackground(Color.clear)
         }
         .alert(
             NSLocalizedString("Reset Stats?", comment: "Reset stats confirm title"),
@@ -55,8 +55,6 @@ struct SettingsView: View {
         } message: {
             Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books and goals remain.", comment: "Reset stats confirm message"))
         }
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .tint(themeManager.accentColor.color)
     }
 }
 

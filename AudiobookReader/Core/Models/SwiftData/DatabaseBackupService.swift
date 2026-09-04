@@ -1,4 +1,5 @@
 import Foundation
+import SQLite3
 import SwiftData
 
 /// Keeps a couple of recent copies of the SwiftData store.
@@ -27,7 +28,7 @@ enum DatabaseBackupService {
         UserDefaults.standard.set(now, forKey: lastBackupKey)
     }
 
-    /// Copies the store and its write-ahead log, verifies the copy opens, and prunes old ones.
+    /// Writes a consistent copy of the store, verifies it opens, and prunes old ones.
     @discardableResult
     static func backUp(storeURL: URL, now: Date = Date()) -> URL? {
         let fileManager = FileManager.default
@@ -36,14 +37,8 @@ enum DatabaseBackupService {
 
         do {
             try fileManager.createDirectory(at: destination, withIntermediateDirectories: true)
-            // The -wal and -shm siblings hold writes not yet folded into the store; a copy
-            // without them can be missing the most recent listening entirely.
-            for suffix in ["", "-wal", "-shm"] {
-                let source = URL(fileURLWithPath: storeURL.path + suffix)
-                guard fileManager.fileExists(atPath: source.path) else { continue }
-                try fileManager.copyItem(at: source, to: destination.appendingPathComponent(source.lastPathComponent))
-            }
-            guard validate(destination.appendingPathComponent(storeURL.lastPathComponent)) else {
+            let copy = destination.appendingPathComponent(storeURL.lastPathComponent)
+            guard vacuum(storeURL, into: copy), validate(copy) else {
                 try? fileManager.removeItem(at: destination)
                 Log.store.error("❌ DatabaseBackupService: Backup did not open, discarded")
                 return nil
@@ -55,6 +50,90 @@ enum DatabaseBackupService {
             try? fileManager.removeItem(at: destination)
             Log.store.error("❌ DatabaseBackupService: Backup failed: \(error)")
             return nil
+        }
+    }
+
+    // MARK: - Restore
+
+    /// What is on disk, newest first. The folder name is the timestamp it was written at.
+    static func availableBackups() -> [(url: URL, date: Date)] {
+        let formatter = ISO8601DateFormatter()
+        let folders = (try? FileManager.default.contentsOfDirectory(
+            at: backupsDirectory,
+            includingPropertiesForKeys: nil
+        )) ?? []
+        return folders.compactMap { folder -> (url: URL, date: Date)? in
+            // `backUp` dashed the time separators out of an ISO-8601 stamp so it could be a
+            // folder name; only that part is put back.
+            let name = folder.lastPathComponent
+            guard let t = name.firstIndex(of: "T") else { return nil }
+            let stamp = name[..<t] + name[t...].replacingOccurrences(of: "-", with: ":")
+            guard let date = formatter.date(from: String(stamp)) else { return nil }
+            return (folder, date)
+        }
+        .sorted { $0.date > $1.date }
+    }
+
+    /// Puts a backup back in place of the live store.
+    ///
+    /// The container is already open on the old file, so nothing here can hand the app a
+    /// working store: the caller has to tell the user to relaunch.
+    static func restore(_ backup: URL, storeURL: URL) throws {
+        let fileManager = FileManager.default
+        let source = backup.appendingPathComponent(storeURL.lastPathComponent)
+        guard validate(source) else { throw RestoreError.unreadableBackup }
+
+        // The journal files describe the store being replaced, so they go with it.
+        for suffix in ["", "-wal", "-shm"] {
+            let url = URL(fileURLWithPath: storeURL.path + suffix)
+            try? fileManager.removeItem(at: url)
+        }
+        try fileManager.copyItem(at: source, to: storeURL)
+        Log.store.debug("✅ DatabaseBackupService: Restored \(backup.lastPathComponent)")
+    }
+
+    enum RestoreError: LocalizedError {
+        case unreadableBackup
+
+        var errorDescription: String? {
+            NSLocalizedString("That backup could not be opened, so nothing was changed.",
+                              comment: "Restore failure message")
+        }
+    }
+
+    /// `VACUUM INTO` writes one self-contained file from inside SQLite, under a read
+    /// transaction, so the copy is a point-in-time snapshot with the write-ahead log already
+    /// folded in.
+    ///
+    /// Copying default.store, -wal and -shm as three separate files could not do that: they
+    /// move at three different instants, and in practice the result was rejected on the very
+    /// next launch with "file is not a database" — every backup discarded, which looked like
+    /// the validation working rather than the copy being broken.
+    private static func vacuum(_ storeURL: URL, into destination: URL) -> Bool {
+        var database: OpaquePointer?
+        // No SQLITE_OPEN_CREATE: a path that is not already a database must fail, not become
+        // an empty one that then backs up perfectly.
+        guard sqlite3_open_v2(storeURL.path, &database, SQLITE_OPEN_READWRITE, nil) == SQLITE_OK else {
+            sqlite3_close(database)
+            return false
+        }
+        defer { sqlite3_close(database) }
+
+        var statement: OpaquePointer?
+        guard sqlite3_prepare_v2(database, "VACUUM INTO ?", -1, &statement, nil) == SQLITE_OK else {
+            Log.store.error("❌ DatabaseBackupService: \(String(cString: sqlite3_errmsg(database)))")
+            return false
+        }
+        defer { sqlite3_finalize(statement) }
+
+        // The C string stays alive across the step, so SQLite needs no copy of its own.
+        return destination.path.withCString { path in
+            guard sqlite3_bind_text(statement, 1, path, -1, nil) == SQLITE_OK,
+                  sqlite3_step(statement) == SQLITE_DONE else {
+                Log.store.error("❌ DatabaseBackupService: \(String(cString: sqlite3_errmsg(database)))")
+                return false
+            }
+            return true
         }
     }
 

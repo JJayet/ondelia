@@ -31,8 +31,8 @@ extension AudiobookManager {
         guard !isDrainingImports else { return }
         isDrainingImports = true
         Task { @MainActor in
-            while !self.swiftDataController.isLoaded || self.isLoadingLibrary || self.isImportRunning {
-                try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
+            await waitUntil {
+                self.swiftDataController.isLoaded && !self.isLoadingLibrary && !self.isImportRunning
             }
             self.isDrainingImports = false
             self.processPendingImports()
@@ -107,17 +107,18 @@ extension AudiobookManager {
         Log.library.debug("📦 AudiobookManager: Starting ZIP audiobook import from: \(zipURL.lastPathComponent)")
 
         // Extract and validate ZIP content
-        guard let extractedFolderURL = await ZIPImporter.importZIPFile(from: zipURL) else {
+        guard let extracted = ZIPImporter.importZIPFile(from: zipURL) else {
             await MainActor.run { }
             return
         }
 
         // Import the extracted folder using existing folder import logic
-        await importAudiobookFolder(from: extractedFolderURL)
+        await importAudiobookFolder(from: extracted.folder)
 
-        // Clean up temporary extraction directory
-        let tempDirectory = extractedFolderURL.deletingLastPathComponent().deletingLastPathComponent()
-        ZIPImporter.cleanupDirectory(at: tempDirectory)
+        // Delete the extraction root itself. Walking two parents up from the audiobook folder
+        // landed on the app's whole temporary directory whenever the archive held its audio at
+        // the root, because the folder returned then *is* the extraction root.
+        ZIPImporter.cleanupDirectory(at: extracted.root)
 
         Log.library.debug("✅ AudiobookManager: ZIP audiobook import completed")
     }

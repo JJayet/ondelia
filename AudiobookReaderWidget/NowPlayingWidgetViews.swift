@@ -8,6 +8,15 @@ struct NowPlayingWidgetView: View {
     @Environment(\.widgetFamily) var widgetFamily
     
     var body: some View {
+        if entry.audiobook == nil {
+            NothingPlayingView()
+        } else {
+            playerView
+        }
+    }
+
+    @ViewBuilder
+    private var playerView: some View {
         switch widgetFamily {
         case .systemSmall:
             SmallNowPlayingView(entry: entry)
@@ -22,6 +31,22 @@ struct NowPlayingWidgetView: View {
         @unknown default:
             SmallNowPlayingView(entry: entry)
         }
+    }
+}
+
+/// Shown until something has actually been played. The placeholder book belongs in Xcode's
+/// gallery preview, not on a home screen.
+struct NothingPlayingView: View {
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "book.closed")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Text("Nothing playing")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -112,12 +137,12 @@ struct MediumNowPlayingView: View {
                     
                     // Progress bar
                     ProgressView(value: audiobook.progress)
-                        .progressViewStyle(LinearProgressViewStyle())
+                        .progressViewStyle(.linear)
                         .scaleEffect(y: 0.5)
                     
                     // Time info
                     HStack {
-                        Text(formatTime(entry.currentTime))
+                        Text(entry.currentTime.clockFormatted)
                             .font(.caption2)
                             .foregroundStyle(.secondary)
                         

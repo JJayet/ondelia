@@ -1,5 +1,19 @@
 import SwiftUI
 
+/// Sets an identifier only when there is one. `.accessibilityIdentifier("")` is not a no-op:
+/// it labels the element with the empty string, which every unlabelled element then matches.
+private struct OptionalAccessibilityIdentifier: ViewModifier {
+    let identifier: String?
+
+    func body(content: Content) -> some View {
+        if let identifier {
+            content.accessibilityIdentifier(identifier)
+        } else {
+            content
+        }
+    }
+}
+
 struct PlayerActionButton: View {
     let icon: String
     let title: String
@@ -32,7 +46,7 @@ struct PlayerActionButton: View {
                     .foregroundStyle(Color.primaryText)
             }
         }
-        .buttonStyle(PlainButtonStyle())
-        .accessibilityIdentifier(accessibilityIdentifier ?? "")
+        .buttonStyle(.plain)
+        .modifier(OptionalAccessibilityIdentifier(identifier: accessibilityIdentifier))
     }
 }

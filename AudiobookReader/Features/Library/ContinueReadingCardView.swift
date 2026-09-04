@@ -5,8 +5,7 @@ struct ContinueReadingCardView: View {
     let onTap: () -> Void
 
     private var coverImage: UIImage? {
-        guard let data = audiobook.coverImageData else { return nil }
-        return UIImage(data: data)
+        CoverImageCache.image(for: audiobook)
     }
 
     private var progressPercentage: Double {
@@ -22,16 +21,16 @@ struct ContinueReadingCardView: View {
                     if let image = coverImage {
                         Image(uiImage: image)
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(contentMode: .fit)
                     } else {
                         Image(systemName: "book.closed")
                             .font(.system(size: 30))
                             .foregroundStyle(Color.secondaryText)
                     }
                 }
-                .frame(width: 140, height: 100)
+                .frame(width: 100, height: 150)
                 .background(Color.secondaryBackground)
-                .cornerRadius(12)
+                .clipShape(.rect(cornerRadius: 12))
                 .clipped()
 
                 VStack(alignment: .leading, spacing: 6) {
@@ -61,6 +60,6 @@ struct ContinueReadingCardView: View {
             .padding(12)
             .glassEffect(in:.rect(cornerRadius: 16))
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }

@@ -114,6 +114,7 @@ struct SearchView: View {
                                 let audio = GlobalAudioManager.shared
                                 audio.loadAudiobook(book)
                                 audio.startPlayback()
+                                playerRouter?.present(book)
                             }
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {

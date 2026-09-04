@@ -4,16 +4,12 @@ enum AppTheme: Int, CaseIterable {
     case system = 0
     case light = 1
     case dark = 2
-    case sepia = 3
-    case dim = 4
     
     var displayName: String {
         switch self {
         case .system: return NSLocalizedString("System", comment: "System appearance theme")
         case .light: return NSLocalizedString("Light", comment: "Light appearance theme")
         case .dark: return NSLocalizedString("Dark", comment: "Dark appearance theme")
-        case .sepia: return NSLocalizedString("Sepia", comment: "Sepia appearance theme")
-        case .dim: return NSLocalizedString("Dim", comment: "Dim appearance theme")
         }
     }
     
@@ -22,8 +18,6 @@ enum AppTheme: Int, CaseIterable {
         case .system: return nil
         case .light: return .light
         case .dark: return .dark
-        case .sepia: return .light
-        case .dim: return .dark
         }
     }
 }
@@ -47,32 +41,15 @@ enum AccentColor: Int, CaseIterable {
         }
     }
     
-    @MainActor var color: Color {
-        // Base palette
-        let base: Color = {
-            switch self {
-            case .blue: return .blue
-            case .green: return .green
-            case .orange: return .orange
-            case .purple: return .purple
-            case .red: return .red
-            case .teal: return .teal
-            }
-        }()
-
-        // Dim theme: slightly mute accents to reduce contrast
-        if ThemeManager.shared.currentTheme == .dim {
-            switch self {
-            case .blue:   return Color(red: 0.36, green: 0.53, blue: 0.90)   // #5C87E5
-            case .green:  return Color(red: 0.35, green: 0.76, blue: 0.54)   // #59C288
-            case .orange: return Color(red: 0.94, green: 0.66, blue: 0.38)   // #F0A760
-            case .purple: return Color(red: 0.69, green: 0.54, blue: 0.90)   // #B08AE6
-            case .red:    return Color(red: 0.88, green: 0.41, blue: 0.41)   // #E06767
-            case .teal:   return Color(red: 0.39, green: 0.76, blue: 0.76)   // #63C2C2
-            }
+    var color: Color {
+        switch self {
+        case .blue: return .blue
+        case .green: return .green
+        case .orange: return .orange
+        case .purple: return .purple
+        case .red: return .red
+        case .teal: return .teal
         }
-
-        return base
     }
 }
 

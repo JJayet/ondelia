@@ -108,12 +108,7 @@ extension AudiobookManager {
             }
         } catch {
             try? FileManager.default.removeItem(at: localFolderURL)
-            await MainActor.run {
-                importErrorMessage = String(
-                    format: NSLocalizedString("The audiobook could not be saved: %@", comment: "Import persistence error"),
-                    error.localizedDescription
-                )
-            }
+            await reportImportFailure(error)
         }
     }
 }

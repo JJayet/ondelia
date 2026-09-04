@@ -13,7 +13,7 @@ struct TranscriptionHeaderView: View {
             if showingSearch {
                 HStack {
                     TextField(NSLocalizedString("Search in transcription...", comment: "Search text field placeholder"), text: $searchText)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .textFieldStyle(.roundedBorder)
                         .onSubmit {
                             searchInTranscription()
                         }
@@ -65,40 +65,6 @@ struct TranscriptionHeaderView: View {
         let range = transcriptionText.range(of: searchText, options: .caseInsensitive)
         highlightedRange = range
     }
-    
-    private var currentChapterIndex: Int {
-        // This should be passed from parent, using 0 as fallback
-        return 0
-    }
-}
-
-// MARK: - Loading View
-struct TranscriptionLoadingView: View {
-    let progress: Double
-    
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "waveform")
-                .font(.system(size: 50))
-                .foregroundStyle(.tint)
-                .scaleEffect(1.0 + sin(Date().timeIntervalSince1970 * 2) * 0.1)
-                .animation(.easeInOut(duration: 1).repeatForever(autoreverses: true), value: UUID())
-            
-            Text(NSLocalizedString("Transcribing...", comment: "Transcription in progress text"))
-                .font(.headline)
-                .foregroundStyle(Color.primaryText)
-            
-            ProgressView(value: progress)
-                .progressViewStyle(LinearProgressViewStyle())
-                .frame(maxWidth: 200)
-            
-            Text(String(format: NSLocalizedString("%.0f%% complete", comment: "Transcription progress percentage"), progress * 100))
-                .font(.caption)
-                .foregroundStyle(Color.secondaryText)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
 }
 
 // MARK: - Empty State View
@@ -126,7 +92,6 @@ struct TranscriptionTextView: View {
     let text: String
     let searchText: String
     let highlightedRange: Range<String.Index>?
-    let currentTime: TimeInterval
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -137,10 +102,6 @@ struct TranscriptionTextView: View {
                     .font(.caption)
                 
                 Spacer()
-                
-                Text(Date(), style: .date)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondaryText)
             }
             
             Divider()
@@ -156,7 +117,7 @@ struct TranscriptionTextView: View {
         }
         .padding()
         .background(Color.primaryBackground)
-        .cornerRadius(12)
+        .clipShape(.rect(cornerRadius: 12))
     }
     
     private var attributedText: AttributedString {

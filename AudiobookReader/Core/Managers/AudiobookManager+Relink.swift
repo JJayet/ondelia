@@ -1,3 +1,4 @@
+import AVFoundation
 import Foundation
 import SwiftData
 
@@ -30,6 +31,15 @@ extension AudiobookManager {
             }
         }
         return nil
+    }
+
+    /// Whether an incoming file is as long as the book claiming it, within a second.
+    /// A book stored with no duration has nothing to check against, so the name has to do.
+    nonisolated func duration(of url: URL, matches expected: TimeInterval) async -> Bool {
+        guard expected > 0 else { return true }
+        guard let measured = try? await AVURLAsset(url: url).load(.duration).seconds,
+              measured.isFinite else { return false }
+        return abs(measured - expected) < 1
     }
 
     /// Puts a re-picked file back where a library entry expects it, rather than importing a copy.
@@ -66,7 +76,12 @@ extension AudiobookManager {
             importBatch.append(book)
             return true
         case .restores(let book):
+            // The library copy is gone, so size cannot be compared and the name is the only
+            // thing left — and two books can each hold a `chapter01.mp3`. Duration is the one
+            // property of the incoming file the library still remembers, so a mismatch falls
+            // through to a normal import rather than inheriting another book's progress.
             guard let destination = book.resolvedFileURL,
+                  await duration(of: url, matches: book.duration),
                   await restore(url, to: destination)
             else { return false }
             importBatch.append(book)

@@ -91,18 +91,5 @@ extension LibraryView {
             case .notStarted: return NSLocalizedString("Not Started", comment: "Filter: books not started")
             }
         }
-
-        func predicate() -> NSPredicate? {
-            switch self {
-            case .all:
-                return nil
-            case .inProgress:
-                return NSPredicate(format: "currentPosition > 0 AND isFinished == NO")
-            case .completed:
-                return NSPredicate(format: "isFinished == YES")
-            case .notStarted:
-                return NSPredicate(format: "currentPosition == 0")
-            }
-        }
     }
 }

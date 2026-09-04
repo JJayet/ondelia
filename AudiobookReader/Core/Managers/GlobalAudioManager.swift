@@ -4,7 +4,7 @@ import MediaPlayer
 
 @MainActor
 @Observable
-final class GlobalAudioManager: AudioManagerProtocol {
+final class GlobalAudioManager {
     static let shared = GlobalAudioManager()
 
     var currentAudiobook: AudiobookModel?
@@ -12,9 +12,14 @@ final class GlobalAudioManager: AudioManagerProtocol {
     var player: AudiobookPlayer?
     var isLoading = false
     var isReady = false
-    var showMiniPlayer = false
     var playbackState: PlaybackState = .stopped
     var sleepTimeRemaining: TimeInterval = 0
+    /// The book last counted towards `booksCompleted`, so finishing it counts once.
+    var completionCountedBookID: UUID?
+
+    /// Derived rather than assigned. As a stored flag it drifted: `stopPlayback` cleared it,
+    /// but the tab accessory keyed off `currentAudiobook`, so the mini player stayed up.
+    var showMiniPlayer: Bool { currentAudiobook != nil && playbackState != .stopped }
 
     var sleepTimer: Timer?
     /// Writes the playback position to the library while a book plays. See `+Progress`.
@@ -49,7 +54,6 @@ final class GlobalAudioManager: AudioManagerProtocol {
         if let current = currentAudiobook, current.id == audiobook.id, isLoading || player != nil {
             Log.audio.debug("🎵 GlobalAudioManager: Already loaded \(audiobook.title ?? "Unknown")")
             if !isLoading {
-                showMiniPlayer = true
                 playbackState = isPlaying() ? .playing : .paused
             }
             return
@@ -67,7 +71,6 @@ final class GlobalAudioManager: AudioManagerProtocol {
         teardownPlayer()
 
         currentAudiobook = audiobook
-        showMiniPlayer = false
         isLoading = true
         isReady = false
         playbackState = .loading

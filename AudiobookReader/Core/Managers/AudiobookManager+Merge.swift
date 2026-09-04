@@ -133,9 +133,6 @@ extension AudiobookManager {
         isImporting = false
         currentImportFileName = nil
         importQueueCompleted = importQueueTotal
-        if cover == nil {
-            audiobookNeedingCover = audiobook
-        }
         fetchAudiobooks()
 
         Log.library.debug("📚 AudiobookManager: Merged \(sources.count) audiobooks into '\(title)'")

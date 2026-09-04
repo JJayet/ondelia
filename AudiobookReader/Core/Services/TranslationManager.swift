@@ -7,9 +7,6 @@ final class TranslationManager {
     static let shared = TranslationManager()
     
     var isTranslating = false
-    var translationProgress: Double = 0
-    
-    private let themeManager = ThemeManager.shared
     
     private init() {}
     
@@ -48,58 +45,6 @@ final class TranslationManager {
             Log.transcription.error("❌ TranslationManager: Translation error: \(error)")
             throw TranslationError.translationFailed(error)
         }
-    }
-    
-    /// Translate transcription result using settings
-    /// - Parameter transcriptionResult: The transcription to translate
-    /// - Returns: Translated transcription result
-    func translateTranscriptionResult(_ transcriptionResult: TranscriptionResult) async throws -> TranscriptionResult {
-        guard themeManager.enableTranslation else {
-            return transcriptionResult
-        }
-        
-        let sourceLanguage = transcriptionResult.language
-        let targetLanguage = themeManager.translationTargetLanguage.rawValue
-        
-        // Don't translate if source and target are the same
-        guard sourceLanguage != targetLanguage else {
-            return transcriptionResult
-        }
-        
-        let translatedText = try await translateText(
-            transcriptionResult.text,
-            from: sourceLanguage,
-            to: targetLanguage
-        )
-        
-        // Translate segments individually
-        var translatedSegments: [TranscriptionSegment] = []
-        
-        let totalSegments = transcriptionResult.segments.count
-        
-        for (index, segment) in transcriptionResult.segments.enumerated() {
-            let translatedSegmentText = try await translateText(
-                segment.text,
-                from: sourceLanguage,
-                to: targetLanguage
-            )
-            
-            let translatedSegment = TranscriptionSegment(
-                text: translatedSegmentText,
-                start: segment.start,
-                end: segment.end
-            )
-            
-            translatedSegments.append(translatedSegment)
-            
-            translationProgress = Double(index + 1) / Double(totalSegments)
-        }
-        
-        return TranscriptionResult(
-            text: translatedText,
-            segments: translatedSegments,
-            language: targetLanguage
-        )
     }
     
 }

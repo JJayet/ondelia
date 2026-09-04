@@ -47,6 +47,6 @@ struct StatisticsCardView: View {
             .glassEffect(in:.rect(cornerRadius: 12))
 
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }

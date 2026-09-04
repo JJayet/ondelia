@@ -46,7 +46,7 @@ struct SearchResultRow: View {
 
     private var cover: some View {
         Group {
-            if let data = audiobook.coverImageData, let image = UIImage(data: data) {
+            if let image = CoverImageCache.image(for: audiobook) {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)

@@ -7,55 +7,10 @@
 
 import XCTest
 
-/// Shared launch, teardown and player navigation for the PlayerViewUITests* classes.
+/// `--reset-state` so each player test starts from the seeded library alone.
 @MainActor
-class PlayerViewUITestCase: XCTestCase {
-    var app: XCUIApplication!
-    
-    override func setUp() async throws {
-        continueAfterFailure = false
-        app = XCUIApplication()
-        app.launchArguments.append("--uitesting")
-        app.launchArguments.append("--reset-state")
-        app.launch()
-        
-        // Wait for app to stabilize
-        let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
-        let exists = libraryTab.waitForExistence(timeout: 10)
-        XCTAssertTrue(exists, "App should launch successfully")
-    }
-    
-    override func tearDown() async throws {
-        app.terminate()
-        app = nil
-    }
-
-    func navigateToPlayer() throws {
-        // Navigate to library
-        let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
-        if libraryTab.exists {
-            libraryTab.tap()
-        }
-        
-        // Wait for library to load
-        sleep(1)
-        
-        // Find and tap the first audiobook (assuming test data exists)
-        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
-        
-        if !firstAudiobook.exists {
-            // If no audiobook exists, we need to import one first
-            // For UI tests, we should ensure test data is available
-            throw XCTSkip("No audiobooks available for testing - test data should be pre-loaded")
-        }
-        
-        firstAudiobook.tap()
-        
-        // Wait for player to appear
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        let playerLoaded = playPauseButton.waitForExistence(timeout: 5)
-        XCTAssertTrue(playerLoaded, "Player should load after tapping audiobook")
-    }
+class PlayerViewUITestCase: AudiobookUITestCase {
+    override var extraLaunchArguments: [String] { ["--reset-state"] }
 }
 
 final class PlayerViewUITests: PlayerViewUITestCase {
@@ -131,15 +86,13 @@ final class PlayerViewUITests: PlayerViewUITestCase {
         // Initially should be 1.0x
         XCTAssertTrue(speedControl.label.contains("1.0"), "Initial speed should be 1.0x")
         
-        // Tap to change speed
+        // The control is a menu, not a cycling button: tapping opens it and a rate is picked.
         speedControl.tap()
-        
-        // Should cycle through speeds (1.0 -> 1.25 -> 1.5 -> 2.0 -> 0.75 -> 1.0)
-        XCTAssertTrue(speedControl.label.contains("1.25") || 
-                     speedControl.label.contains("1.5") ||
-                     speedControl.label.contains("2.0") ||
-                     speedControl.label.contains("0.75"),
-                     "Speed should change after tap")
+        let fasterRate = app.buttons["1.50x"]
+        XCTAssertTrue(fasterRate.waitForExistence(timeout: 2), "Speed menu should list the rates")
+        fasterRate.tap()
+
+        XCTAssertTrue(speedControl.label.contains("1.5"), "Speed should follow the chosen rate")
     }
     
     // MARK: - Mini-Player Functionality Tests

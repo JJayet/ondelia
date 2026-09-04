@@ -13,7 +13,7 @@ struct AudiobookMetadata {
     let album: String?
 }
 
-class MetadataExtractor {
+enum MetadataExtractor {
     static func extractMetadata(from url: URL) async -> AudiobookMetadata? {
         Log.library.debug("🎵 MetadataExtractor: Starting metadata extraction for: \(url.lastPathComponent)")
         

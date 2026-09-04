@@ -19,7 +19,6 @@ extension GlobalAudioManager {
             return
         }
         player.play()
-        showMiniPlayer = true
         playbackState = .playing
         playbackStateDidChange()
     }
@@ -31,7 +30,6 @@ extension GlobalAudioManager {
     func stopPlayback() {
         pendingAutoplay = false
         player?.pause()
-        showMiniPlayer = false
         playbackState = .stopped
         playbackStateDidChange()
     }
@@ -55,14 +53,41 @@ extension GlobalAudioManager {
         playbackStateDidChange()
     }
 
-    func skipForward(_ interval: TimeInterval) {
+    /// Defaults to the interval chosen in Settings, so every caller that has no interval of
+    /// its own — mini player, widget, App Intents — follows the setting instead of a literal.
+    func skipForward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
         player?.skipForward(interval)
         playbackStateDidChange()
     }
 
-    func skipBackward(_ interval: TimeInterval) {
+    func skipBackward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
         player?.skipBackward(interval)
         playbackStateDidChange()
+    }
+
+    /// Start of the next chapter. Does nothing on the last one, and nothing without chapters.
+    func skipToNextChapter() {
+        let now = getCurrentTime()
+        guard let next = currentAudiobook?.sortedChapters.first(where: { $0.startTime > now + 1 })
+        else { return }
+        seek(to: next.startTime)
+    }
+
+    /// Start of the current chapter, or of the previous one when already at the top of this
+    /// one — the same rule every music player uses for its back button.
+    func skipToPreviousChapter() {
+        let chapters = currentAudiobook?.sortedChapters ?? []
+        let now = getCurrentTime()
+        guard let current = chapters.last(where: { $0.startTime <= now }) else {
+            seek(to: 0)
+            return
+        }
+        guard now - current.startTime <= 3 else {
+            seek(to: current.startTime)
+            return
+        }
+        let index = chapters.firstIndex { $0.id == current.id } ?? 0
+        seek(to: index > 0 ? chapters[index - 1].startTime : 0)
     }
 
     func seek(to time: TimeInterval) {
@@ -86,15 +111,4 @@ extension GlobalAudioManager {
     }
 
     // MARK: - Utility Functions
-    func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
 }

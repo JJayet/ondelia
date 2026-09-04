@@ -80,6 +80,9 @@ final class ThemeManager {
         self.transcriptionLanguage = language
         self.enableTranslation = translation
         self.translationTargetLanguage = targetLanguage
+
+        // Remote commands are registered before this runs, with the default interval.
+        GlobalAudioManager.shared.applyRemoteSkipInterval()
     }
     
     func setTheme(_ theme: AppTheme) {
@@ -95,6 +98,7 @@ final class ThemeManager {
     func setSkipInterval(_ interval: SkipInterval) {
         skipInterval = interval
         UserDefaults.standard.set(interval.rawValue, forKey: "skipInterval")
+        GlobalAudioManager.shared.applyRemoteSkipInterval()
     }
 
     func setGlobalSpeedEnabled(_ enabled: Bool) {

@@ -7,12 +7,14 @@ extension LibraryView {
         case rename
         case merge(MergePrompt)
         case importFailed(String)
+        case confirmDelete(AudiobookModel)
 
         var id: String {
             switch self {
             case .rename: return "rename"
             case .merge(let prompt): return prompt.id.uuidString
             case .importFailed: return "importFailed"
+            case .confirmDelete(let book): return "delete-\(book.id)"
             }
         }
 
@@ -24,6 +26,8 @@ extension LibraryView {
                 return NSLocalizedString("Merge Audiobooks", comment: "Merge offer alert title")
             case .importFailed:
                 return NSLocalizedString("Import Failed", comment: "Import error alert title")
+            case .confirmDelete:
+                return NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title")
             }
         }
     }
@@ -35,7 +39,7 @@ extension LibraryView {
             prompt.respond(false)
         case .importFailed:
             audiobookManager.importErrorMessage = nil
-        case .rename, .none:
+        case .rename, .confirmDelete, .none:
             break
         }
         audiobookToRename = nil
@@ -65,6 +69,14 @@ extension LibraryView {
 
         case .importFailed:
             Button(NSLocalizedString("OK", comment: "Dismiss alert button"), role: .cancel) {}
+
+        case .confirmDelete(let audiobook):
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    audiobookManager.deleteAudiobook(audiobook)
+                }
+            }
         }
     }
 
@@ -87,6 +99,14 @@ extension LibraryView {
             ))
         case .importFailed(let message):
             Text(message)
+        case .confirmDelete(let audiobook):
+            Text(String(
+                format: NSLocalizedString(
+                    "'%@', its progress and its bookmarks will be removed. This cannot be undone.",
+                    comment: "Delete confirmation alert message"
+                ),
+                audiobook.title ?? AudiobookModel.unknownTitle
+            ))
         }
     }
 

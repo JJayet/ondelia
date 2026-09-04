@@ -15,7 +15,7 @@ struct MergePrompt: Identifiable {
 
 @MainActor
 @Observable
-class AudiobookManager: AudiobookManagerProtocol {
+final class AudiobookManager {
     static let shared = AudiobookManager()
     let swiftDataController: SwiftDataController
     
@@ -25,7 +25,6 @@ class AudiobookManager: AudiobookManagerProtocol {
     var importQueueCompleted: Int = 0
     var currentImportFileName: String? = nil
     var isLoadingLibrary = false
-    var audiobookNeedingCover: AudiobookModel?
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
@@ -36,7 +35,7 @@ class AudiobookManager: AudiobookManagerProtocol {
     var isDrainingImports = false
     /// Inbox files already handed to an import, so a second scan does not import them again.
     var inboxHandedOff: Set<String> = []
-    /// Audiobooks split out of one folder: they all receive the cover picked for `audiobookNeedingCover`.
+    /// Audiobooks split out of one folder: they all receive the cover picked for any one of them.
     var coverBatch: [AudiobookModel] = []
     /// Every audiobook the running import produced, so the merge offer knows what it would merge.
     var importBatch: [AudiobookModel] = []
@@ -99,40 +98,16 @@ class AudiobookManager: AudiobookManagerProtocol {
     func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
         let imageData = image.jpegData(compressionQuality: 0.8)
         audiobook.coverImageData = imageData
+        CoverImageCache.invalidate(audiobook)
         for sibling in coverBatch where sibling.persistentModelID != audiobook.persistentModelID {
             sibling.coverImageData = imageData
+            CoverImageCache.invalidate(sibling)
         }
         coverBatch.removeAll()
         swiftDataController.save()
         fetchAudiobooks()
-        
-        // Clear the needing cover flag if this was the audiobook that needed it
-        if audiobookNeedingCover?.persistentModelID == audiobook.persistentModelID {
-            audiobookNeedingCover = nil
-        }
     }
 
-    // MARK: - Progress Management (duplicate removed - the real implementation is earlier)
-    
-    // MARK: - Bookmark Management
-    @MainActor
-    func createBookmarkLegacy(for audiobook: AudiobookModel, at timestamp: TimeInterval, title: String, note: String? = nil) {
-        // This is a duplicate - the real createBookmark using SwiftData is earlier in the file
-        let context = swiftDataController.context
-        let bookmark = BookmarkModel(
-            title: title,
-            note: note,
-            timestamp: timestamp,
-            dateCreated: Date()
-        )
-        bookmark.audiobook = audiobook
-        context.insert(bookmark)
-        
-        swiftDataController.save()
-    }
-    
-    // Legacy deleteBookmarkOld function removed - using SwiftData deleteBookmark instead
-    
     // MARK: - Library Management
     @MainActor
     func deleteAudiobook(_ audiobook: AudiobookModel) {

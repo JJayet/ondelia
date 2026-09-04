@@ -15,6 +15,7 @@ struct AudiobookReaderApp: App {
     private let swiftDataController = SwiftDataController.shared
     private let globalAudioManager = GlobalAudioManager.shared
     @State private var playbackCommandCoordinator = PlaybackCommandCoordinator()
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
@@ -24,7 +25,7 @@ struct AudiobookReaderApp: App {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
-                        .progressViewStyle(CircularProgressViewStyle())
+                        .progressViewStyle(.circular)
                     Text(NSLocalizedString("Starting up...", comment: "App startup loading message"))
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -56,17 +57,41 @@ struct AudiobookReaderApp: App {
             } else if swiftDataController.isLoaded {
                 // Main app content - loads immediately once SwiftData setup is complete
                 MainTabView()
+                    #if DEBUG
+                    .uiTestDynamicTypeSize()
+                    #endif
                     .modelContainer(swiftDataController.container)
                     .onAppear {
                         // Initialize widgets on app startup
                         WidgetCenter.shared.reloadAllTimelines()
                         playbackCommandCoordinator.consumePendingCommand()
                     }
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-                        handleAppWillResignActive()
+                    .onChange(of: scenePhase) { _, phase in
+                        switch phase {
+                        case .active: handleAppDidBecomeActive()
+                        case .inactive, .background: handleAppWillResignActive()
+                        @unknown default: break
+                        }
                     }
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                        handleAppDidBecomeActive()
+                    .alert(
+                        NSLocalizedString("Could not save", comment: "SwiftData save failure title"),
+                        isPresented: Binding(
+                            get: { swiftDataController.saveErrorMessage != nil },
+                            set: { if !$0 { swiftDataController.saveErrorMessage = nil } }
+                        ),
+                        presenting: swiftDataController.saveErrorMessage
+                    ) { _ in
+                        Button(NSLocalizedString("OK", comment: "OK button")) {}
+                    } message: { message in
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "Your progress and bookmarks may not have been recorded.\n%@",
+                                    comment: "SwiftData save failure description"
+                                ),
+                                message
+                            )
+                        )
                     }
             }
         }

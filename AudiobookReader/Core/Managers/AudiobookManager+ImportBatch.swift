@@ -64,7 +64,7 @@ extension AudiobookManager {
         Log.library.debug("📚 AudiobookManager: Import finished — \(count) book(s), merge title \(suggestedTitle ?? "none"), offer \(offerMerge)")
         guard offerMerge, count > 1, let suggestedTitle else {
             importBatch.removeAll()
-            resolveBatchCover()
+            coverBatch.removeAll()
             finishImportRun()
             return
         }
@@ -76,7 +76,7 @@ extension AudiobookManager {
             self.mergePrompt = nil
             guard merge else {
                 self.importBatch.removeAll()
-                self.resolveBatchCover()
+                self.coverBatch.removeAll()
                 self.finishImportRun()
                 return
             }
@@ -95,14 +95,6 @@ extension AudiobookManager {
     func finishImportRun() {
         isImportRunning = false
         processPendingImports()
-    }
-
-    /// Asks for one cover for the whole batch, and only when none of the books found their own.
-    @MainActor
-    func resolveBatchCover() {
-        defer { coverBatch.removeAll() }
-        guard let first = coverBatch.first, coverBatch.allSatisfy({ $0.coverImageData == nil }) else { return }
-        audiobookNeedingCover = first
     }
 
     /// Imports every file as its own audiobook, sharing the folder cover and asking for one only at the end.

@@ -67,16 +67,16 @@ struct LargeNowPlayingView: View {
             if let audiobook = entry.audiobook {
                 VStack(spacing: 8) {
                     ProgressView(value: audiobook.progress)
-                        .progressViewStyle(LinearProgressViewStyle())
+                        .progressViewStyle(.linear)
                     
                     HStack {
-                        Text(formatTime(entry.currentTime))
+                        Text(entry.currentTime.clockFormatted)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         
                         Spacer()
                         
-                        Text(formatTime(entry.duration))
+                        Text(entry.duration.clockFormatted)
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -142,11 +142,11 @@ struct ExtraLargeNowPlayingView: View {
                         // Progress
                         VStack(spacing: 8) {
                             ProgressView(value: audiobook.progress)
-                                .progressViewStyle(LinearProgressViewStyle())
+                                .progressViewStyle(.linear)
                                 .tint(.white)
                             
                             HStack {
-                                Text(formatTime(entry.currentTime))
+                                Text(entry.currentTime.clockFormatted)
                                     .font(.caption)
                                     .foregroundStyle(.white.opacity(0.8))
                                 
@@ -163,7 +163,7 @@ struct ExtraLargeNowPlayingView: View {
                                 
                                 Spacer()
                                 
-                                Text(formatTime(entry.duration))
+                                Text(entry.duration.clockFormatted)
                                     .font(.caption)
                                     .foregroundStyle(.white.opacity(0.8))
                             }

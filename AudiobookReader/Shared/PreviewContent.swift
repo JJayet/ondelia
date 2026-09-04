@@ -1,49 +1,9 @@
-import SwiftUI
+import Foundation
 
-// MARK: - Preview Wrapper
-@MainActor
-struct PreviewWrapper<Content: View>: View {
-    let content: Content
-    let customDependencies: AudiobookDependencies?
-    
-    init(dependencies: AudiobookDependencies? = nil, @ViewBuilder content: () -> Content) {
-        self.customDependencies = dependencies
-        self.content = content()
+extension ProcessInfo {
+    static var isPreview: Bool {
+        processInfo.environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
     }
-    
-    var body: some View {
-        let deps = customDependencies ?? PreviewDependencies()
-        
-        content
-            .environment(\.dependencies, deps)
-            .modelContainer(deps.swiftDataController.container)
-    }
-}
-
-// MARK: - View Extension for Preview Dependencies
-@MainActor
-extension View {
-    func previewWithMockAudio(
-        state: GlobalAudioManager.PlaybackState = .playing,
-        currentTime: TimeInterval = 450.0,
-        duration: TimeInterval = 3600.0,
-        showMiniPlayer: Bool = true
-    ) -> some View {
-        let deps = PreviewDependencies()
-        
-        let mockAudio = deps.audioManager as! MockGlobalAudioManager
-        
-        mockAudio.currentAudiobook = PreviewContent.audiobookLong()
-        mockAudio.playbackState = state
-        mockAudio.setMockCurrentTime(currentTime)
-        mockAudio.setMockDuration(duration)
-        mockAudio.showMiniPlayer = showMiniPlayer
-        
-        return PreviewWrapper(dependencies: deps) {
-            self
-        }
-    }
-    
 }
 
 struct PreviewContent {

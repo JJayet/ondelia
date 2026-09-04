@@ -15,11 +15,11 @@ struct LibraryView: View {
     @State var newAudiobookTitle = ""
     /// One presentation slot for every alert this screen raises: SwiftUI only reliably drives one.
     @State var activeAlert: ActiveAlert?
-    @State var viewMode: ViewMode = .list
-    @State var sortOption: SortOption = .lastPlayed
-    @State var filterOption: FilterOption = .all
-    @State private var showingImporter = false
-    @State private var searchText = ""
+    // Kept across launches: re-picking the same sort and view on every cold start was noise.
+    @AppStorage("library.viewMode") var viewMode: ViewMode = .list
+    @AppStorage("library.sortOption") var sortOption: SortOption = .lastPlayed
+    @AppStorage("library.filterOption") var filterOption: FilterOption = .all
+    @State var showingImporter = false
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager) {
         self.audiobookManager = audiobookManager
@@ -32,9 +32,7 @@ struct LibraryView: View {
     }
 
     var filteredAudiobooks: [AudiobookModel] {
-        let source = searchText.isEmpty
-            ? audiobookManager.audiobooks
-            : audiobookManager.searchAudiobooks(query: searchText)
+        let source = audiobookManager.audiobooks
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
             switch filterOption {
@@ -72,29 +70,9 @@ struct LibraryView: View {
         audiobookManager.handleImportRequest(urls: urls)
     }
 
-    /// Extracted from `body`: inline, the whole chain pushed the type checker over its limit.
-    @ViewBuilder
-    private var importBlockingOverlay: some View {
-        if audiobookManager.isImporting {
-            ZStack {
-                Color.black.opacity(0.35).ignoresSafeArea()
-                VStack(spacing: 12) {
-                    ProgressView().scaleEffect(1.2)
-                    Text(NSLocalizedString("Please be patient while your file(s) are being imported", comment: "Blocking import message"))
-                        .font(.body)
-                        .foregroundStyle(Color.primaryText)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-                .padding(20)
-            }
-            .transition(.opacity)
-        }
-    }
-
     @ToolbarContentBuilder
     private var importToolbarItem: some ToolbarContent {
-        ToolbarItem(placement: .navigationBarTrailing) {
+        ToolbarItem(placement: .topBarTrailing) {
             Button {
                 showingImporter = true
             } label: {
@@ -111,17 +89,7 @@ struct LibraryView: View {
     /// modifiers together were more than the type checker would solve inline.
     private var libraryContent: some View {
         VStack(spacing: 0) {
-            TextField(
-                NSLocalizedString("Search your audiobooks", comment: "Library search field prompt"),
-                text: $searchText
-            )
-            .textFieldStyle(.roundedBorder)
-            .textInputAutocapitalization(.never)
-            .autocorrectionDisabled()
-            .accessibilityIdentifier(AccessibilityIdentifiers.Library.searchBar)
-            .padding(.horizontal)
-            .padding(.top, 8)
-
+            // No search field here: the Search tab is the one place that searches the library.
             if viewMode == .list {
                 listModeContent
             } else {
@@ -131,8 +99,6 @@ struct LibraryView: View {
         .background(Color.primaryBackground.ignoresSafeArea())
         .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
         .navigationBarTitleDisplayMode(.large)
-        .overlay { importBlockingOverlay }
-        .disabled(audiobookManager.isImporting)
         .toolbar { importToolbarItem }
         .onAppear {
             // Fetch audiobooks when the view first appears
@@ -146,8 +112,6 @@ struct LibraryView: View {
         NavigationStack {
             libraryContent
         }
-        .tint(themeManager.accentColor.color)
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .sheet(isPresented: $showingImporter) {
             DocumentPickerView { urls in
                 showingImporter = false
@@ -167,11 +131,6 @@ struct LibraryView: View {
             ImagePickerView(audiobook: audiobook) { image in
                 audiobookManager.updateCoverImage(for: audiobook, with: image)
                 audiobookForImagePicker = nil
-            }
-        }
-        .onChange(of: audiobookManager.audiobookNeedingCover?.id, initial: true) { _, _ in
-            if let audiobook = audiobookManager.audiobookNeedingCover {
-                audiobookForImagePicker = audiobook
             }
         }
         .onChange(of: audiobookManager.mergePrompt?.id, initial: true) { _, _ in

@@ -2,6 +2,7 @@ import Foundation
 import Speech
 import AVFoundation
 import CoreMedia
+import SwiftData
 
 /// On-device transcription through `SpeechAnalyzer` (iOS 26).
 ///
@@ -21,6 +22,8 @@ final class SpeechTranscriptionManager {
     var modelLoadingProgress: Double = 0
 
     private let themeManager = ThemeManager.shared
+    private let swiftDataController = SwiftDataController.shared
+    private var transcriptionStore: TranscriptionStore?
 
     private init() {}
 
@@ -75,7 +78,58 @@ final class SpeechTranscriptionManager {
 
     // MARK: - Transcription
 
-    func transcribeAudioFile(
+    /// Built on first use: reading `container` before the store has loaded would trap.
+    private func store() -> TranscriptionStore? {
+        guard swiftDataController.isLoaded else { return nil }
+        if let transcriptionStore { return transcriptionStore }
+        let store = TranscriptionStore(modelContainer: swiftDataController.container)
+        transcriptionStore = store
+        return store
+    }
+
+    /// The transcript for the chapter being heard, as spoken. Translation is the caller's job:
+    /// caching a translation under a row that claims to hold the original made "Original" show
+    /// translated text and pinned the result to whatever language was selected at the time.
+    /// - Parameter bypassCache: re-transcribes and overwrites the cached row.
+    func transcribeCurrentChapter(
+        for audiobook: AudiobookModel,
+        chapterIndex: Int,
+        bypassCache: Bool = false
+    ) async throws -> TranscriptionResult {
+        isTranscribing = true
+        // Every exit, thrown ones included: a throw used to leave the loader up for good, with
+        // refresh disabled behind it.
+        defer { isTranscribing = false }
+
+        // The same timeline the player uses, so the index here means the file being heard —
+        // and a single-file book, which has no manifest to read, resolves to its one track.
+        guard let url = audiobook.resolvedFileURL else {
+            throw TranscriptionError.chapterNotFound
+        }
+        let tracks = await AudiobookPlayer.makeTracks(at: url, fallbackDuration: audiobook.duration)
+        guard tracks.indices.contains(chapterIndex) else {
+            throw TranscriptionError.chapterNotFound
+        }
+
+        let audiobookID = audiobook.id
+        let chapter = Int16(chapterIndex)
+
+        if !bypassCache,
+           let cached = await store()?.cachedResult(audiobookID: audiobookID, chapterIndex: chapter) {
+            Log.transcription.debug("📖 SpeechTranscriptionManager: Using cached transcription")
+            return cached
+        }
+
+        let result = try await transcribeAudioFile(
+            tracks[chapterIndex].url,
+            for: audiobook,
+            chapterIndex: chapterIndex
+        )
+        await store()?.save(result, audiobookID: audiobookID, chapterIndex: chapter, engine: "SpeechAnalyzer")
+        return result
+    }
+
+    private func transcribeAudioFile(
         _ audioURL: URL,
         for audiobook: AudiobookModel,
         chapterIndex: Int
@@ -89,12 +143,8 @@ final class SpeechTranscriptionManager {
 
         Log.transcription.debug("🎤 SpeechTranscriptionManager: Starting transcription for chapter \(chapterIndex)")
 
-        isTranscribing = true
         transcriptionProgress = 0
-        defer {
-            isTranscribing = false
-            transcriptionProgress = 0
-        }
+        defer { transcriptionProgress = 0 }
 
         let hasAccess = audioURL.startAccessingSecurityScopedResource()
         defer { if hasAccess { audioURL.stopAccessingSecurityScopedResource() } }
@@ -136,7 +186,7 @@ final class SpeechTranscriptionManager {
             )
         } catch {
             Log.transcription.error("❌ SpeechTranscriptionManager: Transcription error: \(error)")
-            throw SpeechTranscriptionError.transcriptionFailed(error)
+            throw TranscriptionError.transcriptionFailed(error)
         }
     }
 
@@ -194,13 +244,16 @@ struct TranscriptionSegment: Codable, Equatable, Sendable {
 }
 
 // MARK: - Error Types
-enum SpeechTranscriptionError: Error, LocalizedError {
+enum TranscriptionError: Error, LocalizedError {
     case chapterNotFound
+    case recognizerUnavailable
     case transcriptionFailed(Error)
     case assetInstallationFailed
 
     var errorDescription: String? {
         switch self {
+        case .recognizerUnavailable:
+            return NSLocalizedString("Speech recognizer unavailable", comment: "Transcription error")
         case .chapterNotFound:
             return NSLocalizedString("Chapter file not found", comment: "Transcription error")
         case .transcriptionFailed(let error):
@@ -216,3 +269,4 @@ enum SpeechTranscriptionError: Error, LocalizedError {
         }
     }
 }
+

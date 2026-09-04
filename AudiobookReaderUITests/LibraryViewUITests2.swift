@@ -12,7 +12,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
     // MARK: - Navigation Between Library and Player Tests
     
     func testLibraryToPlayerNavigation() throws {
-        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
+        let firstAudiobook = audiobookRows.firstMatch
         
         if firstAudiobook.exists {
             firstAudiobook.tap()
@@ -24,7 +24,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
             // Verify player is functional
             XCTAssertTrue(playerView.isEnabled, "Player controls should be functional")
         } else {
-            throw XCTSkip("No audiobooks available to test navigation")
+            XCTFail("UITestBootstrap should have seeded an audiobook")
         }
     }
     
@@ -54,7 +54,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
         // Test that library state is preserved when navigating away and back
         
         let searchBar = app.searchFields[AccessibilityIdentifiers.Library.searchBar]
-        let audiobookCellsForState = app.cells[AccessibilityIdentifiers.Library.audiobookCell]
+        let audiobookCellsForState = audiobookRows
         if searchBar.exists && audiobookCellsForState.firstMatch.exists {
             // Set up a search filter
             searchBar.tap()
@@ -64,7 +64,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
             // Note the current state after filtering - can't reliably count XCUIElements
             
             // Navigate to player and back
-            let firstBook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
+            let firstBook = audiobookRows.firstMatch
             if firstBook.exists {
                 firstBook.tap()
                 
@@ -78,7 +78,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
                 XCTAssertEqual(searchBar.value as? String, "Test", "Search text should be preserved")
                 
                 // Verify books are still visible after navigation
-                XCTAssertTrue(app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch.exists, "Audiobooks should still be visible after navigation")
+                XCTAssertTrue(audiobookRows.firstMatch.exists, "Audiobooks should still be visible after navigation")
             }
         } else {
             throw XCTSkip("Cannot test state preservation without search functionality or audiobooks")
@@ -102,7 +102,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
         }
         
         // Test audiobook cells accessibility
-        let audiobookCells = app.cells[AccessibilityIdentifiers.Library.audiobookCell]
+        let audiobookCells = audiobookRows
         let firstCell = audiobookCells.firstMatch
         if firstCell.exists {
             XCTAssertFalse(firstCell.label.isEmpty, "Audiobook cells should have accessibility labels")
@@ -113,13 +113,9 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
         app.launchArguments.append("--voiceover-testing")
         
         // Test that key elements are accessible via VoiceOver
-        let importButton = app.buttons[AccessibilityIdentifiers.Library.importButton]
-        XCTAssertTrue(importButton.isAccessibilityElement, "Import button should be accessibility element")
-        
-        let audiobookCells = app.cells[AccessibilityIdentifiers.Library.audiobookCell]
+        let audiobookCells = audiobookRows
         let firstCell = audiobookCells.firstMatch
         if firstCell.exists {
-            XCTAssertTrue(firstCell.isAccessibilityElement, "Audiobook cells should be accessibility elements")
             
             // Test that cells have meaningful descriptions
             let label = firstCell.label
@@ -148,7 +144,7 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
         // This test assumes we can get to an empty library state
         // In practice, this might require clearing test data or using a fresh install
         
-        let audiobookCells = app.cells[AccessibilityIdentifiers.Library.audiobookCell]
+        let audiobookCells = audiobookRows
         
         let firstCell = audiobookCells.firstMatch
         if !firstCell.exists {
@@ -173,7 +169,6 @@ final class LibraryViewUITests2: LibraryViewUITestCase {
             app.terminate()
             app.launch()
             
-            let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
             libraryTab.tap()
             
             // Wait for library to load

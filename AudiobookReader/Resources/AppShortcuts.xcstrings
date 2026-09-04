@@ -43,6 +43,20 @@
         }
       }
     },
+    "Play ${audiobook} in ${applicationName}" : {
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringSet" : {
+            "state" : "new",
+            "values" : [
+              "Play ${audiobook} in ${applicationName}",
+              "Listen to ${audiobook} in ${applicationName}"
+            ]
+          }
+        }
+      }
+    },
     "Resume last book in ${applicationName}" : {
       "extractionState" : "stale",
       "localizations" : {

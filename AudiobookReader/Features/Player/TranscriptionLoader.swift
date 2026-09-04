@@ -2,7 +2,6 @@ import SwiftUI
 
 struct TranscriptionLoader: View {
     @State private var currentPhraseIndex = 0
-    private let timer = Timer.publish(every: 5, on: .main, in: .common).autoconnect()
     @State private var thinking: Bool = false
     
     // Padded to equal length so the animated HStack keeps a stable width.
@@ -32,7 +31,7 @@ struct TranscriptionLoader: View {
             HStack(spacing: 0) {
                 ForEach(Array(phrases[currentPhraseIndex].enumerated()), id: \.offset) { index, letter in
                     Text(String(letter))
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.tint)
                         .hueRotation(.degrees(thinking ? 220 : 0))
                         .opacity(thinking ? 0 : 1)
                         .scaleEffect(thinking ? 1.5 : 1, anchor: .bottom)
@@ -44,9 +43,13 @@ struct TranscriptionLoader: View {
         .onAppear {
             thinking = true
         }
-        .onReceive(timer) { _ in
-            withAnimation {
-                currentPhraseIndex = (currentPhraseIndex + 1) % phrases.count
+        .task {
+            // Cancelled with the view, so the rotation stops when the loader goes away.
+            while !Task.isCancelled {
+                try? await Task.sleep(for: .seconds(5))
+                withAnimation {
+                    currentPhraseIndex = (currentPhraseIndex + 1) % phrases.count
+                }
             }
         }
     }

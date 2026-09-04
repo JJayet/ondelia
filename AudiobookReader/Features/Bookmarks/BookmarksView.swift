@@ -37,7 +37,7 @@ struct BookmarksView: View {
                                 onTap: {
                                     Log.ui.debug("🔖 Seeking to bookmark at \(bookmark.timestamp) seconds")
                                     globalAudioManager.seek(to: bookmark.timestamp)
-                                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) { dismiss() }
+                                    dismiss()
                                 },
                                 onDelete: {
                                     audiobookManager.deleteBookmark(bookmark)
@@ -50,7 +50,7 @@ struct BookmarksView: View {
             .navigationTitle(NSLocalizedString("Bookmarks", comment: "Bookmarks view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
             }
@@ -74,13 +74,13 @@ struct BookmarkRowView: View {
                     
                     Spacer()
                     
-                    Text(formatTime(bookmark.timestamp))
+                    Text(bookmark.timestamp.clockFormatted)
                         .font(.caption)
-                        .foregroundStyle(.blue)
+                        .foregroundStyle(.tint)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
-                        .cornerRadius(4)
+                        .background(Color.accentColor.opacity(0.1))
+                        .clipShape(.rect(cornerRadius: 4))
                 }
                 
                 if let note = bookmark.note, !note.isEmpty {
@@ -96,7 +96,7 @@ struct BookmarkRowView: View {
             }
             .padding(.vertical, 4)
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(NSLocalizedString("Delete", comment: "Delete bookmark button")) {
                 showingDeleteAlert = true
@@ -113,17 +113,6 @@ struct BookmarkRowView: View {
         }
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
     
     private func formatDate(_ date: Date?) -> String {
         guard let date = date else { return "" }
@@ -153,11 +142,11 @@ struct AddBookmarkView: View {
             .navigationTitle(NSLocalizedString("Add Bookmark", comment: "Add bookmark view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("Save", comment: "Save button")) { onSave(); dismiss() }
                     .fontWeight(.semibold)
                 }

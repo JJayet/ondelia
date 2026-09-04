@@ -7,9 +7,8 @@ import SwiftData
 
 // MARK: - Library Preview with Mock Data
 #Preview("Library with mock books") {
-    PreviewWrapper {
-        SeededLibraryPreview()
-    }
+    SeededLibraryPreview()
+        .modelContainer(SwiftDataController.preview.container)
 }
 
 // MARK: - Importing State Preview
@@ -46,19 +45,14 @@ private struct SeededLibraryPreview: View {
                 guard existing.isEmpty else { return }
 
                 let samples: [AudiobookModel] = [
-                    AudiobookModel.preview(title: "The Art of War", author: "Sun Tzu"),
-                    AudiobookModel.preview(title: "1984", author: "George Orwell"),
-                    AudiobookModel.preview(title: "Dune", author: "Frank Herbert"),
-                    AudiobookModel.preview(title: "The Hobbit", author: "J.R.R. Tolkien"),
-                    AudiobookModel.preview(title: "Project Hail Mary", author: "Andy Weir")
+                    PreviewContent.audiobook(title: "The Art of War", author: "Sun Tzu"),
+                    PreviewContent.audiobook(title: "1984", author: "George Orwell"),
+                    PreviewContent.audiobook(title: "Dune", author: "Frank Herbert"),
+                    PreviewContent.audiobook(title: "The Hobbit", author: "J.R.R. Tolkien"),
+                    PreviewContent.audiobook(title: "Project Hail Mary", author: "Andy Weir")
                 ]
                 samples.forEach { context.insert($0) }
                 try? context.save()
             }
     }
-}
-
-#Preview() {
-    LibraryView()
-        .previewWithMockAudio()
 }

@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class AudiobookModel {
-    var id: UUID
+    @Attribute(.unique) var id: UUID
     var title: String?
     var author: String?
     var narrator: String?
@@ -11,7 +11,9 @@ final class AudiobookModel {
     var duration: Double
     var currentPosition: Double
     var isFinished: Bool
-    var coverImageData: Data?
+    /// Covers are the only large blob on this row; external storage keeps them out of the
+    /// row itself so a library fetch does not drag every JPEG into memory.
+    @Attribute(.externalStorage) var coverImageData: Data?
     var dateAdded: Date
     var lastPlayed: Date
     /// Playback speed remembered for this book. Optional so adding it never blocks the store
@@ -23,6 +25,12 @@ final class AudiobookModel {
     
     @Relationship(deleteRule: .cascade, inverse: \ChapterModel.audiobook)
     var chapters: [ChapterModel] = []
+
+    /// The relationship is a set with no order of its own, so every reader needs this and
+    /// three of them used to sort it themselves.
+    var sortedChapters: [ChapterModel] {
+        chapters.sorted { $0.chapterNumber < $1.chapterNumber }
+    }
     
     @Relationship(deleteRule: .cascade, inverse: \ChapterTranscriptionModel.audiobook)
     var transcriptions: [ChapterTranscriptionModel] = []

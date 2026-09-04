@@ -2,7 +2,7 @@ import Foundation
 import AVFoundation
 import UIKit
 
-class FolderImporter {
+enum FolderImporter {
     
     // MARK: - Import Folder
     static func importAudiobookFolder(from folderURL: URL) async -> FolderAudiobook? {
@@ -77,7 +77,7 @@ class FolderImporter {
                 chapters.append(chapter)
                 cumulativeTime += entry.length
                 
-                Log.library.debug("📖 FolderImporter: Chapter \(index + 1): \(chapterTitle) (\(formatTime(entry.length)))")
+                Log.library.debug("📖 FolderImporter: Chapter \(index + 1): \(chapterTitle) (\(entry.length.clockFormatted))")
             }
             
             // Look for cover image
@@ -96,7 +96,7 @@ class FolderImporter {
             Log.library.debug("✅ FolderImporter: Successfully created folder audiobook")
             Log.library.debug("   Title: \(title)")
             Log.library.debug("   Author: \(author ?? "Unknown")")
-            Log.library.debug("   Duration: \(formatTime(cumulativeTime))")
+            Log.library.debug("   Duration: \(cumulativeTime.clockFormatted)")
             Log.library.debug("   Chapters: \(chapters.count)")
             
             return folderAudiobook
@@ -230,7 +230,7 @@ class FolderImporter {
                 chapters.append(chapter)
                 cumulativeTime += result.duration
                 
-                Log.library.debug("📖 FolderImporter: Chapter \(result.index + 1): \(chapterTitle) (\(formatTime(result.duration)))")
+                Log.library.debug("📖 FolderImporter: Chapter \(result.index + 1): \(chapterTitle) (\(result.duration.clockFormatted))")
             }
             
             // Small delay between batches to prevent overwhelming the system
@@ -259,7 +259,7 @@ class FolderImporter {
         Log.library.debug("✅ FolderImporter: Successfully created folder audiobook from files")
         Log.library.debug("   Title: \(title)")
         Log.library.debug("   Author: \(author ?? "Unknown")")
-        Log.library.debug("   Duration: \(formatTime(cumulativeTime))")
+        Log.library.debug("   Duration: \(cumulativeTime.clockFormatted)")
         Log.library.debug("   Chapters: \(chapters.count)")
         
         return folderAudiobook

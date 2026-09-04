@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct EmptyLibraryView: View {
+    let onImport: () -> Void
+
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "books.vertical")
@@ -28,6 +30,11 @@ struct EmptyLibraryView: View {
                 .foregroundStyle(Color.secondaryText)
                 .multilineTextAlignment(.center)
             }
+
+            Button(NSLocalizedString("Import Audiobook", comment: "Import button title"), systemImage: "plus.circle") {
+                onImport()
+            }
+            .buttonStyle(.glassProminent)
         }
         .padding(32)
         .frame(maxWidth: .infinity)
@@ -35,5 +42,5 @@ struct EmptyLibraryView: View {
 }
 
 #Preview("Empty Library View") {
-    EmptyLibraryView()
+    EmptyLibraryView {}
 }

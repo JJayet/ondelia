@@ -270,14 +270,4 @@ extension AudiobookManager {
         return try JSONSerialization.data(withJSONObject: manifest, options: .prettyPrinted)
     }
     
-    nonisolated private func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
-            return "\(minutes)m"
-        }
-    }
 }

@@ -100,17 +100,17 @@ extension PlayerView {
                     .font(.title2)
                     .foregroundStyle(Color.primaryText)
             }
-            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
-            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
+            .accessibilityLabel(NSLocalizedString("Close Player", comment: "Close player accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.closeButton)
 
             Spacer()
 
             Button {
                 showingSleepTimer = true
             } label: {
-                if viewModel.sleepTimeRemaining > 0 {
+                if sleepTimeRemaining > 0 {
                     Label(
-                        formatTime(viewModel.sleepTimeRemaining),
+                        sleepTimeRemaining.clockFormatted,
                         systemImage: "moon.fill"
                     )
                     .font(.caption)
@@ -121,6 +121,8 @@ extension PlayerView {
                         .foregroundStyle(Color.primaryText)
                 }
             }
+            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
         }
         .padding(.top, 12)
     }
@@ -166,7 +168,7 @@ extension PlayerView {
             }
 
             // Current Chapter
-            if let chapter = viewModel.currentChapter {
+            if let chapter = currentChapter {
                 Button {
                     showingChapterList = true
                 } label: {
@@ -217,29 +219,59 @@ extension PlayerView {
         VStack(spacing: 8) {
             PlayerProgressSlider(
                 value: Binding(
-                    get: { viewModel.currentTime },
+                    get: { currentTime },
                     set: { newValue in
                         audioManager.seek(to: newValue)
                     }
                 ),
-                range: 0...max(viewModel.duration, 1),
+                range: 0...max(duration, 1),
                 onEditingChanged: { editing in
-                    viewModel.isSeekingManually = editing
+                    isSeekingManually = editing
                 }
             )
 
             HStack {
-                Text(formatTime(viewModel.currentTime))
+                Text(currentTime.clockFormatted)
                     .font(.caption)
                     .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
+
+                if let chapter = currentChapter {
+                    Text(
+                        String(
+                            format: NSLocalizedString(
+                                "· %@ in chapter",
+                                comment: "Position within the current chapter"
+                            ),
+                            max(currentTime - chapter.startTime, 0).clockFormatted
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(Color.secondaryText)
+                    .monospacedDigit()
+                }
 
                 Spacer()
 
-                Text(formatTime(viewModel.duration))
+                // Tap to switch between total length and time left.
+                Button {
+                    showRemainingTime.toggle()
+                } label: {
+                    Text(
+                        showRemainingTime
+                            ? "-" + max(duration - currentTime, 0).clockFormatted
+                            : duration.clockFormatted
+                    )
                     .font(.caption)
                     .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    showRemainingTime
+                        ? NSLocalizedString("Time remaining", comment: "Remaining time accessibility label")
+                        : NSLocalizedString("Total length", comment: "Total duration accessibility label")
+                )
             }
         }
     }

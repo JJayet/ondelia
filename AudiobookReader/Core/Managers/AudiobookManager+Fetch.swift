@@ -24,10 +24,7 @@ extension AudiobookManager {
             // then process any pending imports as part of that fetch.
             isLoadingLibrary = false
             Task { @MainActor in
-                // Poll briefly until SwiftData finishes loading
-                while !self.swiftDataController.isLoaded {
-                    try? await Task.sleep(nanoseconds: 100_000_000) // 100ms
-                }
+                await self.swiftDataController.whenLoaded()
                 self.fetchAudiobooks()
             }
             return
@@ -58,6 +55,9 @@ extension AudiobookManager {
             }
             self.audiobooks = valid
             self.isLoadingLibrary = false
+            SpotlightIndex.reindex(valid.map {
+                (id: $0.id, title: $0.title ?? AudiobookModel.unknownTitle, author: $0.author ?? AudiobookModel.unknownAuthor)
+            })
             self.processPendingImports()
         } catch {
             Log.library.error("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")

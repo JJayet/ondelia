@@ -167,6 +167,11 @@ final class AudiobookPlayer {
         seek(to: currentTime - seconds)
     }
 
+    /// Used by the sleep timer's fade-out. Reset to 1 whenever the timer is cancelled.
+    func setVolume(_ volume: Float) {
+        player.volume = min(max(volume, 0), 1)
+    }
+
     func setPlaybackRate(_ rate: Float) {
         guard rate.isFinite, rate > 0 else { return }
         playbackRate = rate

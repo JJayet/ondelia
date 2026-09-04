@@ -13,7 +13,7 @@ extension SettingsView {
                             .tag(language)
                     }
                 }
-                .pickerStyle(MenuPickerStyle())
+                .pickerStyle(.menu)
                 .onChange(of: themeManager.transcriptionLanguage) { _, newLanguage in
                     themeManager.updateTranscriptionLanguage(newLanguage)
                     Task { await refreshAssetStatus() }
@@ -42,7 +42,7 @@ extension SettingsView {
                                 .tag(language)
                         }
                     }
-                    .pickerStyle(MenuPickerStyle())
+                    .pickerStyle(.menu)
                     .onChange(of: themeManager.translationTargetLanguage) { _, newLanguage in
                         themeManager.updateTranslationTargetLanguage(newLanguage)
                     }

@@ -10,6 +10,9 @@ final class SwiftDataController {
     private(set) var isLoaded = false
     private(set) var isLoading = true
     private(set) var loadErrorMessage: String?
+    /// Set when a save fails. Progress and bookmarks live only in this store, so a silent
+    /// failure loses them; the UI shows this and clears it.
+    var saveErrorMessage: String?
     
     private var _container: ModelContainer?
     
@@ -68,6 +71,11 @@ final class SwiftDataController {
         }
     }
 
+    /// Suspends until the store has finished loading, or failed to.
+    func whenLoaded() async {
+        await waitUntil { self.isLoaded || self.loadErrorMessage != nil }
+    }
+
     func retryInitialization() {
         guard !isLoading else { return }
         initializeAsync()
@@ -78,7 +86,12 @@ final class SwiftDataController {
         guard let container = _container else { return }
         let context = container.mainContext
         guard context.hasChanges else { return }
-        do { try context.save() } catch { Log.store.debug("Save error: \(error)") }
+        do {
+            try context.save()
+        } catch {
+            Log.store.error("❌ SwiftData save failed: \(error)")
+            saveErrorMessage = error.localizedDescription
+        }
     }
     
     init(initiallyLoad: Bool = true) {

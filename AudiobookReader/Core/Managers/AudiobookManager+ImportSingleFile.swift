@@ -161,8 +161,6 @@ extension AudiobookManager {
                 }
                 if inCoverBatch {
                     coverBatch.append(audiobook)
-                } else if coverImage == nil {
-                    audiobookNeedingCover = audiobook
                 }
                 fetchAudiobooks()
             }
@@ -172,8 +170,12 @@ extension AudiobookManager {
         }
     }
 
+    /// Called whenever persisting an import failed and its copied audio has been deleted.
     @MainActor
-    private func reportImportFailure(_ error: Error) {
+    func reportImportFailure(_ error: Error) {
+        // The book and its chapters are still pending in the shared context. Without this the
+        // next successful save would persist them, pointing at the audio just deleted.
+        swiftDataController.context.rollback()
         importErrorMessage = String(
             format: NSLocalizedString("The audiobook could not be saved: %@", comment: "Import persistence error"),
             error.localizedDescription
