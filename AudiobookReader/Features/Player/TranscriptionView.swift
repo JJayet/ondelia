@@ -26,11 +26,21 @@ struct TranscriptionView: View {
     
     private var transcriptionText: String { transcription?.text ?? "" }
 
-    /// Word timings grouped into sentences. Empty for a transcript cached before timings were
-    /// stored, and for the translation, which has no timeline of its own.
+    /// Where the chapter being transcribed starts in the book. The recogniser counts from the
+    /// beginning of the chapter file; the player counts from the beginning of the book.
+    private var chapterStart: TimeInterval {
+        guard let tracks = audio.player?.tracks, tracks.indices.contains(currentChapterIndex) else {
+            return 0
+        }
+        return tracks[currentChapterIndex].start
+    }
+
+    /// Word timings grouped into sentences, on the player's timeline. Empty for a transcript
+    /// cached before timings were stored, and for the translation, which has no timeline of
+    /// its own.
     private var sentences: [TranscriptSentence] {
         guard !showingTranslation, let transcription else { return [] }
-        return TranscriptSentence.group(transcription.segments)
+        return TranscriptSentence.group(transcription.segments, offset: chapterStart)
     }
 
     var displayText: String {
@@ -127,10 +137,7 @@ struct TranscriptionView: View {
                         }
                         .disabled(isTranslating)
                     }
-                    
-                    if !displayText.isEmpty {
-                        ShareLink(item: displayText)
-                    }
+
                     
                     Button(action: refreshTranscription) {
                         Image(systemName: "arrow.clockwise")

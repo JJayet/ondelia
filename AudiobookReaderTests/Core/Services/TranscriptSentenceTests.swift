@@ -41,6 +41,19 @@ struct TranscriptSentenceTests {
         #expect(!sentence.contains(9.9))
     }
 
+    @Test("An offset moves the sentence onto the player's timeline")
+    func appliesChapterOffset() {
+        let sentences = TranscriptSentence.group(
+            words([("Second ", 0, 1), ("chapter.", 1, 2)]),
+            offset: 600
+        )
+
+        #expect(sentences[0].start == 600)
+        #expect(sentences[0].end == 602)
+        #expect(sentences[0].contains(601))
+        #expect(!sentences[0].contains(1))
+    }
+
     @Test("Segments without timings produce no sentences")
     func emptyInput() {
         #expect(TranscriptSentence.group([]).isEmpty)
