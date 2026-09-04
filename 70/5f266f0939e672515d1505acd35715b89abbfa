@@ -1,0 +1,29 @@
+AudiobookReader/Features/Player/TranscriptSyncView.swift
+  s_4c9ffaccae1f51::t_149d6b8fe0131e 9-12,21-25,33-35,66-79
+AudiobookReader/Features/Player/TranscriptionView.swift
+  s_4c9ffaccae1f51::t_1878ba3ccc3542 140
+  s_4c9ffaccae1f51::t_67bed0cfaeb817 29-40,43
+AudiobookReaderTests/Core/Services/TranscriptSentenceTests.swift
+  s_4c9ffaccae1f51::t_67bed0cfaeb817 44-56
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "705f266f0939e672515d1505acd35715b89abbfa",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_4c9ffaccae1f51": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "76739e5c-f480-47b1-ac5c-416864f7ca93",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
