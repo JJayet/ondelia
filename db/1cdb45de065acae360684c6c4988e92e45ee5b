@@ -1,0 +1,157 @@
+AudiobookReader/Features/Settings/StatisticsView.swift
+  s_7f931b3db38419::t_091eb6222f9801 6-8,13-14,16-22,24,26,28,30-37,41,43-44,52-106,108-110
+AudiobookReader/Features/Player/PlayerView+Controls.swift
+  s_7f931b3db38419::t_fb76e3187871f8 135-140,148,156,162,165,176-189,191-193
+  s_7f931b3db38419::t_23a35d4cb4a528 6,20,22,30,32,34,40,45,47,49,62,64,72-73,76-77,79-89,93-98,101-103,105-117,119,121,129,131-132,134,141-142,144-145,147,149-150,158-161,163-164,166
+  s_7f931b3db38419::t_7e3513c31f6e27 7-9,12,17-19,27-28,38-39,41-42,53-54,59-61,74-75,90-91,99-100,104,118,120,127,133,143,146,151-155,157,167-175
+  s_7f931b3db38419::t_ee312e778dd161 92
+AudiobookReader/Features/Library/LibraryHeaderView.swift
+  s_7f931b3db38419::t_af10f44c04b896 9,11,13,17,21,23,27,31,39-42,52-62
+  s_7f931b3db38419::t_9ef8dfb9dcf454 63
+AudiobookReader/Features/Library/LibraryView+Content.swift
+  s_7f931b3db38419::t_41bc1b58852377 84
+  s_7f931b3db38419::t_09219579429168 52,115,148,194
+  s_7f931b3db38419::t_ab298a90c2b656 88
+  s_7f931b3db38419::t_b9e375d60c5360 43-51,53-59
+  s_7f931b3db38419::t_29b16f44048583 109-114,116-121
+  s_7f931b3db38419::t_cc1137e532906e 5-22,147
+AudiobookReader/Features/Player/ChaptersListView.swift
+  s_7f931b3db38419::t_ed50bc7ed62eee 9,13-19,22-23,30,46-54,56-92,94,96-115,117-119
+AudiobookReader/Features/Library/ContinueReadingSection.swift
+  s_7f931b3db38419::t_a07a38eb6fceef 14-15
+AudiobookReader/Features/Hardcover/HardcoverSettingsView.swift
+  s_7f931b3db38419::t_38e3758ea72baf 100-101,105-108,110-113,115-116,118,120,122-124,127,130-133,136-139,154
+  s_7f931b3db38419::t_0afcc2363e3bb3 14-16,102-104,109,114,117,119,121,125-126,128-129,134-135
+  s_7f931b3db38419::t_a5514927b113fb 99
+AudiobookReader/Features/Library/AudiobookGridItemView.swift
+  s_7f931b3db38419::t_6e0f9970970e2b 12-24,27-37,40-43,45-48,50-51
+AudiobookReader/Shared/AccessibilityIdentifiers.swift
+  s_7f931b3db38419::t_09219579429168 27-28
+AudiobookReader/Features/Library/SeriesCardView.swift
+  s_7f931b3db38419::t_2958a1df9253c0 57-61,82,99-105,109-113,121,188-224
+  s_7f931b3db38419::t_62d69ad80a2b97 3-37
+  s_7f931b3db38419::t_984213a16911f4 1-2,38-56,62-81,83-98,106-108,114-120,122-187,225-242
+AudiobookReader/Resources/Localizable.xcstrings
+  s_7f931b3db38419::t_60518b6a6d1aa3 87-90,105,176-178,186-189,220-223,439,528-531,601-604,712-715,723-726,1487,1489,1624-1626,1638,1690-1693,1855-1858,1903,1905,1951,1953-1956,1958,1961-1964,2425-2428,2521-2524,2843-2886,2890
+  s_7f931b3db38419::t_50182eb6da9452 1709-1712
+  s_7f931b3db38419::t_8b78ff784b2d85 14-46,59-68,80-86,179-185,444-454,521-527,705-711,1207-1217,1377-1387,1399-1409,1683-1689,1848-1854,2514-2520
+  s_7f931b3db38419::t_12997900de3812 129,139,202,212,429,588-594,1957,1959,2060,2070
+  s_7f931b3db38419::t_8fb3cffa0a6349 47-58,118-128,168-174,213-219,716-722,1617-1623,2418-2424
+  s_7f931b3db38419::t_3d7466c21ae463 159-164,1629-1637
+  s_7f931b3db38419::t_996df1a6a5eef7 151-158,165-167,1627-1628
+  s_7f931b3db38419::t_65b0aeeddc564b 130-138,203-211,430-438,595-600,2061-2069
+  s_7f931b3db38419::t_8d03ace4984269 102-104,108,175,192,534,695,1488,1503,1640,1696,1706-1708,1713-1717,1731,1904,1952,1960,2504,2573,2588,2765
+AudiobookReader/Features/Settings/SettingsView.swift
+  s_7f931b3db38419::t_f7fe57cb637c94 29,43
+  s_7f931b3db38419::t_08f00adc56e344 16-26
+AudiobookReaderTests/Core/Services/HardcoverTests.swift
+  s_7f931b3db38419::t_984385150db405 58-65,67-69,71-81
+  s_7f931b3db38419::t_8e25124536e99e 82-108
+  s_7f931b3db38419::t_326511743b6570 66,70
+AudiobookReader/Features/Library/BookDetailView.swift
+  s_7f931b3db38419::t_48648349175dab 29,37-39,141-155
+  s_7f931b3db38419::t_c4103cd8608ab8 1-28,30-36,40-140,156-281
+AudiobookReader/Shared/CoverImageCache.swift
+  s_7f931b3db38419::t_c7b4a70113fe9c 21-22,25
+AudiobookReaderUITests/AudiobookUITestCase.swift
+  s_7f931b3db38419::t_fc3746d84c4360 82-89
+AudiobookReader/Core/Services/SeriesCatalog.swift
+  s_7f931b3db38419::t_f6607dcd60d2ed 1-34
+AudiobookReader/Features/Player/PlayerView+Layout.swift
+  s_7f931b3db38419::t_6240ba59235e6a 7-9,13,15-16,18,20,22,24,26,28,32,55-68,88-91,93-98,101,103-104,106-108,111,115-118,132-139,141,149-150,152,154,163-218,220
+  s_7f931b3db38419::t_65d5656e3be00b 6,27,45-47,49,75-79,81,105,109-110,112-113,121-130
+  s_7f931b3db38419::t_acc50f1fc73504 69-71
+AudiobookReader/Features/Library/LibraryView.swift
+  s_7f931b3db38419::t_87ea0b9b00b834 57-62
+  s_7f931b3db38419::t_ab298a90c2b656 90-91,110
+  s_7f931b3db38419::t_4173c76c682746 121-123
+  s_7f931b3db38419::t_60949f94b10aae 25-26
+  s_7f931b3db38419::t_09219579429168 14-15,114
+AudiobookReader/Shared/CoverArtView.swift
+  s_7f931b3db38419::t_5b8d75cd254398 10-11,15-24,27,29,31,34,38-44,46,48,57-59,61,63,66,70-71,76
+  s_7f931b3db38419::t_772e6d4152be53 1-9,12-14,25-26,28,30,32-33,35-37,45,47,49-56,60,62,64-65,67-69,72-75,77-80
+AudiobookReader/Core/Models/HardcoverLink.swift
+  s_7f931b3db38419::t_143a3f65eb2409 30-31,60,76
+  s_7f931b3db38419::t_0666c349f2fbf1 48-51,62,79
+  s_7f931b3db38419::t_bf9cb05d950c1a 39-47,63-68,80-84
+  s_7f931b3db38419::t_ffe1146fbbed1e 32-38,59,61,77-78,85-93
+AudiobookReader/Features/Library/StatisticsCardView.swift
+  s_7f931b3db38419::t_4ba9c4d91a2bf4 56
+  s_7f931b3db38419::t_dd63de1c1d0c8d 3-4,11-22,25,27-44,46-51,53-55,57-61,63-69,72
+AudiobookReader/App/UITestBootstrap.swift
+  s_7f931b3db38419::t_038ab8a75a925a 47-52
+  s_7f931b3db38419::t_8e25124536e99e 76-85
+  s_7f931b3db38419::t_5ca525aeea2bc8 46,53-72,74-75,86-88,100-102
+  s_7f931b3db38419::t_a3d0ffa04c8334 73,89-99
+AudiobookReader/Features/Player/WaveformScrubber.swift
+  s_7f931b3db38419::t_0388e96d3f5a52 1-59,70-71
+  s_7f931b3db38419::t_4c58e6df5d916e 60-69
+AudiobookReader/Features/Settings/SettingsView+Sections.swift
+  s_7f931b3db38419::t_5ca00454b6f3af 115-120,122-131,133-134
+  s_7f931b3db38419::t_736378bcb1e02b 3-6,9-10,13,16,22-38,46-47,50,53,59-60,63-69,71,75-77,86,89,97,102-103,106,110-113,136,140-143,145-148,151-163,168-169,171,175-176,178-182,184
+AudiobookReader/Features/Library/EnhancedAudiobookRowView.swift
+  s_7f931b3db38419::t_c09e8350e1b98a 14-15,19,23-24,27-32,34-42,45,50-70
+AudiobookReader/Features/Settings/SettingsRows.swift
+  s_7f931b3db38419::t_feecefd2b94237 82-114
+  s_7f931b3db38419::t_6a96ad782b3749 3-59,63-80,115-126
+  s_7f931b3db38419::t_d73da9ee9260b5 81
+AudiobookReader/Shared/LiquidGlass.swift
+  s_7f931b3db38419::t_4ba9c4d91a2bf4 121-137,144,154,184
+  s_7f931b3db38419::t_19d580c53cc819 1-120,138-143,145-153,155-183,185-192
+AudiobookReader/Features/Library/ContinueReadingCardView.swift
+  s_7f931b3db38419::t_093bc6e3c42d85 12-24,27-28,30,32,34,36-43,47-48,51-52,54,56-58
+AudiobookReader/Shared/MiniPlayerBar.swift
+  s_7f931b3db38419::t_f7fe57cb637c94 19
+AudiobookReader/Features/Library/SeriesGroup.swift
+  s_7f931b3db38419::t_d559d044984282 104,114
+  s_7f931b3db38419::t_1535a26e92f43f 1-4,7-30,91-103,105-113,115-130
+  s_7f931b3db38419::t_19e337e54fb5b9 5-6
+  s_7f931b3db38419::t_255e8d516803df 31-90
+AudiobookReader/Core/Services/HardcoverService.swift
+  s_7f931b3db38419::t_0666c349f2fbf1 153,162
+  s_7f931b3db38419::t_fa0200d5f98561 114-116,144-152,154-158,160-161,163-164,167-171,192-203,221-228
+  s_7f931b3db38419::t_db9139a5e8e936 17
+  s_7f931b3db38419::t_87523137e3d312 117-143
+  s_7f931b3db38419::t_8bacd1f57bd78a 159,165-166,204-220
+  s_7f931b3db38419::t_0afcc2363e3bb3 172-191
+AudiobookReaderUITests/AccessibilityIdentifiers+UITests.swift
+  s_7f931b3db38419::t_09219579429168 35-36
+AudiobookReaderTests/Core/Services/SeriesGroupTests.swift
+  s_7f931b3db38419::t_4c5a62a8e06b40 167-168,170
+  s_7f931b3db38419::t_996df1a6a5eef7 14-16,21,24,112,117-118,123-125,128-147
+  s_7f931b3db38419::t_6963a6a716765c 48-49,55-57
+  s_7f931b3db38419::t_b5211915e7c1d7 88-89,100,102
+  s_7f931b3db38419::t_54a2172e58eaf3 110-111,113-116,119-122,126-127,148-161
+  s_7f931b3db38419::t_f1cb125ae7492e 1-13,17-20,22-23,25-47,50-54,58-87,90-99,101,103-109,162-166,169,171-173
+AudiobookReader/Core/Services/HardcoverAPI.swift
+  s_7f931b3db38419::t_2c7929bdb5e785 122-125,127-132,134-148,150-151
+  s_7f931b3db38419::t_605dedcb3adea1 126,133,149,178-205,319-358,385,396,443-451
+  s_7f931b3db38419::t_388dfe89b7dbee 280-313,315-318
+  s_7f931b3db38419::t_80cc1505fb8a5a 314
+  s_7f931b3db38419::t_eccbb32fd63b51 359-361,363-384,386-395,397-400,453
+  s_7f931b3db38419::t_82015f4aa45919 152-177
+  s_7f931b3db38419::t_f71671c419c386 452
+  s_7f931b3db38419::t_eefd374d28f464 362
+  s_7f931b3db38419::t_52a6e7932eee8d 454
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "db1cdb45de065acae360684c6c4988e92e45ee5b",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_7f931b3db38419": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "14c9a59b-6fce-4906-993f-f736eb487364",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
