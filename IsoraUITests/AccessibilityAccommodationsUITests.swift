@@ -1,5 +1,5 @@
 //
-//  AccessibilityTests3.swift
+//  AccessibilityAccommodationsUITests.swift
 //  IsoraUITests
 //
 //  Split from AccessibilityTests.swift
@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class AccessibilityTests3: AccessibilityUITestCase {
+final class AccessibilityAccommodationsUITests: AccessibilityUITestCase {
 
     // MARK: - Reduced Motion Accessibility
     

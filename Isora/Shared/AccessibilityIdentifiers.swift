@@ -13,6 +13,7 @@ enum AccessibilityIdentifiers {
         static let speedControl = "player_speed_control"
         static let chaptersButton = "player_chapters_button"
         static let bookmarksButton = "player_bookmarks_button"
+        static let addBookmarkButton = "bookmarks_add_button"
         static let sleepTimerButton = "player_sleep_timer_button"
         static let closeButton = "player_close_button"
         static let coverArt = "player_cover_art"

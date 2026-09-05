@@ -1,5 +1,5 @@
 //
-//  AccessibilityTests2.swift
+//  AssistiveTechnologyAccessibilityUITests.swift
 //  IsoraUITests
 //
 //  Split from AccessibilityTests.swift
@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class AccessibilityTests2: AccessibilityUITestCase {
+final class AssistiveTechnologyAccessibilityUITests: AccessibilityUITestCase {
 
     // MARK: - Voice Control Compatibility
     

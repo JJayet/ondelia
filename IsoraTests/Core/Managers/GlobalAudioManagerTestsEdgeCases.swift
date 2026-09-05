@@ -1,5 +1,5 @@
 //
-//  GlobalAudioManagerTests2.swift
+//  GlobalAudioManagerTestsEdgeCases.swift
 //  IsoraTests
 //
 //  Split from GlobalAudioManagerTests.swift (errors, position, memory, processing, concurrency)
@@ -15,8 +15,8 @@ extension GlobalAudioManagerTests {
     /// Serialized order follows source location (fileID first): this file must sort after
     /// GlobalAudioManagerTests.swift so testInitializationState() still sees a pristine singleton.
     @MainActor
-    @Suite("GlobalAudioManager Tests (2)", .serialized, .tags(.manager))
-    struct Part2 {
+    @Suite("GlobalAudioManager Tests (Edge Cases)", .serialized, .tags(.manager))
+    struct EdgeCases {
         
         init() {
             // Reset mock framework for each test

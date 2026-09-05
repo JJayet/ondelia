@@ -5,9 +5,36 @@ struct BookmarksView: View {
     let globalAudioManager: GlobalAudioManager
     private let audiobookManager = AudiobookManager.shared
     @Environment(\.dismiss) private var dismiss
+    @State private var showingAdd = false
+    @State private var newTitle = ""
+    @State private var newNote = ""
     
     private var bookmarks: [BookmarkModel] {
         audiobook.bookmarks.sorted { $0.timestamp < $1.timestamp }
+    }
+
+    /// Where the new bookmark lands: the live position when this book is playing, otherwise
+    /// where the book was left.
+    private var bookmarkTime: TimeInterval {
+        globalAudioManager.currentAudiobook?.id == audiobook.id
+            ? globalAudioManager.getCurrentTime()
+            : audiobook.currentPosition
+    }
+
+    private func addBookmark() {
+        let time = bookmarkTime
+        audiobookManager.createBookmark(
+            for: audiobook,
+            at: time,
+            title: newTitle.isEmpty
+                ? String(
+                    format: NSLocalizedString("Bookmark at %@", comment: "Default bookmark title with time"),
+                    time.clockFormatted
+                ) : newTitle,
+            note: newNote.isEmpty ? nil : newNote
+        )
+        newTitle = ""
+        newNote = ""
     }
     
     var body: some View {
@@ -23,7 +50,7 @@ struct BookmarksView: View {
                             .font(.title2)
                             .fontWeight(.semibold)
                         
-                        Text(NSLocalizedString("Create your first bookmark by tapping the bookmark button while listening", comment: "No bookmarks instructions"))
+                        Text(NSLocalizedString("Tap + to bookmark the current position", comment: "No bookmarks instructions"))
                             .font(.body)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
@@ -54,9 +81,18 @@ struct BookmarksView: View {
             .navigationTitle(NSLocalizedString("Bookmarks", comment: "Bookmarks view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .primaryAction) {
+                    Button { showingAdd = true } label: {
+                        Label(NSLocalizedString("Add Bookmark", comment: "Add bookmark button title"), systemImage: "plus")
+                    }
+                    .accessibilityIdentifier(AccessibilityIdentifiers.Player.addBookmarkButton)
+                }
                 ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
+            }
+            .sheet(isPresented: $showingAdd) {
+                AddBookmarkView(title: $newTitle, note: $newNote, onSave: addBookmark)
             }
         }
     }

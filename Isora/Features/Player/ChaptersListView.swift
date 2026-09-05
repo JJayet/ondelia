@@ -60,7 +60,7 @@ struct ChapterRowView: View {
                     if isCurrent {
                         PlayingBars()
                     } else {
-                        Text("\(chapter.chapterNumber)")
+                        Text(verbatim: "\(chapter.chapterNumber)")
                             .font(.system(size: 12.5))
                             .monospacedDigit()
                             .foregroundStyle(.tertiary)
@@ -100,6 +100,8 @@ struct ChapterRowView: View {
 /// Three bars breathing at different rates — the "this one is playing" mark in the design.
 private struct PlayingBars: View {
     @State private var animating = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
     private let heights: [(CGFloat, CGFloat, Double)] = [(4, 13, 0), (11, 5, 0.15), (7, 14, 0.3)]
 
     var body: some View {
@@ -109,7 +111,9 @@ private struct PlayingBars: View {
                     .fill(.tint)
                     .frame(width: 2.5, height: animating ? bar.1 : bar.0)
                     .animation(
-                        .easeInOut(duration: 0.45).repeatForever(autoreverses: true).delay(bar.2),
+                        reduceMotion
+                            ? nil
+                            : .easeInOut(duration: 0.45).repeatForever(autoreverses: true).delay(bar.2),
                         value: animating
                     )
             }

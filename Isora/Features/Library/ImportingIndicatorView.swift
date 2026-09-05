@@ -20,7 +20,7 @@ struct ImportingIndicatorView: View {
                         .lineLimit(1)
                 }
                 if manager.importQueueTotal > 1 {
-                    Text("\(manager.importQueueCompleted + 1)/\(manager.importQueueTotal)")
+                    Text(verbatim: "\(manager.importQueueCompleted + 1)/\(manager.importQueueTotal)")
                         .font(.caption2)
                         .foregroundStyle(Color.secondaryText)
                 }

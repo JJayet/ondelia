@@ -125,9 +125,9 @@ struct TranscriptionTextView: View {
         
         // Highlight search results
         if !searchText.isEmpty {
-            let searchRange = text.range(of: searchText, options: .caseInsensitive)
-            if let range = searchRange {
-                let attributedRange = AttributedString.Index(range.lowerBound, within: attributed)!..<AttributedString.Index(range.upperBound, within: attributed)!
+            // No highlight rather than a crash if the range does not map across.
+            if let range = text.range(of: searchText, options: .caseInsensitive),
+               let attributedRange = Range(range, in: attributed) {
                 attributed[attributedRange].backgroundColor = .yellow
                 attributed[attributedRange].foregroundColor = .black
             }

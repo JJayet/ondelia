@@ -4,34 +4,40 @@ struct LibraryHeaderView: View {
     @Binding var viewMode: LibraryView.ViewMode
     @Binding var sortOption: LibraryView.SortOption
     @Binding var filterOption: LibraryView.FilterOption
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         HStack(spacing: 9) {
             Menu {
                 ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(.easeInOut(duration: 0.2)) { filterOption = option }
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { filterOption = option }
                     }
                 }
             } label: {
                 chip(filterOption.displayName, tinted: true)
             }
+            // The chip's own text is the choice, so the menu needs a name of its own.
+            .accessibilityLabel(NSLocalizedString("Filter", comment: "Search filter picker label"))
+            .accessibilityValue(filterOption.displayName)
 
             Menu {
                 ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(.easeInOut(duration: 0.2)) { sortOption = option }
+                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { sortOption = option }
                     }
                 }
             } label: {
                 chip(sortOption.displayName, tinted: false)
             }
+            .accessibilityLabel(NSLocalizedString("Sort by", comment: "Search sort picker label"))
+            .accessibilityValue(sortOption.displayName)
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.sortButton)
 
             Spacer(minLength: 0)
 
             Button {
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                     viewMode = viewMode == .list ? .grid : .list
                 }
             } label: {

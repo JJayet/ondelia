@@ -26,6 +26,7 @@ struct MiniPlayerBar: View {
                 )
                 .font(.subheadline).fontWeight(.semibold)
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 if !isInline {
                     Text(
                         book?.author
@@ -34,6 +35,7 @@ struct MiniPlayerBar: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 }
             }
 
@@ -47,6 +49,7 @@ struct MiniPlayerBar: View {
                     } label: {
                         Image(systemName: "gobackward.\(ThemeManager.shared.skipInterval.rawValue)")
                     }
+                    .accessibilityLabel(NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"))
                 }
                 Button {
                     if audio.playbackState != .loading {
@@ -72,6 +75,7 @@ struct MiniPlayerBar: View {
                     } label: {
                         Image(systemName: "goforward.\(ThemeManager.shared.skipInterval.rawValue)")
                     }
+                    .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
                     Button {
                         audio.stopPlayback()
                     } label: {

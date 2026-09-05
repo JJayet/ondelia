@@ -163,6 +163,8 @@ struct SearchView: View {
             } label: {
                 Image(systemName: "arrow.up.arrow.down")
             }
+            .accessibilityLabel(NSLocalizedString("Sort by", comment: "Search sort picker label"))
+            .accessibilityValue(sort.label)
 
             if filtersActive {
                 Button {

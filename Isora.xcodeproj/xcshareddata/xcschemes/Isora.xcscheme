@@ -18,7 +18,7 @@
                BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
                BuildableName = "Isora.app"
                BlueprintName = "Isora"
-               ReferencedContainer = "container:AudiobookReader.xcodeproj">
+               ReferencedContainer = "container:Isora.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -38,7 +38,7 @@
                BlueprintIdentifier = "F13289B02E4DBA6D004EC064"
                BuildableName = "IsoraTests.xctest"
                BlueprintName = "IsoraTests"
-               ReferencedContainer = "container:AudiobookReader.xcodeproj">
+               ReferencedContainer = "container:Isora.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -49,7 +49,7 @@
                BlueprintIdentifier = "F13289BA2E4DBA6D004EC064"
                BuildableName = "IsoraUITests.xctest"
                BlueprintName = "IsoraUITests"
-               ReferencedContainer = "container:AudiobookReader.xcodeproj">
+               ReferencedContainer = "container:Isora.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -80,7 +80,7 @@
             BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
             BuildableName = "Isora.app"
             BlueprintName = "Isora"
-            ReferencedContainer = "container:AudiobookReader.xcodeproj">
+            ReferencedContainer = "container:Isora.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </LaunchAction>
@@ -97,7 +97,7 @@
             BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
             BuildableName = "Isora.app"
             BlueprintName = "Isora"
-            ReferencedContainer = "container:AudiobookReader.xcodeproj">
+            ReferencedContainer = "container:Isora.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <MacroExpansion>
@@ -106,7 +106,7 @@
             BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
             BuildableName = "Isora.app"
             BlueprintName = "Isora"
-            ReferencedContainer = "container:AudiobookReader.xcodeproj">
+            ReferencedContainer = "container:Isora.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
    </ProfileAction>

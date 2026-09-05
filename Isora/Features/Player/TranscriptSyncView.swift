@@ -53,6 +53,7 @@ struct TranscriptSyncView: View {
     let sentences: [TranscriptSentence]
     let currentTime: TimeInterval
     let onSeek: (TimeInterval) -> Void
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var activeID: UUID? {
         sentences.first { $0.contains(currentTime) }?.id
@@ -83,7 +84,7 @@ struct TranscriptSyncView: View {
             }
             .onChange(of: activeID) { _, id in
                 guard let id else { return }
-                withAnimation(.easeInOut(duration: 0.3)) {
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                     proxy.scrollTo(id, anchor: .center)
                 }
             }

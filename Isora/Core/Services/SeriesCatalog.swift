@@ -5,6 +5,7 @@ struct SeriesVolume: Codable, Hashable, Identifiable, Sendable {
     let bookID: Int
     let title: String
     let position: Double?
+    var artworkURL: URL? = nil
 
     var id: Int { bookID }
 
@@ -20,7 +21,7 @@ struct SeriesVolume: Codable, Hashable, Identifiable, Sendable {
 /// dozen short rows per series, and losing it costs one request.
 @MainActor
 enum SeriesCatalog {
-    private static let prefix = "hardcover.series.v2."
+    private static let prefix = "hardcover.series.v3."
 
     static func volumes(for seriesID: Int) -> [SeriesVolume] {
         guard let data = UserDefaults.standard.data(forKey: prefix + String(seriesID)) else { return [] }

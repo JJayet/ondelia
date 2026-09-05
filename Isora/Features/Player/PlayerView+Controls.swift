@@ -143,6 +143,7 @@ extension PlayerView {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+            .accessibilityValue(sleepTimeRemaining > 0 ? sleepTimeRemaining.clockFormatted : "")
 
             Button {
                 showingBookmarks = true
@@ -150,11 +151,6 @@ extension PlayerView {
                 iconChip("bookmark")
             }
             .buttonStyle(.plain)
-            .contextMenu {
-                Button(NSLocalizedString("Add Bookmark", comment: "Add bookmark button title")) {
-                    showingAddBookmark = true
-                }
-            }
             .accessibilityLabel(NSLocalizedString("Bookmarks", comment: "Bookmarks button title"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.bookmarksButton)
 

@@ -1,4 +1,5 @@
 import Foundation
+import os
 import Security
 
 /// Minimal string store for credentials.
@@ -34,6 +35,10 @@ enum Keychain {
         item[kSecValueData as String] = data
         // Background syncs run with the device locked, so `WhenUnlocked` would fail there.
         item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
-        SecItemAdd(item as CFDictionary, nil)
+        let status = SecItemAdd(item as CFDictionary, nil)
+        if status != errSecSuccess {
+            // Never the value: this is the Hardcover token.
+            Log.hardcover.error("Keychain write failed for \(key, privacy: .public), OSStatus \(status, privacy: .public)")
+        }
     }
 }

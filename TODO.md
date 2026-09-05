@@ -26,10 +26,18 @@ Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately
       one running import. It works today; the original audit said refactor when next touched,
       and this pass did not need to touch it.
 - [ ] **CarPlay.** Requires an entitlement request to Apple before any code is worth writing.
-- [ ] **Stale planning docs** `IsoraTests/PHASE_2_IMPLEMENTATION_SUMMARY.md`,
-      `PHASE_3_IMPLEMENTATION_SUMMARY.md` and `README.md` describe infrastructure that does not
-      exist (CarPlay, Watch, `PersistenceController`). Not deleted here because they were not in
-      the audit; they should be.
+
+## Open after the 5 September 2026 audit
+
+- [ ] **Rotate the Google Custom Search API key.** `Config/Secrets.xcconfig` was tracked until
+      `74bf956`; commit `c11cf6b` still contains the key. Create a new key in Google Cloud Console,
+      restrict it to bundle `io.jayet.Isora`, revoke the old one.
+- [ ] **UI suite flake in CI.** One `xctrunner` clone failed to launch ("Application failed preflight
+      checks", Busy) and the run was marked failed although 50/52 cases passed. Split the UI suite
+      into its own CI job or add `-retry-tests-on-failure`.
+- [ ] **19 functions over 50 lines**, all in the import pipeline (`copyFolderToDocuments`,
+      `extractMetadata`, `makeFolderAudiobook`, `mergeAudiobooks`, `importAudiobook`, `parseCUEFile`…).
+      No correctness issue; split when next touched.
 
 ## Needs a device to verify
 

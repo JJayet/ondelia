@@ -82,6 +82,7 @@ extension PlayerView {
             }
             .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+            .accessibilityValue(sleepTimeRemaining > 0 ? sleepTimeRemaining.clockFormatted : "")
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
         }
         .padding(.top, 12)
@@ -138,6 +139,7 @@ extension PlayerView {
             Text(currentChapter.map(chapterTitle) ?? (audiobook.title ?? AudiobookModel.unknownTitle))
                 .font(.system(size: 15, weight: .semibold))
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.bottom, 14)
 

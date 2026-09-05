@@ -9,6 +9,7 @@ struct MainTabView: View {
     @State private var selectedTab = 1
     @State private var searchText: String = ""
     @Namespace private var namespace
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         // Applied once here: sheets and covers presented from the tabs inherit both, so no
@@ -75,7 +76,14 @@ struct MainTabView: View {
         .tabBarMinimizeBehavior(.onScrollDown)
         .environment(\.playerRouter, playerRouter)
         .fullScreenCover(item: $playerRouter.presented) { presentation in
-            PlayerSheetView(bookID: presentation.id).navigationTransition(.zoom(sourceID: "MINIPLAYER", in: namespace))
+            // The zoom flies the mini player across the screen; Reduce Motion gets the plain
+            // cover instead.
+            if reduceMotion {
+                PlayerSheetView(bookID: presentation.id)
+            } else {
+                PlayerSheetView(bookID: presentation.id)
+                    .navigationTransition(.zoom(sourceID: "MINIPLAYER", in: namespace))
+            }
         }
         // A tapped Spotlight result names the book by its UUID.
         .onContinueUserActivity(CSSearchableItemActionType) { activity in
@@ -95,7 +103,8 @@ struct MainTabView: View {
                 AudiobookManager.shared.handleImportRequest(urls: [url])
                 return
             }
-            guard url.scheme == "Isora", url.host == "player" else { return }
+            guard url.scheme?.caseInsensitiveCompare("Isora") == .orderedSame,
+                  url.host == "player" else { return }
             selectedTab = 1
             if let book = globalAudioManager.currentAudiobook {
                 playerRouter.present(book)

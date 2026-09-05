@@ -26,7 +26,7 @@ struct SeriesGroupingBanner: View {
             .foregroundStyle(.secondary)
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            Toggle("", isOn: $isOn)
+            Toggle(isOn: $isOn) { Text(verbatim: "") }
                 .labelsHidden()
         }
         .padding(.horizontal, 16)
@@ -43,6 +43,7 @@ struct SeriesCardView: View {
 
     /// Collapsed series show only their spines; a series being listened to opens by itself.
     @State private var expanded: Bool?
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var isExpanded: Bool {
         expanded ?? (group.progressFraction > 0 && group.progressFraction < 1)
@@ -72,12 +73,13 @@ struct SeriesCardView: View {
 
     private var header: some View {
         Button {
-            withAnimation(.snappy(duration: 0.25)) { expanded = !isExpanded }
+            withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
         } label: {
             HStack(spacing: 8) {
                 Text(group.name)
                     .font(.system(size: 17, weight: .bold))
                     .lineLimit(1)
+                    .minimumScaleFactor(0.8)
 
                 Text(volumeCount)
                 .font(.system(size: 10, weight: .semibold))
@@ -168,6 +170,7 @@ struct SeriesCardView: View {
                         Text(book.title ?? AudiobookModel.unknownTitle)
                             .font(.system(size: 13.5, weight: .semibold))
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
 
                     if book.currentPosition > 0 && !book.isFinished {
@@ -191,14 +194,20 @@ struct SeriesCardView: View {
     @ViewBuilder
     private func missingRow(_ volume: SeriesVolume) -> some View {
         HStack(spacing: 12) {
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .fill(.quaternary)
-                .frame(width: 52, height: 52)
-                .overlay {
-                    Image(systemName: "questionmark")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                }
+            AsyncImage(url: volume.artworkURL) { image in
+                image.resizable().aspectRatio(contentMode: .fill)
+            } placeholder: {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(.quaternary)
+                    .overlay {
+                        Image(systemName: "questionmark")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundStyle(.tertiary)
+                    }
+            }
+            .frame(width: 52, height: 52)
+            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+            .opacity(0.7)
 
             VStack(alignment: .leading, spacing: 6) {
                 HStack(alignment: .firstTextBaseline, spacing: 7) {
@@ -212,6 +221,7 @@ struct SeriesCardView: View {
                         .font(.system(size: 13.5, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
 
                 Text(NSLocalizedString("Not in your library", comment: "Series volume the reader does not own"))

@@ -3,6 +3,7 @@ import SwiftUI
 struct TranscriptionLoader: View {
     @State private var currentPhraseIndex = 0
     @State private var thinking: Bool = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     // Padded to equal length so the animated HStack keeps a stable width.
     let phrases: [String] = {
@@ -21,11 +22,11 @@ struct TranscriptionLoader: View {
             Image(systemName: "wand.and.sparkles.inverse")
                 .font(.title)
                 .foregroundStyle(EllipticalGradient(colors:[.accentColor, .secondary], center: .center, startRadiusFraction: 0.0, endRadiusFraction: 0.5))
-                .phaseAnimator([false , true]) { ai, thinking in
+                .phaseAnimator([false, true]) { ai, thinking in
                     ai
-                        .symbolEffect(.wiggle.byLayer, value: thinking)
-                        .symbolEffect(.bounce.byLayer, value: thinking)
-                        .symbolEffect(.breathe.byLayer, value: thinking)
+                        .symbolEffect(.wiggle.byLayer, value: thinking && !reduceMotion)
+                        .symbolEffect(.bounce.byLayer, value: thinking && !reduceMotion)
+                        .symbolEffect(.breathe.byLayer, value: thinking && !reduceMotion)
                 }
             
             HStack(spacing: 0) {
@@ -35,19 +36,20 @@ struct TranscriptionLoader: View {
                         .hueRotation(.degrees(thinking ? 220 : 0))
                         .opacity(thinking ? 0 : 1)
                         .scaleEffect(thinking ? 1.5 : 1, anchor: .bottom)
-                        .animation(.easeInOut(duration: 0.5).delay(1).repeatForever(autoreverses: false).delay(Double(index) / 20), value: thinking)
+                        .animation(reduceMotion ? nil : .easeInOut(duration: 0.5).delay(1).repeatForever(autoreverses: false).delay(Double(index) / 20), value: thinking)
                 }
             }
         }
         .frame(maxWidth: .infinity, alignment: .center)
         .onAppear {
-            thinking = true
+            // Reduce Motion keeps the phrase legible instead of dissolving it letter by letter.
+            thinking = !reduceMotion
         }
         .task {
             // Cancelled with the view, so the rotation stops when the loader goes away.
             while !Task.isCancelled {
                 try? await Task.sleep(for: .seconds(5))
-                withAnimation {
+                withAnimation(reduceMotion ? nil : Animation.default) {
                     currentPhraseIndex = (currentPhraseIndex + 1) % phrases.count
                 }
             }

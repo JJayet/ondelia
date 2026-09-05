@@ -8,11 +8,11 @@ extension SettingsView {
     var appearanceSection: some View {
         SettingsSection(title: NSLocalizedString("Appearance", comment: "Settings section: Appearance")) {
             SettingsRow(title: NSLocalizedString("Theme", comment: "Theme setting label")) {
-                Picker("", selection: $themeManager.currentTheme) {
+                Picker(selection: $themeManager.currentTheme) {
                     ForEach(AppTheme.allCases, id: \.rawValue) { theme in
                         Text(theme.displayName).tag(theme)
                     }
-                }
+                } label: { Text(verbatim: "") }
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .onChange(of: themeManager.currentTheme) { _, newTheme in
@@ -27,11 +27,11 @@ extension SettingsView {
                     Circle()
                         .fill(themeManager.accentColor.color)
                         .frame(width: 18, height: 18)
-                    Picker("", selection: $themeManager.accentColor) {
+                    Picker(selection: $themeManager.accentColor) {
                         ForEach(AccentColor.allCases, id: \.rawValue) { color in
                             Text(color.displayName).tag(color)
                         }
-                    }
+                    } label: { Text(verbatim: "") }
                     .labelsHidden()
                     .pickerStyle(.menu)
                     .onChange(of: themeManager.accentColor) { _, newColor in
@@ -45,11 +45,11 @@ extension SettingsView {
     var playbackSection: some View {
         SettingsSection(title: NSLocalizedString("Playback", comment: "Settings section: Playback")) {
             SettingsRow(title: NSLocalizedString("Skip Interval", comment: "Skip interval picker label")) {
-                Picker("", selection: $themeManager.skipInterval) {
+                Picker(selection: $themeManager.skipInterval) {
                     ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
                         Text(interval.displayName).tag(interval)
                     }
-                }
+                } label: { Text(verbatim: "") }
                 .labelsHidden()
                 .pickerStyle(.menu)
                 .onChange(of: themeManager.skipInterval) { _, newInterval in

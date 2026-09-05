@@ -99,18 +99,14 @@ final class SwiftDataController {
     }
 
     private func buildContainer(inMemory: Bool) throws -> ModelContainer {
-        let schema = Schema([
-            AudiobookModel.self,
-            BookmarkModel.self,
-            ChapterModel.self,
-            ChapterTranscriptionModel.self
-        ])
+        let schema = Schema(versionedSchema: IsoraSchemaV1.self)
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: inMemory
         )
         return try ModelContainer(
             for: schema,
+            migrationPlan: IsoraMigrationPlan.self,
             configurations: [modelConfiguration]
         )
     }

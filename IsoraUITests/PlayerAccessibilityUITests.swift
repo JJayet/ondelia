@@ -1,5 +1,5 @@
 //
-//  PlayerViewUITests2.swift
+//  PlayerAccessibilityUITests.swift
 //  IsoraUITests
 //
 //  Split from PlayerViewUITests.swift
@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class PlayerViewUITests2: PlayerViewUITestCase {
+final class PlayerAccessibilityUITests: PlayerViewUITestCase {
 
     // MARK: - Accessibility Testing
     

@@ -26,11 +26,13 @@ struct SearchResultRow: View {
                         .font(.subheadline)
                         .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 } else {
                     Text(AudiobookModel.unknownAuthor)
                         .font(.subheadline)
                         .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
+                        .minimumScaleFactor(0.8)
                 }
             }
             Spacer()

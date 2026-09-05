@@ -8,7 +8,7 @@
 import Foundation
 @testable import Isora
 
-// MARK: - Helper Methods (shared by GlobalAudioManagerTests and GlobalAudioManagerTests.Part2)
+// MARK: - Helper Methods (shared by GlobalAudioManagerTests and GlobalAudioManagerTests.EdgeCases)
 
 func createTestAudiobook(isMultiFile: Bool, title: String = "Test Audiobook") -> AudiobookModel {
     AudiobookModel(title: title, author: "Test Author", duration: 3600.0)

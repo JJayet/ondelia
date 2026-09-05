@@ -44,7 +44,7 @@ extension PlayerView {
     @ViewBuilder
     private func upNextRow(_ chapter: ChapterModel) -> some View {
         HStack(spacing: 12) {
-            Text("\(chapter.chapterNumber)")
+            Text(verbatim: "\(chapter.chapterNumber)")
                 .font(.system(size: 12))
                 .monospacedDigit()
                 .foregroundStyle(.tertiary)
@@ -52,6 +52,7 @@ extension PlayerView {
             Text(chapterTitle(chapter))
                 .font(.system(size: 14, weight: .semibold))
                 .lineLimit(1)
+                .minimumScaleFactor(0.8)
 
             Spacer(minLength: 8)
 

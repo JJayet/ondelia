@@ -5,7 +5,7 @@ import UniformTypeIdentifiers
 /// Publishes the library to Spotlight, so a book can be found and opened from search.
 ///
 /// Items carry the audiobook's UUID as their identifier; `IsoraApp` turns a tapped
-/// result back into a `audiobookreader://player` open.
+/// result back into a `Isora://player` open.
 enum SpotlightIndex {
     static let domain = "io.jayet.Isora.library"
 

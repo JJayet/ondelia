@@ -12,6 +12,7 @@ struct TranscriptionView: View {
     private let transcriptionManager = SpeechTranscriptionManager.shared
     private let translationManager = TranslationManager.shared
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     @State private var transcription: TranscriptionResult?
     @State private var translatedText = ""
@@ -115,7 +116,7 @@ struct TranscriptionView: View {
                         }
                         .onChange(of: highlightedRange) { _, range in
                             guard range != nil else { return }
-                            withAnimation(.easeInOut(duration: 0.5)) {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.5)) {
                                 proxy.scrollTo("transcriptionText", anchor: .center)
                             }
                         }
@@ -144,6 +145,11 @@ struct TranscriptionView: View {
                                 .foregroundStyle(showingTranslation ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
                         }
                         .disabled(isTranslating)
+                        .accessibilityLabel(
+                            showingTranslation
+                                ? NSLocalizedString("Show Original", comment: "Transcription: stop showing the translation")
+                                : NSLocalizedString("Translate", comment: "Transcription: translate the text")
+                        )
                     }
 
                     
@@ -151,6 +157,7 @@ struct TranscriptionView: View {
                         Image(systemName: "arrow.clockwise")
                     }
                     .disabled(transcriptionManager.isTranscribing)
+                    .accessibilityLabel(NSLocalizedString("Refresh Transcription", comment: "Transcription: transcribe the chapter again"))
                 }
             }
         }

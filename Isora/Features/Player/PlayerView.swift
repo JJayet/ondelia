@@ -29,12 +29,9 @@ struct PlayerView: View {
     }
 
     @State var showingBookmarks = false
-    @State var showingAddBookmark = false
     @State var showingSleepTimer = false
     @State var showingChapterList = false
     @State var showingTranscription = false
-    @State var bookmarkTitle = ""
-    @State var bookmarkNote = ""
     // Sheet presentation handles dragging/dismiss. No custom drag state needed.
     @Environment(\.dismiss) var dismiss
     @Environment(\.playerRouter) var playerRouter
@@ -62,30 +59,6 @@ struct PlayerView: View {
             BookmarksView(
                 audiobook: audiobook,
                 globalAudioManager: audioManager
-            )
-        }
-        .sheet(isPresented: $showingAddBookmark) {
-            AddBookmarkView(
-                title: $bookmarkTitle,
-                note: $bookmarkNote,
-                onSave: {
-                    let bookmarkTime = currentTime
-                    audiobookManager.createBookmark(
-                        for: audiobook,
-                        at: bookmarkTime,
-                        title: bookmarkTitle.isEmpty
-                            ? String(
-                                format: NSLocalizedString(
-                                    "Bookmark at %@",
-                                    comment: "Default bookmark title with time"
-                                ),
-                                bookmarkTime.clockFormatted
-                            ) : bookmarkTitle,
-                        note: bookmarkNote.isEmpty ? nil : bookmarkNote
-                    )
-                    bookmarkTitle = ""
-                    bookmarkNote = ""
-                }
             )
         }
         .sheet(isPresented: $showingChapterList) {

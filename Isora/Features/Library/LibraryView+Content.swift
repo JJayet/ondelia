@@ -15,7 +15,7 @@ extension LibraryView {
             bookCount: grouping.series.reduce(0) { $0 + $1.books.count },
             isOn: Binding(
                 get: { groupSeries },
-                set: { newValue in withAnimation(.snappy(duration: 0.25)) { groupSeries = newValue } }
+                set: { newValue in withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { groupSeries = newValue } }
             )
         )
     }

@@ -25,6 +25,7 @@ struct LibraryView: View {
     /// Series grouping is Hardcover's doing, so it can be switched off from the banner.
     @AppStorage("library.groupSeries") var groupSeries = true
     @State var showingImporter = false
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager) {
         self.audiobookManager = audiobookManager

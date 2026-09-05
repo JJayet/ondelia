@@ -1,5 +1,5 @@
 //
-//  LibraryViewUITests2.swift
+//  LibraryNavigationUITests.swift
 //  IsoraUITests
 //
 //  Split from LibraryViewUITests.swift
@@ -7,7 +7,7 @@
 
 import XCTest
 
-final class LibraryViewUITests2: LibraryViewUITestCase {
+final class LibraryNavigationUITests: LibraryViewUITestCase {
 
     // MARK: - Navigation Between Library and Player Tests
     

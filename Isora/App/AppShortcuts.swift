@@ -52,7 +52,10 @@ struct AudiobookEntity: AppEntity {
     let author: String
 
     var displayRepresentation: DisplayRepresentation {
-        DisplayRepresentation(title: "\(title)", subtitle: "\(author)")
+        DisplayRepresentation(
+            title: LocalizedStringResource(stringLiteral: title),
+            subtitle: LocalizedStringResource(stringLiteral: author)
+        )
     }
 }
 

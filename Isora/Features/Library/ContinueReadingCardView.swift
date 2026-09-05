@@ -38,6 +38,7 @@ struct ContinueReadingCardView: View {
                             .font(.system(size: 12.5))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
+                            .minimumScaleFactor(0.8)
                     }
 
                     ProgressLine(value: progressPercentage)
