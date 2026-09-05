@@ -1,0 +1,14 @@
+AudiobookReader/Resources/Localizable.xcstrings
+  h_59e29111fad4d9 70,2884
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "36db8e2107daa5780b858c512395e60831681e76",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
