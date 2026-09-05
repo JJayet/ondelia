@@ -1,0 +1,41 @@
+AudiobookReader/App/AppDelegate.swift
+  s_61911fba361502::t_a8b4e13797c9df 1-14
+AudiobookReader/App/MediaIntentHandler.swift
+  s_61911fba361502::t_d5b175f2d5f3ef 21-27,29-30,33,43,47,51
+  s_61911fba361502::t_85b864e21f0ce5 1-20,28,31-32,34-42,44-46,48-50,52-65
+AudiobookReader/App/PlaybackCommands.swift
+  s_61911fba361502::t_567296be498f8a 31-60
+AudiobookReader/Core/Managers/GlobalAudioManager+Playback.swift
+  s_61911fba361502::t_567296be498f8a 24-27
+AudiobookReader/Resources/Info.plist
+  s_61911fba361502::t_567296be498f8a 16-23
+AudiobookReader/Resources/AudiobookReader.entitlements
+  s_61911fba361502::t_567296be498f8a 5-6
+AudiobookReader/Core/Services/MediaIntentDonations.swift
+  s_61911fba361502::t_ea32686376f28b 13-16,18,20-25
+  s_61911fba361502::t_04aee4327cdad1 51
+  s_61911fba361502::t_c13734fc5da945 1-12,17,19,26-50,52-79
+AudiobookReader/App/AudiobookReaderApp.swift
+  s_61911fba361502::t_567296be498f8a 14-15,112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "7f7abf24e3d1123f328ae9c3828a5c358710f5fc",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_61911fba361502": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "54e70808-935f-45a1-abfa-4c64fc9b3f87",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
