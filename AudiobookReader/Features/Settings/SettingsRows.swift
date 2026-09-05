@@ -8,17 +8,3 @@ struct SettingsRowCard: ViewModifier {
     }
 }
 
-struct StatisticRowView: View {
-    let icon: String
-    let title: String
-    let value: String
-
-    var body: some View {
-        HStack {
-            Label(title, systemImage: icon)
-            Spacer()
-            Text(value)
-                .foregroundColor(.secondary)
-        }
-    }
-}

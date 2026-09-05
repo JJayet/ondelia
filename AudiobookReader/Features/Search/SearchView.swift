@@ -3,7 +3,7 @@ import UIKit
 
 struct SearchView: View {
     @Binding var query: String
-    @StateObject private var audiobookManager = AudiobookManager.shared
+    private let audiobookManager = AudiobookManager.shared
     @Environment(\.playerRouter) private var playerRouter
     @State private var debouncedQuery: String = ""
     @State private var searchTask: Task<Void, Never>? = nil
@@ -114,6 +114,7 @@ struct SearchView: View {
                                 let audio = GlobalAudioManager.shared
                                 audio.loadAudiobook(book)
                                 audio.startPlayback()
+                                playerRouter?.present(book)
                             }
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {

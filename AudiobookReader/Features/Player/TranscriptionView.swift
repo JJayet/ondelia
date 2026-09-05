@@ -1,17 +1,20 @@
 import SwiftUI
-import UIKit
 
 struct TranscriptionView: View {
     let audiobook: AudiobookModel
-    let currentChapterIndex: Int
-    let currentTime: TimeInterval
-    
-    @StateObject private var transcriptionManager = TranscriptionManager.shared
-    @StateObject private var themeManager = ThemeManager.shared
-    @StateObject private var translationManager = TranslationManager.shared
+
+    // Read live rather than passed in: the transcript follows playback while the sheet is up,
+    // and a value captured at presentation would freeze at the moment it opened.
+    private let audio = GlobalAudioManager.shared
+    private var currentChapterIndex: Int { audio.currentChapterIndex }
+    private var currentTime: TimeInterval { audio.getCurrentTime() }
+
+    private let transcriptionManager = SpeechTranscriptionManager.shared
+    private let themeManager = ThemeManager.shared
+    private let translationManager = TranslationManager.shared
     @Environment(\.dismiss) private var dismiss
     
-    @State private var transcriptionText = ""
+    @State private var transcription: TranscriptionResult?
     @State private var translatedText = ""
     @State private var showingError = false
     @State private var errorMessage = ""
@@ -21,6 +24,25 @@ struct TranscriptionView: View {
     @State private var showingTranslation = false
     @State private var isTranslating = false
     
+    private var transcriptionText: String { transcription?.text ?? "" }
+
+    /// Where the chapter being transcribed starts in the book. The recogniser counts from the
+    /// beginning of the chapter file; the player counts from the beginning of the book.
+    private var chapterStart: TimeInterval {
+        guard let tracks = audio.player?.tracks, tracks.indices.contains(currentChapterIndex) else {
+            return 0
+        }
+        return tracks[currentChapterIndex].start
+    }
+
+    /// Word timings grouped into sentences, on the player's timeline. Empty for a transcript
+    /// cached before timings were stored, and for the translation, which has no timeline of
+    /// its own.
+    private var sentences: [TranscriptSentence] {
+        guard !showingTranslation, let transcription else { return [] }
+        return TranscriptSentence.group(transcription.segments, offset: chapterStart)
+    }
+
     var displayText: String {
         return showingTranslation && !translatedText.isEmpty ? translatedText : transcriptionText
     }
@@ -36,13 +58,13 @@ struct TranscriptionView: View {
                 )
                 
                 // Translation toggle if available
-                if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                if !transcriptionText.isEmpty && themeManager.enableTranslation {
                     HStack {
                         Picker(NSLocalizedString("View", comment: "View picker label"), selection: $showingTranslation) {
                             Text(NSLocalizedString("Original", comment: "Original text option")).tag(false)
                             Text(NSLocalizedString("Translated", comment: "Translated text option")).tag(true)
                         }
-                        .pickerStyle(SegmentedPickerStyle())
+                        .pickerStyle(.segmented)
                         .onChange(of: showingTranslation) { _, shouldTranslate in
                             if shouldTranslate && translatedText.isEmpty {
                                 translateText()
@@ -60,31 +82,31 @@ struct TranscriptionView: View {
                 }
                 
                 // Main transcription content
-                ScrollViewReader { proxy in
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 16) {
-                            if transcriptionManager.isTranscribing {
-                                Spacer()
-                                TranscriptionLoader()
-                                Spacer()
-                            } else if transcriptionText.isEmpty {
-                                TranscriptionEmptyView {
-                                    startTranscription()
-                                }
-                            } else {
-                                TranscriptionTextView(
-                                    text: displayText,
-                                    searchText: searchText,
-                                    highlightedRange: highlightedRange,
-                                    currentTime: currentTime
-                                )
-                                .id("transcriptionText")
-                            }
-                        }
-                        .padding()
+                if transcriptionManager.isTranscribing {
+                    Spacer()
+                    TranscriptionLoader()
+                    Spacer()
+                } else if transcriptionText.isEmpty {
+                    TranscriptionEmptyView {
+                        startTranscription()
                     }
-                    .onChange(of: highlightedRange) { _, range in
-                        if range != nil {
+                } else if !sentences.isEmpty {
+                    TranscriptSyncView(sentences: sentences, currentTime: currentTime) { time in
+                        audio.seek(to: time)
+                    }
+                } else {
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            TranscriptionTextView(
+                                text: displayText,
+                                searchText: searchText,
+                                highlightedRange: highlightedRange
+                            )
+                            .id("transcriptionText")
+                            .padding()
+                        }
+                        .onChange(of: highlightedRange) { _, range in
+                            guard range != nil else { return }
                             withAnimation(.easeInOut(duration: 0.5)) {
                                 proxy.scrollTo("transcriptionText", anchor: .center)
                             }
@@ -95,14 +117,14 @@ struct TranscriptionView: View {
             .navigationTitle(chapterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                         .glassEffect()
                         .background(Color.glassTint, in: Capsule())
                 }
                 
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if !transcriptionText.isEmpty && TranslationManager.isAvailable && themeManager.enableTranslation {
+                ToolbarItem(placement: .topBarTrailing) {
+                    if !transcriptionText.isEmpty && themeManager.enableTranslation {
                         Button(action: {
                             if translatedText.isEmpty {
                                 translateText()
@@ -111,16 +133,11 @@ struct TranscriptionView: View {
                             }
                         }) {
                             Image(systemName: showingTranslation ? "textformat" : "translate")
-                                .foregroundColor(showingTranslation ? .primary : .accentColor)
+                                .foregroundStyle(showingTranslation ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
                         }
                         .disabled(isTranslating)
                     }
-                    
-                    if !displayText.isEmpty {
-                        Button(action: shareTranscription) {
-                            Image(systemName: "square.and.arrow.up")
-                        }
-                    }
+
                     
                     Button(action: refreshTranscription) {
                         Image(systemName: "arrow.clockwise")
@@ -129,8 +146,6 @@ struct TranscriptionView: View {
                 }
             }
         }
-        .tint(themeManager.accentColor.color)
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
             Button(NSLocalizedString("OK", comment: "OK button")) {}
         } message: {
@@ -138,7 +153,7 @@ struct TranscriptionView: View {
         }
         .onAppear {
             loadChapterTitle()
-            loadTranscription()
+            startTranscription()
         }
         .onChange(of: currentChapterIndex) { _, _ in
             loadChapterTitle()
@@ -148,15 +163,17 @@ struct TranscriptionView: View {
     }
     
     private func translateText() {
-        guard !transcriptionText.isEmpty && TranslationManager.isAvailable else { return }
+        // The transcript is cached untranslated, so the source is whatever was recognised —
+        // not the language currently selected in Settings.
+        guard let transcription, !transcription.text.isEmpty else { return }
         
         isTranslating = true
         
         Task {
             do {
                 let translated = try await translationManager.translateText(
-                    transcriptionText,
-                    from: themeManager.transcriptionLanguage.rawValue,
+                    transcription.text,
+                    from: transcription.language,
                     to: themeManager.translationTargetLanguage.rawValue
                 )
                 
@@ -180,8 +197,8 @@ struct TranscriptionView: View {
     }
     
     private func getChapterTitle(for audiobook: AudiobookModel, chapterIndex: Int) -> String {
-        guard let folderURL = audiobook.fileURL.map(URL.init(fileURLWithPath:)) else {
-            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
+        guard let folderURL = audiobook.resolvedFileURL else {
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
         
         let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
@@ -190,7 +207,7 @@ struct TranscriptionView: View {
               let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let chaptersData = manifest["chapters"] as? [[String: Any]],
               chapterIndex < chaptersData.count else {
-            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
         
         let chapterData = chaptersData[chapterIndex]
@@ -200,68 +217,37 @@ struct TranscriptionView: View {
             return title
         } else if let fileName = chapterData["fileName"] as? String {
             let nameWithoutExtension = (fileName as NSString).deletingPathExtension
-            return nameWithoutExtension.isEmpty ? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex) : nameWithoutExtension
+            return nameWithoutExtension.isEmpty ? String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1) : nameWithoutExtension
         } else {
-            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex)
+            return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
     }
     
-    private func loadTranscription() {
+    private func startTranscription(bypassCache: Bool = false) {
         Task {
             do {
-                transcriptionText = try await transcriptionManager.transcribeCurrentChapter(
+                transcription = try await transcriptionManager.transcribeCurrentChapter(
                     for: audiobook,
-                    currentChapterIndex: currentChapterIndex
+                    chapterIndex: currentChapterIndex,
+                    bypassCache: bypassCache
                 )
             } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showingError = true
-                }
+                errorMessage = error.localizedDescription
+                showingError = true
             }
         }
     }
     
-    private func startTranscription() {
-        Task {
-            do {
-                transcriptionText = try await transcriptionManager.transcribeCurrentChapter(
-                    for: audiobook,
-                    currentChapterIndex: currentChapterIndex
-                )
-            } catch {
-                await MainActor.run {
-                    errorMessage = error.localizedDescription
-                    showingError = true
-                }
-            }
-        }
-    }
-    
+    /// Refresh means "transcribe again", so it has to skip the cache the first run wrote.
     private func refreshTranscription() {
-        transcriptionText = ""
+        transcription = nil
         translatedText = ""
         showingTranslation = false
-        startTranscription()
+        startTranscription(bypassCache: true)
     }
     
-    private func shareTranscription() {
-        let activityViewController = UIActivityViewController(
-            activityItems: [displayText],
-            applicationActivities: nil
-        )
-        
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController?.present(activityViewController, animated: true)
-        }
-    }
 }
 
 #Preview {
-    TranscriptionView(
-        audiobook: PreviewContent.audiobook(),
-        currentChapterIndex: 0,
-        currentTime: 150
-    )
+    TranscriptionView(audiobook: PreviewContent.audiobook())
 }

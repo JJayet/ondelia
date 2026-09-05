@@ -5,38 +5,22 @@ import SwiftData
 // background when needed, so these talk to GlobalAudioManager directly.
 
 struct ResumeLastBookIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Resume Last Book"
-    static var description = IntentDescription("Resume the most recently played audiobook")
+    static let title: LocalizedStringResource = "Resume Last Book"
+    static let description = IntentDescription("Resume the most recently played audiobook")
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
-        let store = SwiftDataController.shared
-        while !store.isLoaded && store.loadErrorMessage == nil {
-            try await Task.sleep(for: .milliseconds(100))
-        }
-        guard store.isLoaded else { return .result(dialog: "Library Unavailable") }
-
-        let manager = GlobalAudioManager.shared
-        if let current = manager.currentAudiobook {
-            manager.startPlayback()
-            return .result(dialog: "Resuming \(current.title ?? "")")
-        }
-        var descriptor = FetchDescriptor<AudiobookModel>(
-            sortBy: [SortDescriptor(\.lastPlayed, order: .reverse)]
-        )
-        descriptor.fetchLimit = 1
-        guard let book = try store.context.fetch(descriptor).first else {
+        guard let book = await PlaybackCommands.loadedBook() else {
             return .result(dialog: "No audiobook in your library")
         }
-        manager.loadAudiobook(book)
-        manager.startPlayback() // queued via pendingAutoplay until the engine is ready
+        GlobalAudioManager.shared.startPlayback() // queued via pendingAutoplay until ready
         return .result(dialog: "Resuming \(book.title ?? "")")
     }
 }
 
 struct PausePlaybackIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Pause Playback"
-    static var description = IntentDescription("Pause the current audiobook")
+    static let title: LocalizedStringResource = "Pause Playback"
+    static let description = IntentDescription("Pause the current audiobook")
 
     @MainActor
     func perform() async throws -> some IntentResult {
@@ -46,8 +30,8 @@ struct PausePlaybackIntent: AudioPlaybackIntent {
 }
 
 struct SleepEndOfChapterIntent: AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Sleep at End of Chapter"
-    static var description = IntentDescription("Stop playback when the current chapter ends")
+    static let title: LocalizedStringResource = "Sleep at End of Chapter"
+    static let description = IntentDescription("Stop playback when the current chapter ends")
 
     @MainActor
     func perform() async throws -> some IntentResult & ProvidesDialog {
@@ -58,8 +42,86 @@ struct SleepEndOfChapterIntent: AudioPlaybackIntent {
     }
 }
 
+/// One audiobook, as Siri and Shortcuts see it.
+struct AudiobookEntity: AppEntity {
+    static let typeDisplayRepresentation = TypeDisplayRepresentation(name: "Audiobook")
+    static let defaultQuery = AudiobookEntityQuery()
+
+    let id: UUID
+    let title: String
+    let author: String
+
+    var displayRepresentation: DisplayRepresentation {
+        DisplayRepresentation(title: "\(title)", subtitle: "\(author)")
+    }
+}
+
+struct AudiobookEntityQuery: EntityStringQuery {
+    @MainActor
+    private func books(matching predicate: Predicate<AudiobookModel>?) async -> [AudiobookEntity] {
+        let store = SwiftDataController.shared
+        await store.whenLoaded()
+        guard store.isLoaded else { return [] }
+        let descriptor = FetchDescriptor<AudiobookModel>(
+            predicate: predicate,
+            sortBy: [SortDescriptor(\.lastPlayed, order: .reverse)]
+        )
+        let models = (try? store.context.fetch(descriptor)) ?? []
+        return models.map {
+            AudiobookEntity(
+                id: $0.id,
+                title: $0.title ?? AudiobookModel.unknownTitle,
+                author: $0.author ?? AudiobookModel.unknownAuthor
+            )
+        }
+    }
+
+    @MainActor
+    func entities(for identifiers: [UUID]) async throws -> [AudiobookEntity] {
+        await books(matching: #Predicate { identifiers.contains($0.id) })
+    }
+
+    @MainActor
+    func entities(matching string: String) async throws -> [AudiobookEntity] {
+        // Matched in Swift: `localizedStandardContains` is not something the store can compile
+        // into a predicate, and a library is small enough to filter in memory.
+        await books(matching: nil).filter {
+            $0.title.localizedStandardContains(string) || $0.author.localizedStandardContains(string)
+        }
+    }
+
+    @MainActor
+    func suggestedEntities() async throws -> [AudiobookEntity] {
+        Array(await books(matching: nil).prefix(10))
+    }
+}
+
+struct PlayAudiobookIntent: AudioPlaybackIntent {
+    static let title: LocalizedStringResource = "Play Audiobook"
+    static let description = IntentDescription("Play a specific audiobook from your library")
+
+    @Parameter(title: "Audiobook")
+    var audiobook: AudiobookEntity
+
+    @MainActor
+    func perform() async throws -> some IntentResult & ProvidesDialog {
+        let store = SwiftDataController.shared
+        await store.whenLoaded()
+        let id = audiobook.id
+        var descriptor = FetchDescriptor<AudiobookModel>(predicate: #Predicate { $0.id == id })
+        descriptor.fetchLimit = 1
+        guard let book = try? store.context.fetch(descriptor).first else {
+            return .result(dialog: "That audiobook is no longer in your library")
+        }
+        let manager = GlobalAudioManager.shared
+        manager.loadAudiobook(book)
+        manager.startPlayback() // queued via pendingAutoplay until the engine is ready
+        return .result(dialog: "Playing \(audiobook.title)")
+    }
+}
+
 struct AudiobookShortcuts: AppShortcutsProvider {
-    static var shortcutTileColor: ShortcutTileColor = .navy
+    static let shortcutTileColor: ShortcutTileColor = .navy
 
     static var appShortcuts: [AppShortcut] {
         AppShortcut(
@@ -71,6 +133,15 @@ struct AudiobookShortcuts: AppShortcutsProvider {
             ],
             shortTitle: "Resume Last Book",
             systemImageName: "play.fill"
+        )
+        AppShortcut(
+            intent: PlayAudiobookIntent(),
+            phrases: [
+                "Play \(\.$audiobook) in \(.applicationName)",
+                "Listen to \(\.$audiobook) in \(.applicationName)"
+            ],
+            shortTitle: "Play Audiobook",
+            systemImageName: "book.fill"
         )
         AppShortcut(
             intent: PausePlaybackIntent(),

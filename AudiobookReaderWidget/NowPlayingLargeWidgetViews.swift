@@ -23,7 +23,7 @@ struct LargeNowPlayingView: View {
                         .overlay {
                             Image(systemName: "book")
                                 .font(.title2)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                         }
                 }
                 
@@ -32,17 +32,17 @@ struct LargeNowPlayingView: View {
                         Text(audiobook.title)
                             .font(.headline)
                             .lineLimit(2)
-                            .foregroundColor(.primary)
+                            .foregroundStyle(.primary)
                         
                         Text(audiobook.author)
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .lineLimit(1)
                         
                         if let chapterTitle = audiobook.chapterTitle {
                             Text(chapterTitle)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                                .foregroundStyle(.secondary)
                                 .lineLimit(1)
                         }
                     }
@@ -55,11 +55,11 @@ struct LargeNowPlayingView: View {
                     Button(intent: PlayPauseIntent()) {
                         Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                             .font(.title2)
-                            .foregroundColor(.accentColor)
+                            .foregroundStyle(.tint)
                     }
                     Text(entry.isPlaying ? "Playing" : "Paused")
                         .font(.caption2)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             }
             
@@ -67,18 +67,18 @@ struct LargeNowPlayingView: View {
             if let audiobook = entry.audiobook {
                 VStack(spacing: 8) {
                     ProgressView(value: audiobook.progress)
-                        .progressViewStyle(LinearProgressViewStyle())
+                        .progressViewStyle(.linear)
                     
                     HStack {
-                        Text(formatTime(entry.currentTime))
+                        Text(entry.currentTime.clockFormatted)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         
                         Spacer()
                         
-                        Text(formatTime(entry.duration))
+                        Text(entry.duration.clockFormatted)
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }
@@ -121,13 +121,13 @@ struct ExtraLargeNowPlayingView: View {
                         VStack(spacing: 4) {
                             Text(audiobook.title)
                                 .font(.title2.weight(.semibold))
-                                .foregroundColor(.white)
+                                .foregroundStyle(.white)
                                 .lineLimit(2)
                                 .multilineTextAlignment(.center)
                             
                             Text(audiobook.author)
                                 .font(.subheadline)
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundStyle(.white.opacity(0.8))
                                 .lineLimit(1)
                         }
                         
@@ -135,20 +135,20 @@ struct ExtraLargeNowPlayingView: View {
                         if let chapterTitle = audiobook.chapterTitle {
                             Text(chapterTitle)
                                 .font(.caption)
-                                .foregroundColor(.white.opacity(0.7))
+                                .foregroundStyle(.white.opacity(0.7))
                                 .lineLimit(1)
                         }
                         
                         // Progress
                         VStack(spacing: 8) {
                             ProgressView(value: audiobook.progress)
-                                .progressViewStyle(LinearProgressViewStyle())
+                                .progressViewStyle(.linear)
                                 .tint(.white)
                             
                             HStack {
-                                Text(formatTime(entry.currentTime))
+                                Text(entry.currentTime.clockFormatted)
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .foregroundStyle(.white.opacity(0.8))
                                 
                                 Spacer()
                                 
@@ -159,13 +159,13 @@ struct ExtraLargeNowPlayingView: View {
                                     Text(entry.isPlaying ? "Playing" : "Paused")
                                         .font(.caption)
                                 }
-                                .foregroundColor(.white.opacity(0.8))
+                                .foregroundStyle(.white.opacity(0.8))
                                 
                                 Spacer()
                                 
-                                Text(formatTime(entry.duration))
+                                Text(entry.duration.clockFormatted)
                                     .font(.caption)
-                                    .foregroundColor(.white.opacity(0.8))
+                                    .foregroundStyle(.white.opacity(0.8))
                             }
                         }
                         .padding(.horizontal)

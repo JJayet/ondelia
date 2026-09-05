@@ -98,29 +98,31 @@ extension PlayerView {
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.title2)
-                    .foregroundColor(.primaryText)
+                    .foregroundStyle(Color.primaryText)
             }
-            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
-            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
+            .accessibilityLabel(NSLocalizedString("Close Player", comment: "Close player accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.closeButton)
 
             Spacer()
 
             Button {
                 showingSleepTimer = true
             } label: {
-                if viewModel.sleepTimeRemaining > 0 {
+                if sleepTimeRemaining > 0 {
                     Label(
-                        formatTime(viewModel.sleepTimeRemaining),
+                        sleepTimeRemaining.clockFormatted,
                         systemImage: "moon.fill"
                     )
                     .font(.caption)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                 } else {
                     Image(systemName: "moon")
                         .font(.title2)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                 }
             }
+            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
         }
         .padding(.top, 12)
     }
@@ -137,7 +139,7 @@ extension PlayerView {
                     )
             )
             .font(.title2)
-            .foregroundColor(.primaryText)
+            .foregroundStyle(Color.primaryText)
             .multilineTextAlignment(.center)
             .lineLimit(2)
 
@@ -149,7 +151,7 @@ extension PlayerView {
                     )
             )
             .font(.headline)
-            .foregroundColor(.secondaryText)
+            .foregroundStyle(Color.secondaryText)
 
             if let narrator = audiobook.narrator {
                 Text(
@@ -162,11 +164,11 @@ extension PlayerView {
                     )
                 )
                 .font(.subheadline)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
             }
 
             // Current Chapter
-            if let chapter = viewModel.currentChapter {
+            if let chapter = currentChapter {
                 Button {
                     showingChapterList = true
                 } label: {
@@ -181,7 +183,7 @@ extension PlayerView {
                             )
                     )
                     .font(.footnote)
-                    .foregroundColor(.accentColor)
+                    .foregroundStyle(.tint)
                     .padding(.horizontal, 16)
                     .padding(.vertical, 8)
                     .glassEffect(
@@ -217,29 +219,59 @@ extension PlayerView {
         VStack(spacing: 8) {
             PlayerProgressSlider(
                 value: Binding(
-                    get: { viewModel.currentTime },  // Use @Published property directly
+                    get: { currentTime },
                     set: { newValue in
                         audioManager.seek(to: newValue)
                     }
                 ),
-                range: 0...max(viewModel.duration, 1),  // Use @Published property directly
+                range: 0...max(duration, 1),
                 onEditingChanged: { editing in
-                    viewModel.isSeekingManually = editing
+                    isSeekingManually = editing
                 }
             )
 
             HStack {
-                Text(formatTime(viewModel.currentTime))  // Use @Published property directly
+                Text(currentTime.clockFormatted)
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
+
+                if let chapter = currentChapter {
+                    Text(
+                        String(
+                            format: NSLocalizedString(
+                                "· %@ in chapter",
+                                comment: "Position within the current chapter"
+                            ),
+                            max(currentTime - chapter.startTime, 0).clockFormatted
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(Color.secondaryText)
+                    .monospacedDigit()
+                }
 
                 Spacer()
 
-                Text(formatTime(viewModel.duration))  // Use @Published property directly
+                // Tap to switch between total length and time left.
+                Button {
+                    showRemainingTime.toggle()
+                } label: {
+                    Text(
+                        showRemainingTime
+                            ? "-" + max(duration - currentTime, 0).clockFormatted
+                            : duration.clockFormatted
+                    )
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
                     .monospacedDigit()
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(
+                    showRemainingTime
+                        ? NSLocalizedString("Time remaining", comment: "Remaining time accessibility label")
+                        : NSLocalizedString("Total length", comment: "Total duration accessibility label")
+                )
             }
         }
     }

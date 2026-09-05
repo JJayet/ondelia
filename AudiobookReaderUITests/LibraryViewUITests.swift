@@ -7,44 +7,15 @@
 
 import XCTest
 
-/// Shared launch, teardown and player navigation for the LibraryViewUITests* classes.
-class LibraryViewUITestCase: XCTestCase {
-    var app: XCUIApplication!
-    
-    override func setUpWithError() throws {
-        continueAfterFailure = false
-        app = XCUIApplication()
-        app.launchArguments.append("--uitesting")
-        app.launchArguments.append("--reset-state")
-        app.launch()
-        
-        // Navigate to library view
-        let libraryTab = app.tabBars.buttons[AccessibilityIdentifiers.TabBar.libraryTab]
-        let exists = libraryTab.waitForExistence(timeout: 10)
-        XCTAssertTrue(exists, "App should launch successfully")
-        libraryTab.tap()
-        
-        // Wait for library view to load
-        sleep(1)
-    }
-    
-    override func tearDownWithError() throws {
-        app.terminate()
-        app = nil
-    }
+/// Library tests open on the library tab, with the seeded library alone in it.
+@MainActor
+class LibraryViewUITestCase: AudiobookUITestCase {
+    override var extraLaunchArguments: [String] { ["--reset-state"] }
 
-    func navigateToPlayer() throws {
-        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
-        
-        if !firstAudiobook.exists {
-            throw XCTSkip("No audiobooks available for testing")
-        }
-        
-        firstAudiobook.tap()
-        
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
-        let playerLoaded = playPauseButton.waitForExistence(timeout: 5)
-        XCTAssertTrue(playerLoaded, "Player should load after selecting audiobook")
+    override func setUp() async throws {
+        try await super.setUp()
+        libraryTab.tap()
+        sleep(1)
     }
 }
 
@@ -79,7 +50,7 @@ final class LibraryViewUITests: LibraryViewUITestCase {
     }
     
     func testLibraryAudiobookSelection() throws {
-        let firstAudiobook = app.cells[AccessibilityIdentifiers.Library.audiobookCell].firstMatch
+        let firstAudiobook = audiobookRows.firstMatch
         
         if firstAudiobook.exists {
             XCTAssertTrue(firstAudiobook.isHittable, "First audiobook should be tappable")
@@ -225,7 +196,7 @@ final class LibraryViewUITests: LibraryViewUITestCase {
         
         if searchBar.exists {
             // Check if there are audiobooks to search through
-            let audiobookCells = app.cells[AccessibilityIdentifiers.Library.audiobookCell]
+            let audiobookCells = audiobookRows
             
             if audiobookCells.firstMatch.exists {
                 searchBar.tap()
@@ -261,13 +232,14 @@ final class LibraryViewUITests: LibraryViewUITestCase {
             let initialLabel = sortButton.label
             
             sortButton.tap()
-            
-            // Should show sort options or change sort mode
-            usleep(500000)
-            
-            // Verify interaction occurred (label might change or menu might appear)
-            let sortOptionExists = app.menus.firstMatch.exists || sortButton.label != initialLabel
-            XCTAssertTrue(sortOptionExists, "Sort interaction should show options or change state")
+
+            // The control is a menu: it lists the sort options rather than cycling them, and
+            // its presentation is not matched by `app.menus`.
+            let titleOption = app.buttons["Title"]
+            XCTAssertTrue(titleOption.waitForExistence(timeout: 2), "Sort menu should list the options")
+            titleOption.tap()
+
+            XCTAssertNotEqual(sortButton.label, initialLabel, "Sort button should follow the chosen option")
         } else {
             throw XCTSkip("Sort functionality not available in current implementation")
         }

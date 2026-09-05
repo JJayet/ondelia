@@ -2,32 +2,45 @@ import Foundation
 import SwiftData
 import UIKit
 
-/// Asks the user how a folder holding several audio files should be imported.
-struct FolderImportPrompt: Identifiable {
+/// Offers to merge the audiobooks a single import produced into one book with chapters.
+/// Raised *after* everything is imported, so ignoring it costs nothing: the books are already
+/// in the library and `mergeAudiobooks` stays available from the library itself.
+struct MergePrompt: Identifiable {
     let id = UUID()
-    let folderName: String
-    let fileCount: Int
-    /// `true` imports each file as its own audiobook, `false` merges them into one.
-    let respond: (Bool) -> Void
+    let suggestedTitle: String
+    let bookCount: Int
+    /// `true` merges the batch into one audiobook, `false` leaves the books separate.
+    let respond: @MainActor (Bool) -> Void
 }
 
-class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
+@MainActor
+@Observable
+final class AudiobookManager {
     static let shared = AudiobookManager()
     let swiftDataController: SwiftDataController
     
-    @Published var audiobooks: [AudiobookModel] = []
-    @Published var isImporting = false
-    @Published var importQueueTotal: Int = 0
-    @Published var importQueueCompleted: Int = 0
-    @Published var currentImportFileName: String? = nil
-    @Published var isLoadingLibrary = false
-    @Published var audiobookNeedingCover: AudiobookModel?
-    @Published var importErrorMessage: String?
-    @Published var folderImportPrompt: FolderImportPrompt?
+    var audiobooks: [AudiobookModel] = []
+    var isImporting = false
+    var importQueueTotal: Int = 0
+    var importQueueCompleted: Int = 0
+    var currentImportFileName: String? = nil
+    var isLoadingLibrary = false
+    var importErrorMessage: String?
+    var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (() -> Void)?)] = []
-    /// Audiobooks split out of one folder: they all receive the cover picked for `audiobookNeedingCover`.
+    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?)] = []
+    /// True from the moment an import starts until its merge offer has been answered.
+    /// Imports run one at a time; see `handleImportRequest`.
+    var isImportRunning = false
+    var isDrainingImports = false
+    /// Inbox files already handed to an import, so a second scan does not import them again.
+    var inboxHandedOff: Set<String> = []
+    /// Audiobooks split out of one folder: they all receive the cover picked for any one of them.
     var coverBatch: [AudiobookModel] = []
+    /// Every audiobook the running import produced, so the merge offer knows what it would merge.
+    var importBatch: [AudiobookModel] = []
+    /// Name to suggest for that merge, set when the batch clearly came from one folder.
+    var pendingMergeTitle: String?
 
     init(swiftDataController: SwiftDataController = .shared) {
         self.swiftDataController = swiftDataController
@@ -85,46 +98,21 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
     func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
         let imageData = image.jpegData(compressionQuality: 0.8)
         audiobook.coverImageData = imageData
+        CoverImageCache.invalidate(audiobook)
         for sibling in coverBatch where sibling.persistentModelID != audiobook.persistentModelID {
             sibling.coverImageData = imageData
+            CoverImageCache.invalidate(sibling)
         }
         coverBatch.removeAll()
         swiftDataController.save()
         fetchAudiobooks()
-        
-        // Clear the needing cover flag if this was the audiobook that needed it
-        if audiobookNeedingCover?.persistentModelID == audiobook.persistentModelID {
-            audiobookNeedingCover = nil
-        }
     }
 
-    // MARK: - Progress Management (duplicate removed - the real implementation is earlier)
-    
-    // MARK: - Bookmark Management
-    @MainActor
-    func createBookmarkLegacy(for audiobook: AudiobookModel, at timestamp: TimeInterval, title: String, note: String? = nil) {
-        // This is a duplicate - the real createBookmark using SwiftData is earlier in the file
-        let context = swiftDataController.context
-        let bookmark = BookmarkModel(
-            title: title,
-            note: note,
-            timestamp: timestamp,
-            dateCreated: Date()
-        )
-        bookmark.audiobook = audiobook
-        context.insert(bookmark)
-        
-        swiftDataController.save()
-    }
-    
-    // Legacy deleteBookmarkOld function removed - using SwiftData deleteBookmark instead
-    
     // MARK: - Library Management
     @MainActor
     func deleteAudiobook(_ audiobook: AudiobookModel) {
         // Delete physical file
-        if let filePath = audiobook.fileURL, !filePath.isEmpty {
-            let fileURL = URL(fileURLWithPath: filePath)
+        if let fileURL = audiobook.resolvedFileURL {
             try? FileManager.default.removeItem(at: fileURL)
         }
         
@@ -142,7 +130,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         swiftDataController.save()
         fetchAudiobooks()
         
-        print("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
+        Log.library.debug("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
     }
     
     @MainActor
@@ -152,7 +140,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         swiftDataController.save()
         fetchAudiobooks()
         
-        print("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
+        Log.library.debug("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
     }
     
     @MainActor
@@ -161,7 +149,7 @@ class AudiobookManager: ObservableObject, AudiobookManagerProtocol {
         swiftDataController.save()
         fetchAudiobooks()
         
-        print("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")
+        Log.library.debug("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")
     }
     
     func searchAudiobooks(query: String) -> [AudiobookModel] {

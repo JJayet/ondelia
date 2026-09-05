@@ -2,17 +2,17 @@ import Foundation
 import SwiftData
 
 @MainActor
-class ReadingStatistics: ReadingStatisticsProtocol {
+@Observable
+final class ReadingStatistics {
     static let shared = ReadingStatistics()
     private let swiftDataController = SwiftDataController.shared
     
-    @Published var totalListeningTime: TimeInterval = 0
-    @Published var booksCompleted: Int = 0
-    @Published var currentStreak: Int = 0
-    @Published var longestStreak: Int = 0
-    @Published var averageSpeed: Float = 1.0
-    @Published var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
-    @Published var monthlyProgress: TimeInterval = 0
+    var totalListeningTime: TimeInterval = 0
+    var booksCompleted: Int = 0
+    var currentStreak: Int = 0
+    var longestStreak: Int = 0
+    var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
+    var monthlyProgress: TimeInterval = 0
     private var monthlyAnchor: Date = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
     
     init() {
@@ -25,7 +25,6 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         booksCompleted = UserDefaults.standard.integer(forKey: "booksCompleted")
         currentStreak = UserDefaults.standard.integer(forKey: "currentStreak")
         longestStreak = UserDefaults.standard.integer(forKey: "longestStreak")
-        averageSpeed = UserDefaults.standard.float(forKey: "averageSpeed")
         monthlyGoal = UserDefaults.standard.double(forKey: "monthlyGoal")
         monthlyProgress = UserDefaults.standard.double(forKey: "monthlyProgress")
         if let anchor = UserDefaults.standard.object(forKey: "monthlyAnchor") as? Date {
@@ -35,9 +34,6 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         if monthlyGoal == 0 {
             monthlyGoal = 3600 * 10 // Default 10 hours
         }
-        if averageSpeed == 0 {
-            averageSpeed = 1.0
-        }
     }
     
     private func saveStatistics() {
@@ -45,14 +41,13 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         UserDefaults.standard.set(booksCompleted, forKey: "booksCompleted")
         UserDefaults.standard.set(currentStreak, forKey: "currentStreak")
         UserDefaults.standard.set(longestStreak, forKey: "longestStreak")
-        UserDefaults.standard.set(averageSpeed, forKey: "averageSpeed")
         UserDefaults.standard.set(monthlyGoal, forKey: "monthlyGoal")
         UserDefaults.standard.set(monthlyProgress, forKey: "monthlyProgress")
         UserDefaults.standard.set(monthlyAnchor, forKey: "monthlyAnchor")
     }
     
     @MainActor
-    func addListeningTime(_ time: TimeInterval, playbackRate: Float = 1.0) {
+    func addListeningTime(_ time: TimeInterval) {
         // Ensure current month anchor and reset if the month rolled over
         let startOfMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
         if startOfMonth != monthlyAnchor {
@@ -62,13 +57,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         totalListeningTime += time
         // Count real time spent listening, not content position deltas
         monthlyProgress += time
-        
-        // Update average speed (weighted average)
-        let totalSessions = UserDefaults.standard.integer(forKey: "totalSessions")
-        let newTotalSessions = totalSessions + 1
-        averageSpeed = (averageSpeed * Float(totalSessions) + playbackRate) / Float(newTotalSessions)
-        
-        UserDefaults.standard.set(newTotalSessions, forKey: "totalSessions")
+
         updateStreak()
         saveStatistics()
     }
@@ -84,18 +73,11 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         totalListeningTime = 0
         currentStreak = 0
         longestStreak = 0
-        averageSpeed = 1.0
         // Preserve user's monthly goal, but reset progress
         monthlyProgress = 0
         monthlyAnchor = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-        // Clear session counters and last listen timestamp
         UserDefaults.standard.removeObject(forKey: "lastListenDate")
-        UserDefaults.standard.removeObject(forKey: "totalSessions")
         saveStatistics()
-    }
-    
-    func getAverageSpeed() -> Float {
-        return averageSpeed
     }
     
     
@@ -140,9 +122,7 @@ class ReadingStatistics: ReadingStatisticsProtocol {
         
         // Recalculate monthly progress to update UI immediately
         calculateCurrentMonthProgress()
-        
-        // Force UI update by sending change (already on @MainActor)
-        self.objectWillChange.send()
+
     }
     
     // MARK: - Computed Properties
@@ -152,28 +132,15 @@ class ReadingStatistics: ReadingStatisticsProtocol {
     }
     
     var formattedTotalTime: String {
-        return formatTime(totalListeningTime)
+        return totalListeningTime.hoursMinutesFormatted
     }
     
     var formattedMonthlyProgress: String {
-        return formatTime(monthlyProgress)
+        return monthlyProgress.hoursMinutesFormatted
     }
     
     var formattedMonthlyGoal: String {
-        return formatTime(monthlyGoal)
+        return monthlyGoal.hoursMinutesFormatted
     }
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        
-        if hours > 0 && minutes > 0 {
-            return "\(hours)h \(minutes)m"
-        } else if hours > 0 {
-            return "\(hours)h"
-        }
-        else {
-            return "\(minutes)m"
-        }
-    }
 }

@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct StatisticsCardView: View {
-    @ObservedObject var statistics: ReadingStatistics
+    let statistics: ReadingStatistics
     let onTap: () -> Void
 
     var body: some View {
@@ -11,7 +11,7 @@ struct StatisticsCardView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(NSLocalizedString("This Month", comment: "This month statistics"))
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
 
                         Text(statistics.formattedMonthlyProgress)
                             .font(.title2)
@@ -19,7 +19,7 @@ struct StatisticsCardView: View {
 
                         Text(String(format: NSLocalizedString("of %@ goal", comment: "Goal progress text"), statistics.formattedMonthlyGoal))
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
 
                     Spacer()
@@ -27,7 +27,7 @@ struct StatisticsCardView: View {
                     VStack(alignment: .trailing, spacing: 4) {
                         Text(NSLocalizedString("Total", comment: "Total statistics"))
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
 
                         Text(statistics.formattedTotalTime)
                             .font(.title3)
@@ -35,7 +35,7 @@ struct StatisticsCardView: View {
 
                         Text(String(format: NSLocalizedString("%d books", comment: "Number of books completed"), statistics.booksCompleted))
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
 
@@ -47,6 +47,6 @@ struct StatisticsCardView: View {
             .glassEffect(in:.rect(cornerRadius: 12))
 
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }

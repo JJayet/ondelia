@@ -3,33 +3,29 @@ import UIKit
 
 struct PlayerView: View {
     let audiobook: AudiobookModel
-    @Environment(\.dependencies) var deps
-    @StateObject var statistics: ReadingStatistics
-    @StateObject var viewModel: PlayerViewModel
 
-    // Access dependencies through the container
-    var audioManager: any AudioManagerProtocol { deps.audioManager }
-    var themeManager: any ThemeManagerProtocol { deps.themeManager }
-    var audiobookManager: AudiobookManagerProtocol {
-        deps.audiobookManager
-    }
+    // The engine is a singleton and the view reads it straight through, as `MiniPlayerBar`
+    // does. Observation tracks the properties these touch, so the player redraws whenever
+    // playback moves — at the engine's own tick rather than a copy on a timer.
+    let audioManager = GlobalAudioManager.shared
+    let themeManager = ThemeManager.shared
+    let audiobookManager = AudiobookManager.shared
 
-    init(audiobook: AudiobookModel, dependencies: AudiobookDependencies? = nil)
-    {
-        self.audiobook = audiobook
-        let deps =
-            dependencies
-            ?? (ProcessInfo.isPreview
-                ? PreviewDependencies() : LiveDependencies())
-        let stats = (deps.createReadingStatistics() as? ReadingStatistics) ?? ReadingStatistics()
-        self._statistics = StateObject(wrappedValue: stats)
-        self._viewModel = StateObject(
-            wrappedValue: PlayerViewModel(
-                audiobook: audiobook,
-                dependencies: deps,
-                statistics: stats
-            )
-        )
+    /// True while the user drags the scrubber, so the position is not written back under them.
+    @State var isSeekingManually = false
+    /// Remembered: whoever wants time-left wants it every time.
+    @AppStorage("player.showRemainingTime") var showRemainingTime = false
+
+    var isPlaying: Bool { audioManager.playbackState == .playing }
+    var currentTime: TimeInterval { audioManager.getCurrentTime() }
+    var duration: TimeInterval { audioManager.getDuration() }
+    var playbackRate: Float { audioManager.getPlaybackRate() }
+    var sleepTimeRemaining: TimeInterval { audioManager.sleepTimeRemaining }
+
+    var currentChapter: ChapterModel? {
+        let now = currentTime
+        return chapters.first { now >= $0.startTime && now < $0.endTime }
+            ?? chapters.last { now >= $0.startTime }
     }
 
     @State var showingBookmarks = false
@@ -42,15 +38,13 @@ struct PlayerView: View {
     // Sheet presentation handles dragging/dismiss. No custom drag state needed.
     @Environment(\.dismiss) var dismiss
     @Environment(\.playerRouter) var playerRouter
-    @Environment(\.miniPlayerNamespace) var miniNS
 
     var coverImage: UIImage? {
-        guard let data = audiobook.coverImageData else { return nil }
-        return UIImage(data: data)
+        CoverImageCache.image(for: audiobook)
     }
 
     var chapters: [ChapterModel] {
-        audiobook.chapters.sorted { $0.chapterNumber < $1.chapterNumber }
+        audiobook.sortedChapters
     }
 
     var bookmarks: [BookmarkModel] {
@@ -62,16 +56,12 @@ struct PlayerView: View {
             fullPlayerView(geometry: geometry)
         }
         .onAppear {
-            viewModel.load()
-            viewModel.autoPlayIfNeeded()
-        }
-        .onDisappear {
-            viewModel.cleanup()
+            audioManager.loadAudiobook(audiobook)
         }
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(
                 audiobook: audiobook,
-                globalAudioManager: (audioManager as? GlobalAudioManager) ?? GlobalAudioManager.shared
+                globalAudioManager: audioManager
             )
         }
         .sheet(isPresented: $showingAddBookmark) {
@@ -79,7 +69,7 @@ struct PlayerView: View {
                 title: $bookmarkTitle,
                 note: $bookmarkNote,
                 onSave: {
-                    let bookmarkTime = viewModel.currentTime  // Use @Published property directly
+                    let bookmarkTime = currentTime
                     audiobookManager.createBookmark(
                         for: audiobook,
                         at: bookmarkTime,
@@ -89,7 +79,7 @@ struct PlayerView: View {
                                     "Bookmark at %@",
                                     comment: "Default bookmark title with time"
                                 ),
-                                formatTime(bookmarkTime)
+                                bookmarkTime.clockFormatted
                             ) : bookmarkTitle,
                         note: bookmarkNote.isEmpty ? nil : bookmarkNote
                     )
@@ -101,6 +91,7 @@ struct PlayerView: View {
         .sheet(isPresented: $showingChapterList) {
             ChapterListView(
                 chapters: chapters,
+                currentChapter: currentChapter,
                 onChapterTap: { chapter in
                     audioManager.seek(to: chapter.startTime)
                     audioManager.startPlayback()
@@ -109,13 +100,7 @@ struct PlayerView: View {
             )
         }
         .sheet(isPresented: $showingTranscription) {
-            TranscriptionView(
-                audiobook: audiobook,
-                currentChapterIndex: Int(
-                    viewModel.currentChapter?.chapterNumber ?? 0
-                ),
-                currentTime: viewModel.currentTime  // Use @Published property directly
-            )
+            TranscriptionView(audiobook: audiobook)
         }
         .confirmationDialog(
             Text(
@@ -125,26 +110,30 @@ struct PlayerView: View {
             titleVisibility: .visible
         ) {
             Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
-                viewModel.setSleepTimer(300)
+                audioManager.setSleepTimer(300)
             }
             Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
-                viewModel.setSleepTimer(600)
+                audioManager.setSleepTimer(600)
             }
             Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
-                viewModel.setSleepTimer(900)
+                audioManager.setSleepTimer(900)
             }
             Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
-                viewModel.setSleepTimer(1800)
+                audioManager.setSleepTimer(1800)
+            }
+            Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(2700)
+            }
+            Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(3600)
             }
             Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
-                viewModel.setSleepTimerEndOfChapter()
+                audioManager.setSleepTimerEndOfChapter()
             }
             Button(
                 NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
                 role: .destructive
-            ) { viewModel.cancelSleepTimer() }
+            ) { audioManager.cancelSleepTimer() }
         }
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .tint(themeManager.accentColor.color)
     }
 }

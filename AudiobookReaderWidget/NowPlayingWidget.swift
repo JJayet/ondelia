@@ -45,21 +45,41 @@ struct NowPlayingProvider: TimelineProvider {
     }
     
     func getTimeline(in context: Context, completion: @escaping (Timeline<NowPlayingEntry>) -> Void) {
-        let currentEntry = getCurrentPlaybackState()
-        
-        // Update timeline based on playback state
-        let refreshDate = currentEntry.isPlaying ? 
-            Date().addingTimeInterval(30) : // Update every 30 seconds when playing
-            Date().addingTimeInterval(300)   // Update every 5 minutes when paused
-        
-        let timeline = Timeline(entries: [currentEntry], policy: .after(refreshDate))
-        completion(timeline)
+        let current = getCurrentPlaybackState()
+
+        // A paused book never moves, so one entry covers it. A playing one is projected forward
+        // instead of asking for a reload every 30s: WidgetKit grants a handful of refreshes an
+        // hour, and burning them on a progress bar meant the widget went stale mid-chapter.
+        guard current.isPlaying else {
+            completion(Timeline(entries: [current], policy: .after(Date().addingTimeInterval(300))))
+            return
+        }
+
+        let rate = Double(NowPlayingSharedStore.read().playbackRate)
+        let step: TimeInterval = 30
+        let entries = (0..<60).map { index -> NowPlayingEntry in
+            let offset = step * Double(index)
+            return NowPlayingEntry(
+                date: current.date.addingTimeInterval(offset),
+                audiobook: current.audiobook.map {
+                    AudiobookInfo(
+                        title: $0.title,
+                        author: $0.author,
+                        chapterTitle: $0.chapterTitle,
+                        progress: Float(min(max((current.currentTime + offset * rate) / current.duration, 0), 1))
+                    )
+                },
+                isPlaying: true,
+                currentTime: min(current.currentTime + offset * rate, current.duration),
+                duration: current.duration,
+                coverImage: current.coverImage
+            )
+        }
+        completion(Timeline(entries: entries, policy: .atEnd))
     }
     
     private func getCurrentPlaybackState() -> NowPlayingEntry {
         let shared = NowPlayingSharedStore.read()
-        let title = shared.title ?? String(localized: "Sample Audiobook")
-        let author = shared.author ?? String(localized: "Sample Author")
         let isPlaying = shared.isPlaying
         let current = shared.current
         let duration = max(shared.duration, 1)
@@ -67,7 +87,16 @@ struct NowPlayingProvider: TimelineProvider {
         var coverImage: UIImage? = nil
         if let data = shared.cover { coverImage = UIImage(data: data) }
 
-        let info = AudiobookInfo(title: title, author: author, chapterTitle: nil, progress: progress)
+        // No title in the shared store means nothing has been played yet. The placeholder
+        // strings belong in `placeholder(in:)`, not on a real home screen.
+        let info = shared.title.map {
+            AudiobookInfo(
+                title: $0,
+                author: shared.author ?? "",
+                chapterTitle: nil,
+                progress: progress
+            )
+        }
         return NowPlayingEntry(
             date: Date(),
             audiobook: info,
@@ -94,12 +123,4 @@ struct NowPlayingWidget: Widget {
     }
 }
 
-// MARK: - Widget Registration
-// For iOS 26 - widgets need to be explicitly registered with the system
-// This approach allows widgets to be discoverable in the dashboard when in main app target
-extension AudiobookWidgetBundle {
-    static func registerWidgets() {
-        // Register widgets with the system
-        WidgetCenter.shared.reloadAllTimelines()
-    }
-}
+// MARK: - Utility Functions

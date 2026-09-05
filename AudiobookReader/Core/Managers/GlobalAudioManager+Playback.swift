@@ -1,215 +1,103 @@
 import Foundation
 import SwiftUI
-import ActivityKit
-import Combine
 
-// MARK: - Playback controls, Live Activity, helpers
+// MARK: - Playback controls and helpers
+//
+// One player means these are all plain forwarding now. Each of them used to branch on
+// `useMultiFileEngine` and address one of two engines.
 extension GlobalAudioManager {
     func pausePlayback() {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.pause()
-        } else {
-            audioEngine?.pause()
-        }
+        player?.pause()
         playbackState = .paused
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func resumePlayback() {
-        guard audioEngine != nil || multiFileAudioEngine != nil else {
-            if isLoading { pendingAutoplay = true }
-            return
-        }
-        if useMultiFileEngine {
-            multiFileAudioEngine?.play()
-        } else {
-            audioEngine?.play()
-        }
-        showMiniPlayer = true
-        playbackState = .playing
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func startPlayback() {
-        guard audioEngine != nil || multiFileAudioEngine != nil else {
-            if isLoading { pendingAutoplay = true }
-            return
-        }
-        resumePlayback()
-        showMiniPlayer = true
-        playbackState = .playing
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func stopPlayback() {
-        pendingAutoplay = false
-        pausePlayback()
-        showMiniPlayer = false
-        playbackState = .stopped
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func isPlaying() -> Bool {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.isPlaying ?? false
-        } else {
-            return audioEngine?.isPlaying ?? false
-        }
-    }
-    
-    func getCurrentTime() -> TimeInterval {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.currentTime ?? 0
-        } else {
-            return audioEngine?.currentTime ?? 0
-        }
-    }
-    
-    func getDuration() -> TimeInterval {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.duration ?? 0
-        } else {
-            return audioEngine?.duration ?? 0
-        }
-    }
-    
-    func getPlaybackRate() -> Float {
-        if useMultiFileEngine {
-            return multiFileAudioEngine?.playbackRate ?? 1.0
-        } else {
-            return audioEngine?.playbackRate ?? 1.0
-        }
-    }
-    
-    func setPlaybackRate(_ rate: Float) {
-        print(rate)
-        if useMultiFileEngine {
-            multiFileAudioEngine?.setPlaybackRate(rate)
-        } else {
-            audioEngine?.setPlaybackRate(rate)
-        }
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func skipForward(_ interval: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.skipForward(interval)
-        } else {
-            audioEngine?.skipForward(interval)
-        }
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func skipBackward(_ interval: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.skipBackward(interval)
-        } else {
-            audioEngine?.skipBackward(interval)
-        }
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func togglePlayback() {
-        let wasPlaying = isPlaying()
-        
-        if useMultiFileEngine {
-            multiFileAudioEngine?.togglePlayback()
-        } else {
-            audioEngine?.togglePlayback()
-        }
-        
-        // Update state based on toggle result
-        if wasPlaying {
-            playbackState = .paused
-        } else {
-            playbackState = .playing
-            showMiniPlayer = true
-        }
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
-    }
-    
-    func seek(to time: TimeInterval) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.seek(to: time)
-        } else {
-            audioEngine?.seek(to: time)
-        }
-        NowPlayingSharedStore.write(
-            audiobook: currentAudiobook,
-            isPlaying: playbackState == .playing,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            coverImageData: currentAudiobook?.coverImageData
-        )
-        updateLiveActivity()
+        playbackStateDidChange()
     }
 
-    
-    // MARK: - Enhanced Audio Processing Controls
-    func enableDynamicRangeCompression(_ enabled: Bool, threshold: Float = -12.0, ratio: Float = 4.0) {
-        if useMultiFileEngine {
-            multiFileAudioEngine?.enableDynamicRangeCompression(enabled, threshold: threshold, ratio: ratio)
+    func resumePlayback() {
+        guard let player else {
+            // Nothing to resume yet: remember the intent so the load can honour it.
+            if isLoading { pendingAutoplay = true }
+            return
         }
-        // Note: Single file engine doesn't have this method yet, but could be added similarly
+        player.play()
+        playbackState = .playing
+        playbackStateDidChange()
     }
-    
-    // MARK: - Live Activity Management
+
+    func startPlayback() {
+        resumePlayback()
+    }
+
+    func stopPlayback() {
+        pendingAutoplay = false
+        player?.pause()
+        playbackState = .stopped
+        playbackStateDidChange()
+    }
+
+    func togglePlayback() {
+        if isPlaying() {
+            pausePlayback()
+        } else {
+            resumePlayback()
+        }
+    }
+
+    func isPlaying() -> Bool { player?.isPlaying ?? false }
+    func getCurrentTime() -> TimeInterval { player?.currentTime ?? 0 }
+    func getDuration() -> TimeInterval { player?.duration ?? 0 }
+    func getPlaybackRate() -> Float { player?.playbackRate ?? 1 }
+
+    func setPlaybackRate(_ rate: Float) {
+        rememberSpeed(rate)
+        player?.setPlaybackRate(rate)
+        playbackStateDidChange()
+    }
+
+    /// Defaults to the interval chosen in Settings, so every caller that has no interval of
+    /// its own — mini player, widget, App Intents — follows the setting instead of a literal.
+    func skipForward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
+        player?.skipForward(interval)
+        playbackStateDidChange()
+    }
+
+    func skipBackward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
+        player?.skipBackward(interval)
+        playbackStateDidChange()
+    }
+
+    /// Start of the next chapter. Does nothing on the last one, and nothing without chapters.
+    func skipToNextChapter() {
+        let now = getCurrentTime()
+        guard let next = currentAudiobook?.sortedChapters.first(where: { $0.startTime > now + 1 })
+        else { return }
+        seek(to: next.startTime)
+    }
+
+    /// Start of the current chapter, or of the previous one when already at the top of this
+    /// one — the same rule every music player uses for its back button.
+    func skipToPreviousChapter() {
+        let chapters = currentAudiobook?.sortedChapters ?? []
+        let now = getCurrentTime()
+        guard let current = chapters.last(where: { $0.startTime <= now }) else {
+            seek(to: 0)
+            return
+        }
+        guard now - current.startTime <= 3 else {
+            seek(to: current.startTime)
+            return
+        }
+        let index = chapters.firstIndex { $0.id == current.id } ?? 0
+        seek(to: index > 0 ? chapters[index - 1].startTime : 0)
+    }
+
+    func seek(to time: TimeInterval) {
+        player?.seek(to: time)
+        // A deliberate jump is worth writing straight away rather than waiting for the save timer.
+        persistProgress()
+        playbackStateDidChange()
+    }
+
+    // MARK: - Now Playing Snapshot
     func publishPlaybackSnapshot(reloadTimeline: Bool = false) {
         NowPlayingSharedStore.write(
             audiobook: currentAudiobook,
@@ -220,52 +108,7 @@ extension GlobalAudioManager {
             playbackRate: getPlaybackRate(),
             reloadTimeline: reloadTimeline
         )
-        updateLiveActivity()
     }
 
-    private func updateLiveActivity() {
-        guard let audiobook = currentAudiobook else {
-            liveActivityManager.endLiveActivity()
-            return
-        }
-        
-        let contentState = AudiobookLiveActivityAttributes.ContentState(
-            title: audiobook.title ?? "Unknown Title",
-            author: audiobook.author ?? "Unknown Author",
-            chapterTitle: audiobook.chapters.first?.title,
-            currentTime: getCurrentTime(),
-            duration: getDuration(),
-            isPlaying: playbackState == .playing,
-            playbackRate: getPlaybackRate(),
-            updatedAt: Date()
-        )
-        
-        // Start live activity if not already started, otherwise update
-        if playbackState == .playing && !liveActivityManager.isActivityActive {
-            liveActivityManager.startLiveActivity(
-                for: contentState,
-                audiobookId: audiobook.id.uuidString
-            )
-        } else if liveActivityManager.isActivityActive {
-            liveActivityManager.updateLiveActivity(with: contentState)
-        }
-        
-        // End live activity when stopped
-        if playbackState == .stopped {
-            liveActivityManager.endLiveActivity()
-        }
-    }
-    
     // MARK: - Utility Functions
-    func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
 }

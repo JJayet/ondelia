@@ -8,43 +8,46 @@ struct AudiobookMetadata {
     let narrator: String?
     let duration: TimeInterval
     let coverImage: UIImage?
+    /// The album the file belongs to. For a book split into per-chapter files this is the book
+    /// title, which is the only place that name survives when the files come from a file provider.
+    let album: String?
 }
 
-class MetadataExtractor {
+enum MetadataExtractor {
     static func extractMetadata(from url: URL) async -> AudiobookMetadata? {
-        print("🎵 MetadataExtractor: Starting metadata extraction for: \(url.lastPathComponent)")
+        Log.library.debug("🎵 MetadataExtractor: Starting metadata extraction for: \(url.lastPathComponent)")
         
         // Ensure we have access to the security-scoped resource if needed
         let hasAccess = url.startAccessingSecurityScopedResource()
         defer { 
             if hasAccess { 
                 url.stopAccessingSecurityScopedResource() 
-                print("🔓 MetadataExtractor: Released security-scoped resource access")
+                Log.library.debug("🔓 MetadataExtractor: Released security-scoped resource access")
             }
         }
         
         let asset = AVURLAsset(url: url)
         
         // Load duration with individual error handling
-        print("   Loading duration...")
+        Log.library.debug("   Loading duration...")
         let duration: TimeInterval
         do {
             let durationCMTime = try await asset.load(.duration)
             duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
-            print("   Duration loaded: \(duration)s")
+            Log.library.debug("   Duration loaded: \(duration)s")
         } catch {
-            print("   ⚠️ Could not get duration: \(error.localizedDescription)")
+            Log.library.debug("   ⚠️ Could not get duration: \(error.localizedDescription)")
             duration = 0
         }
         
         // Load metadata with individual error handling
-        print("   Loading metadata...")
+        Log.library.debug("   Loading metadata...")
         let metadata: [AVMetadataItem]
         do {
             metadata = try await asset.load(.metadata)
-            print("   Found \(metadata.count) metadata items")
+            Log.library.debug("   Found \(metadata.count) metadata items")
         } catch {
-            print("   ⚠️ Could not load metadata: \(error.localizedDescription)")
+            Log.library.debug("   ⚠️ Could not load metadata: \(error.localizedDescription)")
             metadata = []
         }
             
@@ -52,6 +55,7 @@ class MetadataExtractor {
             var author = "Unknown Author"
             var narrator: String?
             var coverImage: UIImage?
+            var album: String?
             
             // Process metadata items with individual error handling
             for item in metadata {
@@ -64,7 +68,7 @@ class MetadataExtractor {
                             title = titleValue
                         }
                     } catch {
-                        print("   ⚠️ Could not load title: \(error.localizedDescription)")
+                        Log.library.debug("   ⚠️ Could not load title: \(error.localizedDescription)")
                     }
                 case .commonKeyArtist:
                     do {
@@ -72,15 +76,18 @@ class MetadataExtractor {
                             author = artistValue
                         }
                     } catch {
-                        print("   ⚠️ Could not load artist: \(error.localizedDescription)")
+                        Log.library.debug("   ⚠️ Could not load artist: \(error.localizedDescription)")
                     }
                 case .commonKeyAlbumName:
                     do {
-                        if let albumValue = try await item.load(.stringValue), title == url.deletingPathExtension().lastPathComponent {
-                            title = albumValue
+                        if let albumValue = try await item.load(.stringValue) {
+                            album = albumValue
+                            if title == url.deletingPathExtension().lastPathComponent {
+                                title = albumValue
+                            }
                         }
                     } catch {
-                        print("   ⚠️ Could not load album name: \(error.localizedDescription)")
+                        Log.library.debug("   ⚠️ Could not load album name: \(error.localizedDescription)")
                     }
                 case .commonKeyArtwork:
                     do {
@@ -88,7 +95,7 @@ class MetadataExtractor {
                             coverImage = UIImage(data: artworkData)
                         }
                     } catch {
-                        print("   ⚠️ Could not load artwork: \(error.localizedDescription)")
+                        Log.library.debug("   ⚠️ Could not load artwork: \(error.localizedDescription)")
                     }
                 default:
                     break
@@ -100,24 +107,25 @@ class MetadataExtractor {
                         do {
                             narrator = try await item.load(.stringValue)
                         } catch {
-                            print("   ⚠️ Could not load narrator: \(error.localizedDescription)")
+                            Log.library.debug("   ⚠️ Could not load narrator: \(error.localizedDescription)")
                         }
                     }
                 }
             }
             
-        print("✅ MetadataExtractor: Metadata extraction completed:")
-        print("   Title: \(title)")
-        print("   Author: \(author)")
-        print("   Duration: \(duration)s")
-        print("   Has cover: \(coverImage != nil)")
+        Log.library.debug("✅ MetadataExtractor: Metadata extraction completed:")
+        Log.library.debug("   Title: \(title)")
+        Log.library.debug("   Author: \(author)")
+        Log.library.debug("   Duration: \(duration)s")
+        Log.library.debug("   Has cover: \(coverImage != nil)")
         
         return AudiobookMetadata(
             title: title,
             author: author,
             narrator: narrator,
             duration: duration,
-            coverImage: coverImage
+            coverImage: coverImage,
+            album: album
         )
     }
     
@@ -169,7 +177,7 @@ class MetadataExtractor {
             return chapters
             
         } catch {
-            print("Failed to extract chapters: \(error)")
+            Log.library.debug("Failed to extract chapters: \(error)")
             return []
         }
     }

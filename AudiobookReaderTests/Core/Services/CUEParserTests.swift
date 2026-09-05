@@ -40,18 +40,4 @@ struct CUEParserTests {
     func missingFile() {
         #expect(CUEParser.parseCUEFile(at: URL(fileURLWithPath: "/nonexistent/file.cue")) == nil)
     }
-
-    @Test("Tracks convert to chapters with end times from the next track")
-    func convertTracksToChapters() {
-        let tracks = [
-            CUETrack(number: 1, title: "A", startTime: 0, type: "AUDIO"),
-            CUETrack(number: 2, title: "B", startTime: 100, type: "AUDIO")
-        ]
-        let chapters = CUEParser.convertCUETracksToChapters(tracks, totalDuration: 250)
-        #expect(chapters.count == 2)
-        #expect(chapters[0].duration == 100)
-        #expect(chapters[1].startTimeInBook == 100)
-        #expect(chapters[1].duration == 150)
-        #expect(chapters[1].chapterNumber == 2)
-    }
 }

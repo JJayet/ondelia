@@ -12,9 +12,10 @@ import WidgetKit
 @main
 struct AudiobookReaderApp: App {
     // Use StateObject for proper SwiftUI lifecycle management
-    @StateObject private var swiftDataController = SwiftDataController.shared
-    @StateObject private var globalAudioManager = GlobalAudioManager.shared
-    @StateObject private var playbackCommandCoordinator = PlaybackCommandCoordinator()
+    private let swiftDataController = SwiftDataController.shared
+    private let globalAudioManager = GlobalAudioManager.shared
+    @State private var playbackCommandCoordinator = PlaybackCommandCoordinator()
+    @Environment(\.scenePhase) private var scenePhase
     
     var body: some Scene {
         WindowGroup {
@@ -24,10 +25,10 @@ struct AudiobookReaderApp: App {
                 VStack(spacing: 16) {
                     ProgressView()
                         .scaleEffect(1.2)
-                        .progressViewStyle(CircularProgressViewStyle())
+                        .progressViewStyle(.circular)
                     Text(NSLocalizedString("Starting up...", comment: "App startup loading message"))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(Color(.systemBackground))
@@ -56,38 +57,58 @@ struct AudiobookReaderApp: App {
             } else if swiftDataController.isLoaded {
                 // Main app content - loads immediately once SwiftData setup is complete
                 MainTabView()
+                    #if DEBUG
+                    .uiTestDynamicTypeSize()
+                    #endif
                     .modelContainer(swiftDataController.container)
-                    .environment(\.theme, ThemeManager.shared)
-                    .environmentObject(globalAudioManager)
                     .onAppear {
                         // Initialize widgets on app startup
                         WidgetCenter.shared.reloadAllTimelines()
                         playbackCommandCoordinator.consumePendingCommand()
                     }
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.willResignActiveNotification)) { _ in
-                        handleAppWillResignActive()
+                    .onChange(of: scenePhase) { _, phase in
+                        switch phase {
+                        case .active: handleAppDidBecomeActive()
+                        case .inactive, .background: handleAppWillResignActive()
+                        @unknown default: break
+                        }
                     }
-                    .onReceive(NotificationCenter.default.publisher(for: UIApplication.didBecomeActiveNotification)) { _ in
-                        handleAppDidBecomeActive()
+                    .alert(
+                        NSLocalizedString("Could not save", comment: "SwiftData save failure title"),
+                        isPresented: Binding(
+                            get: { swiftDataController.saveErrorMessage != nil },
+                            set: { if !$0 { swiftDataController.saveErrorMessage = nil } }
+                        ),
+                        presenting: swiftDataController.saveErrorMessage
+                    ) { _ in
+                        Button(NSLocalizedString("OK", comment: "OK button")) {}
+                    } message: { message in
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "Your progress and bookmarks may not have been recorded.\n%@",
+                                    comment: "SwiftData save failure description"
+                                ),
+                                message
+                            )
+                        )
                     }
             }
         }
     }
     
     private func handleAppWillResignActive() {
-        // Save current playback position when app goes to background
-        if let audiobook = globalAudioManager.currentAudiobook {
-            let currentTime = globalAudioManager.getCurrentTime()
-            let audiobookManager = AudiobookManager.shared
-            audiobookManager.updateProgress(for: audiobook, currentTime: currentTime)
-            
-            // Save SwiftData context
-            swiftDataController.save()
-        }
+        // Save current playback position when app goes to background. The manager owns the same
+        // write on a timer, so this only shortens the window, and it shares the guard that keeps
+        // a still-loading book from saving a position of zero.
+        globalAudioManager.persistProgress()
+        swiftDataController.save()
     }
     
     private func handleAppDidBecomeActive() {
         playbackCommandCoordinator.consumePendingCommand()
+        // Files can be handed over while the app is in the background.
+        AudiobookManager.shared.importInboxFiles()
         // Refresh Now Playing info when app becomes active
         if globalAudioManager.isPlaying() {
             // Update now playing info to ensure it's current

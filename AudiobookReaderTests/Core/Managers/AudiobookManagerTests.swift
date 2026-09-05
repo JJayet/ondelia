@@ -95,14 +95,17 @@ struct AudiobookManagerTests {
         #expect(manager.isLoadingLibrary == false)
     }
 
-    @Test("fetchAudiobooks drops books whose file is missing")
-    func fetchDropsMissingFiles() throws {
-        _ = insertBook(title: "Present")
+    @Test("fetchAudiobooks keeps books whose file is missing")
+    func fetchKeepsMissingFiles() throws {
+        // Deleting them threw away progress and bookmarks over a file that is often recoverable,
+        // and the entry has to survive for a re-import to relink to it instead of duplicating.
+        let present = insertBook(title: "Present")
         controller.context.insert(AudiobookModel(title: "Ghost", fileURL: "/nonexistent/ghost.m4b", duration: 10))
 
         manager.fetchAudiobooks()
 
-        #expect(manager.audiobooks.map(\.title) == ["Present"])
-        #expect(try controller.context.fetch(FetchDescriptor<AudiobookModel>()).count == 1)
+        #expect(Set(manager.audiobooks.compactMap(\.title)) == ["Present", "Ghost"])
+        #expect(try controller.context.fetch(FetchDescriptor<AudiobookModel>()).count == 2)
+        #expect(manager.hasFile(present))
     }
 }

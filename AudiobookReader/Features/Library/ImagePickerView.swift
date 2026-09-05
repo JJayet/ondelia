@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct ImagePickerView: View {
     let audiobook: AudiobookModel
@@ -8,7 +9,7 @@ struct ImagePickerView: View {
     @State private var searchResults: [ImageSearchResult] = []
     @State private var isLoading = false
     @State private var errorMessage: String?
-    @State private var showingPhotoPicker = false
+    @State private var photoItem: PhotosPickerItem?
     
     var body: some View {
         NavigationStack {
@@ -21,7 +22,7 @@ struct ImagePickerView: View {
                     
                     Text(String(format: NSLocalizedString("for %@", comment: "Cover image for audiobook title"), audiobook.title ?? AudiobookModel.unknownTitle))
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .multilineTextAlignment(.center)
                 }
                 .padding()
@@ -34,9 +35,11 @@ struct ImagePickerView: View {
                     .buttonStyle(.glassProminent)
                     .disabled(isLoading)
                     
-                    Button(NSLocalizedString("Choose from Photos", comment: "Choose from Photos button")) {
-                        showingPhotoPicker = true
-                    }
+                    PhotosPicker(
+                        NSLocalizedString("Choose from Photos", comment: "Choose from Photos button"),
+                        selection: $photoItem,
+                        matching: .images
+                    )
                     .buttonStyle(.glass)
                 }
                 .padding(.horizontal)
@@ -46,17 +49,17 @@ struct ImagePickerView: View {
                         ProgressView()
                         Text(NSLocalizedString("Searching for images...", comment: "Searching for images loading text"))
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 } else if let error = errorMessage {
                     VStack {
                         Image(systemName: "exclamationmark.triangle")
                             .font(.largeTitle)
-                            .foregroundColor(.orange)
+                            .foregroundStyle(.orange)
                         Text(error)
                             .font(.body)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -64,13 +67,13 @@ struct ImagePickerView: View {
                     VStack {
                         Image(systemName: "photo.on.rectangle")
                             .font(.system(size: 60))
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(NSLocalizedString("No images found", comment: "No images found message"))
                             .font(.headline)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         Text(NSLocalizedString("Try searching for images or choose from your photos", comment: "No images found instructions"))
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                             .multilineTextAlignment(.center)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -88,7 +91,7 @@ struct ImagePickerView: View {
                                         .aspectRatio(contentMode: .fit)
                                         .frame(height: 100)
                                         .clipped()
-                                        .cornerRadius(8)
+                                        .clipShape(.rect(cornerRadius: 8))
                                         .onTapGesture {
                                             downloadAndSelectImage(result)
                                         }
@@ -96,7 +99,7 @@ struct ImagePickerView: View {
                                     Rectangle()
                                         .fill(Color.gray.opacity(0.3))
                                         .frame(width: 100, height: 100)
-                                        .cornerRadius(8)
+                                        .clipShape(.rect(cornerRadius: 8))
                                         .overlay(
                                             ProgressView()
                                                 .scaleEffect(0.7)
@@ -113,13 +116,16 @@ struct ImagePickerView: View {
             .navigationTitle(NSLocalizedString("Cover Image", comment: "Cover image view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
                 }
             }
         }
-        .sheet(isPresented: $showingPhotoPicker) {
-            PhotoPickerView { image in
+        .onChange(of: photoItem) { _, item in
+            guard let item else { return }
+            Task {
+                guard let data = try? await item.loadTransferable(type: Data.self),
+                      let image = UIImage(data: data) else { return }
                 onImageSelected(image)
                 dismiss()
             }
@@ -182,50 +188,6 @@ struct ImagePickerView: View {
     }
 }
 
-
-struct PhotoPickerView: UIViewControllerRepresentable {
-    let onImageSelected: (UIImage) -> Void
-    
-    func makeUIViewController(context: Context) -> UIImagePickerController {
-        let picker = UIImagePickerController()
-        picker.sourceType = .photoLibrary
-        picker.allowsEditing = true // Allow basic editing like cropping
-        picker.delegate = context.coordinator
-        
-        // Ensure camera is not available as a source
-        picker.mediaTypes = ["public.image"]
-        
-        return picker
-    }
-    
-    func updateUIViewController(_ uiViewController: UIImagePickerController, context: Context) {}
-    
-    func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-    
-    class Coordinator: NSObject, UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-        let parent: PhotoPickerView
-        
-        init(_ parent: PhotoPickerView) {
-            self.parent = parent
-        }
-        
-        func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
-            // Prefer edited image if available (for cropping), otherwise use original
-            let image = info[.editedImage] as? UIImage ?? info[.originalImage] as? UIImage
-            
-            if let selectedImage = image {
-                parent.onImageSelected(selectedImage)
-            }
-            picker.dismiss(animated: true)
-        }
-        
-        func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-            picker.dismiss(animated: true)
-        }
-    }
-}
 
 #Preview {
     ImagePickerView(audiobook: PreviewContent.audiobook()) { _ in }

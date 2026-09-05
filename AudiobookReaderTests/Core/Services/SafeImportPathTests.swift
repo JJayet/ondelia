@@ -46,7 +46,7 @@ struct SafeImportPathTests {
         }
 
         #expect(throws: (any Error).self) {
-            try SafeImportPath.existingFileURL(for: "linked.mp3", inside: root)
+            try SafeImportPath.containedFileURL(for: "linked.mp3", inside: root)
         }
     }
 }

@@ -1,86 +1,47 @@
-import ActivityKit
 import AppIntents
-import Combine
 import Foundation
 
 // MARK: - App Intents for Controls
-struct PlayPauseIntent: AudioIntent, AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Play/Pause"
-    static var description = IntentDescription("Toggle playback")
+//
+// `AudioPlaybackIntent` is performed in the app process, cold-launching it when necessary —
+// that is the whole point of the conformance. The type is compiled into the widget extension
+// too, only so the widget can name it in `Button(intent:)`; that copy never runs the work, and
+// it cannot, since the audio engine and the store do not exist there.
+
+private func run(_ command: PlaybackCommand) async {
+    #if WIDGET_EXTENSION
+    NowPlayingSharedStore.send(command)
+    #else
+    await PlaybackCommands.perform(command)
+    #endif
+}
+
+struct PlayPauseIntent: AudioPlaybackIntent {
+    static let title: LocalizedStringResource = "Play/Pause"
+    static let description = IntentDescription("Toggle playback")
     
     func perform() async throws -> some IntentResult {
-        NowPlayingSharedStore.send(.toggle)
+        await run(.toggle)
         return .result()
     }
 }
 
-struct SkipForwardIntent: AudioIntent, AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Skip Forward"
-    static var description = IntentDescription("Skip forward 15 seconds")
+struct SkipForwardIntent: AudioPlaybackIntent {
+    static let title: LocalizedStringResource = "Skip Forward"
+    static let description = IntentDescription("Skip forward")
     
     func perform() async throws -> some IntentResult {
-        NowPlayingSharedStore.send(.skipForward)
+        await run(.skipForward)
         return .result()
     }
 }
 
-struct SkipBackwardIntent: AudioIntent, AudioPlaybackIntent {
-    static var title: LocalizedStringResource = "Skip Backward"  
-    static var description = IntentDescription("Skip backward 15 seconds")
+struct SkipBackwardIntent: AudioPlaybackIntent {
+    static let title: LocalizedStringResource = "Skip Backward"  
+    static let description = IntentDescription("Skip backward")
     
     func perform() async throws -> some IntentResult {
-        NowPlayingSharedStore.send(.skipBackward)
+        await run(.skipBackward)
         return .result()
-    }
-}
-
-// MARK: - Base Audio Intent
-protocol AudioIntent: AppIntent {
-    // Common properties for audio intents
-}
-
-// MARK: - Live Activity Manager
-class LiveActivityManager: ObservableObject {
-    private var currentActivity: Activity<AudiobookLiveActivityAttributes>?
-    
-    var isActivityActive: Bool {
-        return currentActivity?.activityState == .active
-    }
-    
-    func startLiveActivity(for audiobook: AudiobookLiveActivityAttributes.ContentState, audiobookId: String) {
-        let attributes = AudiobookLiveActivityAttributes(
-            audiobookId: audiobookId,
-            startTime: Date()
-        )
-        
-        do {
-            currentActivity = try Activity<AudiobookLiveActivityAttributes>.request(
-                attributes: attributes,
-                content: ActivityContent(state: audiobook, staleDate: nil),
-                pushType: nil
-            )
-            print("✨ Live Activity started successfully")
-        } catch {
-            print("❌ Failed to start Live Activity: \(error)")
-        }
-    }
-    
-    func updateLiveActivity(with newState: AudiobookLiveActivityAttributes.ContentState) {
-        Task {
-            guard let activity = currentActivity else { return }
-            
-            await activity.update(ActivityContent(state: newState, staleDate: nil))
-            print("🔄 Live Activity updated")
-        }
-    }
-    
-    func endLiveActivity() {
-        Task {
-            guard let activity = currentActivity else { return }
-            
-            await activity.end(activity.content, dismissalPolicy: .immediate)
-            currentActivity = nil
-            print("🛑 Live Activity ended")
-        }
     }
 }

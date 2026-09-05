@@ -12,24 +12,24 @@ struct SearchResultRow: View {
                 if let title = audiobook.title, !title.isEmpty {
                     Text(highlighted(title, query: query))
                         .font(.headline)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                 } else {
                     Text(AudiobookModel.unknownTitle)
                         .font(.headline)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                 }
 
                 if let author = audiobook.author, !author.isEmpty {
                     Text(highlighted(author, query: query))
                         .font(.subheadline)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
                 } else {
                     Text(AudiobookModel.unknownAuthor)
                         .font(.subheadline)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
                 }
             }
@@ -37,7 +37,7 @@ struct SearchResultRow: View {
             Text(percentageString)
                 .font(.subheadline) // a little bigger than caption
                 .fontWeight(.semibold)
-                .foregroundColor(.secondaryText)
+                .foregroundStyle(Color.secondaryText)
                 .monospacedDigit()
                 .accessibilityLabel(accessibilityProgress)
         }
@@ -46,7 +46,7 @@ struct SearchResultRow: View {
 
     private var cover: some View {
         Group {
-            if let data = audiobook.coverImageData, let image = UIImage(data: data) {
+            if let image = CoverImageCache.image(for: audiobook) {
                 Image(uiImage: image)
                     .resizable()
                     .aspectRatio(1, contentMode: .fill)
@@ -54,7 +54,7 @@ struct SearchResultRow: View {
                 ZStack {
                     RoundedRectangle(cornerRadius: 8).fill(Color.secondaryBackground)
                     Image(systemName: "book.closed")
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                 }
             }
         }

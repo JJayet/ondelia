@@ -5,8 +5,7 @@ struct EnhancedAudiobookRowView: View {
     let onTap: () -> Void
 
     private var coverImage: UIImage? {
-        guard let data = audiobook.coverImageData else { return nil }
-        return UIImage(data: data)
+        CoverImageCache.image(for: audiobook)
     }
 
     private var progressPercentage: Double {
@@ -22,16 +21,16 @@ struct EnhancedAudiobookRowView: View {
                     if let image = coverImage {
                         Image(uiImage: image)
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(contentMode: .fit)
                     } else {
                         Image(systemName: "book.closed")
                             .font(.title2)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
-                .frame(width: 70, height: 70)
+                .frame(width: 70, height: 105)
                 .background(Color.secondaryBackground)
-                .cornerRadius(12)
+                .clipShape(.rect(cornerRadius: 12))
                 .clipped()
                 .shadow(color: Color.black.opacity(0.1), radius: 2, x: 0, y: 1)
 
@@ -39,13 +38,13 @@ struct EnhancedAudiobookRowView: View {
                 VStack(alignment: .leading, spacing: 6) {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.headline)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
 
                     Text(audiobook.author ?? AudiobookModel.unknownAuthor)
                         .font(.subheadline)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
 
                     // Progress Section
@@ -59,7 +58,7 @@ struct EnhancedAudiobookRowView: View {
                                 systemImage: "checkmark.circle.fill"
                             )
                             .font(.caption)
-                            .foregroundColor(.green)
+                            .foregroundStyle(.green)
                         } else if audiobook.currentPosition > 0 {
                             VStack(alignment: .leading, spacing: 4) {
                                 ProgressView(value: progressPercentage)
@@ -80,7 +79,7 @@ struct EnhancedAudiobookRowView: View {
                                     )
                                 )
                                 .font(.caption2)
-                                .foregroundColor(.secondaryText)
+                                .foregroundStyle(Color.secondaryText)
                             }
                         } else {
                             Text(
@@ -90,14 +89,14 @@ struct EnhancedAudiobookRowView: View {
                                 )
                             )
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                         }
 
                         Spacer()
 
-                        Text(formatDuration(audiobook.duration))
+                        Text(audiobook.duration.hoursMinutesFormatted)
                             .font(.caption)
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
 
@@ -105,22 +104,12 @@ struct EnhancedAudiobookRowView: View {
 
                 Image(systemName: "chevron.right")
                     .font(.caption)
-                    .foregroundColor(.secondaryText)
+                    .foregroundStyle(Color.secondaryText)
             }
             .padding(16)
             .glassEffect(in:.rect(cornerRadius: 16))
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 
-    private func formatDuration(_ duration: TimeInterval) -> String {
-        let hours = Int(duration) / 3600
-        let minutes = (Int(duration) % 3600) / 60
-
-        if hours > 0 {
-            return "\(hours)h \(minutes)m"
-        } else {
-            return "\(minutes)m"
-        }
-    }
 }

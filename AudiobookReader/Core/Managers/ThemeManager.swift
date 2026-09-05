@@ -1,20 +1,21 @@
 import SwiftUI
-import Combine
 
 @MainActor
-class ThemeManager: ThemeManagerProtocol {    
+@Observable
+final class ThemeManager {    
     static let shared = ThemeManager()
     
-    @Published var currentTheme: AppTheme = .system
-    @Published var accentColor: AccentColor = .blue
-    @Published var skipInterval: SkipInterval = .fifteen
+    var currentTheme: AppTheme = .system
+    var accentColor: AccentColor = .blue
+    var skipInterval: SkipInterval = .fifteen
+    /// When on, every book plays at `globalSpeed` instead of its own remembered speed.
+    var globalSpeedEnabled: Bool = false
+    var globalSpeed: Float = 1.0
     
     // Transcription Settings
-    @Published var transcriptionEngine: TranscriptionEngine = .whisperKit
-    @Published var whisperModel: WhisperModel = .base
-    @Published var transcriptionLanguage: TranscriptionLanguage = .english
-    @Published var enableTranslation: Bool = false
-    @Published var translationTargetLanguage: TranscriptionLanguage = .english
+    var transcriptionLanguage: TranscriptionLanguage = .english
+    var enableTranslation: Bool = false
+    var translationTargetLanguage: TranscriptionLanguage = .english
     
     private init() {
         // Load settings without GCD to align with @MainActor
@@ -25,8 +26,6 @@ class ThemeManager: ThemeManagerProtocol {
         let theme: AppTheme
         let accent: AccentColor
         let skip: SkipInterval
-        let engine: TranscriptionEngine
-        let model: WhisperModel
         let language: TranscriptionLanguage
         let translation: Bool
         let targetLanguage: TranscriptionLanguage
@@ -54,20 +53,6 @@ class ThemeManager: ThemeManagerProtocol {
         }
         
         // Transcription settings
-        if let engineRawValue = UserDefaults.standard.object(forKey: "transcriptionEngine") as? Int,
-           let loadedEngine = TranscriptionEngine(rawValue: engineRawValue) {
-            engine = loadedEngine
-        } else {
-            engine = .whisperKit
-        }
-        
-        if let modelRawValue = UserDefaults.standard.object(forKey: "whisperModel") as? String,
-           let loadedModel = WhisperModel(rawValue: modelRawValue) {
-            model = loadedModel
-        } else {
-            model = .base
-        }
-        
         if let languageRawValue = UserDefaults.standard.object(forKey: "transcriptionLanguage") as? String,
            let loadedLanguage = TranscriptionLanguage(rawValue: languageRawValue) {
             language = loadedLanguage
@@ -84,15 +69,20 @@ class ThemeManager: ThemeManagerProtocol {
             targetLanguage = .english
         }
         
+        let storedGlobalSpeed = UserDefaults.standard.object(forKey: "globalSpeed") as? Double
+
         // Update published properties on main actor
+        self.globalSpeedEnabled = UserDefaults.standard.bool(forKey: "globalSpeedEnabled")
+        self.globalSpeed = storedGlobalSpeed.map(Float.init) ?? 1.0
         self.currentTheme = theme
         self.accentColor = accent
         self.skipInterval = skip
-        self.transcriptionEngine = engine
-        self.whisperModel = model
         self.transcriptionLanguage = language
         self.enableTranslation = translation
         self.translationTargetLanguage = targetLanguage
+
+        // Remote commands are registered before this runs, with the default interval.
+        GlobalAudioManager.shared.applyRemoteSkipInterval()
     }
     
     func setTheme(_ theme: AppTheme) {
@@ -108,20 +98,21 @@ class ThemeManager: ThemeManagerProtocol {
     func setSkipInterval(_ interval: SkipInterval) {
         skipInterval = interval
         UserDefaults.standard.set(interval.rawValue, forKey: "skipInterval")
+        GlobalAudioManager.shared.applyRemoteSkipInterval()
+    }
+
+    func setGlobalSpeedEnabled(_ enabled: Bool) {
+        globalSpeedEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "globalSpeedEnabled")
+    }
+
+    func setGlobalSpeed(_ speed: Float) {
+        globalSpeed = speed
+        UserDefaults.standard.set(Double(speed), forKey: "globalSpeed")
     }
     
     // MARK: - Transcription Settings
-    func updateTranscriptionEngine(_ engine: TranscriptionEngine) {
-        transcriptionEngine = engine
-        UserDefaults.standard.set(engine.rawValue, forKey: "transcriptionEngine")
-    }
-    
-    func updateWhisperModel(_ model: WhisperModel) {
-        whisperModel = model
-        UserDefaults.standard.set(model.rawValue, forKey: "whisperModel")
-    }
-    
-    func updateTranscriptionLanguage(_ language: TranscriptionLanguage) {
+        func updateTranscriptionLanguage(_ language: TranscriptionLanguage) {
         transcriptionLanguage = language
         UserDefaults.standard.set(language.rawValue, forKey: "transcriptionLanguage")
     }

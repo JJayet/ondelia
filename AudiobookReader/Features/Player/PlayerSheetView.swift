@@ -14,7 +14,7 @@ struct PlayerSheetView: View {
                     ProgressView()
                     Text(NSLocalizedString("Loading…", comment: "Loading player content"))
                         .font(.footnote)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
                 .task { await loadBook() }
             }
@@ -31,7 +31,7 @@ struct PlayerSheetView: View {
             let result = try context.fetch(descriptor)
             self.book = result.first
         } catch {
-            print("❌ PlayerSheetView: Failed to fetch audiobook by ID: \(error)")
+            Log.ui.error("❌ PlayerSheetView: Failed to fetch audiobook by ID: \(error)")
         }
     }
 }

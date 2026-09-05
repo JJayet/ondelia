@@ -8,6 +8,15 @@ struct NowPlayingWidgetView: View {
     @Environment(\.widgetFamily) var widgetFamily
     
     var body: some View {
+        if entry.audiobook == nil {
+            NothingPlayingView()
+        } else {
+            playerView
+        }
+    }
+
+    @ViewBuilder
+    private var playerView: some View {
         switch widgetFamily {
         case .systemSmall:
             SmallNowPlayingView(entry: entry)
@@ -22,6 +31,22 @@ struct NowPlayingWidgetView: View {
         @unknown default:
             SmallNowPlayingView(entry: entry)
         }
+    }
+}
+
+/// Shown until something has actually been played. The placeholder book belongs in Xcode's
+/// gallery preview, not on a home screen.
+struct NothingPlayingView: View {
+    var body: some View {
+        VStack(spacing: 6) {
+            Image(systemName: "book.closed")
+                .font(.title2)
+                .foregroundStyle(.secondary)
+            Text("Nothing playing")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
@@ -55,14 +80,14 @@ struct SmallNowPlayingView: View {
                 Button(intent: PlayPauseIntent()) {
                     Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                         .font(.title2)
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                 }
                 
                 // Title (truncated)
                 if let audiobook = entry.audiobook {
                     Text(audiobook.title)
                         .font(.caption.weight(.medium))
-                        .foregroundColor(.white)
+                        .foregroundStyle(.white)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
                 }
@@ -92,7 +117,7 @@ struct MediumNowPlayingView: View {
                     .frame(width: 60, height: 60)
                     .overlay {
                         Image(systemName: "book")
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                     }
             }
             
@@ -102,31 +127,31 @@ struct MediumNowPlayingView: View {
                     Text(audiobook.title)
                         .font(.headline)
                         .lineLimit(1)
-                        .foregroundColor(.primary)
+                        .foregroundStyle(.primary)
                     
                     // Author
                     Text(audiobook.author)
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                         .lineLimit(1)
                     
                     // Progress bar
                     ProgressView(value: audiobook.progress)
-                        .progressViewStyle(LinearProgressViewStyle())
+                        .progressViewStyle(.linear)
                         .scaleEffect(y: 0.5)
                     
                     // Time info
                     HStack {
-                        Text(formatTime(entry.currentTime))
+                        Text(entry.currentTime.clockFormatted)
                             .font(.caption2)
-                            .foregroundColor(.secondary)
+                            .foregroundStyle(.secondary)
                         
                         Spacer()
                         
                         Button(intent: PlayPauseIntent()) {
                             Image(systemName: entry.isPlaying ? "pause.fill" : "play.fill")
                                 .font(.caption)
-                                .foregroundColor(.accentColor)
+                                .foregroundStyle(.tint)
                         }
                     }
                 }

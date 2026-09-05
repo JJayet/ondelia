@@ -1,7 +1,8 @@
 import Foundation
 import UIKit
 
-class GoogleImageSearchService {
+// No stored state: every property reads the bundle, so the shared instance is safe to share.
+final class GoogleImageSearchService: Sendable {
     static let shared = GoogleImageSearchService()
     
     // Google Custom Search API configuration
@@ -24,10 +25,14 @@ class GoogleImageSearchService {
     private init() {}
     
     func searchImages(query: String) async -> Result<[ImageSearchResult], GoogleImageSearchError> {
-        // Check if API keys are configured
         guard hasValidKeys else {
-            // Return mock data with realistic book cover placeholders for development
+            // Random stock photos are a development aid. Shipping them meant a release build
+            // with no keys offered strangers' photographs as book covers.
+            #if DEBUG
             return await createMockSearchResults(for: query)
+            #else
+            return .failure(.apiKeyNotConfigured)
+            #endif
         }
         
         // Perform real Google Custom Search API call
@@ -84,6 +89,7 @@ class GoogleImageSearchService {
         }
     }
     
+    #if DEBUG
     private func createMockSearchResults(for query: String) async -> Result<[ImageSearchResult], GoogleImageSearchError> {
         // Simulate network delay
         try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 second
@@ -130,6 +136,7 @@ class GoogleImageSearchService {
         
         return .success(mockResults)
     }
+    #endif
 }
 
 // MARK: - Data Models

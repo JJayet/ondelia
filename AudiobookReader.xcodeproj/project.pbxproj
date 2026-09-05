@@ -8,7 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
-		F11938B52E60A52C003F868D /* WhisperKit in Frameworks */ = {isa = PBXBuildFile; productRef = F11938B42E60A52C003F868D /* WhisperKit */; };
 		F1A887002E66445100718F1B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F1A887022E66445100718F1B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
 		F1A887132E66445200718F1B /* AudiobookReaderWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F1A886FD2E66445100718F1B /* AudiobookReaderWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -86,10 +85,9 @@
 				Core/Models/SwiftData/BookmarkModel.swift,
 				Core/Models/SwiftData/ChapterModel.swift,
 				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
-				Shared/AppIntents/AudiobookLiveActivity.swift,
-				Shared/AppIntents/AudiobookLiveActivityViews.swift,
 				Shared/AppIntents/AudiobookPlaybackIntents.swift,
 				Shared/NowPlayingSharedStore.swift,
+				Shared/TimeFormatting.swift,
 			);
 			target = F1A886FC2E66445100718F1B /* AudiobookReaderWidgetExtension */;
 		};
@@ -131,7 +129,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */,
-				F11938B52E60A52C003F868D /* WhisperKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,7 +223,6 @@
 			);
 			name = AudiobookReader;
 			packageProductDependencies = (
-				F11938B42E60A52C003F868D /* WhisperKit */,
 				F11938C42E60A52D003F868D /* ZIPFoundation */,
 			);
 			productName = AudiobookReader;
@@ -338,7 +334,6 @@
 			mainGroup = F13289972E4DBA6B004EC064;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				F11938B32E60A52C003F868D /* XCRemoteSwiftPackageReference "WhisperKit" */,
 				F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */,
 			);
 			preferredProjectObjectVersion = 77;
@@ -453,8 +448,6 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Audiobook Reader";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you choose cover images for your audiobooks.";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -469,7 +462,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -492,8 +485,6 @@
 				INFOPLIST_KEY_CFBundleDisplayName = "Audiobook Reader";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you choose cover images for your audiobooks.";
-				INFOPLIST_KEY_NSSupportsLiveActivities = YES;
-				INFOPLIST_KEY_NSSupportsLiveActivitiesFrequentUpdates = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -508,7 +499,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -652,7 +643,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudiobookReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudiobookReader";
 			};
@@ -670,7 +661,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AudiobookReader.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/AudiobookReader";
 			};
@@ -686,7 +677,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = AudiobookReader;
 			};
@@ -702,7 +693,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.AudiobookReaderUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_TARGET_NAME = AudiobookReader;
 			};
@@ -732,10 +723,13 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "WIDGET_EXTENSION $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
@@ -764,10 +758,13 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "WIDGET_EXTENSION $(inherited)";
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_INFER_SENDABLE_FROM_CAPTURES = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
@@ -823,14 +820,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		F11938B32E60A52C003F868D /* XCRemoteSwiftPackageReference "WhisperKit" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/argmaxinc/WhisperKit";
-			requirement = {
-				kind = revision;
-				revision = 0a064c3ba8b424887ce691c2f6c85ddffde0ce89;
-			};
-		};
 		F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/weichsel/ZIPFoundation";
@@ -842,11 +831,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		F11938B42E60A52C003F868D /* WhisperKit */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = F11938B32E60A52C003F868D /* XCRemoteSwiftPackageReference "WhisperKit" */;
-			productName = WhisperKit;
-		};
 		F11938C42E60A52D003F868D /* ZIPFoundation */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = F11938C32E60A52D003F868D /* XCRemoteSwiftPackageReference "ZIPFoundation" */;

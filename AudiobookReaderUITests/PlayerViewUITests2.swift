@@ -12,8 +12,6 @@ final class PlayerViewUITests2: PlayerViewUITestCase {
     // MARK: - Accessibility Testing
     
     func testVoiceOverSupport() throws {
-        // Enable VoiceOver simulation
-        app.launchArguments.append("--voiceover-testing")
         try navigateToPlayer()
         
         let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
@@ -24,9 +22,8 @@ final class PlayerViewUITests2: PlayerViewUITestCase {
                      playPauseButton.label.lowercased().contains("pause"),
                      "Accessibility label should indicate play/pause state")
         
-        // Check accessibility hint
-        let hint = playPauseButton.value as? String ?? ""
-        XCTAssertFalse(hint.isEmpty, "Button should have accessibility hint")
+        // No assertion on `value`: XCUIElement exposes no accessibility hint, and a button's
+        // value is not one — the label above is what VoiceOver reads here.
     }
     
     func testDynamicTypeSupport() throws {

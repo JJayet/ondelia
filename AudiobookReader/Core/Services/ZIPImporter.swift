@@ -1,14 +1,16 @@
 import Foundation
 import ZIPFoundation
 
-class ZIPImporter {
+enum ZIPImporter {
     static let maximumEntryCount = 10_000
     static let maximumEntrySize: UInt64 = 4 * 1_024 * 1_024 * 1_024
     static let maximumExpandedSize: UInt64 = 20 * 1_024 * 1_024 * 1_024
     static let maximumCompressionRatio: UInt64 = 200
     
-    static func importZIPFile(from zipURL: URL) async -> URL? {
-        print("📦 ZIPImporter: Starting ZIP import from: \(zipURL.lastPathComponent)")
+    /// Synchronous on purpose: the only caller already runs off the main actor, so wrapping
+    /// this in a continuation only bought an extra thread hop.
+    static func importZIPFile(from zipURL: URL) -> (folder: URL, root: URL)? {
+        Log.library.debug("📦 ZIPImporter: Starting ZIP import from: \(zipURL.lastPathComponent)")
         
         // Create temporary extraction directory
         let tempDirectory = FileManager.default.temporaryDirectory
@@ -16,126 +18,112 @@ class ZIPImporter {
             .appendingPathComponent(UUID().uuidString)
         
         guard createDirectory(at: tempDirectory) else {
-            print("❌ ZIPImporter: Failed to create temporary directory")
+            Log.library.error("❌ ZIPImporter: Failed to create temporary directory")
             return nil
         }
         
         // Extract ZIP file
-        guard await extractZIP(from: zipURL, to: tempDirectory) else {
-            print("❌ ZIPImporter: Failed to extract ZIP file")
+        do {
+            try extractZIP(from: zipURL, to: tempDirectory)
+        } catch {
+            Log.library.error("❌ ZIPImporter: Failed to extract ZIP file: \(error.localizedDescription)")
             cleanupDirectory(at: tempDirectory)
             return nil
         }
         
         // Validate audiobook content
-        guard let audiobookFolder = await validateAudiobookContent(in: tempDirectory) else {
-            print("❌ ZIPImporter: No valid audiobook content found")
+        guard let audiobookFolder = validateAudiobookContent(in: tempDirectory) else {
+            Log.library.error("❌ ZIPImporter: No valid audiobook content found")
             cleanupDirectory(at: tempDirectory)
             return nil
         }
         
-        print("✅ ZIPImporter: Successfully validated audiobook content")
-        return audiobookFolder
+        Log.library.debug("✅ ZIPImporter: Successfully validated audiobook content")
+        // The extraction root travels with the folder: it is the only thing safe to delete
+        // afterwards, and it is not derivable from the folder — an archive with audio at its
+        // root makes the two the same directory.
+        return (folder: audiobookFolder, root: tempDirectory)
     }
     
     private static func createDirectory(at url: URL) -> Bool {
         do {
             try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
-            print("📁 ZIPImporter: Created temporary directory: \(url.path)")
+            Log.library.debug("📁 ZIPImporter: Created temporary directory: \(url.path)")
             return true
         } catch {
-            print("❌ ZIPImporter: Failed to create directory: \(error)")
+            Log.library.error("❌ ZIPImporter: Failed to create directory: \(error)")
             return false
         }
     }
     
-    private static func extractZIP(from zipURL: URL, to destinationURL: URL) async -> Bool {
-        print("📦 ZIPImporter: Extracting ZIP file \(zipURL.lastPathComponent) to \(destinationURL.path)")
-        
-        return await withCheckedContinuation { continuation in
-            DispatchQueue.global(qos: .userInitiated).async {
-                do {
-                    // Create the destination directory if it doesn't exist
-                    if !FileManager.default.fileExists(atPath: destinationURL.path) {
-                        try FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true, attributes: nil)
-                    }
-                    
-                    // Open the ZIP archive
-                    let archive: Archive
-                    do {
-                        archive = try Archive(url: zipURL, accessMode: .read)
-                    } catch {
-                        print("❌ ZIPImporter: Failed to open ZIP archive: \(error)")
-                        continuation.resume(returning: false)
-                        return
-                    }
-                    
-                    print("📊 ZIPImporter: Starting ZIP extraction...")
-                    
-                    var extractedCount = 0
-                    var expandedSize: UInt64 = 0
-                    
-                    // Extract all entries
-                    for entry in archive {
-                        guard extractedCount < maximumEntryCount else {
-                            throw ZIPImportError.tooManyEntries
-                        }
-                        guard entry.type != .symlink else {
-                            throw ZIPImportError.symbolicLink(entry.path)
-                        }
-                        guard entry.uncompressedSize <= maximumEntrySize else {
-                            throw ZIPImportError.entryTooLarge(entry.path)
-                        }
-                        let (newExpandedSize, overflow) = expandedSize.addingReportingOverflow(entry.uncompressedSize)
-                        guard !overflow, newExpandedSize <= maximumExpandedSize else {
-                            throw ZIPImportError.archiveTooLarge
-                        }
-                        if entry.compressedSize == 0 {
-                            guard entry.uncompressedSize == 0 else {
-                                throw ZIPImportError.suspiciousCompression(entry.path)
-                            }
-                        } else {
-                            guard entry.uncompressedSize / entry.compressedSize <= maximumCompressionRatio else {
-                                throw ZIPImportError.suspiciousCompression(entry.path)
-                            }
-                        }
+    private static func extractZIP(from zipURL: URL, to destinationURL: URL) throws {
+        Log.library.debug("📦 ZIPImporter: Extracting ZIP file \(zipURL.lastPathComponent) to \(destinationURL.path)")
 
-                        let entryDestinationURL = try SafeImportPath.resolvedURL(
-                            for: entry.path,
-                            inside: destinationURL
-                        )
-                        expandedSize = newExpandedSize
-                        
-                        // Ensure the directory structure exists
-                        let entryDirectory = entryDestinationURL.deletingLastPathComponent()
-                        if !FileManager.default.fileExists(atPath: entryDirectory.path) {
-                            try FileManager.default.createDirectory(at: entryDirectory, withIntermediateDirectories: true, attributes: nil)
-                        }
-                        
-                        // Skip if it's a directory entry
-                        if entry.type == .directory {
-                            extractedCount += 1
-                            continue
-                        }
-                        
-                        // Extract the file
-                        _ = try archive.extract(entry, to: entryDestinationURL)
-                        extractedCount += 1
-                        print("   ✅ Extracted: \(entry.path)")
-                    }
-                    
-                    print("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
-                    continuation.resume(returning: true)
-                    
-                } catch {
-                    print("❌ ZIPImporter: Failed to extract ZIP file: \(error.localizedDescription)")
-                    continuation.resume(returning: false)
+        // Create the destination directory if it doesn't exist
+        if !FileManager.default.fileExists(atPath: destinationURL.path) {
+            try FileManager.default.createDirectory(at: destinationURL, withIntermediateDirectories: true, attributes: nil)
+        }
+
+        let archive = try Archive(url: zipURL, accessMode: .read)
+
+        Log.library.debug("📊 ZIPImporter: Starting ZIP extraction...")
+
+        var extractedCount = 0
+        var expandedSize: UInt64 = 0
+
+        // Extract all entries
+        for entry in archive {
+            guard extractedCount < maximumEntryCount else {
+                throw ZIPImportError.tooManyEntries
+            }
+            guard entry.type != .symlink else {
+                throw ZIPImportError.symbolicLink(entry.path)
+            }
+            guard entry.uncompressedSize <= maximumEntrySize else {
+                throw ZIPImportError.entryTooLarge(entry.path)
+            }
+            let (newExpandedSize, overflow) = expandedSize.addingReportingOverflow(entry.uncompressedSize)
+            guard !overflow, newExpandedSize <= maximumExpandedSize else {
+                throw ZIPImportError.archiveTooLarge
+            }
+            if entry.compressedSize == 0 {
+                guard entry.uncompressedSize == 0 else {
+                    throw ZIPImportError.suspiciousCompression(entry.path)
+                }
+            } else {
+                guard entry.uncompressedSize / entry.compressedSize <= maximumCompressionRatio else {
+                    throw ZIPImportError.suspiciousCompression(entry.path)
                 }
             }
+
+            let entryDestinationURL = try SafeImportPath.resolvedURL(
+                for: entry.path,
+                inside: destinationURL
+            )
+            expandedSize = newExpandedSize
+
+            // Ensure the directory structure exists
+            let entryDirectory = entryDestinationURL.deletingLastPathComponent()
+            if !FileManager.default.fileExists(atPath: entryDirectory.path) {
+                try FileManager.default.createDirectory(at: entryDirectory, withIntermediateDirectories: true, attributes: nil)
+            }
+
+            // Skip if it's a directory entry
+            if entry.type == .directory {
+                extractedCount += 1
+                continue
+            }
+
+            // Extract the file
+            _ = try archive.extract(entry, to: entryDestinationURL)
+            extractedCount += 1
+            Log.library.debug("   ✅ Extracted: \(entry.path)")
         }
+
+        Log.library.debug("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
     }
     
-    private static func validateAudiobookContent(in directory: URL) async -> URL? {
+    private static func validateAudiobookContent(in directory: URL) -> URL? {
         let fileManager = FileManager.default
         let audioExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
         
@@ -173,20 +161,20 @@ class ZIPImporter {
             
             // Validate audiobook criteria
             guard !audioFiles.isEmpty else {
-                print("❌ ZIPImporter: No audio files found")
+                Log.library.error("❌ ZIPImporter: No audio files found")
                 return nil
             }
             
             // Check for CUE files in the target directory
             let cueFiles = CUEParser.findCUEFiles(in: targetDirectory)
             if !cueFiles.isEmpty {
-                print("🎵 ZIPImporter: Found \(cueFiles.count) CUE file(s) in extracted content")
+                Log.library.debug("🎵 ZIPImporter: Found \(cueFiles.count) CUE file(s) in extracted content")
                 
                 // If we have CUE files, validate that we can parse them and find associated audio
                 for cueFileURL in cueFiles {
                     if let parsedCUE = CUEParser.parseCUEFile(at: cueFileURL) {
                         if let _ = CUEParser.matchCUEWithAudioFile(cueFile: parsedCUE, in: targetDirectory) {
-                            print("✅ ZIPImporter: Valid CUE-based audiobook found")
+                            Log.library.debug("✅ ZIPImporter: Valid CUE-based audiobook found")
                             return targetDirectory
                         }
                     }
@@ -209,16 +197,16 @@ class ZIPImporter {
             }
             
             guard validAudioFiles >= 1 && totalSize > 10_000_000 else { // 10MB minimum total
-                print("❌ ZIPImporter: Insufficient valid audio content. Files: \(validAudioFiles), Size: \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
+                Log.library.error("❌ ZIPImporter: Insufficient valid audio content. Files: \(validAudioFiles), Size: \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
                 return nil
             }
             
-            print("✅ ZIPImporter: Valid audiobook found - \(validAudioFiles) files, \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
+            Log.library.debug("✅ ZIPImporter: Valid audiobook found - \(validAudioFiles) files, \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
             
             return targetDirectory
             
         } catch {
-            print("❌ ZIPImporter: Error validating content: \(error)")
+            Log.library.error("❌ ZIPImporter: Error validating content: \(error)")
             return nil
         }
     }
@@ -226,9 +214,9 @@ class ZIPImporter {
     static func cleanupDirectory(at url: URL) {
         do {
             try FileManager.default.removeItem(at: url)
-            print("🗑️ ZIPImporter: Cleaned up temporary directory")
+            Log.library.debug("🗑️ ZIPImporter: Cleaned up temporary directory")
         } catch {
-            print("⚠️ ZIPImporter: Failed to cleanup temporary directory: \(error)")
+            Log.library.warning("⚠️ ZIPImporter: Failed to cleanup temporary directory: \(error)")
         }
     }
 }

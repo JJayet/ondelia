@@ -7,7 +7,6 @@
 
 import Testing
 import Foundation
-import Combine
 @testable import AudiobookReader
 
 extension GlobalAudioManagerTests {
@@ -35,13 +34,12 @@ extension GlobalAudioManagerTests {
             // Leave fileURL nil
             audiobook.fileURL = nil
         
-            await manager.loadAudiobook(audiobook)
+            manager.loadAudiobook(audiobook)
             try await Task.sleep(for: .milliseconds(200))
         
             #expect(manager.isLoading == false)
             #expect(manager.playbackState == .failed)
-            #expect(manager.audioEngine == nil)
-            #expect(manager.multiFileAudioEngine == nil)
+            #expect(manager.player == nil)
         }
     
         @Test("Non-existent file results in failed state")
@@ -52,13 +50,12 @@ extension GlobalAudioManagerTests {
             audiobook.fileURL = "/non/existent/path/file.m4a"
             MockFileManager.setFileExists("/non/existent/path/file.m4a", exists: false)
         
-            await manager.loadAudiobook(audiobook)
+            manager.loadAudiobook(audiobook)
             try await Task.sleep(for: .milliseconds(200))
         
             #expect(manager.isLoading == false)
             #expect(manager.playbackState == .failed)
-            #expect(manager.audioEngine == nil)
-            #expect(manager.multiFileAudioEngine == nil)
+            #expect(manager.player == nil)
         }
     
         // MARK: - Position Management Tests
@@ -73,7 +70,7 @@ extension GlobalAudioManagerTests {
             audiobook.currentPosition = 1500.0 // 25 minutes in
             MockFileManager.setFileExists(tempURL.path, exists: true)
         
-            await manager.loadAudiobook(audiobook)
+            manager.loadAudiobook(audiobook)
             try await Task.sleep(for: .milliseconds(300))
         
             #expect(manager.getCurrentTime() >= 1490.0) // Allow some variance
@@ -82,7 +79,7 @@ extension GlobalAudioManagerTests {
     
         // MARK: - Memory Management Tests
     
-        @Test("Engine cleanup properly deallocates resources")
+        @Test("Loading another book tears the previous player down")
         func testEngineCleanup() async throws {
             let manager = GlobalAudioManager.shared
         
@@ -92,24 +89,26 @@ extension GlobalAudioManagerTests {
             audiobook.fileURL = tempURL.path
             MockFileManager.setFileExists(tempURL.path, exists: true)
         
-            await manager.loadAudiobook(audiobook)
+            manager.loadAudiobook(audiobook)
             try await Task.sleep(for: .milliseconds(300))
         
-            let engineReference = manager.audioEngine
-            #expect(engineReference != nil)
+            let firstPlayer = try #require(manager.player)
         
-            // Load different audiobook to trigger cleanup
+            // Load a different audiobook to trigger teardown
             let audiobook2 = createTestAudiobook(isMultiFile: true)
-            let tempDir2 = createTempDirectory(named: "cleanup_test2")
+            let tempDir2 = createTestChapterFolder(named: "cleanup_test2", chapters: 2)
             audiobook2.fileURL = tempDir2.path
             MockFileManager.setFileExists(tempDir2.path, exists: true)
         
-            await manager.loadAudiobook(audiobook2)
+            manager.loadAudiobook(audiobook2)
             try await Task.sleep(for: .milliseconds(300))
         
-            // Original engine should be cleared
-            #expect(manager.audioEngine == nil)
-            #expect(manager.multiFileAudioEngine != nil)
+            let secondPlayer = try #require(manager.player)
+            #expect(secondPlayer !== firstPlayer)
+            #expect(secondPlayer.tracks.count == 2)
+            // The replaced player is emptied rather than left holding a live queue.
+            #expect(firstPlayer.tracks.isEmpty)
+            #expect(firstPlayer.player.items().isEmpty)
         }
     
         // MARK: - Audio Processing Features Tests
@@ -123,7 +122,7 @@ extension GlobalAudioManagerTests {
             audiobook.fileURL = tempURL.path
             MockFileManager.setFileExists(tempURL.path, exists: true)
         
-            await manager.loadAudiobook(audiobook)
+            manager.loadAudiobook(audiobook)
             try await Task.sleep(for: .milliseconds(300))
         
             // Test playback rate
@@ -132,7 +131,7 @@ extension GlobalAudioManagerTests {
         
             // Verify no exceptions thrown and state remains stable
             #expect(manager.isReady == true)
-            #expect(manager.audioEngine != nil)
+            #expect(manager.player != nil)
         }
     
         // MARK: - Concurrent Operations Tests
@@ -148,7 +147,7 @@ extension GlobalAudioManagerTests {
         
             let tempURL1 = createTempAudioFile(named: "concurrent1.m4a")
             let tempURL2 = createTempAudioFile(named: "concurrent2.m4a")
-            let tempDir3 = createTempDirectory(named: "concurrent3")
+            let tempDir3 = createTestChapterFolder(named: "concurrent3", chapters: 2)
         
             audiobook1.fileURL = tempURL1.path
             audiobook2.fileURL = tempURL2.path
@@ -158,32 +157,21 @@ extension GlobalAudioManagerTests {
             MockFileManager.setFileExists(tempURL2.path, exists: true)
             MockFileManager.setFileExists(tempDir3.path, exists: true)
         
-            // Start concurrent loading operations
-            async let load1 = manager.loadAudiobook(audiobook1)
-            async let load2 = manager.loadAudiobook(audiobook2)
-            async let load3 = manager.loadAudiobook(audiobook3)
-        
-            // Wait for all to complete
-            await load1
-            await load2
-            await load3
-        
+            // Three requests back to back: each supersedes the one still loading, and the
+            // last one wins. `loadAudiobook` returns immediately and finishes in a Task.
+            manager.loadAudiobook(audiobook1)
+            manager.loadAudiobook(audiobook2)
+            manager.loadAudiobook(audiobook3)
+
             try await Task.sleep(for: .milliseconds(500))
         
-            // Should have one audiobook loaded (the last one processed)
-            #expect(manager.currentAudiobook != nil)
+            #expect(manager.currentAudiobook?.id == audiobook3.id)
             #expect(manager.isReady == true)
             #expect(manager.isLoading == false)
         
-            // Should have correct engine type for the final audiobook
-            let finalIsMultiFile = manager.useMultiFileEngine
-            if finalIsMultiFile {
-                #expect(manager.multiFileAudioEngine != nil)
-                #expect(manager.audioEngine == nil)
-            } else {
-                #expect(manager.audioEngine != nil)
-                #expect(manager.multiFileAudioEngine == nil)
-            }
+            // One player, whichever book won the race, and only one.
+            let player = try #require(manager.player)
+            #expect(player.tracks.isEmpty == false)
         }
     }
 }

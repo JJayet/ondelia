@@ -1,4 +1,3 @@
-import Combine
 import CoreFoundation
 import Foundation
 
@@ -15,7 +14,8 @@ private func playbackCommandCallback(
 }
 
 @MainActor
-final class PlaybackCommandCoordinator: ObservableObject {
+@Observable
+final class PlaybackCommandCoordinator {
     init() {
         CFNotificationCenterAddObserver(
             CFNotificationCenterGetDarwinNotifyCenter(),
@@ -38,14 +38,6 @@ final class PlaybackCommandCoordinator: ObservableObject {
 
     func consumePendingCommand() {
         guard let command = NowPlayingSharedStore.consumePlaybackCommand() else { return }
-        let audioManager = GlobalAudioManager.shared
-        switch command {
-        case .toggle:
-            audioManager.togglePlayback()
-        case .skipForward:
-            audioManager.skipForward(15)
-        case .skipBackward:
-            audioManager.skipBackward(15)
-        }
+        Task { await PlaybackCommands.perform(command) }
     }
 }

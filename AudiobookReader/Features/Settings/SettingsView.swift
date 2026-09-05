@@ -1,17 +1,19 @@
 import SwiftUI
+import Speech
 
 struct SettingsView: View {
     // State is internal (not private) so the section extensions in
     // SettingsView+Sections.swift / SettingsView+TranscriptionSection.swift can drive it.
-    @StateObject var themeManager = ThemeManager.shared
-    @StateObject var statistics = ReadingStatistics.shared
-    @StateObject var whisperManager = WhisperTranscriptionManager.shared
+    @Bindable var themeManager = ThemeManager.shared
+    let statistics = ReadingStatistics.shared
+    let speechManager = SpeechTranscriptionManager.shared
     @Environment(\.dismiss) private var dismiss
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
-    @State var showModelDownloadConfirm = false
-    @State var pendingWhisperModel: WhisperModel? = nil
+    /// nil until the first asset check answers; drives the language-model row.
+    @State var assetStatus: AssetInventory.Status? = nil
     @State var showResetStatsConfirm = false
+    @State var showingBackupRestore = false
 
     var body: some View {
         NavigationStack {
@@ -20,7 +22,6 @@ struct SettingsView: View {
                 playbackSection
                 transcriptionSection
                 goalsSection
-                statisticsSection
                 dataSection
                 aboutSection
             }
@@ -37,35 +38,11 @@ struct SettingsView: View {
             } message: {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
+            .sheet(isPresented: $showingBackupRestore) { BackupRestoreView() }
             .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
             .background(Color.primaryBackground)
-            .tint(themeManager.accentColor.color)
-            .listRowBackground(Color.clear)
-        }
-        .alert(
-            NSLocalizedString("Download Model?", comment: "Whisper model download confirm title"),
-            isPresented: $showModelDownloadConfirm
-        ) {
-            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {
-                pendingWhisperModel = nil
-            }
-            Button(NSLocalizedString("Download", comment: "Download button")) {
-                if let model = pendingWhisperModel {
-                    Task { try? await whisperManager.switchModel(to: model) }
-                }
-                pendingWhisperModel = nil
-            }
-        } message: {
-            Text(
-                String(
-                    format: NSLocalizedString(
-                        "Download %@ model for offline transcription?",
-                        comment: "Whisper download confirm message"
-                    ),
-                    pendingWhisperModel?.displayName ?? ""
-                )
-            )
+                .listRowBackground(Color.clear)
         }
         .alert(
             NSLocalizedString("Reset Stats?", comment: "Reset stats confirm title"),
@@ -78,8 +55,6 @@ struct SettingsView: View {
         } message: {
             Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books and goals remain.", comment: "Reset stats confirm message"))
         }
-        .preferredColorScheme(themeManager.currentTheme.colorScheme)
-        .tint(themeManager.accentColor.color)
     }
 }
 

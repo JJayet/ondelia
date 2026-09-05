@@ -2,13 +2,11 @@ import Foundation
 import Translation
 
 @MainActor
-class TranslationManager: ObservableObject {
+@Observable
+final class TranslationManager {
     static let shared = TranslationManager()
     
-    @Published var isTranslating = false
-    @Published var translationProgress: Double = 0
-    
-    private let themeManager = ThemeManager.shared
+    var isTranslating = false
     
     private init() {}
     
@@ -23,18 +21,11 @@ class TranslationManager: ObservableObject {
     func translateText(_ text: String, from sourceLanguage: String, to targetLanguage: String) async throws -> String {
         guard !text.isEmpty else { return text }
         
-        await MainActor.run {
-            isTranslating = true
-        }
-        
-        defer {
-            Task { @MainActor in
-                isTranslating = false
-            }
-        }
+        isTranslating = true
+        defer { isTranslating = false }
         
         do {
-            print("🔄 TranslationManager: Starting translation from \(sourceLanguage) to \(targetLanguage)")
+            Log.transcription.debug("🔄 TranslationManager: Starting translation from \(sourceLanguage) to \(targetLanguage)")
             
             // Create translation session
             let session = TranslationSession(
@@ -47,147 +38,25 @@ class TranslationManager: ObservableObject {
             // Perform translation
             let response = try await session.translate(text)
             
-            print("✅ TranslationManager: Translation completed")
+            Log.transcription.debug("✅ TranslationManager: Translation completed")
             return response.targetText
             
         } catch {
-            print("❌ TranslationManager: Translation error: \(error)")
+            Log.transcription.error("❌ TranslationManager: Translation error: \(error)")
             throw TranslationError.translationFailed(error)
         }
     }
     
-    /// Translate transcription result using settings
-    /// - Parameter transcriptionResult: The transcription to translate
-    /// - Returns: Translated transcription result
-    func translateTranscriptionResult(_ transcriptionResult: TranscriptionResult) async throws -> TranscriptionResult {
-        guard themeManager.enableTranslation else {
-            return transcriptionResult
-        }
-        
-        let sourceLanguage = transcriptionResult.language
-        let targetLanguage = themeManager.translationTargetLanguage.rawValue
-        
-        // Don't translate if source and target are the same
-        guard sourceLanguage != targetLanguage else {
-            return transcriptionResult
-        }
-        
-        let translatedText = try await translateText(
-            transcriptionResult.text,
-            from: sourceLanguage,
-            to: targetLanguage
-        )
-        
-        // Translate segments individually
-        var translatedSegments: [TranscriptionSegment] = []
-        
-        let totalSegments = transcriptionResult.segments.count
-        
-        for (index, segment) in transcriptionResult.segments.enumerated() {
-            let translatedSegmentText = try await translateText(
-                segment.text,
-                from: sourceLanguage,
-                to: targetLanguage
-            )
-            
-            let translatedSegment = TranscriptionSegment(
-                text: translatedSegmentText,
-                start: segment.start,
-                end: segment.end
-            )
-            
-            translatedSegments.append(translatedSegment)
-            
-            // Update progress
-            await MainActor.run {
-                translationProgress = Double(index + 1) / Double(totalSegments)
-            }
-        }
-        
-        return TranscriptionResult(
-            text: translatedText,
-            segments: translatedSegments,
-            language: targetLanguage
-        )
-    }
-    
-    /// Check if translation is available for the given language pair
-    /// - Parameters:
-    ///   - sourceLanguage: Source language code
-    ///   - targetLanguage: Target language code
-    /// - Returns: Whether translation is available
-    func isTranslationAvailable(from sourceLanguage: String, to targetLanguage: String) async -> Bool {
-        guard sourceLanguage != targetLanguage else { return true }
-        
-        do {
-            let targetLocale = Locale.Language(identifier: targetLanguage)
-            
-            let availability = LanguageAvailability()
-            let status = try await availability.status(for: sourceLanguage, to: targetLocale)
-            
-            switch status {
-            case .installed, .supported:
-                return true
-            case .unsupported:
-                return false
-            @unknown default:
-                return false
-            }
-        } catch {
-            print("❌ TranslationManager: Error checking availability: \(error)")
-            return false
-        }
-    }
-    
-    /// Get available translation language pairs
-    /// - Returns: Array of supported language pairs
-    func getAvailableLanguagePairs() async -> [(source: TranscriptionLanguage, target: TranscriptionLanguage)] {
-        var pairs: [(source: TranscriptionLanguage, target: TranscriptionLanguage)] = []
-        
-        for sourceLanguage in TranscriptionLanguage.allCases {
-            for targetLanguage in TranscriptionLanguage.allCases {
-                if sourceLanguage != targetLanguage {
-                    let isAvailable = await isTranslationAvailable(
-                        from: sourceLanguage.rawValue,
-                        to: targetLanguage.rawValue
-                    )
-                    if isAvailable {
-                        pairs.append((source: sourceLanguage, target: targetLanguage))
-                    }
-                }
-            }
-        }
-        
-        return pairs
-    }
 }
 
 // MARK: - Error Types
 enum TranslationError: Error, LocalizedError {
     case translationFailed(Error)
-    case languageNotSupported
-    case translationUnavailable
     
     var errorDescription: String? {
         switch self {
         case .translationFailed(let error):
             return "Translation failed: \(error.localizedDescription)"
-        case .languageNotSupported:
-            return "Language not supported for translation"
-        case .translationUnavailable:
-            return "Translation service unavailable"
-        }
-    }
-}
-
-// MARK: - iOS Version Compatibility
-@available(iOS 26.0, *)
-extension TranslationManager {
-    static var isAvailable: Bool {
-        if #available(iOS 26, *) {
-            return true
-        } else {
-            return false
         }
     }
 }

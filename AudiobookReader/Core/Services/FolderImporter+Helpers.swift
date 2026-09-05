@@ -35,15 +35,36 @@ extension FolderImporter {
         return "Chapter \(index)"
     }
     
-    static let audioFileExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
+    static let audioFileExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac", "opus", "ogg", "aiff", "aif"]
 
-    /// Audio files directly inside `folderURL`, sorted by file name.
+    static func isAudioFile(_ url: URL) -> Bool {
+        audioFileExtensions.contains(url.pathExtension.lowercased())
+    }
+
+    /// Audio files anywhere under `folderURL`, sorted the way Finder would sort them.
+    /// Recursive, because a book is just as often shipped as `Book/Disc 1/01.mp3`
+    /// as it is as a flat folder.
     static func audioFiles(in folderURL: URL) -> [URL] {
-        let audioExtensions = audioFileExtensions
-        let contents = (try? FileManager.default.contentsOfDirectory(at: folderURL, includingPropertiesForKeys: [.isRegularFileKey])) ?? []
-        return contents
-            .filter { audioExtensions.contains($0.pathExtension.lowercased()) }
-            .sorted { $0.lastPathComponent < $1.lastPathComponent }
+        let enumerator = FileManager.default.enumerator(
+            at: folderURL,
+            includingPropertiesForKeys: [.isRegularFileKey],
+            options: [.skipsHiddenFiles, .skipsPackageDescendants]
+        )
+        let files = (enumerator?.allObjects as? [URL] ?? []).filter(isAudioFile)
+        return files.sorted {
+            relativePath(of: $0, in: folderURL)
+                .localizedStandardCompare(relativePath(of: $1, in: folderURL)) == .orderedAscending
+        }
+    }
+
+    /// The path of `url` relative to `folderURL`, so a chapter in a subfolder keeps its subfolder.
+    /// Falls back to the file name when `url` is not under `folderURL` (hand-picked selections).
+    static func relativePath(of url: URL, in folderURL: URL) -> String {
+        let root = folderURL.standardizedFileURL.path
+        let path = url.standardizedFileURL.path
+        let prefix = root.hasSuffix("/") ? root : root + "/"
+        guard path.hasPrefix(prefix) else { return url.lastPathComponent }
+        return String(path.dropFirst(prefix.count))
     }
 
     static func findCoverImage(in folderURL: URL) async -> UIImage? {
@@ -58,7 +79,7 @@ extension FolderImporter {
                 for ext in imageExtensions {
                     let imageURL = folderURL.appendingPathComponent("\(name).\(ext)")
                     if contents.contains(imageURL), let image = UIImage(contentsOfFile: imageURL.path) {
-                        print("🖼️ FolderImporter: Found cover image: \(name).\(ext)")
+                        Log.library.debug("🖼️ FolderImporter: Found cover image: \(name).\(ext)")
                         return image
                     }
                 }
@@ -68,27 +89,16 @@ extension FolderImporter {
             for url in contents {
                 if imageExtensions.contains(url.pathExtension.lowercased()) {
                     if let image = UIImage(contentsOfFile: url.path) {
-                        print("🖼️ FolderImporter: Using image: \(url.lastPathComponent)")
+                        Log.library.debug("🖼️ FolderImporter: Using image: \(url.lastPathComponent)")
                         return image
                     }
                 }
             }
         } catch {
-            print("⚠️ FolderImporter: Could not search for cover image: \(error)")
+            Log.library.warning("⚠️ FolderImporter: Could not search for cover image: \(error)")
         }
         
         return nil
     }
     
-    static func formatTime(_ time: TimeInterval) -> String {
-        let hours = Int(time) / 3600
-        let minutes = (Int(time) % 3600) / 60
-        let seconds = Int(time) % 60
-        
-        if hours > 0 {
-            return String(format: "%d:%02d:%02d", hours, minutes, seconds)
-        } else {
-            return String(format: "%d:%02d", minutes, seconds)
-        }
-    }
 }

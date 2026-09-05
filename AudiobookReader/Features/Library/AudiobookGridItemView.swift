@@ -5,8 +5,7 @@ struct AudiobookGridItemView: View {
     let onTap: () -> Void
 
     private var coverImage: UIImage? {
-        guard let data = audiobook.coverImageData else { return nil }
-        return UIImage(data: data)
+        CoverImageCache.image(for: audiobook)
     }
 
     private var progressPercentage: Double {
@@ -22,16 +21,16 @@ struct AudiobookGridItemView: View {
                     if let image = coverImage {
                         Image(uiImage: image)
                             .resizable()
-                            .aspectRatio(contentMode: .fill)
+                            .aspectRatio(contentMode: .fit)
                     } else {
                         Image(systemName: "book.closed")
                             .font(.system(size: 40))
-                            .foregroundColor(.secondaryText)
+                            .foregroundStyle(Color.secondaryText)
                     }
                 }
-                .frame(width: 120, height: 120)
+                .frame(width: 120, height: 180)
                 .background(Color.secondaryBackground)
-                .cornerRadius(16)
+                .clipShape(.rect(cornerRadius: 16))
                 .clipped()
                 .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
                 .overlay(
@@ -49,19 +48,19 @@ struct AudiobookGridItemView: View {
                     Text(audiobook.title ?? AudiobookModel.unknownTitle)
                         .font(.subheadline)
                         .fontWeight(.medium)
-                        .foregroundColor(.primaryText)
+                        .foregroundStyle(Color.primaryText)
                         .lineLimit(2)
                         .multilineTextAlignment(.center)
 
                     Text(audiobook.author ?? AudiobookModel.unknownAuthor)
                         .font(.caption)
-                        .foregroundColor(.secondaryText)
+                        .foregroundStyle(Color.secondaryText)
                         .lineLimit(1)
 
                     // Progress Indicator
                     if audiobook.isFinished {
                         Image(systemName: "checkmark.circle.fill")
-                            .foregroundColor(.green)
+                            .foregroundStyle(.green)
                             .font(.caption)
                     } else if audiobook.currentPosition > 0 {
                         ProgressView(value: progressPercentage)
@@ -76,6 +75,6 @@ struct AudiobookGridItemView: View {
             .padding(12)
             .glassEffect(in:.rect(cornerRadius: 20))
         }
-        .buttonStyle(PlainButtonStyle())
+        .buttonStyle(.plain)
     }
 }

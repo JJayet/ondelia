@@ -2,11 +2,11 @@ import Foundation
 import AVFoundation
 import UIKit
 
-class FolderImporter {
+enum FolderImporter {
     
     // MARK: - Import Folder
     static func importAudiobookFolder(from folderURL: URL) async -> FolderAudiobook? {
-        print("📁 FolderImporter: Starting import from folder: \(folderURL.lastPathComponent)")
+        Log.library.debug("📁 FolderImporter: Starting import from folder: \(folderURL.lastPathComponent)")
         
         // Ensure we have access to the folder
         let hasAccess = folderURL.startAccessingSecurityScopedResource()
@@ -20,10 +20,10 @@ class FolderImporter {
         let completeJsonURL = folderURL.appendingPathComponent("complete.json")
         
         if FileManager.default.fileExists(atPath: completeJsonURL.path) {
-            print("✅ FolderImporter: Found complete.json, using structured import")
+            Log.library.debug("✅ FolderImporter: Found complete.json, using structured import")
             return await importFromCompleteJson(folderURL: folderURL, completeJsonURL: completeJsonURL)
         } else {
-            print("📄 FolderImporter: No complete.json found, using file-based import")
+            Log.library.debug("📄 FolderImporter: No complete.json found, using file-based import")
             return await importFromAudioFiles(folderURL: folderURL)
         }
     }
@@ -34,7 +34,7 @@ class FolderImporter {
             let jsonData = try Data(contentsOf: completeJsonURL)
             let entries = try JSONDecoder().decode([CompleteJsonEntry].self, from: jsonData)
             
-            print("📊 FolderImporter: Found \(entries.count) entries in complete.json")
+            Log.library.debug("📊 FolderImporter: Found \(entries.count) entries in complete.json")
             
             let folderName = folderURL.lastPathComponent
             let title = extractTitle(from: folderName)
@@ -52,16 +52,16 @@ class FolderImporter {
                 let audioFileURL: URL
                 do {
                     fileName = try SafeImportPath.normalizedRelativePath(rawPath)
-                    audioFileURL = try SafeImportPath.existingFileURL(for: fileName, inside: folderURL)
+                    audioFileURL = try SafeImportPath.containedFileURL(for: fileName, inside: folderURL)
                 } catch {
-                    print("⚠️ FolderImporter: Rejected unsafe audio path: \(entry.path)")
+                    Log.library.warning("⚠️ FolderImporter: Rejected unsafe audio path: \(entry.path)")
                     continue
                 }
                 let chapterTitle = generateChapterTitle(from: fileName, index: index + 1)
                 
                 // Verify the audio file exists
                 guard FileManager.default.fileExists(atPath: audioFileURL.path) else {
-                    print("⚠️ FolderImporter: Audio file not found: \(fileName)")
+                    Log.library.warning("⚠️ FolderImporter: Audio file not found: \(fileName)")
                     continue
                 }
                 
@@ -77,7 +77,7 @@ class FolderImporter {
                 chapters.append(chapter)
                 cumulativeTime += entry.length
                 
-                print("📖 FolderImporter: Chapter \(index + 1): \(chapterTitle) (\(formatTime(entry.length)))")
+                Log.library.debug("📖 FolderImporter: Chapter \(index + 1): \(chapterTitle) (\(entry.length.clockFormatted))")
             }
             
             // Look for cover image
@@ -93,16 +93,16 @@ class FolderImporter {
                 coverImage: coverImage
             )
             
-            print("✅ FolderImporter: Successfully created folder audiobook")
-            print("   Title: \(title)")
-            print("   Author: \(author ?? "Unknown")")
-            print("   Duration: \(formatTime(cumulativeTime))")
-            print("   Chapters: \(chapters.count)")
+            Log.library.debug("✅ FolderImporter: Successfully created folder audiobook")
+            Log.library.debug("   Title: \(title)")
+            Log.library.debug("   Author: \(author ?? "Unknown")")
+            Log.library.debug("   Duration: \(cumulativeTime.clockFormatted)")
+            Log.library.debug("   Chapters: \(chapters.count)")
             
             return folderAudiobook
             
         } catch {
-            print("❌ FolderImporter: Failed to parse complete.json: \(error)")
+            Log.library.error("❌ FolderImporter: Failed to parse complete.json: \(error)")
             return await importFromAudioFiles(folderURL: folderURL)
         }
     }
@@ -115,7 +115,7 @@ class FolderImporter {
         var associatedAudioFile: URL?
         
         if let firstCueFile = cueFiles.first {
-            print("🎵 FolderImporter: Found CUE file: \(firstCueFile.lastPathComponent)")
+            Log.library.debug("🎵 FolderImporter: Found CUE file: \(firstCueFile.lastPathComponent)")
             cueFile = CUEParser.parseCUEFile(at: firstCueFile)
             
             if let parsedCue = cueFile {
@@ -126,9 +126,9 @@ class FolderImporter {
         // If we have a valid CUE file with associated audio, this is a single-file audiobook
         // We should return nil here so the AudiobookManager can import it as a single file instead
         if let _ = cueFile, let audioFile = associatedAudioFile {
-            print("📖 FolderImporter: CUE file detected - this should be imported as a single-file audiobook")
-            print("   Audio file: \(audioFile.lastPathComponent)")
-            print("   ⚠️ Returning nil to trigger single-file import workflow")
+            Log.library.debug("📖 FolderImporter: CUE file detected - this should be imported as a single-file audiobook")
+            Log.library.debug("   Audio file: \(audioFile.lastPathComponent)")
+            Log.library.debug("   ⚠️ Returning nil to trigger single-file import workflow")
             return nil
         }
         
@@ -136,11 +136,11 @@ class FolderImporter {
         let audioFiles = FolderImporter.audioFiles(in: folderURL)
         
         guard !audioFiles.isEmpty else {
-            print("❌ FolderImporter: No audio files found in folder")
+            Log.library.error("❌ FolderImporter: No audio files found in folder")
             return nil
         }
         
-        print("🎵 FolderImporter: Found \(audioFiles.count) audio files")
+        Log.library.debug("🎵 FolderImporter: Found \(audioFiles.count) audio files")
         
         return await makeFolderAudiobook(from: audioFiles, folderURL: folderURL)
     }
@@ -170,7 +170,7 @@ class FolderImporter {
             let batchEnd = min(batchStart + batchSize, audioFiles.count)
             let batch = Array(audioFiles[batchStart..<batchEnd])
             
-            print("🔄 FolderImporter: Processing batch \(batchStart / batchSize + 1): files \(batchStart + 1)-\(batchEnd)")
+            Log.library.debug("🔄 FolderImporter: Processing batch \(batchStart / batchSize + 1): files \(batchStart + 1)-\(batchEnd)")
             
             // Process batch in parallel for better performance
             let batchResults = await withTaskGroup(of: (index: Int, duration: TimeInterval, fileName: String, fileSize: Int64).self) { group in
@@ -188,10 +188,10 @@ class FolderImporter {
                             }
                             duration = durationCMTime.seconds.isFinite ? durationCMTime.seconds : 0
                         } catch is TimeoutError {
-                            print("⏱️ FolderImporter: Timeout on \(audioFileURL.lastPathComponent)")
+                            Log.library.debug("⏱️ FolderImporter: Timeout on \(audioFileURL.lastPathComponent)")
                             duration = 0
                         } catch {
-                            print("⚠️ FolderImporter: Error on \(audioFileURL.lastPathComponent): \(error)")
+                            Log.library.warning("⚠️ FolderImporter: Error on \(audioFileURL.lastPathComponent): \(error)")
                             duration = 0
                         }
                         
@@ -199,7 +199,10 @@ class FolderImporter {
                         let attributes = try? FileManager.default.attributesOfItem(atPath: audioFileURL.path)
                         let fileSize = attributes?[.size] as? Int64 ?? 0
                         
-                        return (index: globalIndex, duration: duration, fileName: audioFileURL.lastPathComponent, fileSize: fileSize)
+                        // Relative, so a chapter living in a subfolder keeps its subfolder in the
+                        // manifest and survives the copy into the library.
+                        let fileName = FolderImporter.relativePath(of: audioFileURL, in: folderURL)
+                        return (index: globalIndex, duration: duration, fileName: fileName, fileSize: fileSize)
                     }
                 }
                 
@@ -227,7 +230,7 @@ class FolderImporter {
                 chapters.append(chapter)
                 cumulativeTime += result.duration
                 
-                print("📖 FolderImporter: Chapter \(result.index + 1): \(chapterTitle) (\(formatTime(result.duration)))")
+                Log.library.debug("📖 FolderImporter: Chapter \(result.index + 1): \(chapterTitle) (\(result.duration.clockFormatted))")
             }
             
             // Small delay between batches to prevent overwhelming the system
@@ -253,11 +256,11 @@ class FolderImporter {
             coverImage: coverImage
         )
         
-        print("✅ FolderImporter: Successfully created folder audiobook from files")
-        print("   Title: \(title)")
-        print("   Author: \(author ?? "Unknown")")
-        print("   Duration: \(formatTime(cumulativeTime))")
-        print("   Chapters: \(chapters.count)")
+        Log.library.debug("✅ FolderImporter: Successfully created folder audiobook from files")
+        Log.library.debug("   Title: \(title)")
+        Log.library.debug("   Author: \(author ?? "Unknown")")
+        Log.library.debug("   Duration: \(cumulativeTime.clockFormatted)")
+        Log.library.debug("   Chapters: \(chapters.count)")
         
         return folderAudiobook
     }
