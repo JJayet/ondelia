@@ -1,4 +1,4 @@
-name: AudiobookReader CI
+name: Isora CI
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
       - name: Select Xcode 26
         uses: maxim-lobanov/setup-xcode@v1
         with:
-          xcode-version: '26.6'
+          xcode-version: "26.6"
 
       - name: Cache build dependencies
         uses: actions/cache@v4
@@ -31,15 +31,15 @@ jobs:
           path: |
             DerivedData/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: ${{ runner.os }}-spm-${{ hashFiles('AudiobookReader.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: ${{ runner.os }}-spm-${{ hashFiles('Isora.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: ${{ runner.os }}-spm-
 
       - name: Build application and test targets
         run: |
           set -o pipefail
           xcodebuild build-for-testing \
-            -project AudiobookReader.xcodeproj \
-            -scheme AudiobookReader \
+            -project Isora.xcodeproj \
+            -scheme Isora \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
@@ -51,8 +51,8 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild test-without-building \
-            -project AudiobookReader.xcodeproj \
-            -scheme AudiobookReader \
+            -project Isora.xcodeproj \
+            -scheme Isora \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
