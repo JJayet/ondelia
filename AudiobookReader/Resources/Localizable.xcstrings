@@ -67,7 +67,7 @@
       }
     },
     "%@ left" : {
-      "comment" : "Remaining listening time",
+      "comment" : "Player: time left in the chapter\nRemaining listening time",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2566,9 +2566,6 @@
         }
       }
     },
-    "Time remaining" : {
-      "comment" : "Remaining time accessibility label"
-    },
     "Title" : {
       "comment" : "Sort by title",
       "localizations" : {
@@ -2612,9 +2609,6 @@
           }
         }
       }
-    },
-    "Total length" : {
-      "comment" : "Total duration accessibility label"
     },
     "Total Time" : {
       "comment" : "Total time stat card title",
@@ -2884,50 +2878,6 @@
     },
     "Your progress and bookmarks may not have been recorded.\n%@" : {
       "comment" : "SwiftData save failure description"
-    },
-    "Metadata" : {
-      "comment" : "Hardcover settings section: metadata",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Métadonnées"
-          }
-        }
-      }
-    },
-    "Re-reads the series, summary, genres, moods and content warnings of every linked book." : {
-      "comment" : "Hardcover metadata section footer",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Relit la série, le résumé, les genres, les ambiances et les avertissements de contenu de chaque livre lié."
-          }
-        }
-      }
-    },
-    "Refresh All Metadata" : {
-      "comment" : "Hardcover metadata refresh button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tout actualiser"
-          }
-        }
-      }
-    },
-    "Refreshed %d linked books. %d belong to a series." : {
-      "comment" : "Hardcover metadata refresh result",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres liés actualisés. %d font partie d'une série."
-          }
-        }
-      }
     }
   },
   "version" : "1.1"
