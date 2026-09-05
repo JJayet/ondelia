@@ -4,76 +4,51 @@ struct AudiobookGridItemView: View {
     let audiobook: AudiobookModel
     let onTap: () -> Void
 
-    private var coverImage: UIImage? {
-        CoverImageCache.image(for: audiobook)
-    }
-
     private var progressPercentage: Double {
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
     }
 
+    private var meta: String {
+        audiobook.isFinished
+            ? String(
+                format: NSLocalizedString("Completed · %@", comment: "Finished book with its duration"),
+                audiobook.duration.hoursMinutesFormatted
+            )
+            : String(
+                format: NSLocalizedString("%d%% · %@", comment: "Progress percentage and duration"),
+                Int(progressPercentage * 100),
+                audiobook.duration.hoursMinutesFormatted
+            )
+    }
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 12) {
-                // Cover Art
-                Group {
-                    if let image = coverImage {
-                        Image(uiImage: image)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                    } else {
-                        Image(systemName: "book.closed")
-                            .font(.system(size: 40))
-                            .foregroundStyle(Color.secondaryText)
-                    }
-                }
-                .frame(width: 120, height: 180)
-                .background(Color.secondaryBackground)
-                .clipShape(.rect(cornerRadius: 16))
-                .clipped()
-                .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .stroke(
-                            Color.accentColor.opacity(
-                                audiobook.currentPosition > 0 ? 0.3 : 0
-                            ),
-                            lineWidth: 2
-                        )
-                )
-
-                // Book Info
-                VStack(spacing: 4) {
-                    Text(audiobook.title ?? AudiobookModel.unknownTitle)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color.primaryText)
-                        .lineLimit(2)
-                        .multilineTextAlignment(.center)
-
-                    Text(audiobook.author ?? AudiobookModel.unknownAuthor)
-                        .font(.caption)
-                        .foregroundStyle(Color.secondaryText)
-                        .lineLimit(1)
-
-                    // Progress Indicator
-                    if audiobook.isFinished {
-                        Image(systemName: "checkmark.circle.fill")
-                            .foregroundStyle(.green)
-                            .font(.caption)
-                    } else if audiobook.currentPosition > 0 {
-                        ProgressView(value: progressPercentage)
-                            .progressViewStyle(
-                                LinearProgressViewStyle(tint: .accentColor)
+            VStack(alignment: .leading, spacing: 8) {
+                CoverArtView(audiobook: audiobook, size: nil)
+                    // The progress hairline rides the bottom edge of the artwork itself.
+                    .overlay(alignment: .bottom) {
+                        if audiobook.currentPosition > 0 {
+                            ProgressLine(
+                                value: progressPercentage,
+                                height: 3,
+                                color: audiobook.isFinished ? .green : .accentColor
                             )
-                            .frame(height: 2)
+                        }
                     }
-                }
-                .frame(maxWidth: .infinity)
+
+                Text(audiobook.title ?? AudiobookModel.unknownTitle)
+                    .font(.system(size: 12.5, weight: .semibold))
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                Text(meta)
+                    .font(.system(size: 11))
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
             }
-            .padding(12)
-            .glassEffect(in:.rect(cornerRadius: 20))
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

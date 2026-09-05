@@ -119,6 +119,90 @@ extension HardcoverAPI {
         return response.insertUserBook.id
     }
 
+    /// The series a book belongs to, or nil when Hardcover has it as a standalone.
+    ///
+    /// Search does not carry series, so this is a second request — made once per link, not per
+    /// library read: the answer is stored on the link.
+    static func series(bookID: Int, token: String) async throws -> SeriesRef? {
+        let document = """
+            query BookSeries($id: Int!) {
+              books(where: {id: {_eq: $id}}, limit: 1) {
+                book_series {
+                  position
+                  series {
+                    id
+                    name
+                  }
+                }
+              }
+            }
+            """
+        let response = try await execute(
+            query: document,
+            variables: ["id": bookID],
+            token: token,
+            as: BookSeriesResponse.self
+        )
+        // A book can sit in several series (an omnibus, a shared universe). The first is the
+        // one Hardcover shows on the book page, and grouping needs exactly one.
+        guard let entry = response.books.first?.bookSeries.first else { return nil }
+        return SeriesRef(id: entry.series.id, name: entry.series.name, position: entry.position)
+    }
+
+    /// What Hardcover knows about one book: its description, and the tags readers have put on
+    /// it — genres, moods, content warnings.
+    static func details(bookID: Int, token: String) async throws -> BookDetails? {
+        let document = """
+            query BookDetails($id: Int!) {
+              books(where: {id: {_eq: $id}}, limit: 1) {
+                description
+                cached_tags
+              }
+            }
+            """
+        let response = try await execute(
+            query: document,
+            variables: ["id": bookID],
+            token: token,
+            as: BookDetailsResponse.self
+        )
+        guard let book = response.books.first else { return nil }
+        return BookDetails(
+            summary: book.description?.trimmingCharacters(in: .whitespacesAndNewlines),
+            genres: book.tags(in: "Genre"),
+            moods: book.tags(in: "Mood"),
+            contentWarnings: book.tags(in: "Content Warning")
+        )
+    }
+
+    /// Every volume of a series, in reading order — including the ones the reader does not own,
+    /// which is the whole point: a series card can only say what is missing if it knows the
+    /// full list.
+    static func seriesVolumes(seriesID: Int, token: String) async throws -> [SeriesVolume] {
+        let document = """
+            query SeriesBooks($id: Int!) {
+              series(where: {id: {_eq: $id}}, limit: 1) {
+                book_series(order_by: {position: asc}) {
+                  position
+                  book {
+                    id
+                    title
+                  }
+                }
+              }
+            }
+            """
+        let response = try await execute(
+            query: document,
+            variables: ["id": seriesID],
+            token: token,
+            as: SeriesVolumesResponse.self
+        )
+        return (response.series.first?.bookSeries ?? []).map {
+            SeriesVolume(bookID: $0.book.id, title: $0.book.title, position: $0.position)
+        }
+    }
+
     static func removeFromShelf(userBookID: Int, token: String) async throws {
         let document = """
             mutation DeleteUserBook($id: Int!) {
@@ -193,6 +277,127 @@ extension HardcoverAPI {
         }
     }
 
+    /// The blurb and the reader-applied tags for one book.
+    struct BookDetails: Hashable, Sendable {
+        let summary: String?
+        let genres: [String]
+        let moods: [String]
+        let contentWarnings: [String]
+    }
+
+    struct BookDetailsResponse: Decodable {
+        let books: [Book]
+
+        struct Book: Decodable {
+            let description: String?
+            /// `cached_tags` is a free-form jsonb column: a bucket per category, each holding
+            /// rows that carry a `tag` among other fields. Anything that does not fit that
+            /// shape is dropped rather than failing the whole decode.
+            let cachedTags: [String: [Tag]]
+
+            struct Tag: Decodable {
+                let tag: String
+            }
+
+            func tags(in category: String) -> [String] {
+                (cachedTags[category] ?? []).map(\.tag)
+            }
+
+            enum CodingKeys: String, CodingKey {
+                case description
+                case cachedTags = "cached_tags"
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                description = try? container.decodeIfPresent(String.self, forKey: .description)
+                cachedTags = (try? container.decodeIfPresent([String: [Tag]].self, forKey: .cachedTags)) ?? [:]
+            }
+        }
+    }
+
+    /// Where one book sits in one series.
+    struct SeriesRef: Hashable, Sendable {
+        let id: Int
+        let name: String
+        let position: Double?
+    }
+
+    struct SeriesVolumesResponse: Decodable {
+        let series: [Entry]
+
+        struct Entry: Decodable {
+            let bookSeries: [Volume]
+
+            enum CodingKeys: String, CodingKey {
+                case bookSeries = "book_series"
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                bookSeries = (try? container.decode([Volume].self, forKey: .bookSeries)) ?? []
+            }
+        }
+
+        struct Volume: Decodable {
+            let position: Double?
+            let book: Book
+
+            struct Book: Decodable {
+                let id: Int
+                let title: String
+            }
+
+            enum CodingKeys: String, CodingKey {
+                case position, book
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                book = try container.decode(Book.self, forKey: .book)
+                position = try container.decodeSeriesPosition(forKey: .position)
+            }
+        }
+    }
+
+    struct BookSeriesResponse: Decodable {
+        let books: [Book]
+
+        struct Book: Decodable {
+            let bookSeries: [Entry]
+
+            enum CodingKeys: String, CodingKey {
+                case bookSeries = "book_series"
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                bookSeries = (try? container.decode([Entry].self, forKey: .bookSeries)) ?? []
+            }
+        }
+
+        struct Entry: Decodable {
+            /// Hardcover stores the position as a number on some rows and a string on others.
+            let position: Double?
+            let series: Series
+
+            struct Series: Decodable {
+                let id: Int
+                let name: String
+            }
+
+            enum CodingKeys: String, CodingKey {
+                case position, series
+            }
+
+            init(from decoder: Decoder) throws {
+                let container = try decoder.container(keyedBy: CodingKeys.self)
+                series = try container.decode(Series.self, forKey: .series)
+                position = try container.decodeSeriesPosition(forKey: .position)
+            }
+        }
+    }
+
     struct InsertUserBookResponse: Decodable {
         let insertUserBook: Row
 
@@ -233,5 +438,17 @@ extension HardcoverLink {
             artworkURL: hit.artworkURL,
             status: status
         )
+    }
+}
+
+// MARK: - Shared decoding
+
+private extension KeyedDecodingContainer {
+    /// Hardcover writes the series position as a number on some rows and a string on others,
+    /// and omits it for a volume whose place is unrecorded.
+    func decodeSeriesPosition(forKey key: Key) throws -> Double? {
+        if let number = try? decodeIfPresent(Double.self, forKey: key) { return number }
+        guard let text = try? decodeIfPresent(String.self, forKey: key) else { return nil }
+        return Double(text)
     }
 }

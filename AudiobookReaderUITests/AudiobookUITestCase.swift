@@ -79,6 +79,14 @@ class AudiobookUITestCase: XCTestCase {
         )
         firstAudiobook.tap()
 
+        // A library row opens the book's detail screen; the player is one tap further in.
+        let resumeButton = app.buttons[AccessibilityIdentifiers.Library.resumeButton]
+        XCTAssertTrue(
+            resumeButton.waitForExistence(timeout: 5),
+            "Tapping an audiobook should open its detail screen. On screen instead:\n\(app.debugDescription)"
+        )
+        resumeButton.tap()
+
         let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
         XCTAssertTrue(
             playPauseButton.waitForExistence(timeout: 5),

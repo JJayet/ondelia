@@ -24,6 +24,8 @@ enum AccessibilityIdentifiers {
         static let viewModeToggle = "library_view_mode_toggle"
         static let importButton = "library_import_button"
         static let audiobookCell = "library_audiobook_cell"
+        /// The play/resume button on a book's detail screen.
+        static let resumeButton = "book_detail_resume_button"
     }
     
     // MARK: - Mini Player

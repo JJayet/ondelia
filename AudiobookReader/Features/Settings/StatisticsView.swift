@@ -2,88 +2,46 @@ import SwiftUI
 
 struct StatisticsView: View {
     let statistics: ReadingStatistics
-    private let themeManager = ThemeManager.shared
     @Environment(\.dismiss) private var dismiss
+    /// The ring animates in from zero on appear, so opening the sheet reads as progress being
+    /// counted up rather than a static gauge.
+    @State private var ringProgress: Double = 0
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(spacing: 24) {
-                    VStack(spacing: 16) {
-                        VStack(spacing: 8) {
-                            Text(NSLocalizedString("This Month", comment: "This month progress header"))
-                                .font(.headline)
-                                .foregroundStyle(Color.primaryText)
+                VStack(spacing: 16) {
+                    streakCard
 
-                            Text(statistics.formattedMonthlyProgress)
-                                .font(.system(size: 48, weight: .bold, design: .rounded))
-                                .foregroundStyle(.tint)
-
-                            Text(String(format: NSLocalizedString("of %@ goal", comment: "Monthly goal progress text"), statistics.formattedMonthlyGoal))
-                                .font(.subheadline)
-                                .foregroundStyle(Color.secondaryText)
-                        }
-
-                        // Progress Ring
-                        ZStack {
-                            Circle()
-                                .stroke(Color.secondaryBackground, lineWidth: 12)
-
-                            Circle()
-                                .trim(from: 0, to: statistics.monthlyGoalProgress)
-                                .stroke(
-                                    LinearGradient(
-                                        colors: [.accentColor, .accentColor.opacity(0.6)],
-                                        startPoint: .leading,
-                                        endPoint: .trailing
-                                    ),
-                                    style: StrokeStyle(lineWidth: 12, lineCap: .round)
-                                )
-                                .rotationEffect(.degrees(-90))
-                                .animation(.easeInOut(duration: 1), value: statistics.monthlyGoalProgress)
-
-                            Text("\(Int(statistics.monthlyGoalProgress * 100))%")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundStyle(Color.primaryText)
-                        }
-                        .frame(width: 150, height: 150)
-                    }
-                    .padding(24)
-                    .glassEffect(in:.rect(cornerRadius: 20))
-
-                    // Statistics Grid
-                    LazyVGrid(columns: [
-                        GridItem(.flexible()),
-                        GridItem(.flexible())
-                    ], spacing: 16) {
-                        StatCardView(
-                            title: NSLocalizedString("Total Time", comment: "Total time stat card title"),
-                            value: statistics.formattedTotalTime,
-                            icon: "clock",
-                            color: .blue
+                    HStack(spacing: 14) {
+                        tile(
+                            value: statistics.formattedMonthlyProgress,
+                            caption: String(
+                                format: NSLocalizedString("this month · %@ goal", comment: "Monthly goal caption"),
+                                statistics.formattedMonthlyGoal
+                            )
                         )
-
-                        StatCardView(
-                            title: NSLocalizedString("Books Completed", comment: "Books completed stat card title"),
+                        tile(
                             value: "\(statistics.booksCompleted)",
-                            icon: "books.vertical",
-                            color: .green
-                        )
-
-                        StatCardView(
-                            title: NSLocalizedString("Current Streak", comment: "Current streak stat card title"),
-                            value: "\(statistics.currentStreak)",
-                            subtitle: NSLocalizedString("days", comment: "Days unit for stat card"),
-                            icon: "flame",
-                            color: .red
+                            caption: NSLocalizedString("books completed", comment: "Books completed caption")
                         )
                     }
 
+                    HStack(spacing: 14) {
+                        tile(
+                            value: statistics.formattedTotalTime,
+                            caption: NSLocalizedString("listened in total", comment: "Total listening caption")
+                        )
+                        tile(
+                            value: "\(statistics.longestStreak)",
+                            caption: NSLocalizedString("longest streak, in days", comment: "Longest streak caption")
+                        )
+                    }
                 }
-                .padding()
+                .padding(16)
             }
-            .background(Color.primaryBackground.ignoresSafeArea())
+            .background(TintedBackground(intensity: 0.7))
+            .scrollContentBackground(.hidden)
             .navigationTitle(NSLocalizedString("Statistics", comment: "Statistics view title"))
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -91,7 +49,65 @@ struct StatisticsView: View {
                     Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
                 }
             }
+            .task {
+                ringProgress = statistics.monthlyGoalProgress
+            }
         }
+    }
+
+    private var streakCard: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                // The soft bloom behind the ring in the design.
+                Circle()
+                    .fill(.tint)
+                    .blur(radius: 26)
+                    .opacity(0.4)
+                    .padding(18)
+
+                StreakRing(
+                    progress: ringProgress,
+                    days: statistics.currentStreak,
+                    lineWidth: 13,
+                    numberSize: 54
+                )
+            }
+            .frame(width: 184, height: 184)
+
+            Text(
+                String(
+                    format: NSLocalizedString(
+                        "Best streak: %d days. %@ of this month's goal.",
+                        comment: "Streak card footnote"
+                    ),
+                    statistics.longestStreak,
+                    (statistics.monthlyGoalProgress).formatted(.percent.precision(.fractionLength(0)))
+                )
+            )
+            .font(.system(size: 12.5))
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+            .frame(maxWidth: 250)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 26)
+        .padding(.horizontal, 18)
+        .glassCard(cornerRadius: 30)
+    }
+
+    private func tile(value: String, caption: String) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text(value)
+                .font(.system(size: 26, weight: .bold))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
+            Text(caption)
+                .font(.system(size: 11.5))
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .glassCard(cornerRadius: 24)
     }
 }
 

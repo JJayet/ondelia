@@ -11,6 +11,8 @@ struct LibraryView: View {
     let statistics = ReadingStatistics.shared
     @State var showingStatistics = false
     @State var audiobookForImagePicker: AudiobookModel?
+    /// The book whose detail screen is pushed, if any.
+    @State var audiobookForDetail: AudiobookModel?
     @State var audiobookForHardcover: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
@@ -20,6 +22,8 @@ struct LibraryView: View {
     @AppStorage("library.viewMode") var viewMode: ViewMode = .list
     @AppStorage("library.sortOption") var sortOption: SortOption = .lastPlayed
     @AppStorage("library.filterOption") var filterOption: FilterOption = .all
+    /// Series grouping is Hardcover's doing, so it can be switched off from the banner.
+    @AppStorage("library.groupSeries") var groupSeries = true
     @State var showingImporter = false
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager) {
@@ -50,6 +54,12 @@ struct LibraryView: View {
         return filtered.sorted { sortOption.isOrderedBefore($0, $1) }
     }
 
+    /// The filtered library split into series and everything else. Computed whether or not
+    /// grouping is on, so the banner can say what turning it on would do.
+    var grouping: (series: [SeriesGroup], standalone: [AudiobookModel]) {
+        SeriesGroup.group(filteredAudiobooks)
+    }
+
     // MARK: - Actions
     func playAndPresent(_ audiobook: AudiobookModel) {
         let audio = GlobalAudioManager.shared
@@ -77,8 +87,8 @@ struct LibraryView: View {
             Button {
                 showingImporter = true
             } label: {
-                Image(systemName: "plus.circle")
-                    .font(.title3)
+                Image(systemName: "plus")
+                    .font(.system(size: 15, weight: .bold))
                     .foregroundStyle(.tint)
             }
             .accessibilityLabel(NSLocalizedString("Import Audiobook", comment: "Import button accessibility label"))
@@ -97,16 +107,20 @@ struct LibraryView: View {
                 gridModeContent
             }
         }
-        .background(Color.primaryBackground.ignoresSafeArea())
+        .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
         .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar { importToolbarItem }
+        .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0) }
         .onAppear {
             // Fetch audiobooks when the view first appears
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {
                 audiobookManager.fetchAudiobooks()
             }
         }
+        // Backfill: links made before the series lookup existed have no series on them. Each
+        // book is asked about once — `seriesChecked` keeps this from running again.
+        .task { await HardcoverService.shared.refreshSeries(for: audiobookManager.audiobooks) }
     }
 
     var body: some View {

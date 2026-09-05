@@ -13,16 +13,20 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                appearanceSection
-                playbackSection
-                goalsSection
-                integrationsSection
-                dataSection
-                aboutSection
+            ScrollView {
+                VStack(spacing: 22) {
+                    appearanceSection
+                    playbackSection
+                    goalsSection
+                    integrationsSection
+                    dataSection
+                    aboutSection
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
             }
             .navigationTitle(NSLocalizedString("Settings", comment: "Settings view title"))
-            .navigationBarTitleDisplayMode(.inline)
+            .navigationBarTitleDisplayMode(.large)
             .alert(NSLocalizedString("Monthly Goal", comment: "Monthly goal alert title"), isPresented: $showingGoalEditor) {
                 TextField(NSLocalizedString("Hours", comment: "Hours text field placeholder"), value: $tempGoal, format: .number)
                     .keyboardType(.decimalPad)
@@ -35,10 +39,8 @@ struct SettingsView: View {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
             .sheet(isPresented: $showingBackupRestore) { BackupRestoreView() }
-            .listStyle(.insetGrouped)
             .scrollContentBackground(.hidden)
-            .background(Color.primaryBackground)
-                .listRowBackground(Color.clear)
+            .background(TintedBackground(intensity: 0.6))
         }
         .alert(
             NSLocalizedString("Reset Stats?", comment: "Reset stats confirm title"),

@@ -3,131 +3,194 @@ import UIKit
 
 extension PlayerView {
     // MARK: - Playback Controls
+    //
+    // The design's minimal transport: two glass seek circles around one white play target.
+    // Chapter skips stay as bare glyphs at the edges — the mock drops them, but nothing else
+    // on this screen moves a chapter at a time.
     @ViewBuilder
     var playbackControls: some View {
-        HStack(spacing: 28) {
+        HStack(spacing: 0) {
             Button {
                 withHapticFeedback { audioManager.skipToPreviousChapter() }
             } label: {
                 Image(systemName: "backward.end.fill")
-                    .font(.title3)
-                    .foregroundStyle(Color.primaryText)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 40, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             .disabled(chapters.isEmpty)
             .accessibilityLabel(NSLocalizedString("Previous Chapter", comment: "Previous chapter accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.previousChapterButton)
 
+            Spacer(minLength: 8)
+
             Button {
-                let skipInterval = themeManager.skipInterval.seconds
-                withHapticFeedback {
-                    audioManager.skipBackward(skipInterval)
-                }
+                withHapticFeedback { audioManager.skipBackward(themeManager.skipInterval.seconds) }
             } label: {
-                Image(
-                    systemName:
-                        "gobackward.\(Int(themeManager.skipInterval.seconds))"
-                )
-                .font(.title)
-                .foregroundStyle(Color.primaryText)
+                seekLabel("gobackward.\(Int(themeManager.skipInterval.seconds))")
             }
+            .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipBackwardButton)
 
-            Button {
-                withHapticFeedback(.medium) {
-                    if audioManager.playbackState != .loading {
-                        audioManager.togglePlayback()
-                    }
-                }
-            } label: {
-                Group {
-                    if audioManager.playbackState == .loading {
-                        ProgressView()
-                            .scaleEffect(1.8)
-                            .progressViewStyle(.circular)
-                            .tint(.accentColor)
-                    } else {
-                        Image(
-                            systemName: isPlaying
-                                ? "pause.circle.fill" : "play.circle.fill"
-                        )
-                        .font(.system(size: 80))
-                        .foregroundStyle(.tint)
-                        .shadow(
-                            color: .accentColor.opacity(0.3),
-                            radius: 8,
-                            x: 0,
-                            y: 4
-                        )
-                    }
-                }
-            }
-            .frame(width: 80, height: 80)
-            .disabled(audioManager.playbackState == .loading)
-            .accessibilityLabel(
-                isPlaying
-                    ? NSLocalizedString("Pause", comment: "Pause playback accessibility label")
-                    : NSLocalizedString("Play", comment: "Play playback accessibility label")
-            )
-            .accessibilityIdentifier(AccessibilityIdentifiers.Player.playPauseButton)
+            Spacer(minLength: 8)
+
+            playPauseButton
+
+            Spacer(minLength: 8)
 
             Button {
-                let skipInterval = themeManager.skipInterval.seconds
-                withHapticFeedback {
-                    audioManager.skipForward(skipInterval)
-                }
+                withHapticFeedback { audioManager.skipForward(themeManager.skipInterval.seconds) }
             } label: {
-                Image(
-                    systemName:
-                        "goforward.\(Int(themeManager.skipInterval.seconds))"
-                )
-                .font(.title)
-                .foregroundStyle(Color.primaryText)
+                seekLabel("goforward.\(Int(themeManager.skipInterval.seconds))")
             }
+            .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipForwardButton)
+
+            Spacer(minLength: 8)
 
             Button {
                 withHapticFeedback { audioManager.skipToNextChapter() }
             } label: {
                 Image(systemName: "forward.end.fill")
-                    .font(.title3)
-                    .foregroundStyle(Color.primaryText)
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 40, height: 44)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
             .disabled(chapters.isEmpty)
             .accessibilityLabel(NSLocalizedString("Next Chapter", comment: "Next chapter accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.nextChapterButton)
         }
     }
 
-    // MARK: - Speed Controls
     @ViewBuilder
-    var speedControls: some View {
-        VStack(spacing: 12) {
-            Text(
-                String(
-                    format: NSLocalizedString(
-                        "Speed: %@",
-                        comment: "Playback speed display"
-                    ),
-                    PlaybackSpeed.displayName(playbackRate)
-                )
-            )
-            .font(.caption)
-            .foregroundStyle(Color.secondaryText)
+    private func seekLabel(_ systemImage: String) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 17, weight: .medium))
+            .frame(width: 48, height: 48)
+            .glassEffect(.regular, in: Circle())
+    }
 
+    @ViewBuilder
+    var playPauseButton: some View {
+        Button {
+            withHapticFeedback(.medium) {
+                if audioManager.playbackState != .loading {
+                    audioManager.togglePlayback()
+                }
+            }
+        } label: {
+            ZStack {
+                Circle()
+                    .fill(.white)
+                    .shadow(color: .black.opacity(0.45), radius: 18, y: 8)
+
+                if audioManager.playbackState == .loading {
+                    ProgressView()
+                        .progressViewStyle(.circular)
+                        .tint(.black)
+                } else {
+                    Image(systemName: isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 26, weight: .heavy))
+                        .foregroundStyle(.black)
+                        .offset(x: isPlaying ? 0 : 2)
+                }
+            }
+            .frame(width: 76, height: 76)
+        }
+        .buttonStyle(.plain)
+        .disabled(audioManager.playbackState == .loading)
+        .accessibilityLabel(
+            isPlaying
+                ? NSLocalizedString("Pause", comment: "Pause playback accessibility label")
+                : NSLocalizedString("Play", comment: "Play playback accessibility label")
+        )
+        .accessibilityIdentifier(AccessibilityIdentifiers.Player.playPauseButton)
+    }
+
+    // MARK: - Chips
+    //
+    // Speed, sleep timer, bookmarks and the transcript, as the wide glass pills under the panel.
+    @ViewBuilder
+    var chipRow: some View {
+        HStack(spacing: 9) {
             Menu {
                 ForEach(PlaybackSpeed.choices, id: \.self) { speed in
                     speedButton(for: speed)
                 }
             } label: {
-                Label(PlaybackSpeed.displayName(playbackRate), systemImage: "speedometer")
-                    .font(.caption.weight(.semibold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
+                chip(PlaybackSpeed.displayName(playbackRate))
             }
+            .accessibilityLabel(NSLocalizedString("Playback speed", comment: "Playback speed accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.speedControl)
+
+            Button {
+                showingSleepTimer = true
+            } label: {
+                // A running timer keeps its countdown beside the moon; otherwise the icon alone.
+                iconChip(
+                    sleepTimeRemaining > 0 ? "moon.fill" : "moon",
+                    trailing: sleepTimeRemaining > 0 ? sleepTimeRemaining.clockFormatted : nil,
+                    tinted: sleepTimeRemaining > 0
+                )
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
+
+            Button {
+                showingBookmarks = true
+            } label: {
+                iconChip("bookmark")
+            }
+            .buttonStyle(.plain)
+            .contextMenu {
+                Button(NSLocalizedString("Add Bookmark", comment: "Add bookmark button title")) {
+                    showingAddBookmark = true
+                }
+            }
+            .accessibilityLabel(NSLocalizedString("Bookmarks", comment: "Bookmarks button title"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.bookmarksButton)
+
+            Button {
+                showingTranscription = true
+            } label: {
+                iconChip("text.alignleft")
+            }
+            .buttonStyle(.plain)
+            .accessibilityLabel(NSLocalizedString("Transcript", comment: "Transcription button title"))
         }
+    }
+
+    @ViewBuilder
+    private func chip(_ title: String) -> some View {
+        Text(title)
+            .lineLimit(1)
+            .minimumScaleFactor(0.7)
+            .frame(maxWidth: .infinity)
+            .glassPill(height: 44)
+    }
+
+    /// The icon chips: sleep timer, bookmarks, transcript.
+    @ViewBuilder
+    private func iconChip(_ systemImage: String, trailing: String? = nil, tinted: Bool = false) -> some View {
+        HStack(spacing: 6) {
+            Image(systemName: systemImage)
+                .font(.system(size: 16, weight: .medium))
+            if let trailing {
+                Text(trailing)
+                    .monospacedDigit()
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.7)
+            }
+        }
+        .foregroundStyle(tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+        .frame(maxWidth: .infinity)
+        .glassPill(height: 44, tinted: tinted)
     }
 
     // MARK: - Speed Button Helper
@@ -143,52 +206,10 @@ extension PlayerView {
         .fontWeight(isSelected ? .bold : .regular)
     }
 
-    // MARK: - Action Buttons
-    @ViewBuilder
-    var actionButtons: some View {
-        HStack(spacing: 16) {
-            PlayerActionButton(
-                icon: "bookmark",
-                title: NSLocalizedString(
-                    "Bookmarks",
-                    comment: "Bookmarks button title"
-                ),
-                count: bookmarks.count,
-                accessibilityIdentifier: AccessibilityIdentifiers.Player.bookmarksButton
-            ) {
-                showingBookmarks = true
-            }
-
-            PlayerActionButton(
-                icon: "bookmark.circle",
-                title: NSLocalizedString(
-                    "Add Bookmark",
-                    comment: "Add bookmark button title"
-                )
-            ) {
-                showingAddBookmark = true
-            }
-
-            PlayerActionButton(
-                icon: "doc.text",
-                title: NSLocalizedString(
-                    "Transcript",
-                    comment: "Transcription button title"
-                )
-            ) {
-                showingTranscription = true
-            }
-        }
-        .padding(.bottom, 16)
-    }
-
     // MARK: - Helper Methods
     func loadAudiobook() {
         audioManager.loadAudiobook(audiobook)
     }
-
-    // Sleep timer is handled by PlayerViewModel
-
 
     func withHapticFeedback<T>(
         _ intensity: UIImpactFeedbackGenerator.FeedbackStyle = .light,

@@ -1,52 +1,74 @@
 import SwiftUI
 
+/// The streak card that opens the library: a ring for the month's goal wrapped around the
+/// current streak, and the month's own numbers beside it.
 struct StatisticsCardView: View {
     let statistics: ReadingStatistics
     let onTap: () -> Void
 
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 12) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(NSLocalizedString("This Month", comment: "This month statistics"))
-                            .font(.caption)
-                            .foregroundStyle(Color.secondaryText)
+            HStack(spacing: 16) {
+                StreakRing(progress: statistics.monthlyGoalProgress, days: statistics.currentStreak)
+                    .frame(width: 66, height: 66)
 
-                        Text(statistics.formattedMonthlyProgress)
-                            .font(.title2)
-                            .fontWeight(.bold)
-
-                        Text(String(format: NSLocalizedString("of %@ goal", comment: "Goal progress text"), statistics.formattedMonthlyGoal))
-                            .font(.caption)
-                            .foregroundStyle(Color.secondaryText)
-                    }
-
-                    Spacer()
-
-                    VStack(alignment: .trailing, spacing: 4) {
-                        Text(NSLocalizedString("Total", comment: "Total statistics"))
-                            .font(.caption)
-                            .foregroundStyle(Color.secondaryText)
-
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack(alignment: .firstTextBaseline) {
+                        Text(NSLocalizedString("Current Streak", comment: "Current streak stat card title"))
+                            .font(.system(size: 14.5, weight: .semibold))
+                        Spacer()
                         Text(statistics.formattedTotalTime)
-                            .font(.title3)
-                            .fontWeight(.semibold)
-
-                        Text(String(format: NSLocalizedString("%d books", comment: "Number of books completed"), statistics.booksCompleted))
-                            .font(.caption)
-                            .foregroundStyle(Color.secondaryText)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.secondary)
                     }
+
+                    ProgressLine(value: statistics.monthlyGoalProgress, height: 6)
+
+                    Text(
+                        String(
+                            format: NSLocalizedString("%@ this month · of %@ goal", comment: "Monthly listening against the goal"),
+                            statistics.formattedMonthlyProgress,
+                            statistics.formattedMonthlyGoal
+                        )
+                    )
+                    .font(.system(size: 11.5))
+                    .foregroundStyle(.secondary)
                 }
-
-                ProgressView(value: statistics.monthlyGoalProgress)
-                    .progressViewStyle(LinearProgressViewStyle(tint: .blue))
-                    .frame(height: 4)
             }
-            .padding()
-            .glassEffect(in:.rect(cornerRadius: 12))
-
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .glassCard()
         }
         .buttonStyle(.plain)
+    }
+}
+
+/// Goal ring with the streak count in the middle.
+struct StreakRing: View {
+    let progress: Double
+    let days: Int
+    var lineWidth: CGFloat = 6
+    var numberSize: CGFloat = 19
+
+    var body: some View {
+        ZStack {
+            Circle()
+                .stroke(.quaternary, lineWidth: lineWidth)
+            Circle()
+                .trim(from: 0, to: min(max(progress, 0), 1))
+                .stroke(.tint, style: StrokeStyle(lineWidth: lineWidth, lineCap: .round))
+                .rotationEffect(.degrees(-90))
+                .animation(.easeInOut(duration: 1.2), value: progress)
+
+            VStack(spacing: 1) {
+                Text("\(days)")
+                    .font(.system(size: numberSize, weight: .bold))
+                Text(NSLocalizedString("days", comment: "Days unit for stat card").uppercased())
+                    .font(.system(size: numberSize * 0.4, weight: .semibold))
+                    .tracking(0.8)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(lineWidth / 2)
     }
 }

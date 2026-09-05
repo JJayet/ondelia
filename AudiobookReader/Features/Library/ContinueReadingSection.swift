@@ -11,13 +11,8 @@ struct ContinueReadingSection: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
-                    .font(.title2)
-                    .fontWeight(.bold)
-                Spacer()
-            }
-            .padding(.horizontal, headerPadding)
+            SectionLabel(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
+                .padding(.horizontal, headerPadding)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 16) {

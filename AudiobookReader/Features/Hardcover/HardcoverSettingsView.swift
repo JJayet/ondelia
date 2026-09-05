@@ -11,6 +11,9 @@ struct HardcoverSettingsView: View {
     /// The token is held in the keychain, so the field keeps its own copy while editing.
     @State private var token = ""
     @FocusState private var tokenFocused: Bool
+    @State private var isRefreshing = false
+    /// What the last refresh found, for the row's footer.
+    @State private var lastResult: (books: Int, inSeries: Int)?
 
     var body: some View {
         List {
@@ -94,6 +97,47 @@ struct HardcoverSettingsView: View {
 
             if !token.isEmpty {
                 Section {
+                    Button {
+                        Task {
+                            isRefreshing = true
+                            defer { isRefreshing = false }
+                            lastResult = await service.refreshMetadata(for: AudiobookManager.shared.audiobooks)
+                        }
+                    } label: {
+                        HStack {
+                            Label(
+                                NSLocalizedString("Refresh All Metadata", comment: "Hardcover metadata refresh button"),
+                                systemImage: "arrow.trianglehead.2.clockwise"
+                            )
+                            .foregroundStyle(Color.primaryText)
+                            Spacer()
+                            if isRefreshing { ProgressView() }
+                        }
+                    }
+                    .disabled(isRefreshing)
+                } header: {
+                    Text(NSLocalizedString("Metadata", comment: "Hardcover settings section: metadata"))
+                } footer: {
+                    if let lastResult {
+                        Text(
+                            String(
+                                format: NSLocalizedString(
+                                    "Refreshed %d linked books. %d belong to a series.",
+                                    comment: "Hardcover metadata refresh result"
+                                ),
+                                lastResult.books,
+                                lastResult.inSeries
+                            )
+                        )
+                    } else {
+                        Text(NSLocalizedString(
+                            "Re-reads the series, summary, genres, moods and content warnings of every linked book.",
+                            comment: "Hardcover metadata section footer"
+                        ))
+                    }
+                }
+
+                Section {
                     Button(role: .destructive) {
                         token = ""
                         tokenFocused = false
@@ -107,7 +151,7 @@ struct HardcoverSettingsView: View {
         .navigationTitle("Hardcover")
         .navigationBarTitleDisplayMode(.inline)
         .scrollContentBackground(.hidden)
-        .background(Color.primaryBackground)
+        .background(TintedBackground(intensity: 0.6))
         .onAppear { token = service.token ?? "" }
     }
 }

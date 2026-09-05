@@ -14,6 +14,7 @@ final class HardcoverService {
         static let autoMatch = "hardcover.autoMatch"
         static let autoAddWantToRead = "hardcover.autoAddWantToRead"
         static let readingThreshold = "hardcover.readingThreshold"
+        static let lastSync = "hardcover.lastSync"
     }
 
     private static let tokenKey = "hardcover.token"
@@ -110,6 +111,121 @@ final class HardcoverService {
         }
         audiobook.hardcover = link
         save()
+        await refreshSeries(for: audiobook)
+    }
+
+    // MARK: - Book details
+
+    /// Pulls the blurb and the reader-applied tags for a linked book.
+    ///
+    /// Asked for once, the first time the book's detail screen is opened, and stored on the
+    /// link: the description does not change, and the screen should not wait on the network
+    /// every time it is pushed.
+    func refreshDetails(for audiobook: AudiobookModel, force: Bool = false) async {
+        guard let token, let link = audiobook.hardcover else { return }
+        guard force || link.detailsChecked != true else { return }
+
+        do {
+            let details = try await HardcoverAPI.details(bookID: link.id, token: token)
+            // Re-read: an await let the book be unlinked or relinked while the request was out.
+            guard var current = audiobook.hardcover, current.id == link.id else { return }
+            current.summary = details?.summary
+            current.genres = details?.genres
+            current.moods = details?.moods
+            current.contentWarnings = details?.contentWarnings
+            current.detailsChecked = true
+            audiobook.hardcover = current
+            save()
+        } catch {
+            Log.hardcover.error("Failed to read book details: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Series
+
+    /// Fills in which series the linked book belongs to, so the library can group it.
+    ///
+    /// Safe to call on anything: a book with no link, or one whose series is already known, is
+    /// skipped without touching the network. Pass `force` to re-ask Hardcover for a book that
+    /// came back standalone.
+    func refreshSeries(for audiobook: AudiobookModel, force: Bool = false) async {
+        guard let token, let link = audiobook.hardcover else { return }
+        guard force || link.seriesChecked != true else { return }
+
+        do {
+            let series = try await HardcoverAPI.series(bookID: link.id, token: token)
+            // Re-read: an await let the book be unlinked or relinked while the request was out.
+            guard var current = audiobook.hardcover, current.id == link.id else { return }
+            current.seriesID = series?.id
+            current.seriesName = series?.name
+            current.seriesPosition = series?.position
+            current.seriesChecked = true
+            audiobook.hardcover = current
+            save()
+
+            if let series { await refreshCatalog(seriesID: series.id, force: force) }
+        } catch {
+            Log.hardcover.error("Failed to read series: \(error.localizedDescription)")
+        }
+    }
+
+    /// Everything Hardcover knows, for every linked book — what Settings' "Refresh metadata"
+    /// runs: the series and its catalogue, the blurb, the tags.
+    ///
+    /// Sequential, and forcing: this is the button someone presses when the shelf looks stale.
+    @discardableResult
+    func refreshMetadata(for audiobooks: [AudiobookModel]) async -> (books: Int, inSeries: Int) {
+        guard isLinked else { return (0, 0) }
+        var refreshed = 0
+        var inSeries = 0
+        for audiobook in audiobooks where audiobook.hardcover != nil {
+            await refreshSeries(for: audiobook, force: true)
+            await refreshDetails(for: audiobook, force: true)
+            refreshed += 1
+            if audiobook.hardcover?.seriesName != nil { inSeries += 1 }
+        }
+        lastSyncedAt = Date()
+        return (refreshed, inSeries)
+    }
+
+    /// Series lookup for a whole library — the library's own backfill.
+    ///
+    /// Sequential on purpose: this walks every linked book, and Hardcover rate-limits.
+    @discardableResult
+    func refreshSeries(for audiobooks: [AudiobookModel], force: Bool = false) async -> Int {
+        guard isLinked else { return 0 }
+        var grouped = 0
+        for audiobook in audiobooks where audiobook.hardcover != nil {
+            await refreshSeries(for: audiobook, force: force)
+            if audiobook.hardcover?.seriesName != nil { grouped += 1 }
+        }
+        lastSyncedAt = Date()
+        return grouped
+    }
+
+    /// The full volume list for a series, so a card can show what the shelf is missing.
+    ///
+    /// Cached: the catalogue only changes when Hardcover gains a volume, which is not often
+    /// enough to pay for a request on every library read.
+    func refreshCatalog(seriesID: Int, force: Bool = false) async {
+        guard let token else { return }
+        guard force || SeriesCatalog.volumes(for: seriesID).isEmpty else { return }
+
+        do {
+            let volumes = try await HardcoverAPI.seriesVolumes(seriesID: seriesID, token: token)
+            guard !volumes.isEmpty else { return }
+            SeriesCatalog.store(volumes, for: seriesID)
+        } catch {
+            Log.hardcover.error("Failed to read the series catalogue: \(error.localizedDescription)")
+        }
+    }
+
+    // MARK: - Status
+
+    /// When the library was last walked against Hardcover, for the Settings row.
+    var lastSyncedAt: Date? {
+        get { UserDefaults.standard.object(forKey: Defaults.lastSync) as? Date }
+        set { UserDefaults.standard.set(newValue, forKey: Defaults.lastSync) }
     }
 
     // MARK: - Progress sync

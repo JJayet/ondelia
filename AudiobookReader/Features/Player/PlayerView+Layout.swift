@@ -3,88 +3,33 @@ import UIKit
 
 extension PlayerView {
     // MARK: - Full Player View
+    //
+    // The ambience layout: the cover is the room the screen sits in rather than an object on
+    // it, the title carries the top half, and everything you can touch lives in one glass
+    // panel — chapter, waveform, transport — with the chips under it.
     @ViewBuilder
     func fullPlayerView(geometry: GeometryProxy) -> some View {
         ZStack {
-            // Background layer - full screen with cover image
-            backgroundLayer(geometry: geometry)
-            VStack {
-                Spacer()
-                controlPanel
-                    .frame(height: geometry.size.height * 0.7)  // 70% height
+            PlayerBackdrop(audiobook: audiobook)
+
+            VStack(spacing: 0) {
+                headerControls
+
+                Spacer(minLength: 20)
+
+                titleBlock
+
+                controlPanel.padding(.top, 26)
+
+                chipRow.padding(.top, 12)
+
+                Spacer(minLength: 20)
             }
+            .padding(.horizontal, 16)
         }
     }
 
-    // Mini player UI is handled by the tabViewBottomAccessory
-    // MARK: - Background Layer
-    @ViewBuilder
-    func backgroundLayer(geometry: GeometryProxy) -> some View {
-        if let coverImage = coverImage {
-            Image(uiImage: coverImage)
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(
-                    width: geometry.size.width,
-                    height: geometry.size.height,
-                    alignment: .top
-                )
-                .clipped()
-                .accessibilityLabel(
-                    String(
-                        format: NSLocalizedString("Cover of %@", comment: "Audiobook cover accessibility label"),
-                        audiobook.title ?? NSLocalizedString("Unknown Title", comment: "Unknown title")
-                    )
-                )
-                .accessibilityIdentifier(AccessibilityIdentifiers.Player.coverArt)
-        } else {
-            // Fallback gradient background
-            LinearGradient(
-                colors: [
-                    Color.accentColor.opacity(0.6),
-                    Color.primaryBackground,
-                ],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(width: geometry.size.width, height: geometry.size.height)
-            .accessibilityHidden(true)
-        }
-    }
-
-    // MARK: - Control Panel
-    @ViewBuilder
-    var controlPanel: some View {
-        VStack(spacing: 16) {
-            // Drag handle
-            RoundedRectangle(cornerRadius: 3)
-                .fill(Color.primaryText.opacity(0.25))
-                .frame(width: 56, height: 6)
-                .padding(.top, 8)
-                .accessibilityHidden(true)
-
-            headerControls
-            
-            Spacer()
-            
-            bookInfo
-
-            progressSection
-
-            actionButtons
-
-            Spacer()
-        }
-        .padding(.horizontal, 16)
-        .glassEffect(
-            .regular.interactive(),
-            in: RoundedRectangle(cornerRadius: 24)
-        )
-        .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 24))
-        .padding(.horizontal, 16)
-    }
-
-    // MARK: - Header Controls
+    // MARK: - Header
     @ViewBuilder
     var headerControls: some View {
         HStack {
@@ -97,161 +42,103 @@ extension PlayerView {
                 }
             } label: {
                 Image(systemName: "chevron.down")
-                    .font(.title2)
-                    .foregroundStyle(Color.primaryText)
+                    .font(.system(size: 15, weight: .semibold))
+                    .frame(width: 38, height: 38)
+                    .glassEffect(.regular, in: Circle())
             }
+            .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Close Player", comment: "Close player accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.closeButton)
+
+            Spacer()
+
+            // The chapter counter doubles as the way into the chapter list: the design has no
+            // separate chapters button on this screen.
+            Button {
+                showingChapterList = true
+            } label: {
+                Text(chapterCounter)
+                    .font(.system(size: 11, weight: .semibold))
+                    .tracking(1.5)
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .disabled(chapters.isEmpty)
+            .accessibilityLabel(NSLocalizedString("Chapters", comment: "Chapter list sheet title"))
+            .accessibilityIdentifier(AccessibilityIdentifiers.Player.chaptersButton)
 
             Spacer()
 
             Button {
                 showingSleepTimer = true
             } label: {
-                if sleepTimeRemaining > 0 {
-                    Label(
-                        sleepTimeRemaining.clockFormatted,
-                        systemImage: "moon.fill"
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.tint)
-                } else {
-                    Image(systemName: "moon")
-                        .font(.title2)
-                        .foregroundStyle(Color.primaryText)
-                }
+                Image(systemName: sleepTimeRemaining > 0 ? "moon.fill" : "moon")
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(sleepTimeRemaining > 0 ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                    .frame(width: 38, height: 38)
+                    .glassEffect(.regular, in: Circle())
             }
+            .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
         }
         .padding(.top, 12)
     }
 
-    // MARK: - Book Info
-    @ViewBuilder
-    var bookInfo: some View {
-        VStack(spacing: 8) {
-            Text(
-                audiobook.title
-                    ?? NSLocalizedString(
-                        "Unknown Title",
-                        comment: "Default title for audiobooks without title"
-                    )
-            )
-            .font(.title2)
-            .foregroundStyle(Color.primaryText)
-            .multilineTextAlignment(.center)
-            .lineLimit(2)
-
-            Text(
-                audiobook.author
-                    ?? NSLocalizedString(
-                        "Unknown Author",
-                        comment: "Default author for audiobooks without author"
-                    )
-            )
-            .font(.headline)
-            .foregroundStyle(Color.secondaryText)
-
-            if let narrator = audiobook.narrator {
-                Text(
-                    String(
-                        format: NSLocalizedString(
-                            "Narrated by %@",
-                            comment: "Narrator credit text"
-                        ),
-                        narrator
-                    )
-                )
-                .font(.subheadline)
-                .foregroundStyle(Color.secondaryText)
-            }
-
-            // Current Chapter
-            if let chapter = currentChapter {
-                Button {
-                    showingChapterList = true
-                } label: {
-                    Text(
-                        chapter.title
-                            ?? String(
-                                format: NSLocalizedString(
-                                    "Chapter %d",
-                                    comment: "Default chapter title with number"
-                                ),
-                                chapter.chapterNumber
-                            )
-                    )
-                    .font(.footnote)
-                    .foregroundStyle(.tint)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .glassEffect(
-                        .regular.interactive(),
-                        in: RoundedRectangle(cornerRadius: 12)
-                    )
-                    .background(Color.glassTint, in: RoundedRectangle(cornerRadius: 12))
-                }
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(AccessibilityIdentifiers.Player.chaptersButton)
-            }
+    /// "CHAPTER 14 / 42", or the book's own name when it has no chapters to count.
+    var chapterCounter: String {
+        guard let chapter = currentChapter, !chapters.isEmpty else {
+            return NSLocalizedString("Now Playing", comment: "Player header label").uppercased()
         }
+        let index = (chapters.firstIndex { $0.id == chapter.id } ?? 0) + 1
+        return String(
+            format: NSLocalizedString("Chapter %d / %d", comment: "Player header: chapter counter"),
+            index,
+            chapters.count
+        ).uppercased()
     }
 
-    // MARK: - Progress Section
+    // MARK: - Title
     @ViewBuilder
-    var progressSection: some View {
-        VStack(spacing: 16) {
-            // Time Slider
-            progressSlider
+    var titleBlock: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(audiobook.title ?? AudiobookModel.unknownTitle)
+                .font(.system(size: 40, weight: .bold))
+                .lineLimit(3)
+                .minimumScaleFactor(0.6)
 
-            // Playback controls
-            playbackControls
-
-            // Speed control
-            speedControls
+            Text(credits)
+                .font(.system(size: 14.5))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .accessibilityElement(children: .combine)
+        .accessibilityIdentifier(AccessibilityIdentifiers.Player.coverArt)
     }
 
-    // MARK: - Progress Slider
+    /// "Author · narrated by X", collapsed to the author alone when there is no narrator.
+    var credits: String {
+        let author = audiobook.author ?? AudiobookModel.unknownAuthor
+        guard let narrator = audiobook.narrator else { return author }
+        return String(
+            format: NSLocalizedString("%@ · narrated by %@", comment: "Author and narrator credit"),
+            author,
+            narrator
+        )
+    }
+
+    // MARK: - Control panel
     @ViewBuilder
-    var progressSlider: some View {
-        VStack(spacing: 8) {
-            PlayerProgressSlider(
-                value: Binding(
-                    get: { currentTime },
-                    set: { newValue in
-                        audioManager.seek(to: newValue)
-                    }
-                ),
-                range: 0...max(duration, 1),
-                onEditingChanged: { editing in
-                    isSeekingManually = editing
-                }
-            )
+    var controlPanel: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .firstTextBaseline, spacing: 10) {
+                Text(currentChapter.map(chapterTitle) ?? (audiobook.title ?? AudiobookModel.unknownTitle))
+                    .font(.system(size: 13, weight: .semibold))
+                    .lineLimit(1)
 
-            HStack {
-                Text(currentTime.clockFormatted)
-                    .font(.caption)
-                    .foregroundStyle(Color.secondaryText)
-                    .monospacedDigit()
-
-                if let chapter = currentChapter {
-                    Text(
-                        String(
-                            format: NSLocalizedString(
-                                "· %@ in chapter",
-                                comment: "Position within the current chapter"
-                            ),
-                            max(currentTime - chapter.startTime, 0).clockFormatted
-                        )
-                    )
-                    .font(.caption)
-                    .foregroundStyle(Color.secondaryText)
-                    .monospacedDigit()
-                }
-
-                Spacer()
+                Spacer(minLength: 0)
 
                 // Tap to switch between total length and time left.
                 Button {
@@ -259,12 +146,12 @@ extension PlayerView {
                 } label: {
                     Text(
                         showRemainingTime
-                            ? "-" + max(duration - currentTime, 0).clockFormatted
-                            : duration.clockFormatted
+                            ? currentTime.clockFormatted + " · -" + max(duration - currentTime, 0).clockFormatted
+                            : currentTime.clockFormatted + " · " + duration.clockFormatted
                     )
-                    .font(.caption)
-                    .foregroundStyle(Color.secondaryText)
+                    .font(.system(size: 11.5))
                     .monospacedDigit()
+                    .foregroundStyle(.secondary)
                 }
                 .buttonStyle(.plain)
                 .accessibilityLabel(
@@ -273,6 +160,63 @@ extension PlayerView {
                         : NSLocalizedString("Total length", comment: "Total duration accessibility label")
                 )
             }
+            .padding(.bottom, 16)
+
+            WaveformScrubber(
+                position: currentTime,
+                duration: duration,
+                seed: audiobook.id
+            ) { newValue in
+                audioManager.seek(to: newValue)
+            }
+
+            playbackControls.padding(.top, 22)
         }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 22)
+        .glassCard(cornerRadius: 34)
+    }
+
+    func chapterTitle(_ chapter: ChapterModel) -> String {
+        chapter.title
+            ?? String(
+                format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"),
+                chapter.chapterNumber
+            )
+    }
+}
+
+// MARK: - Backdrop
+
+/// The cover, blown up and blurred into the room the player sits in. Books with no artwork fall
+/// back to the tint canvas the rest of the app uses.
+struct PlayerBackdrop: View {
+    let audiobook: AudiobookModel
+
+    var body: some View {
+        ZStack {
+            TintedBackground(tint: CoverTintCache.tint(for: audiobook), intensity: 1.2)
+
+            if let cover = CoverImageCache.image(for: audiobook) {
+                GeometryReader { geometry in
+                    Image(uiImage: cover)
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: geometry.size.width, height: geometry.size.height * 0.75)
+                        .blur(radius: 70, opaque: false)
+                        .opacity(0.85)
+                        .clipped()
+                }
+                .ignoresSafeArea()
+
+                LinearGradient(
+                    colors: [.black.opacity(0.15), .black.opacity(0.55), .black.opacity(0.92)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+            }
+        }
+        .accessibilityHidden(true)
     }
 }

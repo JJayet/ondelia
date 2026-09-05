@@ -27,6 +27,28 @@ struct HardcoverLink: Codable, Hashable, Sendable {
     /// Id of the shelf row on Hardcover. Needed to take the book off the shelf again, and nil
     /// until the book has actually been put on one.
     var userBookID: Int?
+    /// Hardcover's id for that series, so the rest of its volumes can be looked up.
+    var seriesID: Int?
+    /// Series this book belongs to, as Hardcover has it. Nil for a standalone book, and also
+    /// nil for a link made before the series lookup existed — `HardcoverService.refreshSeries`
+    /// fills those in.
+    var seriesName: String?
+    /// Where the book sits in its series. Hardcover allows halves (a 1.5 novella), so this is
+    /// not an Int.
+    var seriesPosition: Double?
+    /// What Hardcover knows about the book itself, filled in the first time its detail screen
+    /// is opened. Optional throughout: a link written before this existed decodes unchanged.
+    var summary: String?
+    var genres: [String]?
+    var moods: [String]?
+    var contentWarnings: [String]?
+    /// Whether Hardcover has been asked for the above. A book with no description at all is a
+    /// real answer, so nil-vs-asked cannot be told apart without this.
+    var detailsChecked: Bool?
+    /// Whether Hardcover has been asked about this book's series. Without it, every standalone
+    /// book would be asked about again on every launch, since a nil `seriesName` is also the
+    /// right answer for a book that is in no series.
+    var seriesChecked: Bool?
 
     init(
         id: Int,
@@ -34,7 +56,16 @@ struct HardcoverLink: Codable, Hashable, Sendable {
         author: String,
         artworkURL: URL? = nil,
         status: Status = .local,
-        userBookID: Int? = nil
+        userBookID: Int? = nil,
+        seriesID: Int? = nil,
+        seriesName: String? = nil,
+        seriesPosition: Double? = nil,
+        seriesChecked: Bool? = nil,
+        summary: String? = nil,
+        genres: [String]? = nil,
+        moods: [String]? = nil,
+        contentWarnings: [String]? = nil,
+        detailsChecked: Bool? = nil
     ) {
         self.id = id
         self.title = title
@@ -42,5 +73,23 @@ struct HardcoverLink: Codable, Hashable, Sendable {
         self.artworkURL = artworkURL
         self.status = status
         self.userBookID = userBookID
+        self.seriesID = seriesID
+        self.seriesName = seriesName
+        self.seriesPosition = seriesPosition
+        self.seriesChecked = seriesChecked
+        self.summary = summary
+        self.genres = genres
+        self.moods = moods
+        self.contentWarnings = contentWarnings
+        self.detailsChecked = detailsChecked
+    }
+
+    /// The compact volume badge — "#1", or "#1.5" for a novella between two volumes.
+    var volumeBadge: String? {
+        guard let seriesPosition else { return nil }
+        let rounded = seriesPosition.rounded()
+        return rounded == seriesPosition
+            ? "#\(Int(rounded))"
+            : "#\(seriesPosition.formatted(.number.precision(.fractionLength(0...1))))"
     }
 }

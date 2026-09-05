@@ -12,19 +12,11 @@ struct MiniPlayerBar: View {
     private var book: AudiobookModel? { audio.currentAudiobook }
     private var isPlaying: Bool { audio.playbackState == .playing }
 
-    private var cover: Image? {
-        guard let ui = CoverImageCache.image(for: book) else { return nil }
-        return Image(uiImage: ui)
-    }
-
     var body: some View {
         VStack(spacing: 4) {
             HStack(spacing: 12) {
             // Cover
-            (cover ?? Image(systemName: "book.closed"))
-                .resizable()
-                .aspectRatio(contentMode: .fit)
-                .frame(height: 30)
+            CoverArtView(audiobook: book, size: isInline ? 28 : 38, cornerRadius: isInline ? 9 : 12)
 
             // Texts
             VStack(alignment: .leading, spacing: 2) {

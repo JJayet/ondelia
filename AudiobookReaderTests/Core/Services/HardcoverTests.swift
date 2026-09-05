@@ -55,6 +55,57 @@ struct HardcoverTests {
         #expect(hit.artworkURL == URL(string: "https://example.com/cover.jpg"))
     }
 
+    /// Hardcover returns the series position as a number on some rows and a string on others,
+    /// and omits it entirely for a book whose place in the series is unrecorded.
+    @Test(
+        "Series positions decode from either spelling",
+        arguments: [("3", 3.0), ("\"3\"", 3.0), ("3.5", 3.5), ("null", nil)] as [(String, Double?)]
+    )
+    func decodesSeriesPosition(rawPosition: String, expected: Double?) throws {
+        let json = """
+            {"books": [{"book_series": [{"position": \(rawPosition), "series": {"id": 7, "name": "Mistborn"}}]}]}
+            """
+        let response = try JSONDecoder().decode(HardcoverAPI.BookSeriesResponse.self, from: Data(json.utf8))
+        let entry = try #require(response.books.first?.bookSeries.first)
+        #expect(entry.series.id == 7)
+        #expect(entry.series.name == "Mistborn")
+        #expect(entry.position == expected)
+    }
+
+    @Test("A standalone book decodes as no series at all")
+    func decodesStandaloneBook() throws {
+        let json = #"{"books": [{"book_series": []}]}"#
+        let response = try JSONDecoder().decode(HardcoverAPI.BookSeriesResponse.self, from: Data(json.utf8))
+        #expect(response.books.first?.bookSeries.isEmpty == true)
+    }
+
+    @Test("Book details decode their description and tag buckets")
+    func decodesBookDetails() throws {
+        let json = """
+            {"books": [{"description": "A thief discovers Allomancy.",
+             "cached_tags": {"Genre": [{"tag": "Fantasy"}, {"tag": "Epic"}],
+                             "Mood": [{"tag": "Dark"}],
+                             "Content Warning": [{"tag": "Violence"}]}}]}
+            """
+        let response = try JSONDecoder().decode(HardcoverAPI.BookDetailsResponse.self, from: Data(json.utf8))
+        let book = try #require(response.books.first)
+        #expect(book.description == "A thief discovers Allomancy.")
+        #expect(book.tags(in: "Genre") == ["Fantasy", "Epic"])
+        #expect(book.tags(in: "Mood") == ["Dark"])
+        #expect(book.tags(in: "Content Warning") == ["Violence"])
+    }
+
+    /// `cached_tags` is a free-form column: a shape this app does not know must not take the
+    /// description down with it.
+    @Test("An unexpected tag payload leaves the description intact")
+    func toleratesUnknownTagShapes() throws {
+        let json = #"{"books": [{"description": "Blurb.", "cached_tags": []}]}"#
+        let response = try JSONDecoder().decode(HardcoverAPI.BookDetailsResponse.self, from: Data(json.utf8))
+        let book = try #require(response.books.first)
+        #expect(book.description == "Blurb.")
+        #expect(book.tags(in: "Genre").isEmpty)
+    }
+
     @Test("A hit with no author or artwork still decodes")
     func decodesSparseHit() throws {
         let json = #"{"id": 1, "title": "Untitled", "author_names": []}"#

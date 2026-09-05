@@ -18,8 +18,10 @@ enum CoverImageCache {
         return image
     }
 
-    /// Call after writing `coverImageData`, or the old cover keeps being drawn.
+    /// Call after writing `coverImageData`, or the old cover keeps being drawn — and, with it,
+    /// the tint every screen the book appears on is painted with.
     static func invalidate(_ audiobook: AudiobookModel) {
         cache.removeObject(forKey: audiobook.id as NSUUID)
+        CoverTintCache.invalidate(audiobook)
     }
 }

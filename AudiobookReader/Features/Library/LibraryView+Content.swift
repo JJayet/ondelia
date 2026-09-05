@@ -2,6 +2,24 @@ import SwiftUI
 
 // MARK: - List / Grid content
 extension LibraryView {
+    /// The books shown on the shelf itself: everything, less whatever a series card already
+    /// shows.
+    var shelfBooks: [AudiobookModel] {
+        groupSeries ? grouping.standalone : filteredAudiobooks
+    }
+
+    @ViewBuilder
+    var seriesBanner: some View {
+        SeriesGroupingBanner(
+            seriesCount: grouping.series.count,
+            bookCount: grouping.series.reduce(0) { $0 + $1.books.count },
+            isOn: Binding(
+                get: { groupSeries },
+                set: { newValue in withAnimation(.snappy(duration: 0.25)) { groupSeries = newValue } }
+            )
+        )
+    }
+
     // Extracted to help the type-checker
     @ViewBuilder
     var listModeContent: some View {
@@ -20,6 +38,23 @@ extension LibraryView {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+
+            // Series, grouped by Hardcover
+            if !grouping.series.isEmpty {
+                seriesBanner
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+
+                if groupSeries {
+                    ForEach(grouping.series) { group in
+                        SeriesCardView(group: group) { audiobookForDetail = $0 }
+                            .listRowBackground(Color.clear)
+                            .listRowSeparator(.hidden)
+                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    }
+                }
             }
 
             // Header with filters
@@ -46,11 +81,11 @@ extension LibraryView {
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 }
 
-                ForEach(filteredAudiobooks, id: \.id, content: libraryRow)
+                ForEach(shelfBooks, id: \.id, content: libraryRow)
             }
         }
         .listStyle(PlainListStyle())
-        .background(Color.primaryBackground)
+        .scrollContentBackground(.hidden)
     }
 
     // Grid mode - use ScrollView
@@ -69,6 +104,19 @@ extension LibraryView {
                 // Continue Reading Section
                 if !continueReadingBooks.isEmpty {
                     ContinueReadingSection(books: continueReadingBooks, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
+                }
+
+                // Series, grouped by Hardcover
+                if !grouping.series.isEmpty {
+                    VStack(spacing: 12) {
+                        seriesBanner
+                        if groupSeries {
+                            ForEach(grouping.series) { group in
+                                SeriesCardView(group: group) { audiobookForDetail = $0 }
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
                 }
 
                 // Main Library Section
@@ -96,8 +144,8 @@ extension LibraryView {
                                 GridItem(.flexible(), spacing: 16),
                                 GridItem(.flexible(), spacing: 16)
                             ], spacing: 16) {
-                                ForEach(filteredAudiobooks, id: \.id) { audiobook in
-                                    AudiobookGridItemView(audiobook: audiobook) { playAndPresent(audiobook) }
+                                ForEach(shelfBooks, id: \.id) { audiobook in
+                                    AudiobookGridItemView(audiobook: audiobook) { audiobookForDetail = audiobook }
                                     .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
                                     .contextMenu {
                                         Button(NSLocalizedString("Rename", comment: "Rename button")) {
@@ -143,7 +191,7 @@ extension LibraryView {
 extension LibraryView {
     @ViewBuilder
     func libraryRow(audiobook: AudiobookModel) -> some View {
-        EnhancedAudiobookRowView(audiobook: audiobook) { playAndPresent(audiobook) }
+        EnhancedAudiobookRowView(audiobook: audiobook) { audiobookForDetail = audiobook }
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)

@@ -6,69 +6,40 @@ struct LibraryHeaderView: View {
     @Binding var filterOption: LibraryView.FilterOption
 
     var body: some View {
-        HStack(spacing: 16) {
-            // Filter Options
+        HStack(spacing: 9) {
             Menu {
-                ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) {
-                    option in
+                ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            filterOption = option
-                        }
+                        withAnimation(.easeInOut(duration: 0.2)) { filterOption = option }
                     }
                 }
             } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "line.3.horizontal.decrease.circle")
-                    Text(filterOption.displayName)
-                    Image(systemName: "chevron.down")
-                        .font(.caption)
-                }
-                .font(.caption)
-                .foregroundStyle(.tint)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.accentColor.opacity(0.1))
-                .clipShape(.rect(cornerRadius: 8))
+                chip(filterOption.displayName, tinted: true)
             }
 
-            // Sort Options
             Menu {
-                ForEach(LibraryView.SortOption.allCases, id: \.rawValue) {
-                    option in
+                ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(.easeInOut(duration: 0.2)) {
-                            sortOption = option
-                        }
+                        withAnimation(.easeInOut(duration: 0.2)) { sortOption = option }
                     }
                 }
             } label: {
-                HStack(spacing: 4) {
-                    Image(systemName: "arrow.up.arrow.down")
-                    Text(sortOption.displayName)
-                    Image(systemName: "chevron.down")
-                        .font(.caption)
-                }
-                .font(.caption)
-                .foregroundStyle(.tint)
-                .padding(.horizontal, 12)
-                .padding(.vertical, 6)
-                .background(Color.accentColor.opacity(0.1))
-                .clipShape(.rect(cornerRadius: 8))
+                chip(sortOption.displayName, tinted: false)
             }
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.sortButton)
 
-            Spacer()
+            Spacer(minLength: 0)
 
-            // View Mode Toggle
             Button {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     viewMode = viewMode == .list ? .grid : .list
                 }
             } label: {
                 Image(systemName: viewMode.icon)
-                    .font(.title3)
-                    .foregroundStyle(.tint)
+                    .font(.system(size: 15, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 34, height: 34)
+                    .contentShape(Rectangle())
             }
             .accessibilityLabel(
                 viewMode == .list
@@ -77,5 +48,17 @@ struct LibraryHeaderView: View {
             )
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.viewModeToggle)
         }
+    }
+
+    /// Filter and sort read as glass pills, the tinted one carrying the active filter.
+    private func chip(_ title: String, tinted: Bool) -> some View {
+        HStack(spacing: 6) {
+            Text(title)
+            Image(systemName: "chevron.down")
+                .font(.system(size: 9, weight: .bold))
+                .opacity(0.6)
+        }
+        .foregroundStyle(tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+        .glassPill(height: 34, tinted: tinted)
     }
 }
