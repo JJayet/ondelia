@@ -55,6 +55,17 @@
         }
       }
     },
+    "%@ into the chapter" : {
+      "comment" : "Player: elapsed time within the current chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ dans le chapitre"
+          }
+        }
+      }
+    },
     "%@ left" : {
       "comment" : "Remaining listening time",
       "localizations" : {
@@ -62,6 +73,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "il reste %@"
+          }
+        }
+      }
+    },
+    "%@ left in the book" : {
+      "comment" : "Player: time left in the book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "il reste %@ dans le livre"
           }
         }
       }
@@ -2415,6 +2437,17 @@
         }
       }
     },
+    "Stops in %@" : {
+      "comment" : "Player: time left on the sleep timer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêt dans %@"
+          }
+        }
+      }
+    },
     "Synced %@" : {
       "comment" : "Hardcover status: relative last sync",
       "localizations" : {
@@ -2779,6 +2812,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Dissocier"
+          }
+        }
+      }
+    },
+    "Up next" : {
+      "comment" : "Player: next chapters section",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À suivre"
           }
         }
       }

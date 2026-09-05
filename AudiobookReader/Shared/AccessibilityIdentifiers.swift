@@ -16,6 +16,8 @@ enum AccessibilityIdentifiers {
         static let sleepTimerButton = "player_sleep_timer_button"
         static let closeButton = "player_close_button"
         static let coverArt = "player_cover_art"
+        static let upNextSection = "player_up_next_section"
+        static let sleepTimerRow = "player_sleep_timer_row"
     }
     
     // MARK: - Library View

@@ -15,15 +15,17 @@ extension PlayerView {
             VStack(spacing: 0) {
                 headerControls
 
-                Spacer(minLength: 20)
+                titleBlock.padding(.top, 18)
 
-                titleBlock
+                Spacer(minLength: 16)
 
-                controlPanel.padding(.top, 26)
+                controlPanel
 
                 chipRow.padding(.top, 12)
 
-                Spacer(minLength: 20)
+                upNextSection.padding(.top, 22)
+
+                Spacer(minLength: 16)
             }
             .padding(.horizontal, 16)
         }
@@ -103,8 +105,8 @@ extension PlayerView {
     var titleBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
             Text(audiobook.title ?? AudiobookModel.unknownTitle)
-                .font(.system(size: 40, weight: .bold))
-                .lineLimit(3)
+                .font(.system(size: 32, weight: .bold))
+                .lineLimit(2)
                 .minimumScaleFactor(0.6)
 
             Text(credits)
@@ -133,48 +135,46 @@ extension PlayerView {
     @ViewBuilder
     var controlPanel: some View {
         VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline, spacing: 10) {
-                Text(currentChapter.map(chapterTitle) ?? (audiobook.title ?? AudiobookModel.unknownTitle))
-                    .font(.system(size: 13, weight: .semibold))
-                    .lineLimit(1)
+            Text(currentChapter.map(chapterTitle) ?? (audiobook.title ?? AudiobookModel.unknownTitle))
+                .font(.system(size: 15, weight: .semibold))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.bottom, 14)
 
-                Spacer(minLength: 0)
-
-                // Tap to switch between total length and time left.
-                Button {
-                    showRemainingTime.toggle()
-                } label: {
-                    Text(
-                        showRemainingTime
-                            ? currentTime.clockFormatted + " · -" + max(duration - currentTime, 0).clockFormatted
-                            : currentTime.clockFormatted + " · " + duration.clockFormatted
-                    )
-                    .font(.system(size: 11.5))
-                    .monospacedDigit()
-                    .foregroundStyle(.secondary)
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(
-                    showRemainingTime
-                        ? NSLocalizedString("Time remaining", comment: "Remaining time accessibility label")
-                        : NSLocalizedString("Total length", comment: "Total duration accessibility label")
-                )
-            }
-            .padding(.bottom, 16)
-
-            WaveformScrubber(
+            ChapterScrubber(
                 position: currentTime,
-                duration: duration,
-                seed: audiobook.id
-            ) { newValue in
-                audioManager.seek(to: newValue)
-            }
+                range: scrubberRange,
+                remainingLabel: remainingLabel,
+                onToggleRemaining: { showRemainingTime.toggle() },
+                onSeek: { audioManager.seek(to: $0) }
+            )
 
             playbackControls.padding(.top, 22)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 22)
         .glassCard(cornerRadius: 34)
+    }
+
+    /// The chapter the scrubber spans, falling back to the whole book.
+    var scrubberRange: ClosedRange<TimeInterval> {
+        guard let chapter = currentChapter, chapter.endTime > chapter.startTime else {
+            return 0...max(duration, 1)
+        }
+        return chapter.startTime...chapter.endTime
+    }
+
+    /// What is left of the chapter, or — tapped — what is left of the book.
+    var remainingLabel: String {
+        let left = showRemainingTime
+            ? max(duration - currentTime, 0)
+            : max(scrubberRange.upperBound - currentTime, 0)
+        return String(
+            format: showRemainingTime
+                ? NSLocalizedString("%@ left in the book", comment: "Player: time left in the book")
+                : NSLocalizedString("%@ left", comment: "Player: time left in the chapter"),
+            left.clockFormatted
+        )
     }
 
     func chapterTitle(_ chapter: ChapterModel) -> String {
@@ -202,7 +202,10 @@ struct PlayerBackdrop: View {
                     Image(uiImage: cover)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: geometry.size.width, height: geometry.size.height * 0.75)
+                        .frame(width: geometry.size.width, height: geometry.size.height)
+                        // Blurred past the edges: a 70pt blur samples transparency at the
+                        // border and would draw a dark rim without the overscan.
+                        .scaleEffect(1.2)
                         .blur(radius: 70, opaque: false)
                         .opacity(0.85)
                         .clipped()
@@ -210,7 +213,7 @@ struct PlayerBackdrop: View {
                 .ignoresSafeArea()
 
                 LinearGradient(
-                    colors: [.black.opacity(0.15), .black.opacity(0.55), .black.opacity(0.92)],
+                    colors: [.black.opacity(0.1), .black.opacity(0.4), .black.opacity(0.8)],
                     startPoint: .top,
                     endPoint: .bottom
                 )

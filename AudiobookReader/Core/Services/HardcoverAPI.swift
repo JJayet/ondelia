@@ -182,7 +182,14 @@ extension HardcoverAPI {
         let document = """
             query SeriesBooks($id: Int!) {
               series(where: {id: {_eq: $id}}, limit: 1) {
-                book_series(order_by: {position: asc}) {
+                book_series(
+                  distinct_on: position
+                  order_by: [{position: asc}, {book: {users_count: desc}}]
+                  where: {
+                    compilation: {_eq: false}
+                    book: {canonical_id: {_is_null: true}, is_partial_book: {_eq: false}}
+                  }
+                ) {
                   position
                   book {
                     id

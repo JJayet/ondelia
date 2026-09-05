@@ -13,7 +13,7 @@ struct PlayerView: View {
 
     /// True while the user drags the scrubber, so the position is not written back under them.
     @State var isSeekingManually = false
-    /// Remembered: whoever wants time-left wants it every time.
+    /// Remembered: whoever wants the book's time left wants it every time.
     @AppStorage("player.showRemainingTime") var showRemainingTime = false
 
     var isPlaying: Bool { audioManager.playbackState == .playing }
