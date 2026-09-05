@@ -1,0 +1,163 @@
+IsoraUITests/AccessibilityAccommodationsUITests.swift
+  s_97f765d5cc2bd9::t_f9d6843f8d69b1 2,10
+Isora/Core/Services/MetadataExtractor.swift
+  s_97f765d5cc2bd9::t_a7e1027bf7c651 145,147
+Isora/Core/Services/HardcoverAPI+Queries.swift
+  s_dc95f2cdbb6101::t_4f507cfb85fbef 62
+  s_97f765d5cc2bd9::t_5100667d0bffe8 1-61,63-76
+Isora/Features/Search/SearchView.swift
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 166-167
+Isora/Features/Hardcover/HardcoverBookPickerView.swift
+  s_97f765d5cc2bd9::t_a25910b75d5824 142
+Isora/Features/Player/TranscriptionView.swift
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 15,119
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 148-152,160
+IsoraUITests/AssistiveTechnologyAccessibilityUITests.swift
+  s_97f765d5cc2bd9::t_8f634b2264cc89 2-10
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_97f765d5cc2bd9::t_a25910b75d5824 55
+  s_97f765d5cc2bd9::t_ce12539bb3d8ff 47
+Isora/Features/Search/SearchResultRow.swift
+  s_97f765d5cc2bd9::t_a25910b75d5824 29,35
+IsoraTests/Core/Managers/GlobalAudioManagerTestsEdgeCases.swift
+  s_97f765d5cc2bd9::t_3e8326e43c9c60 2,18-19
+Isora/Core/Services/Keychain.swift
+  s_97f765d5cc2bd9::t_22897f142917cb 2
+  s_97f765d5cc2bd9::t_5f61c29e78935b 38-42
+Isora/Features/Library/StatisticsCardView.swift
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 51,62
+  s_97f765d5cc2bd9::t_d80d48363f7d23 65
+Isora/App/AppShortcuts.swift
+  s_97f765d5cc2bd9::t_d0744e88101405 55-58
+Isora/Core/Models/SwiftData/IsoraSchema.swift
+  s_97f765d5cc2bd9::t_285b19528789ab 2,4-10,12-18,20,22-26
+Isora/Features/Player/PlayerView+Layout.swift
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 85
+  s_97f765d5cc2bd9::t_a25910b75d5824 142
+IsoraUITests/PlayerAccessibilityUITests.swift
+  s_97f765d5cc2bd9::t_1be3b617e7d91e 2-10
+Isora/App/MainTabView.swift
+  s_97f765d5cc2bd9::t_45b52f08b6ade7 12,79-86,106-107
+IsoraUITests/LibraryNavigationUITests.swift
+  s_97f765d5cc2bd9::t_9a08e7776f3244 2,10
+Isora.xcodeproj/xcshareddata/xcschemes/Isora.xcscheme
+  s_97f765d5cc2bd9::t_d89697a2edcd14 21,41,52,83,100,109
+Isora/Resources/Info.plist
+  s_97f765d5cc2bd9::t_ea559ce129f7d1 44-45
+IsoraWidget/PrivacyInfo.xcprivacy
+  s_97f765d5cc2bd9::t_060f1b41f29894 1-24
+Isora/Features/Player/PlayerView+Controls.swift
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 146
+IsoraTests/Core/Managers/GlobalAudioManagerTests+Helpers.swift
+  s_97f765d5cc2bd9::t_644221864fcecd 11
+Isora/Features/Library/LibraryView+Content.swift
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 18
+Isora/Shared/MiniPlayerBar.swift
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 52,78
+  s_97f765d5cc2bd9::t_a25910b75d5824 29,38
+Isora/Core/Services/HardcoverAPI.swift
+  s_97f765d5cc2bd9::t_954c377df1c419 115
+  s_97f765d5cc2bd9::t_9a807e9c36372a 88
+  s_97f765d5cc2bd9::t_a5d8414658b759 131
+  s_97f765d5cc2bd9::t_17e2780d2c7fce 100
+  s_97f765d5cc2bd9::t_025174c9214d81 151
+  s_dc95f2cdbb6101::t_4f507cfb85fbef 159-164
+  s_97f765d5cc2bd9::t_71c8c2e8bd8fb5 169
+Isora/Features/Library/LibraryView.swift
+  s_97f765d5cc2bd9::t_1c3228bee9fb52 28
+Isora/Features/Player/TranscriptionSubviews.swift
+  s_97f765d5cc2bd9::t_b403db5d2abd46 128-130
+Isora/Shared/AccessibilityIdentifiers.swift
+  s_8f2806651216ef::t_ad260f25cf1810 16
+Isora/Features/Library/ContinueReadingCardView.swift
+  s_97f765d5cc2bd9::t_a25910b75d5824 41
+TODO.md
+  s_97f765d5cc2bd9::t_6e0039bb977f43 30-40
+  s_97f765d5cc2bd9::t_c4585c3677e08c 29
+Isora/Features/Library/LibraryHeaderView.swift
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 7,14,27,40
+  s_97f765d5cc2bd9::t_586951cb3bcbc7 20-22,33-34
+Isora/Core/Services/SpotlightIndex.swift
+  s_97f765d5cc2bd9::t_9c6cf12b2b0e4f 8
+Isora/Core/Services/SeriesCatalog.swift
+  s_dc95f2cdbb6101::t_4f507cfb85fbef 8,24
+Isora/Features/Bookmarks/BookmarksView.swift
+  s_8f2806651216ef::t_ad260f25cf1810 8-10,15-38,84-89,94-95
+  s_8f2806651216ef::t_2df1c38d6d0cfd 53
+  s_8f2806651216ef::t_5a55003ae503e1 96
+Isora/Features/Player/TranscriptSyncView.swift
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 56,87
+Isora/Features/Library/SeriesCardView.swift
+  s_97f765d5cc2bd9::t_a25910b75d5824 82,173,224
+  s_dc95f2cdbb6101::t_4f507cfb85fbef 197-210
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 46,76
+  s_97f765d5cc2bd9::t_597e93e3936bf8 29
+Isora/Core/Models/SwiftData/SwiftDataController.swift
+  s_97f765d5cc2bd9::t_bf16a8947bb071 102,109
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_97f765d5cc2bd9::t_48baa337116e75 30,34
+  s_97f765d5cc2bd9::t_6bcbc13801a0ed 11,15
+  s_97f765d5cc2bd9::t_5e04b020dc5b87 48,52
+Isora/Features/Player/ChaptersListView.swift
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 103-104,114-116
+  s_97f765d5cc2bd9::t_1503bd6c98d991 63
+IsoraTests/Core/Models/SchemaMigrationTests.swift
+  s_97f765d5cc2bd9::t_2d379a03919ec2 1-27
+Isora/Features/Library/ImportingIndicatorView.swift
+  s_97f765d5cc2bd9::t_1b12ea4a361897 23
+Isora/Core/Services/HardcoverAPI+Models.swift
+  s_dc95f2cdbb6101::t_4f507cfb85fbef 129
+  s_97f765d5cc2bd9::t_a1ac1d69750d3a 1-128,130-209
+  s_97f765d5cc2bd9::t_2bcba304a75a75 210-221
+Isora/Resources/Localizable.xcstrings
+  s_97f765d5cc2bd9::t_0334e2090927fc 843-844,849,854-855,860,1355-1356,1361,1771-1772,1777,2302
+  s_97f765d5cc2bd9::t_136411cd833777 5-13,253-261,264-272,275-283,397-405,442-450,723-731,833,838,1345,1350,1378-1386,1399-1407,1563,1568,1639-1647,1651-1659,1706,1711,1717-1725,1750-1758,1761,1766,1805-1813,1834-1839,1921-1929,1932-1940,1943-1951,1954-1962,1965-1973,1976-1984,2188-2190,2194-2202,2217-2225,2281-2289,2303,2308,2407-2409,2424-2432,2435-2443,2797-2805
+  s_97f765d5cc2bd9::t_625502276b5561 2809
+  s_97f765d5cc2bd9::t_21ab3ffd4b50a6 1562,1814,2191,2410
+  s_97f765d5cc2bd9::t_edabce5a88b057 1815-1824,2181-2187,2609-2610,2615
+  s_97f765d5cc2bd9::t_103dbf5be96d5d 2400-2406
+.gitignore
+  s_97f765d5cc2bd9::t_f0f24861c12dc2 26
+Isora/Features/Player/TranscriptionLoader.swift
+  s_97f765d5cc2bd9::t_a68ad5c7351334 25,52
+  s_97f765d5cc2bd9::t_4654c7fa9bbb44 6,27-29,39,45-46
+IsoraWidget/Localizable.xcstrings
+  s_97f765d5cc2bd9::t_fe08d02831ea15 27-35,111,121,126,133,143,148
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "97e1351525910f1c7126960d6d3164d89ed63d5e",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_8f2806651216ef": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "98fc2fc5-290a-4eb6-b85f-343d17b3e920",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_97f765d5cc2bd9": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "af93380d-653f-4d7e-a7b9-569d73f984f9",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_dc95f2cdbb6101": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "174bb67b-e71e-49ef-856a-f4810aea01f7",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
