@@ -6,7 +6,7 @@ Verification performed after the pass below:
 
 - `xcodebuild build` (app + widget extension): passed, 0 errors, 0 warnings.
 - `xcodebuild build-for-testing` (app, unit and UI test targets): passed, 0 errors, 0 warnings.
-- Unit suite `AudiobookReaderTests`: 105 tests in 20 suites, all passed.
+- Unit suite `IsoraTests`: 105 tests in 20 suites, all passed.
 - UI suite: still not run (known broken, being consolidated into `AudiobookUITestCase.swift`).
 
 Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately not done**.
@@ -26,7 +26,7 @@ Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately
       one running import. It works today; the original audit said refactor when next touched,
       and this pass did not need to touch it.
 - [ ] **CarPlay.** Requires an entitlement request to Apple before any code is worth writing.
-- [ ] **Stale planning docs** `AudiobookReaderTests/PHASE_2_IMPLEMENTATION_SUMMARY.md`,
+- [ ] **Stale planning docs** `IsoraTests/PHASE_2_IMPLEMENTATION_SUMMARY.md`,
       `PHASE_3_IMPLEMENTATION_SUMMARY.md` and `README.md` describe infrastructure that does not
       exist (CarPlay, Watch, `PersistenceController`). Not deleted here because they were not in
       the audit; they should be.

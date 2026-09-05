@@ -2,22 +2,22 @@
 
 ## Project Structure & Module Organization
 
-- App entry: `AudiobookReader/App` (`AudiobookReaderApp.swift`, `MainTabView.swift`).
-- Core logic: `AudiobookReader/Core`
+- App entry: `Isora/App` (`IsoraApp.swift`, `MainTabView.swift`).
+- Core logic: `Isora/Core`
   - Managers, Services, Models, SwiftData models. Shared singletons (`GlobalAudioManager`,
     `AudiobookManager`, `ThemeManager`) are read directly by the views that need them.
-- Features: `AudiobookReader/Features/*` (e.g., `Player`, `Library`, `Settings`). Views end with `View`.
-- Shared UI/utilities: `AudiobookReader/Shared` (e.g., `AccessibilityIdentifiers.swift`).
-- Assets & config: `AudiobookReader/Resources` (colors, `Info.plist`, entitlements, `Localizable.xcstrings` String Catalog).
-- Tests: `AudiobookReaderTests` (unit/integration) and `AudiobookReaderUITests` (UI).
+- Features: `Isora/Features/*` (e.g., `Player`, `Library`, `Settings`). Views end with `View`.
+- Shared UI/utilities: `Isora/Shared` (e.g., `AccessibilityIdentifiers.swift`).
+- Assets & config: `Isora/Resources` (colors, `Info.plist`, entitlements, `Localizable.xcstrings` String Catalog).
+- Tests: `IsoraTests` (unit/integration) and `IsoraUITests` (UI).
 
 ## Build, Test, and Development Commands
 
-- Build clean: `xcodebuild clean -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Build for testing: `xcodebuild build-for-testing -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Unit tests only: `xcodebuild test-without-building -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:AudiobookReaderTests`
-- All tests (when UI tests compile): `xcodebuild test -project AudiobookReader.xcodeproj -scheme AudiobookReader -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Open in Xcode: `open AudiobookReader.xcodeproj` and run the `AudiobookReader` scheme.
+- Build clean: `xcodebuild clean -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Build for testing: `xcodebuild build-for-testing -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Unit tests only: `xcodebuild test-without-building -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:IsoraTests`
+- All tests (when UI tests compile): `xcodebuild test -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Open in Xcode: `open Isora.xcodeproj` and run the `Isora` scheme.
 
 ## Coding Style & Naming Conventions
 
@@ -29,9 +29,9 @@
 
 ## Testing Guidelines
 
-- Framework: Swift Testing (`@Test` / `#expect`) for unit tests in `AudiobookReaderTests`; XCTest for UI tests in `AudiobookReaderUITests`. File names end with `Tests.swift` and mirror source paths.
+- Framework: Swift Testing (`@Test` / `#expect`) for unit tests in `IsoraTests`; XCTest for UI tests in `IsoraUITests`. File names end with `Tests.swift` and mirror source paths.
 - Prioritize coverage of Core and Player.
-- UI tests: live under `AudiobookReaderUITests`. Prefer `AccessibilityIdentifiers` for queries.
+- UI tests: live under `IsoraUITests`. Prefer `AccessibilityIdentifiers` for queries.
 - Run focused tests with `-only-testing:` (see commands above).
 
 ## Commit & Pull Request Guidelines
