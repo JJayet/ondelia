@@ -144,6 +144,25 @@ extension SettingsView {
         }
     }
 
+    var integrationsSection: some View {
+        Section(NSLocalizedString("Integrations", comment: "Settings section: Integrations")) {
+            NavigationLink {
+                HardcoverSettingsView()
+            } label: {
+                HStack {
+                    Label("Hardcover", systemImage: "books.vertical")
+                        .foregroundStyle(Color.primaryText)
+                    Spacer()
+                    if HardcoverService.shared.isLinked {
+                        Text(NSLocalizedString("On", comment: "Integration enabled"))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .modifier(SettingsRowCard())
+        }
+    }
+
     var aboutSection: some View {
         Section(NSLocalizedString("About", comment: "Settings section: About")) {
             HStack {

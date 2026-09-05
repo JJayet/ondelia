@@ -63,9 +63,10 @@ extension AudiobookManager {
 
         Log.library.debug("📚 AudiobookManager: Import finished — \(count) book(s), merge title \(suggestedTitle ?? "none"), offer \(offerMerge)")
         guard offerMerge, count > 1, let suggestedTitle else {
+            let imported = importBatch
             importBatch.removeAll()
             coverBatch.removeAll()
-            finishImportRun()
+            finishImportRun(matching: imported)
             return
         }
         // The batch stays on the manager rather than being captured: SwiftData models are not
@@ -75,16 +76,18 @@ extension AudiobookManager {
             guard let self, self.mergePrompt != nil else { return }
             self.mergePrompt = nil
             guard merge else {
+                let imported = self.importBatch
                 self.importBatch.removeAll()
                 self.coverBatch.removeAll()
-                self.finishImportRun()
+                self.finishImportRun(matching: imported)
                 return
             }
             Task { @MainActor in
                 let batch = self.importBatch
                 self.importBatch.removeAll()
-                await self.mergeAudiobooks(batch, title: suggestedTitle)
-                self.finishImportRun()
+                let merged = await self.mergeAudiobooks(batch, title: suggestedTitle)
+                // Match the one book that came out of the merge, not the parts that went in.
+                self.finishImportRun(matching: merged.map { [$0] } ?? batch)
             }
         }
     }
@@ -92,8 +95,10 @@ extension AudiobookManager {
     /// Releases the import gate. Held past the end of the copying on purpose: the batch is still
     /// needed while the merge offer is on screen, so the next import waits for the answer.
     @MainActor
-    func finishImportRun() {
+    func finishImportRun(matching imported: [AudiobookModel] = []) {
         isImportRunning = false
+        // No-op unless Hardcover auto-match is switched on and a token is saved.
+        Task { await HardcoverService.shared.autoMatch(imported) }
         processPendingImports()
     }
 

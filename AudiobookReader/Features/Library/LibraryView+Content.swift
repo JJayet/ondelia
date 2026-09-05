@@ -117,6 +117,11 @@ extension LibraryView {
                                         Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
                                             audiobookForImagePicker = audiobook
                                         }
+                                        if HardcoverService.shared.isLinked {
+                                            Button(NSLocalizedString("Link to Hardcover", comment: "Hardcover link menu item")) {
+                                                audiobookForHardcover = audiobook
+                                            }
+                                        }
 
                                         Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                                             activeAlert = .confirmDelete(audiobook)
@@ -186,6 +191,12 @@ extension LibraryView {
 
                 Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
                     audiobookForImagePicker = audiobook
+                }
+
+                if HardcoverService.shared.isLinked {
+                    Button(NSLocalizedString("Link to Hardcover", comment: "Hardcover link menu item")) {
+                        audiobookForHardcover = audiobook
+                    }
                 }
             }
     }

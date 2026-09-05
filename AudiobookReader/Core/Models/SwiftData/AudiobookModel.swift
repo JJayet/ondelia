@@ -19,6 +19,9 @@ final class AudiobookModel {
     /// Playback speed remembered for this book. Optional so adding it never blocks the store
     /// from opening; read it through `speed`, which supplies the 1.0 default.
     var playbackSpeed: Double?
+    /// Hardcover book this one is linked to, nil until it is matched. Optional so the store
+    /// keeps opening for libraries written before the integration existed.
+    var hardcover: HardcoverLink?
     
     @Relationship(deleteRule: .cascade, inverse: \BookmarkModel.audiobook)
     var bookmarks: [BookmarkModel] = []

@@ -19,4 +19,6 @@ enum Log {
     static let transcription = Logger(subsystem: subsystem, category: "transcription")
     /// Views and view models.
     static let ui = Logger(subsystem: subsystem, category: "ui")
+    /// Hardcover matching and shelf sync.
+    static let hardcover = Logger(subsystem: subsystem, category: "hardcover")
 }

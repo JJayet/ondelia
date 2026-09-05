@@ -67,36 +67,6 @@ enum SkipInterval: Int, CaseIterable {
     }
 }
 
-enum TranscriptionLanguage: String, CaseIterable {
-    case english = "en"
-    case spanish = "es"
-    case french = "fr"
-    case german = "de"
-    case italian = "it"
-    case portuguese = "pt"
-    case japanese = "ja"
-    case korean = "ko"
-    case chinese = "zh"
-    
-    var displayName: String {
-        switch self {
-        case .english: return NSLocalizedString("English", comment: "English language")
-        case .spanish: return NSLocalizedString("Spanish", comment: "Spanish language")
-        case .french: return NSLocalizedString("French", comment: "French language")
-        case .german: return NSLocalizedString("German", comment: "German language")
-        case .italian: return NSLocalizedString("Italian", comment: "Italian language")
-        case .portuguese: return NSLocalizedString("Portuguese", comment: "Portuguese language")
-        case .japanese: return NSLocalizedString("Japanese", comment: "Japanese language")
-        case .korean: return NSLocalizedString("Korean", comment: "Korean language")
-        case .chinese: return NSLocalizedString("Chinese", comment: "Chinese language")
-        }
-    }
-    
-    var locale: Locale {
-        return Locale(identifier: rawValue)
-    }
-}
-
 /// The speeds offered in Settings and in the player.
 enum PlaybackSpeed {
     static let choices: [Float] = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0, 2.5, 3.0]

@@ -52,6 +52,7 @@ final class AudiobookManager {
     
     func markAsFinished(_ audiobook: AudiobookModel) {
         audiobook.isFinished = true
+        syncToHardcover(audiobook)
     }
     
     func resetProgress(for audiobook: AudiobookModel) {
@@ -68,6 +69,14 @@ final class AudiobookManager {
         }
         
         swiftDataController.save()
+        syncToHardcover(audiobook)
+    }
+
+    /// Pushes the reading status to Hardcover. One call site per place that moves a book's
+    /// progress or finished flag; the service itself is a no-op when the book is not linked,
+    /// when nothing crossed a shelf boundary, or when no token is saved.
+    func syncToHardcover(_ audiobook: AudiobookModel) {
+        Task { await HardcoverService.shared.syncProgress(for: audiobook) }
     }
     
     @MainActor
@@ -138,6 +147,7 @@ final class AudiobookManager {
         audiobook.isFinished = true
         audiobook.currentPosition = audiobook.duration // Set to end
         swiftDataController.save()
+        syncToHardcover(audiobook)
         fetchAudiobooks()
         
         Log.library.debug("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")

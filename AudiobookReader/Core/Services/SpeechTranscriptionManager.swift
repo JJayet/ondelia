@@ -17,62 +17,43 @@ final class SpeechTranscriptionManager {
     var isTranscribing = false
     var currentTranscription = ""
     var transcriptionProgress: Double = 0
-    /// True while the system downloads the language asset for the selected locale.
-    var isModelLoading = false
-    var modelLoadingProgress: Double = 0
 
-    private let themeManager = ThemeManager.shared
     private let swiftDataController = SwiftDataController.shared
     private var transcriptionStore: TranscriptionStore?
 
     private init() {}
 
-    /// The engine itself needs no warm-up; only a missing language asset can hold a run back.
-    var isReady: Bool { SpeechTranscriber.isAvailable && !isModelLoading }
+    // MARK: - Locales
 
-    // MARK: - Locales and assets
-
-    /// The locale the system will actually recognise for the language chosen in Settings.
-    /// Returns nil when the device supports no variant of it.
-    func resolvedLocale() async -> Locale? {
-        let requested = Locale(identifier: themeManager.transcriptionLanguage.rawValue)
-        return await SpeechTranscriber.supportedLocale(equivalentTo: requested)
-    }
-
-    /// Whether the selected language is unsupported, installable, downloading, or ready.
-    func assetStatus() async -> AssetInventory.Status {
-        guard let locale = await resolvedLocale() else { return .unsupported }
-        return await AssetInventory.status(forModules: [Self.makeTranscriber(locale: locale)])
-    }
-
-    /// Downloads the language asset if it is not installed yet. Safe to call repeatedly:
-    /// `assetInstallationRequest` returns nil once nothing is left to fetch.
-    func installAssetsIfNeeded() async throws {
-        guard let locale = await resolvedLocale() else {
-            throw TranscriptionError.recognizerUnavailable
+    /// The locale to recognise a file in: the language the file itself declares, else the
+    /// device language. Nil when the device supports neither.
+    private static func resolvedLocale(for url: URL) async -> Locale? {
+        for candidate in [await declaredLocale(for: url), Locale.current].compactMap({ $0 }) {
+            if let supported = await SpeechTranscriber.supportedLocale(equivalentTo: candidate) {
+                return supported
+            }
         }
-        try await installAssets(for: Self.makeTranscriber(locale: locale))
+        return nil
     }
 
+    /// The language tag carried by the audio track, as ISO 639-2 ("fra"). Missing or "und" on
+    /// plenty of files, which is why `resolvedLocale` keeps a fallback.
+    private static func declaredLocale(for url: URL) async -> Locale? {
+        let asset = AVURLAsset(url: url)
+        guard let track = try? await asset.loadTracks(withMediaType: .audio).first,
+              let code = try? await track.load(.languageCode),
+              code != "und",
+              let alpha2 = Locale.Language(identifier: code).languageCode?.identifier(.alpha2)
+        else { return nil }
+        return Locale(identifier: alpha2)
+    }
+
+    /// Downloads the language asset when the device does not have it yet. The transcription
+    /// loader stays up meanwhile, so the download needs no progress of its own.
     private func installAssets(for transcriber: SpeechTranscriber) async throws {
         guard let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) else {
             return
         }
-        isModelLoading = true
-        modelLoadingProgress = 0
-        defer {
-            isModelLoading = false
-            modelLoadingProgress = 1
-        }
-        // Progress is observed rather than polled so the settings row can show a real bar.
-        let progress = request.progress
-        let observer = Task { @MainActor [weak self] in
-            while !Task.isCancelled && !progress.isFinished {
-                self?.modelLoadingProgress = progress.fractionCompleted
-                try? await Task.sleep(for: .milliseconds(250))
-            }
-        }
-        defer { observer.cancel() }
         try await request.downloadAndInstall()
     }
 
@@ -134,9 +115,14 @@ final class SpeechTranscriptionManager {
         for audiobook: AudiobookModel,
         chapterIndex: Int
     ) async throws -> TranscriptionResult {
-        guard SpeechTranscriber.isAvailable, let locale = await resolvedLocale() else {
+        // Access first: reading the file's language tag opens it just like the analyzer does.
+        let hasAccess = audioURL.startAccessingSecurityScopedResource()
+        defer { if hasAccess { audioURL.stopAccessingSecurityScopedResource() } }
+
+        guard SpeechTranscriber.isAvailable, let locale = await Self.resolvedLocale(for: audioURL) else {
             throw TranscriptionError.recognizerUnavailable
         }
+        Log.transcription.debug("🌍 SpeechTranscriptionManager: Recognising in \(locale.identifier)")
 
         let transcriber = Self.makeTranscriber(locale: locale)
         try await installAssets(for: transcriber)
@@ -145,9 +131,6 @@ final class SpeechTranscriptionManager {
 
         transcriptionProgress = 0
         defer { transcriptionProgress = 0 }
-
-        let hasAccess = audioURL.startAccessingSecurityScopedResource()
-        defer { if hasAccess { audioURL.stopAccessingSecurityScopedResource() } }
 
         do {
             let file = try AVAudioFile(forReading: audioURL)

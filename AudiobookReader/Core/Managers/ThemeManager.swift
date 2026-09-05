@@ -12,11 +12,6 @@ final class ThemeManager {
     var globalSpeedEnabled: Bool = false
     var globalSpeed: Float = 1.0
     
-    // Transcription Settings
-    var transcriptionLanguage: TranscriptionLanguage = .english
-    var enableTranslation: Bool = false
-    var translationTargetLanguage: TranscriptionLanguage = .english
-    
     private init() {
         // Load settings without GCD to align with @MainActor
         Task { self.loadSettings() }
@@ -26,9 +21,6 @@ final class ThemeManager {
         let theme: AppTheme
         let accent: AccentColor
         let skip: SkipInterval
-        let language: TranscriptionLanguage
-        let translation: Bool
-        let targetLanguage: TranscriptionLanguage
         
         // Load from UserDefaults on background queue
         if let themeRawValue = UserDefaults.standard.object(forKey: "selectedTheme") as? Int,
@@ -52,23 +44,6 @@ final class ThemeManager {
             skip = .fifteen
         }
         
-        // Transcription settings
-        if let languageRawValue = UserDefaults.standard.object(forKey: "transcriptionLanguage") as? String,
-           let loadedLanguage = TranscriptionLanguage(rawValue: languageRawValue) {
-            language = loadedLanguage
-        } else {
-            language = .english
-        }
-        
-        translation = UserDefaults.standard.bool(forKey: "enableTranslation")
-        
-        if let targetLanguageRawValue = UserDefaults.standard.object(forKey: "translationTargetLanguage") as? String,
-           let loadedTargetLanguage = TranscriptionLanguage(rawValue: targetLanguageRawValue) {
-            targetLanguage = loadedTargetLanguage
-        } else {
-            targetLanguage = .english
-        }
-        
         let storedGlobalSpeed = UserDefaults.standard.object(forKey: "globalSpeed") as? Double
 
         // Update published properties on main actor
@@ -77,9 +52,6 @@ final class ThemeManager {
         self.currentTheme = theme
         self.accentColor = accent
         self.skipInterval = skip
-        self.transcriptionLanguage = language
-        self.enableTranslation = translation
-        self.translationTargetLanguage = targetLanguage
 
         // Remote commands are registered before this runs, with the default interval.
         GlobalAudioManager.shared.applyRemoteSkipInterval()
@@ -109,21 +81,5 @@ final class ThemeManager {
     func setGlobalSpeed(_ speed: Float) {
         globalSpeed = speed
         UserDefaults.standard.set(Double(speed), forKey: "globalSpeed")
-    }
-    
-    // MARK: - Transcription Settings
-        func updateTranscriptionLanguage(_ language: TranscriptionLanguage) {
-        transcriptionLanguage = language
-        UserDefaults.standard.set(language.rawValue, forKey: "transcriptionLanguage")
-    }
-    
-    func updateEnableTranslation(_ enabled: Bool) {
-        enableTranslation = enabled
-        UserDefaults.standard.set(enabled, forKey: "enableTranslation")
-    }
-    
-    func updateTranslationTargetLanguage(_ language: TranscriptionLanguage) {
-        translationTargetLanguage = language
-        UserDefaults.standard.set(language.rawValue, forKey: "translationTargetLanguage")
     }
 }

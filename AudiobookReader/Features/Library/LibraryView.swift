@@ -11,6 +11,7 @@ struct LibraryView: View {
     let statistics = ReadingStatistics.shared
     @State var showingStatistics = false
     @State var audiobookForImagePicker: AudiobookModel?
+    @State var audiobookForHardcover: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
     /// One presentation slot for every alert this screen raises: SwiftUI only reliably drives one.
@@ -132,6 +133,9 @@ struct LibraryView: View {
                 audiobookManager.updateCoverImage(for: audiobook, with: image)
                 audiobookForImagePicker = nil
             }
+        }
+        .sheet(item: $audiobookForHardcover) { audiobook in
+            HardcoverBookPickerView(audiobook: audiobook)
         }
         .onChange(of: audiobookManager.mergePrompt?.id, initial: true) { _, _ in
             guard let prompt = audiobookManager.mergePrompt else {

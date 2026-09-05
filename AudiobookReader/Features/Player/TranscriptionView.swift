@@ -10,7 +10,6 @@ struct TranscriptionView: View {
     private var currentTime: TimeInterval { audio.getCurrentTime() }
 
     private let transcriptionManager = SpeechTranscriptionManager.shared
-    private let themeManager = ThemeManager.shared
     private let translationManager = TranslationManager.shared
     @Environment(\.dismiss) private var dismiss
     
@@ -25,6 +24,15 @@ struct TranscriptionView: View {
     @State private var isTranslating = false
     
     private var transcriptionText: String { transcription?.text ?? "" }
+
+    /// The language to translate into, and the reason to offer translation at all: a book
+    /// already spoken in the reader's language has nothing to translate to.
+    private var readerLanguage: Locale.Language { Locale.current.language }
+
+    private var canTranslate: Bool {
+        guard let source = transcription?.language, !transcriptionText.isEmpty else { return false }
+        return Locale.Language(identifier: source).languageCode != readerLanguage.languageCode
+    }
 
     /// Where the chapter being transcribed starts in the book. The recogniser counts from the
     /// beginning of the chapter file; the player counts from the beginning of the book.
@@ -58,7 +66,7 @@ struct TranscriptionView: View {
                 )
                 
                 // Translation toggle if available
-                if !transcriptionText.isEmpty && themeManager.enableTranslation {
+                if canTranslate {
                     HStack {
                         Picker(NSLocalizedString("View", comment: "View picker label"), selection: $showingTranslation) {
                             Text(NSLocalizedString("Original", comment: "Original text option")).tag(false)
@@ -124,7 +132,7 @@ struct TranscriptionView: View {
                 }
                 
                 ToolbarItem(placement: .topBarTrailing) {
-                    if !transcriptionText.isEmpty && themeManager.enableTranslation {
+                    if canTranslate {
                         Button(action: {
                             if translatedText.isEmpty {
                                 translateText()
@@ -163,8 +171,7 @@ struct TranscriptionView: View {
     }
     
     private func translateText() {
-        // The transcript is cached untranslated, so the source is whatever was recognised —
-        // not the language currently selected in Settings.
+        // The transcript is cached untranslated, so the source is whatever was recognised.
         guard let transcription, !transcription.text.isEmpty else { return }
         
         isTranslating = true
@@ -174,7 +181,7 @@ struct TranscriptionView: View {
                 let translated = try await translationManager.translateText(
                     transcription.text,
                     from: transcription.language,
-                    to: themeManager.translationTargetLanguage.rawValue
+                    to: readerLanguage.languageCode?.identifier ?? "en"
                 )
                 
                 await MainActor.run {

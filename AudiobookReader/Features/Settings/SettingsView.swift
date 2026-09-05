@@ -1,17 +1,13 @@
 import SwiftUI
-import Speech
 
 struct SettingsView: View {
     // State is internal (not private) so the section extensions in
-    // SettingsView+Sections.swift / SettingsView+TranscriptionSection.swift can drive it.
+    // SettingsView+Sections.swift can drive it.
     @Bindable var themeManager = ThemeManager.shared
     let statistics = ReadingStatistics.shared
-    let speechManager = SpeechTranscriptionManager.shared
     @Environment(\.dismiss) private var dismiss
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
-    /// nil until the first asset check answers; drives the language-model row.
-    @State var assetStatus: AssetInventory.Status? = nil
     @State var showResetStatsConfirm = false
     @State var showingBackupRestore = false
 
@@ -20,8 +16,8 @@ struct SettingsView: View {
             List {
                 appearanceSection
                 playbackSection
-                transcriptionSection
                 goalsSection
+                integrationsSection
                 dataSection
                 aboutSection
             }

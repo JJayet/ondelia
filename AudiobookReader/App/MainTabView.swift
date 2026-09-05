@@ -28,6 +28,13 @@ struct MainTabView: View {
                     MiniPlayerBar()
                         .matchedTransitionSource(id: "MINIPLAYER", in: namespace)
                         .onTapGesture { playerRouter.present(book) }
+                        // The tap gesture is invisible to VoiceOver, which reaches the bar as a
+                        // container of buttons and would otherwise have no way to expand it.
+                        .accessibilityAction(
+                            named: Text(NSLocalizedString("Open Player", comment: "Accessibility action: expand the mini player"))
+                        ) {
+                            playerRouter.present(book)
+                        }
                 }
         } else {
             tabs
