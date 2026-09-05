@@ -21,6 +21,10 @@ extension GlobalAudioManager {
         player.play()
         playbackState = .playing
         playbackStateDidChange()
+        // Feeds the system's media suggestions — the row of covers in Control Center.
+        if let currentAudiobook {
+            MediaIntentDonations.donatePlayback(of: currentAudiobook)
+        }
     }
 
     func startPlayback() {

@@ -11,6 +11,8 @@ import WidgetKit
 
 @main
 struct AudiobookReaderApp: App {
+    // Only there to serve `INPlayMediaIntent`; see `AppDelegate`.
+    @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     // Use StateObject for proper SwiftUI lifecycle management
     private let swiftDataController = SwiftDataController.shared
     private let globalAudioManager = GlobalAudioManager.shared
@@ -107,6 +109,7 @@ struct AudiobookReaderApp: App {
     
     private func handleAppDidBecomeActive() {
         playbackCommandCoordinator.consumePendingCommand()
+        MediaIntentDonations.refreshUserContext()
         // Files can be handed over while the app is in the background.
         AudiobookManager.shared.importInboxFiles()
         // Refresh Now Playing info when app becomes active
