@@ -1,0 +1,82 @@
+AudiobookReader/Features/Library/LibraryView.swift
+  s_78dafe35c98d4d::t_9fb65135cac4d8 14,137-138
+  s_78dafe35c98d4d::t_b31b70349fda2a 139
+AudiobookReader/Core/Services/HardcoverService.swift
+  s_78dafe35c98d4d::t_c506725406e4f9 72-73
+  s_78dafe35c98d4d::t_55b9ccca403921 1-71,74-187
+AudiobookReader/Shared/MiniPlayerBar.swift
+  s_0f6328f6de9ee3::t_f15fab3a8d2f50 7-11,37-45,52-57,77-89,95-97,100-103,109-119
+  s_0f6328f6de9ee3::t_18db7d4636ac4a 120-122
+AudiobookReader/Features/Settings/SettingsView+Sections.swift
+  s_78dafe35c98d4d::t_c8783334e9a4c3 147-165
+AudiobookReader/App/MainTabView.swift
+  s_0f6328f6de9ee3::t_3eefb65f1c7b2c 31-37
+AudiobookReader/Core/Services/Log.swift
+  s_78dafe35c98d4d::t_faba8bfd713e08 22-23
+AudiobookReader/Features/Player/TranscriptionView.swift
+  s_0f6328f6de9ee3::t_30d171f3c050e1 28-36,69,135,174,184
+AudiobookReader/Core/Services/SpeechTranscriptionManager.swift
+  s_0f6328f6de9ee3::t_d3ce41df1f4196 26,28-36,39-48,118-122,125
+  s_0f6328f6de9ee3::t_3a555545cf7374 51-52
+AudiobookReader/Core/Services/HardcoverAPI.swift
+  s_78dafe35c98d4d::t_a55eea0ff37194 224-237
+  s_78dafe35c98d4d::t_4a238270f42f9e 1-223
+AudiobookReader.xcodeproj/project.pbxproj
+  s_78dafe35c98d4d::t_a55eea0ff37194 84
+AudiobookReaderTests/Core/Services/HardcoverTests.swift
+  s_78dafe35c98d4d::t_c506725406e4f9 20
+  s_78dafe35c98d4d::t_f9b66dda272889 1-19,21-80
+AudiobookReader/Core/Managers/AudiobookManager+ImportBatch.swift
+  s_78dafe35c98d4d::t_3a79e86dd450a1 66,69,79,82,88-90,98,100-101
+AudiobookReader/Features/Hardcover/HardcoverSettingsView.swift
+  s_78dafe35c98d4d::t_c3dff8355f3d48 1-119
+AudiobookReader/Features/Library/LibraryView+Content.swift
+  s_78dafe35c98d4d::t_9fb65135cac4d8 120-124,195-199
+  s_78dafe35c98d4d::t_fca02d777f7a2e 200
+AudiobookReader/Core/Models/HardcoverLink.swift
+  s_78dafe35c98d4d::t_4e569b3ee112e9 1-46
+AudiobookReader/Features/Hardcover/HardcoverBookPickerView.swift
+  s_78dafe35c98d4d::t_7f4af0427ff579 1-165
+AudiobookReader/Resources/Localizable.xcstrings
+  s_78dafe35c98d4d::t_81cebec8450c29 899
+  s_78dafe35c98d4d::t_6e0f92cf23ae8b 896-898
+  s_78dafe35c98d4d::t_8b68b43ca89336 900-902
+AudiobookReader/Core/Managers/AudiobookManager.swift
+  s_78dafe35c98d4d::t_6c2c7c2a298171 55,72-79,150
+AudiobookReader/Core/Services/Keychain.swift
+  s_78dafe35c98d4d::t_d1048911538608 1-39
+AudiobookReader/Core/Models/SwiftData/AudiobookModel.swift
+  s_78dafe35c98d4d::t_4e569b3ee112e9 22-24
+AudiobookReader/Features/Settings/SettingsView.swift
+  s_0f6328f6de9ee3::t_2d0db17014c21a 5
+  s_78dafe35c98d4d::t_c8783334e9a4c3 20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.0",
+  "base_commit_sha": "966643c9a9b871eeb48044a5fe0208851e50b006",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_0f6328f6de9ee3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ffab39de-f9bb-451f-a00b-f81fc9834363",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_78dafe35c98d4d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "f5b8d228-2b37-4272-a595-2de5bb0f3676",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
