@@ -26,8 +26,7 @@ struct MainTabView: View {
         if let book = globalAudioManager.currentAudiobook, globalAudioManager.showMiniPlayer {
             tabs
                 .tabViewBottomAccessory {
-                    MiniPlayerBar()
-                        .matchedTransitionSource(id: "MINIPLAYER", in: namespace)
+                    MiniPlayerBar(namespace: namespace)
                         .onTapGesture { playerRouter.present(book) }
                         // The tap gesture is invisible to VoiceOver, which reaches the bar as a
                         // container of buttons and would otherwise have no way to expand it.

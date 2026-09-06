@@ -36,13 +36,7 @@ final class LibraryNavigationUITests: LibraryViewUITestCase {
         if backButton.exists {
             backButton.tap()
         } else {
-            // Alternative: use swipe gesture or mini player close
             app.swipeDown() // Minimize to mini player
-            
-            let miniPlayerClose = app.buttons[AccessibilityIdentifiers.MiniPlayer.closeButton]
-            if miniPlayerClose.exists {
-                miniPlayerClose.tap()
-            }
         }
         
         // Verify return to library

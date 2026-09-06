@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Bindable var themeManager = ThemeManager.shared
     let statistics = ReadingStatistics.shared
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(ChapterScrubber.showChapterTimesKey) var showChapterTimes = true
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
     @State var showResetStatsConfirm = false

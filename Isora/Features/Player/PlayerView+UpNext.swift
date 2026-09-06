@@ -24,7 +24,7 @@ extension PlayerView {
             }
 
             if sleepTimeRemaining > 0 {
-                Button { showingSleepTimer = true } label: { sleepTimerRow }
+                Menu { sleepTimerMenuItems } label: { sleepTimerRow }
                     .buttonStyle(.plain)
                     .padding(.top, 4)
             }

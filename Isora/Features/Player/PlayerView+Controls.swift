@@ -126,13 +126,16 @@ extension PlayerView {
             } label: {
                 chip(PlaybackSpeed.displayName(playbackRate))
             }
+            // Plain, like the two button chips: a menu label is tinted by default.
+            .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Playback speed", comment: "Playback speed accessibility label"))
             // The chip's own text is the rate; without this the label alone reaches VoiceOver.
             .accessibilityValue(PlaybackSpeed.displayName(playbackRate))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.speedControl)
 
-            Button {
-                showingSleepTimer = true
+            // A menu, like the speed chip, so it opens from the button.
+            Menu {
+                sleepTimerMenuItems
             } label: {
                 // A running timer keeps its countdown beside the moon; otherwise the icon alone.
                 iconChip(
@@ -169,6 +172,7 @@ extension PlayerView {
         Text(title)
             .lineLimit(1)
             .minimumScaleFactor(0.7)
+            .foregroundStyle(.primary)
             .frame(maxWidth: .infinity)
             .glassPill(height: 44)
     }
@@ -189,6 +193,38 @@ extension PlayerView {
         .foregroundStyle(tinted ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
         .frame(maxWidth: .infinity)
         .glassPill(height: 44, tinted: tinted)
+    }
+
+    /// Shared by the moon chip and the running-timer row under "Up next".
+    @ViewBuilder
+    var sleepTimerMenuItems: some View {
+            Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(300)
+            }
+            Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(600)
+            }
+            Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(900)
+            }
+            Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(1800)
+            }
+            Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(2700)
+            }
+            Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
+                audioManager.setSleepTimer(3600)
+            }
+            Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
+                audioManager.setSleepTimerEndOfChapter()
+            }
+            if sleepTimeRemaining > 0 {
+                Button(
+                    NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
+                    role: .destructive
+                ) { audioManager.cancelSleepTimer() }
+            }
     }
 
     // MARK: - Speed Button Helper

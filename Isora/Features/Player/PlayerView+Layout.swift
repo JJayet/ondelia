@@ -71,19 +71,9 @@ extension PlayerView {
 
             Spacer()
 
-            Button {
-                showingSleepTimer = true
-            } label: {
-                Image(systemName: sleepTimeRemaining > 0 ? "moon.fill" : "moon")
-                    .font(.system(size: 15, weight: .semibold))
-                    .foregroundStyle(sleepTimeRemaining > 0 ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                    .frame(width: 38, height: 38)
-                    .glassEffect(.regular, in: Circle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
-            .accessibilityValue(sleepTimeRemaining > 0 ? sleepTimeRemaining.clockFormatted : "")
-            .accessibilityIdentifier(AccessibilityIdentifiers.Player.sleepTimerButton)
+            // Balances the close button so the counter stays centred; the sleep timer lives in
+            // the chip row alone now.
+            Color.clear.frame(width: 38, height: 38)
         }
         .padding(.top, 12)
     }
@@ -145,9 +135,8 @@ extension PlayerView {
 
             ChapterScrubber(
                 position: currentTime,
-                range: scrubberRange,
-                remainingLabel: remainingLabel,
-                onToggleRemaining: { showRemainingTime.toggle() },
+                duration: duration,
+                chapters: chapters,
                 onSeek: { audioManager.seek(to: $0) }
             )
 
@@ -156,27 +145,6 @@ extension PlayerView {
         .padding(.horizontal, 20)
         .padding(.vertical, 22)
         .glassCard(cornerRadius: 34)
-    }
-
-    /// The chapter the scrubber spans, falling back to the whole book.
-    var scrubberRange: ClosedRange<TimeInterval> {
-        guard let chapter = currentChapter, chapter.endTime > chapter.startTime else {
-            return 0...max(duration, 1)
-        }
-        return chapter.startTime...chapter.endTime
-    }
-
-    /// What is left of the chapter, or — tapped — what is left of the book.
-    var remainingLabel: String {
-        let left = showRemainingTime
-            ? max(duration - currentTime, 0)
-            : max(scrubberRange.upperBound - currentTime, 0)
-        return String(
-            format: showRemainingTime
-                ? NSLocalizedString("%@ left in the book", comment: "Player: time left in the book")
-                : NSLocalizedString("%@ left", comment: "Player: time left in the chapter"),
-            left.clockFormatted
-        )
     }
 
     func chapterTitle(_ chapter: ChapterModel) -> String {

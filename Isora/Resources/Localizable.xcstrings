@@ -1,6 +1,9 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "" : {
+
+    },
     "'%@', its progress and its bookmarks will be removed. This cannot be undone." : {
       "comment" : "Delete confirmation alert message",
       "localizations" : {
@@ -609,6 +612,17 @@
         }
       }
     },
+    "Chapter Times" : {
+      "comment" : "Player chapter time line toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps du chapitre"
+          }
+        }
+      }
+    },
     "Chapters" : {
       "comment" : "Chapter list sheet title",
       "localizations" : {
@@ -665,7 +679,7 @@
       }
     },
     "Close Player" : {
-      "comment" : "Close mini player\nClose player accessibility label",
+      "comment" : "Close player accessibility label",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1735,6 +1749,17 @@
         }
       }
     },
+    "Progress bar spans" : {
+      "comment" : "Player: what the scrubber covers",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Portée de la barre de progression"
+          }
+        }
+      }
+    },
     "Purple" : {
       "comment" : "Purple accent color",
       "localizations" : {
@@ -2257,7 +2282,7 @@
       }
     },
     "Sleep Timer" : {
-      "comment" : "Sleep timer accessibility label\nSleep timer title",
+      "comment" : "Sleep timer accessibility label",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2460,6 +2485,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les livres audio n'ont pas pu être fusionnés : %@"
+          }
+        }
+      }
+    },
+    "The book" : {
+      "comment" : "Player: scrubber spans the book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le livre"
+          }
+        }
+      }
+    },
+    "The chapter" : {
+      "comment" : "Player: scrubber spans the chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le chapitre"
           }
         }
       }

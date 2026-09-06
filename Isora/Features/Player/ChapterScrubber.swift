@@ -1,17 +1,21 @@
 import SwiftUI
 
-/// The player's scrubber: how far into the chapter, how much of it is left, and a line that
-/// seeks when it is dragged. Scoped to the chapter rather than the book — a twelve-hour bar
-/// never visibly moves.
+/// The player's scrubber: two lines of time — the book's, the chapter's — over a line that
+/// seeks when it is dragged. The bar spans the chapter or the whole book; tapping the times
+/// switches, and the line the bar is following reads brighter than the other.
 struct ChapterScrubber: View {
     /// Position in the book.
     let position: TimeInterval
-    /// The chapter's span in the book, or the whole book when it has no chapters.
-    let range: ClosedRange<TimeInterval>
-    /// Right-hand label: what is left of the chapter, or of the book when toggled.
-    let remainingLabel: String
-    let onToggleRemaining: () -> Void
+    let duration: TimeInterval
+    let chapters: [ChapterModel]
     let onSeek: (TimeInterval) -> Void
+
+    static let showChapterTimesKey = "player.showChapterTimes"
+    /// Settings > Playback: whether the chapter line shows at all.
+    @AppStorage(ChapterScrubber.showChapterTimesKey) private var showsChapterTimes = true
+    /// Whether the bar spans the book. Off — the chapter — by default: a twelve-hour bar never
+    /// visibly moves.
+    @AppStorage("player.scrubsBook") private var scrubsBook = false
 
     var height: CGFloat = 6
     /// Touchable height. The line itself is hairline-thin; a finger is not.
@@ -21,49 +25,81 @@ struct ChapterScrubber: View {
     /// playback, so a drag is something you can see before you commit to it.
     @State private var dragFraction: Double?
 
+    /// The span of the chapter around `time`, or nil when the book has none there.
+    private func chapterRange(at time: TimeInterval) -> ClosedRange<TimeInterval>? {
+        guard let chapter = chapters.last(where: { $0.startTime <= time }) ?? chapters.first,
+              chapter.endTime > chapter.startTime
+        else { return nil }
+        return chapter.startTime...chapter.endTime
+    }
+
+    /// What the bar spans. Pinned to playback, not the finger, so it holds still during a drag.
+    private var range: ClosedRange<TimeInterval> {
+        (scrubsBook ? nil : chapterRange(at: position)) ?? 0...max(duration, 1)
+    }
     private var span: TimeInterval { max(range.upperBound - range.lowerBound, 1) }
     private var playedFraction: Double {
         min(max((position - range.lowerBound) / span, 0), 1)
     }
     /// What the bar shows: the finger while dragging, playback otherwise.
     private var shownFraction: Double { dragFraction ?? playedFraction }
-    private var shownElapsed: TimeInterval { shownFraction * span }
+    /// Position in the book the bar shows.
+    private var shownPosition: TimeInterval { range.lowerBound + shownFraction * span }
+    private var showsChapterLine: Bool { showsChapterTimes && !chapters.isEmpty }
 
     var body: some View {
         VStack(spacing: 10) {
-            HStack(spacing: 8) {
-                Text(
-                    String(
-                        format: NSLocalizedString(
-                            "%@ into the chapter",
-                            comment: "Player: elapsed time within the current chapter"
+            Button {
+                scrubsBook.toggle()
+            } label: {
+                VStack(spacing: 4) {
+                    timeLine(
+                        shownPosition.clockFormatted,
+                        String(
+                            format: NSLocalizedString("%@ left in the book", comment: "Player: time left in the book"),
+                            max(duration - shownPosition, 0).clockFormatted
                         ),
-                        shownElapsed.clockFormatted
+                        active: scrubsBook || !showsChapterLine
                     )
-                )
-
-                Spacer(minLength: 0)
-
-                Button(action: onToggleRemaining) {
-                    Text(dragFraction == nil ? remainingLabel : dragRemainingLabel)
-                        .font(.system(size: 12))
-                        .monospacedDigit()
-                        .foregroundStyle(.secondary)
+                    // Follows the finger across chapters when the bar spans the book.
+                    if showsChapterLine, let chapter = chapterRange(at: shownPosition) {
+                        timeLine(
+                            String(
+                                format: NSLocalizedString(
+                                    "%@ into the chapter",
+                                    comment: "Player: elapsed time within the current chapter"
+                                ),
+                                max(shownPosition - chapter.lowerBound, 0).clockFormatted
+                            ),
+                            String(
+                                format: NSLocalizedString("%@ left", comment: "Player: time left in the chapter"),
+                                max(chapter.upperBound - shownPosition, 0).clockFormatted
+                            ),
+                            active: !scrubsBook
+                        )
+                    }
                 }
-                .buttonStyle(.plain)
-                // Nothing to toggle mid-drag: the label is showing the finger, not playback.
-                .disabled(dragFraction != nil)
+                .font(.system(size: 12))
+                .monospacedDigit()
+                .contentShape(Rectangle())
             }
-            .font(.system(size: 12))
-            .monospacedDigit()
-            .foregroundStyle(.secondary)
+            .buttonStyle(.plain)
+            .disabled(chapters.isEmpty)
+            .accessibilityLabel(NSLocalizedString("Progress bar spans", comment: "Player: what the scrubber covers"))
+            .accessibilityValue(
+                scrubsBook
+                    ? NSLocalizedString("The book", comment: "Player: scrubber spans the book")
+                    : NSLocalizedString("The chapter", comment: "Player: scrubber spans the chapter")
+            )
 
             GeometryReader { geometry in
                 ProgressLine(value: shownFraction, height: height)
                     .frame(height: touchHeight, alignment: .center)
                     .contentShape(Rectangle())
+                    // A tap is not a seek: the bar is too easy to brush on the way to the
+                    // buttons under it. The finger has to travel first.
                     .gesture(
-                        DragGesture(minimumDistance: 0)
+                        DragGesture(minimumDistance: 8)
                             .onChanged { value in
                                 dragFraction = ratio(at: value.location.x, in: geometry.size.width)
                             }
@@ -111,12 +147,13 @@ struct ChapterScrubber: View {
         return min(max(Double(x / width), 0), 1)
     }
 
-    /// Time left in the chapter from where the finger is, so the right-hand label stays honest
-    /// during a drag even when it was showing the book's remaining time.
-    private var dragRemainingLabel: String {
-        String(
-            format: NSLocalizedString("%@ left", comment: "Player: time left in the chapter"),
-            max(span - shownElapsed, 0).clockFormatted
-        )
+    @ViewBuilder
+    private func timeLine(_ leading: String, _ trailing: String, active: Bool) -> some View {
+        HStack(spacing: 8) {
+            Text(leading)
+            Spacer(minLength: 0)
+            Text(trailing)
+        }
+        .foregroundStyle(active ? AnyShapeStyle(.primary) : AnyShapeStyle(.secondary))
     }
 }

@@ -13,8 +13,6 @@ struct PlayerView: View {
 
     /// True while the user drags the scrubber, so the position is not written back under them.
     @State var isSeekingManually = false
-    /// Remembered: whoever wants the book's time left wants it every time.
-    @AppStorage("player.showRemainingTime") var showRemainingTime = false
 
     var isPlaying: Bool { audioManager.playbackState == .playing }
     var currentTime: TimeInterval { audioManager.getCurrentTime() }
@@ -29,7 +27,6 @@ struct PlayerView: View {
     }
 
     @State var showingBookmarks = false
-    @State var showingSleepTimer = false
     @State var showingChapterList = false
     @State var showingTranscription = false
     // Sheet presentation handles dragging/dismiss. No custom drag state needed.
@@ -74,39 +71,6 @@ struct PlayerView: View {
         }
         .sheet(isPresented: $showingTranscription) {
             TranscriptionView(audiobook: audiobook)
-        }
-        .confirmationDialog(
-            Text(
-                NSLocalizedString("Sleep Timer", comment: "Sleep timer title")
-            ),
-            isPresented: $showingSleepTimer,
-            titleVisibility: .visible
-        ) {
-            Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(300)
-            }
-            Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(600)
-            }
-            Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(900)
-            }
-            Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(1800)
-            }
-            Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(2700)
-            }
-            Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(3600)
-            }
-            Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
-                audioManager.setSleepTimerEndOfChapter()
-            }
-            Button(
-                NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
-                role: .destructive
-            ) { audioManager.cancelSleepTimer() }
         }
     }
 }

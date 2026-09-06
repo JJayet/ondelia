@@ -135,10 +135,6 @@ final class PlayerViewUITests: PlayerViewUITestCase {
         
         // Verify state change (button should still exist and be tappable)
         XCTAssertTrue(miniPlayPause.exists, "Mini player button should remain after tap")
-        
-        // Test progress bar exists
-        let miniProgressBar = app.progressIndicators[AccessibilityIdentifiers.MiniPlayer.progressBar]
-        XCTAssertTrue(miniProgressBar.exists, "Mini player progress bar should exist")
     }
     
     // MARK: - iOS 26 Liquid Glass Effects Validation

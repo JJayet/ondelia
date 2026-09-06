@@ -20,7 +20,6 @@ enum AccessibilityIdentifiers {
         static let speedControl = "player_speed_control"
         static let chaptersButton = "player_chapters_button"
         static let bookmarksButton = "player_bookmarks_button"
-        static let sleepTimerButton = "player_sleep_timer_button"
         static let closeButton = "player_close_button"
         static let coverArt = "player_cover_art"
     }
@@ -40,8 +39,6 @@ enum AccessibilityIdentifiers {
     enum MiniPlayer {
         static let container = "mini_player_container"
         static let playPauseButton = "mini_player_play_pause_button"
-        static let closeButton = "mini_player_close_button"
-        static let progressBar = "mini_player_progress_bar"
     }
     
     // MARK: - Tab Bar

@@ -74,6 +74,13 @@ extension SettingsView {
 
             SettingsDivider()
 
+            SettingsRow(title: NSLocalizedString("Chapter Times", comment: "Player chapter time line toggle")) {
+                Toggle("", isOn: $showChapterTimes)
+                    .labelsHidden()
+            }
+
+            SettingsDivider()
+
             // Off by default: a speed picked for one narrator rarely suits the next one.
             SettingsRow(title: NSLocalizedString("Same Speed For All Books", comment: "Global playback speed toggle")) {
                 Toggle(
