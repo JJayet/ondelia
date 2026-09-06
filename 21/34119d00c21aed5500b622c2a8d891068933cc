@@ -1,0 +1,20 @@
+Isora.xcodeproj/project.pbxproj
+  s_28cb5bfc997f1c::t_bedc9505fa0943 143,151,183-202
+  s_28cb5bfc997f1c::t_0391da842e9020 10,21-27,73-83,155,203,391,397,759-763,1071,1104
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "2134119d00c21aed5500b622c2a8d891068933cc",
+  "prompts": {},
+  "sessions": {
+    "s_28cb5bfc997f1c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "160389d2-14d6-4fa3-982f-52823c9eecc3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
