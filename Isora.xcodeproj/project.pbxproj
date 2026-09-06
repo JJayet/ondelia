@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
 		F140E5FF304DE9D0004492CC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F140E600304DE9D0004492CC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
@@ -17,6 +18,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		F140E7A0304DEA0000000011 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
+			remoteInfo = "IsoraWatch Watch App";
+		};
 		F13289B22E4DBA6D004EC064 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
@@ -62,6 +70,17 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		F140E7A0304DEA0000000013 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		F140E614304DE9D1004492CC /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -117,43 +136,23 @@
 			);
 			target = F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */;
 		};
-		F1A887172E66445200718F1B /* Exceptions for "IsoraWidget" folder in "IsoraWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
-		};
-		F1A887202E66496A00718F1B /* Exceptions for "Isora" folder in "IsoraWidgetExtension" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Core/Models/HardcoverLink.swift,
-				Core/Models/SwiftData/AudiobookModel.swift,
-				Core/Models/SwiftData/BookmarkModel.swift,
-				Core/Models/SwiftData/ChapterModel.swift,
-				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
-				Shared/AppIntents/AudiobookPlaybackIntents.swift,
-				Shared/NowPlayingSharedStore.swift,
-				Shared/TimeFormatting.swift,
-			);
-			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
-		};
 		F140E7A0304DEA0000000001 /* Exceptions for "Isora" folder in "IsoraWatch Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Models/HardcoverLink.swift,
+				Core/Models/SwiftData/AudiobookModel.swift,
 				"Core/Models/SwiftData/AudiobookModel+Display.swift",
 				"Core/Models/SwiftData/AudiobookModel+Paths.swift",
-				Core/Models/SwiftData/AudiobookModel.swift,
 				Core/Models/SwiftData/BookmarkModel.swift,
 				Core/Models/SwiftData/ChapterModel.swift,
 				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
 				Core/Models/SwiftData/IsoraSchema.swift,
-				"Core/Services/AudiobookPlayer+Tracks.swift",
 				Core/Services/AudiobookPlayer.swift,
+				"Core/Services/AudiobookPlayer+Tracks.swift",
 				Core/Services/Log.swift,
 				Core/Services/SafeImportPath.swift,
 				Resources/Localizable.xcstrings,
+				Resources/audiobook.icon,
 				Shared/NowPlayingSharedStore.swift,
 				Shared/TimeFormatting.swift,
 				Shared/WatchSync/SyncModels.swift,
@@ -180,6 +179,27 @@
 				Info.plist,
 			);
 			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+		};
+		F1A887172E66445200718F1B /* Exceptions for "IsoraWidget" folder in "IsoraWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
+		};
+		F1A887202E66496A00718F1B /* Exceptions for "Isora" folder in "IsoraWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Core/Models/HardcoverLink.swift,
+				Core/Models/SwiftData/AudiobookModel.swift,
+				Core/Models/SwiftData/BookmarkModel.swift,
+				Core/Models/SwiftData/ChapterModel.swift,
+				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
+				Shared/AppIntents/AudiobookPlaybackIntents.swift,
+				Shared/NowPlayingSharedStore.swift,
+				Shared/TimeFormatting.swift,
+			);
+			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -368,11 +388,13 @@
 				F132899D2E4DBA6B004EC064 /* Frameworks */,
 				F132899E2E4DBA6B004EC064 /* Resources */,
 				F1A887182E66445200718F1B /* Embed Foundation Extensions */,
+				F140E7A0304DEA0000000013 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				F1A887122E66445200718F1B /* PBXTargetDependency */,
+				F140E7A0304DEA0000000012 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				F13289A22E4DBA6B004EC064 /* Isora */,
@@ -734,6 +756,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		F140E7A0304DEA0000000012 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			targetProxy = F140E7A0304DEA0000000011 /* PBXContainerItemProxy */;
+		};
 		F13289B32E4DBA6D004EC064 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F132899F2E4DBA6B004EC064 /* Isora */;
@@ -1041,7 +1068,7 @@
 		F140E5F1304DE9B8004492CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = audiobook;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "IsoraWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
@@ -1074,7 +1101,7 @@
 		F140E5F2304DE9B8004492CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_APPICON_NAME = audiobook;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "IsoraWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
