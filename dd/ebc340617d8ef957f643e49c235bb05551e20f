@@ -1,0 +1,19 @@
+Isora/App/IsoraApp.swift
+  s_1e9888e79dd654::t_571cece9392d00 115-116,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "ddebc340617d8ef957f643e49c235bb05551e20f",
+  "prompts": {},
+  "sessions": {
+    "s_1e9888e79dd654": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5aa0e1a3-6ab8-4b38-9cec-001db3407a77",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
