@@ -127,7 +127,7 @@ struct TranscriptionView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { withHapticFeedback { dismiss() } }
                         .glassEffect()
                         .background(Color.glassTint, in: Capsule())
                 }
@@ -135,6 +135,7 @@ struct TranscriptionView: View {
                 ToolbarItem(placement: .topBarTrailing) {
                     if canTranslate {
                         Button(action: {
+                            withHapticFeedback {}
                             if translatedText.isEmpty {
                                 translateText()
                             } else {
@@ -153,7 +154,7 @@ struct TranscriptionView: View {
                     }
 
                     
-                    Button(action: refreshTranscription) {
+                    Button(action: { withHapticFeedback { refreshTranscription() } }) {
                         Image(systemName: "arrow.clockwise")
                     }
                     .disabled(transcriptionManager.isTranscribing)
@@ -162,7 +163,7 @@ struct TranscriptionView: View {
             }
         }
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
-            Button(NSLocalizedString("OK", comment: "OK button")) {}
+            Button(NSLocalizedString("OK", comment: "OK button")) { withHapticFeedback {} }
         } message: {
             Text(errorMessage)
         }

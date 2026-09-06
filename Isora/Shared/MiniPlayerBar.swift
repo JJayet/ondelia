@@ -51,7 +51,7 @@ struct MiniPlayerBar: View {
 
             Button {
                 if audio.playbackState != .loading {
-                    audio.togglePlayback()
+                    withHapticFeedback(.medium) { audio.togglePlayback() }
                 }
             } label: {
                 Group {
@@ -69,7 +69,7 @@ struct MiniPlayerBar: View {
 
             if !isInline {
                 Button {
-                    audio.skipForward()
+                    withHapticFeedback { audio.skipForward() }
                 } label: {
                     Image(systemName: "goforward.\(ThemeManager.shared.skipInterval.rawValue)")
                         .frame(width: 44, height: 44)

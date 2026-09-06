@@ -31,6 +31,7 @@ final class GlobalAudioManager {
     /// Where a transport request wants the book, when it arrived before the player existed.
     /// Cleared by the load that honours it. See `loadAudiobook` and `seek`.
     var pendingSeek: TimeInterval?
+    var delayedStartTask: Task<Void, Never>?
     var loadTask: Task<Void, Never>?
 
     // Session and remote controls are process-wide; see `+AudioSession` and `+RemoteCommands`.
@@ -73,6 +74,7 @@ final class GlobalAudioManager {
 
         // A newer request supersedes whatever is still loading, which is what used to need a
         // request-ID comparison inside the completion.
+        cancelDelayedStart()
         loadTask?.cancel()
         teardownPlayer()
 
@@ -158,6 +160,7 @@ final class GlobalAudioManager {
 
     /// Drops everything pointing at the book — used when it is deleted from the library.
     func unload() {
+        cancelDelayedStart()
         loadTask?.cancel()
         stopProgressPersistence()
         cancelSleepTimer()

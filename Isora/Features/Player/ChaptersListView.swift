@@ -32,7 +32,7 @@ struct ChapterListView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { withHapticFeedback { dismiss() } }
                 }
             }
         }
@@ -53,7 +53,7 @@ struct ChapterRowView: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { withHapticFeedback { onTap() } }) {
             HStack(spacing: 13) {
                 // The playing chapter trades its number for the design's three-bar meter.
                 Group {

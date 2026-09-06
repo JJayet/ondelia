@@ -126,6 +126,7 @@ extension PlayerView {
             } label: {
                 chip(PlaybackSpeed.displayName(playbackRate))
             }
+            .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
             // Plain, like the two button chips: a menu label is tinted by default.
             .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Playback speed", comment: "Playback speed accessibility label"))
@@ -145,11 +146,12 @@ extension PlayerView {
                 )
             }
             .buttonStyle(.plain)
+            .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
             .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
             .accessibilityValue(sleepTimeRemaining > 0 ? sleepTimeRemaining.clockFormatted : "")
 
             Button {
-                showingBookmarks = true
+                withHapticFeedback { showingBookmarks = true }
             } label: {
                 iconChip("bookmark")
             }
@@ -158,7 +160,7 @@ extension PlayerView {
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.bookmarksButton)
 
             Button {
-                showingTranscription = true
+                withHapticFeedback { showingTranscription = true }
             } label: {
                 iconChip("text.alignleft")
             }
@@ -199,31 +201,31 @@ extension PlayerView {
     @ViewBuilder
     var sleepTimerMenuItems: some View {
             Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(300)
+                withHapticFeedback { audioManager.setSleepTimer(300) }
             }
             Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(600)
+                withHapticFeedback { audioManager.setSleepTimer(600) }
             }
             Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(900)
+                withHapticFeedback { audioManager.setSleepTimer(900) }
             }
             Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(1800)
+                withHapticFeedback { audioManager.setSleepTimer(1800) }
             }
             Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(2700)
+                withHapticFeedback { audioManager.setSleepTimer(2700) }
             }
             Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
-                audioManager.setSleepTimer(3600)
+                withHapticFeedback { audioManager.setSleepTimer(3600) }
             }
             Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
-                audioManager.setSleepTimerEndOfChapter()
+                withHapticFeedback { audioManager.setSleepTimerEndOfChapter() }
             }
             if sleepTimeRemaining > 0 {
                 Button(
                     NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
                     role: .destructive
-                ) { audioManager.cancelSleepTimer() }
+                ) { withHapticFeedback { audioManager.cancelSleepTimer() } }
             }
     }
 
@@ -243,17 +245,6 @@ extension PlayerView {
     // MARK: - Helper Methods
     func loadAudiobook() {
         audioManager.loadAudiobook(audiobook)
-    }
-
-    func withHapticFeedback<T>(
-        _ intensity: UIImpactFeedbackGenerator.FeedbackStyle = .light,
-        _ action: () -> T
-    ) -> T {
-        let impact = UIImpactFeedbackGenerator(style: intensity)
-        impact.prepare()
-        let result = action()
-        impact.impactOccurred()
-        return result
     }
 
     func formatAccessibilityTime(

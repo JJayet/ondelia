@@ -76,7 +76,7 @@ struct TranscriptSyncView: View {
                                 .frame(maxWidth: .infinity, alignment: .leading)
                         }
                         .contentShape(Rectangle())
-                        .onTapGesture { onSeek(sentence.start) }
+                        .onTapGesture { withHapticFeedback { onSeek(sentence.start) } }
                         .id(sentence.id)
                     }
                 }

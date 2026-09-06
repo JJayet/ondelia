@@ -50,7 +50,7 @@ struct ChapterScrubber: View {
     var body: some View {
         VStack(spacing: 10) {
             Button {
-                scrubsBook.toggle()
+                withHapticFeedback { scrubsBook.toggle() }
             } label: {
                 VStack(spacing: 4) {
                     timeLine(
@@ -106,7 +106,7 @@ struct ChapterScrubber: View {
                             .onEnded { value in
                                 let target = ratio(at: value.location.x, in: geometry.size.width)
                                 dragFraction = nil
-                                onSeek(range.lowerBound + target * span)
+                                withHapticFeedback { onSeek(range.lowerBound + target * span) }
                             }
                     )
             }
@@ -121,7 +121,9 @@ struct ChapterScrubber: View {
             Slider(
                 value: Binding(
                     get: { shownFraction },
-                    set: { onSeek(range.lowerBound + $0 * span) }
+                    set: { fraction in
+                        withHapticFeedback { onSeek(range.lowerBound + fraction * span) }
+                    }
                 ),
                 in: 0...1
             )

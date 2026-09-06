@@ -7,6 +7,7 @@ import SwiftUI
 // `useMultiFileEngine` and address one of two engines.
 extension GlobalAudioManager {
     func pausePlayback() {
+        cancelDelayedStart()
         // A pause during a load is the listener's latest word: the queued autoplay is off.
         pendingAutoplay = false
         player?.pause()
@@ -15,6 +16,7 @@ extension GlobalAudioManager {
     }
 
     func resumePlayback() {
+        cancelDelayedStart()
         guard let player else {
             // Nothing to resume yet: remember the intent so the load can honour it.
             if isLoading { pendingAutoplay = true }
@@ -31,11 +33,40 @@ extension GlobalAudioManager {
         }
     }
 
+    /// Only used when entering the full player from a book or library play action.
+    func startPlaybackAfterOpeningBook() {
+        cancelDelayedStart()
+        guard !isPlaying() else { return }
+        let stored = UserDefaults.standard.object(forKey: "playback.bookOpeningDelayMS") as? Int ?? 200
+        let milliseconds = [0, 100, 200, 500].contains(stored) ? stored : 200
+        guard milliseconds > 0 else {
+            startPlayback()
+            return
+        }
+        let bookID = currentAudiobook?.id
+        delayedStartTask = Task { [weak self] in
+            do {
+                try await Task.sleep(for: .milliseconds(milliseconds))
+            } catch {
+                return
+            }
+            guard let self, self.currentAudiobook?.id == bookID else { return }
+            self.delayedStartTask = nil
+            self.startPlayback()
+        }
+    }
+
+    func cancelDelayedStart() {
+        delayedStartTask?.cancel()
+        delayedStartTask = nil
+    }
+
     func startPlayback() {
         resumePlayback()
     }
 
     func stopPlayback() {
+        cancelDelayedStart()
         pendingAutoplay = false
         player?.pause()
         playbackState = .stopped

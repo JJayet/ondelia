@@ -7,6 +7,7 @@ struct SettingsView: View {
     let statistics = ReadingStatistics.shared
     @Environment(\.dismiss) private var dismiss
     @AppStorage(ChapterScrubber.showChapterTimesKey) var showChapterTimes = true
+    @AppStorage("playback.bookOpeningDelayMS") var bookOpeningDelayMS = 200
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
     @State var showResetStatsConfirm = false

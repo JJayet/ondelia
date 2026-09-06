@@ -27,7 +27,7 @@ struct MainTabView: View {
             tabs
                 .tabViewBottomAccessory {
                     MiniPlayerBar(namespace: namespace)
-                        .onTapGesture { playerRouter.present(book) }
+                        .onTapGesture { withHapticFeedback { playerRouter.present(book) } }
                         // The tap gesture is invisible to VoiceOver, which reaches the bar as a
                         // container of buttons and would otherwise have no way to expand it.
                         .accessibilityAction(
