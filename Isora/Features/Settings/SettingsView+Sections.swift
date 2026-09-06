@@ -59,6 +59,20 @@ extension SettingsView {
 
             SettingsDivider()
 
+            SettingsRow(title: NSLocalizedString("Book opening delay", comment: "Full player playback delay setting")) {
+                Picker("Book opening delay", selection: $bookOpeningDelayMS) {
+                    Text("Off").tag(0)
+                    Text(verbatim: "100 ms").tag(100)
+                    Text(verbatim: "200 ms").tag(200)
+                    Text(verbatim: "500 ms").tag(500)
+                }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .accessibilityHint(Text("Delay playback when opening the full player. Miniplayer controls start immediately."))
+            }
+
+            SettingsDivider()
+
             // On by default: resuming mid-word is the thing everyone notices, and the rewind
             // after a short pause is small enough to go unremarked.
             SettingsRow(title: NSLocalizedString("Smart Rewind", comment: "Smart rewind toggle")) {

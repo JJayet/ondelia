@@ -59,6 +59,9 @@ extension AudiobookManager {
                 (id: $0.id, title: $0.title ?? AudiobookModel.unknownTitle, author: $0.author ?? AudiobookModel.unknownAuthor)
             })
             self.processPendingImports()
+            // The one funnel every library mutation goes through — import, delete, rename,
+            // mark as read, new cover — so the watch hears about all of them from here.
+            WatchSyncService.shared.pushSnapshot()
         } catch {
             Log.library.error("❌ AudiobookManager: Failed to fetch audiobooks: \(error)")
             self.isLoadingLibrary = false

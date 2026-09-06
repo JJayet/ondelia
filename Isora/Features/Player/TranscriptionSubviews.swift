@@ -19,9 +19,11 @@ struct TranscriptionHeaderView: View {
                         }
                     
                     Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
-                        searchText = ""
-                        highlightedRange = nil
-                        showingSearch = false
+                        withHapticFeedback {
+                            searchText = ""
+                            highlightedRange = nil
+                            showingSearch = false
+                        }
                     }
                     .foregroundStyle(.tint)
                 }
@@ -31,8 +33,10 @@ struct TranscriptionHeaderView: View {
             
             HStack {
                 Button(action: {
+                    withHapticFeedback {
+                        withAnimation { showingSearch.toggle() }
+                    }
                     withAnimation {
-                        showingSearch.toggle()
                         if !showingSearch {
                             searchText = ""
                             highlightedRange = nil

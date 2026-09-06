@@ -46,6 +46,7 @@
 	<key>NSUserActivityTypes</key>
 	<array>
 		<string>INPlayMediaIntent</string>
+		<string>io.jayet.Isora.listening</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>

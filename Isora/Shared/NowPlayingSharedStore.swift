@@ -27,7 +27,8 @@ nonisolated enum NowPlayingSharedStore {
         duration: TimeInterval,
         coverImageData: Data?,
         playbackRate: Float = 1,
-        reloadTimeline: Bool = true
+        reloadTimeline: Bool = true,
+        chapter: (title: String?, number: Int, start: TimeInterval, end: TimeInterval)? = nil
     ) {
         guard let d = defaults else { return }
         if let book = audiobook {
@@ -42,11 +43,44 @@ nonisolated enum NowPlayingSharedStore {
         d.set(duration, forKey: "np_duration")
         d.set(Date().timeIntervalSince1970, forKey: "np_updatedAt")
         d.set(playbackRate, forKey: "np_playbackRate")
-        persistCover(coverImageData)
+        persistCoverIfChanged(coverImageData, bookID: audiobook?.id, defaults: d)
         d.removeObject(forKey: "np_coverImageData") // Remove data written by older versions.
+        writeChapter(chapter, into: d)
         if reloadTimeline {
-            WidgetCenter.shared.reloadTimelines(ofKind: "NowPlayingWidget")
+            WidgetCenter.shared.reloadTimelines(ofKind: widgetKind)
         }
+    }
+
+    /// The watch complication draws chapter progress, so the watch app writes four extra keys
+    /// alongside the book-level ones. Nil clears them, which is what makes the widget fall
+    /// back to whole-book progress.
+    private static func writeChapter(
+        _ chapter: (title: String?, number: Int, start: TimeInterval, end: TimeInterval)?,
+        into d: UserDefaults
+    ) {
+        guard let chapter else {
+            for key in ["np_chapterTitle", "np_chapterStart", "np_chapterEnd", "np_chapterNumber"] {
+                d.removeObject(forKey: key)
+            }
+            return
+        }
+        if let title = chapter.title, !title.isEmpty {
+            d.set(title, forKey: "np_chapterTitle")
+        } else {
+            d.removeObject(forKey: "np_chapterTitle")
+        }
+        d.set(chapter.start, forKey: "np_chapterStart")
+        d.set(chapter.end, forKey: "np_chapterEnd")
+        d.set(chapter.number, forKey: "np_chapterNumber")
+    }
+
+    /// Each platform has exactly one now-playing widget, and they do not share a kind.
+    private static var widgetKind: String {
+        #if os(watchOS)
+        "IsoraWatchNowPlaying"
+        #else
+        "NowPlayingWidget"
+        #endif
     }
 
     static func read() -> (
@@ -106,6 +140,20 @@ nonisolated enum NowPlayingSharedStore {
         FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: appGroupID)?
             .appendingPathComponent(coverFileName)
+    }
+
+    /// The progress timer calls `write` every few seconds with the same cover. Reading the
+    /// file back to compare bytes each time was wasted main-actor work, so the cover file is
+    /// touched only when the book or the cover's size changed since the last write.
+    private static func persistCoverIfChanged(_ data: Data?, bookID: UUID?, defaults d: UserDefaults) {
+        let stamp = bookID.map { "\($0.uuidString):\(data?.count ?? 0)" }
+        guard stamp != d.string(forKey: "np_coverStamp") else { return }
+        persistCover(data)
+        if let stamp {
+            d.set(stamp, forKey: "np_coverStamp")
+        } else {
+            d.removeObject(forKey: "np_coverStamp")
+        }
     }
 
     private static func persistCover(_ data: Data?) {

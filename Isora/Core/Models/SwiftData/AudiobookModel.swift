@@ -19,6 +19,10 @@ final class AudiobookModel {
     /// Playback speed remembered for this book. Optional so adding it never blocks the store
     /// from opening; read it through `speed`, which supplies the 1.0 default.
     var playbackSpeed: Double?
+    /// When `currentPosition` was last written, on whichever device wrote it. Optional so
+    /// adding it never blocks the store from opening; nil means "older than the watch sync",
+    /// which loses every last-write-wins comparison.
+    var positionUpdatedAt: Date?
     /// Hardcover book this one is linked to, nil until it is matched. Optional so the store
     /// keeps opening for libraries written before the integration existed.
     var hardcover: HardcoverLink?

@@ -25,6 +25,7 @@ extension PlayerView {
 
             if sleepTimeRemaining > 0 {
                 Menu { sleepTimerMenuItems } label: { sleepTimerRow }
+                    .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
                     .buttonStyle(.plain)
                     .padding(.top, 4)
             }

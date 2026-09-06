@@ -38,9 +38,9 @@ extension PlayerView {
             Button {
                 // Dismiss overlay by clearing router's presented
                 if let router = playerRouter {
-                    router.presented = nil
+                    withHapticFeedback { router.presented = nil }
                 } else {
-                    dismiss()
+                    withHapticFeedback { dismiss() }
                 }
             } label: {
                 Image(systemName: "chevron.down")
@@ -57,7 +57,7 @@ extension PlayerView {
             // The chapter counter doubles as the way into the chapter list: the design has no
             // separate chapters button on this screen.
             Button {
-                showingChapterList = true
+                withHapticFeedback { showingChapterList = true }
             } label: {
                 Text(chapterCounter)
                     .font(.system(size: 11, weight: .semibold))

@@ -63,9 +63,10 @@ struct LibraryView: View {
 
     // MARK: - Actions
     func playAndPresent(_ audiobook: AudiobookModel) {
+        withHapticFeedback(.medium) {}
         let audio = GlobalAudioManager.shared
         audio.loadAudiobook(audiobook)
-        audio.startPlayback()
+        audio.startPlaybackAfterOpeningBook()
         playerRouter?.present(audiobook)
     }
 

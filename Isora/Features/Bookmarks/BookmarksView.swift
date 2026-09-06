@@ -82,13 +82,13 @@ struct BookmarksView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .primaryAction) {
-                    Button { showingAdd = true } label: {
+                    Button { withHapticFeedback { showingAdd = true } } label: {
                         Label(NSLocalizedString("Add Bookmark", comment: "Add bookmark button title"), systemImage: "plus")
                     }
                     .accessibilityIdentifier(AccessibilityIdentifiers.Player.addBookmarkButton)
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { withHapticFeedback { dismiss() } }
                 }
             }
             .sheet(isPresented: $showingAdd) {
@@ -105,7 +105,7 @@ struct BookmarkRowView: View {
     @State private var showingDeleteAlert = false
     
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { withHapticFeedback { onTap() } }) {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Text(bookmark.title ?? NSLocalizedString("Bookmark", comment: "Default bookmark title"))
@@ -139,14 +139,14 @@ struct BookmarkRowView: View {
         .buttonStyle(.plain)
         .swipeActions(edge: .trailing, allowsFullSwipe: true) {
             Button(NSLocalizedString("Delete", comment: "Delete bookmark button")) {
-                showingDeleteAlert = true
+                withHapticFeedback { showingDeleteAlert = true }
             }
             .tint(.red)
         }
         .alert(NSLocalizedString("Delete Bookmark", comment: "Delete bookmark alert title"), isPresented: $showingDeleteAlert) {
-            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { }
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { withHapticFeedback {} }
             Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                onDelete()
+                withHapticFeedback { onDelete() }
             }
         } message: {
             Text(NSLocalizedString("Are you sure you want to delete this bookmark?", comment: "Delete bookmark confirmation message"))
@@ -183,11 +183,11 @@ struct AddBookmarkView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { withHapticFeedback { dismiss() } }
                 }
                 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(NSLocalizedString("Save", comment: "Save button")) { onSave(); dismiss() }
+                    Button(NSLocalizedString("Save", comment: "Save button")) { withHapticFeedback { onSave(); dismiss() } }
                     .fontWeight(.semibold)
                 }
             }

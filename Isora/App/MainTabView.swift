@@ -27,7 +27,7 @@ struct MainTabView: View {
             tabs
                 .tabViewBottomAccessory {
                     MiniPlayerBar(namespace: namespace)
-                        .onTapGesture { playerRouter.present(book) }
+                        .onTapGesture { withHapticFeedback { playerRouter.present(book) } }
                         // The tap gesture is invisible to VoiceOver, which reaches the bar as a
                         // container of buttons and would otherwise have no way to expand it.
                         .accessibilityAction(
@@ -102,13 +102,50 @@ struct MainTabView: View {
                 AudiobookManager.shared.handleImportRequest(urls: [url])
                 return
             }
-            guard url.scheme?.caseInsensitiveCompare("Isora") == .orderedSame,
-                  url.host == "player" else { return }
-            selectedTab = 1
-            if let book = globalAudioManager.currentAudiobook {
-                playerRouter.present(book)
+            guard url.scheme?.caseInsensitiveCompare("Isora") == .orderedSame else { return }
+            switch url.host {
+            case "player":
+                selectedTab = 1
+                if let book = globalAudioManager.currentAudiobook {
+                    playerRouter.present(book)
+                }
+            case "resume":
+                // The watch complication's "Resume": the loaded book, else the last one played.
+                selectedTab = 1
+                Task { @MainActor in
+                    guard let book = await PlaybackCommands.loadedBook() else { return }
+                    globalAudioManager.startPlayback()
+                    playerRouter.present(book)
+                }
+            default:
+                return
             }
         }
+        // Handoff from the watch player. Bonus on top of progress sync, so a missing book or a
+        // malformed activity is simply ignored.
+        .onContinueUserActivity(WatchHandoff.activityType) { activity in
+            guard let id = WatchHandoff.bookID(from: activity.userInfo) else { return }
+            selectedTab = 1
+            var descriptor = FetchDescriptor<AudiobookModel>(predicate: #Predicate { $0.id == id })
+            descriptor.fetchLimit = 1
+            guard let book = try? SwiftDataController.shared.context.fetch(descriptor).first else { return }
+            globalAudioManager.loadAudiobook(book)
+            if let position = activity.userInfo?[WatchHandoff.positionKey] as? Double {
+                globalAudioManager.seek(to: position)
+            }
+            playerRouter.present(book)
+        }
+    }
+}
 
+/// The one activity type the watch publishes and the phone continues.
+enum WatchHandoff {
+    static let activityType = "io.jayet.Isora.listening"
+    static let bookIDKey = "bookID"
+    static let positionKey = "position"
+
+    static func bookID(from userInfo: [AnyHashable: Any]?) -> UUID? {
+        guard let raw = userInfo?[bookIDKey] as? String else { return nil }
+        return UUID(uuidString: raw)
     }
 }

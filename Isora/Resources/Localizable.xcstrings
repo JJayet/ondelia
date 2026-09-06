@@ -4,6 +4,17 @@
     "" : {
 
     },
+    "-%@" : {
+      "comment" : "Player: time remaining, negative clock format",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%@"
+          }
+        }
+      }
+    },
     "'%@', its progress and its bookmarks will be removed. This cannot be undone." : {
       "comment" : "Delete confirmation alert message",
       "localizations" : {
@@ -15,6 +26,17 @@
         }
       }
     },
+    "% CH." : {
+      "comment" : "Widget: circular gauge caption under the percent value",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "% CH."
+          }
+        }
+      }
+    },
     "%@ · %@" : {
       "comment" : "Author and duration",
       "localizations" : {
@@ -22,6 +44,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@ · %lld %%" : {
+      "comment" : "On-watch storage: chapter status with sending percent (nested composite)",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld %%"
           }
         }
       }
@@ -44,6 +77,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · lu par %@"
+          }
+        }
+      }
+    },
+    "%@ %@" : {
+      "comment" : "On-watch storage: bytes used sentence (nested composite)",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %@"
+          }
+        }
+      }
+    },
+    "%@ %lld" : {
+      "comment" : "Player header: chapter abbreviation and number (nested composite)",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ %lld"
           }
         }
       }
@@ -121,6 +176,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@, %@ sur %@"
+          }
+        }
+      }
+    },
+    "%@×" : {
+      "comment" : "Speed picker: playback rate multiplier",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@×"
           }
         }
       }
@@ -204,6 +270,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d %% de la série"
+          }
+        }
+      }
+    },
+    "%lld %%" : {
+      "comment" : "Chapter transfer percent badge",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld %%"
+          }
+        }
+      }
+    },
+    "%lld chapters" : {
+      "comment" : "Settings: number of chapters held on the watch for a book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld chapitres"
+          }
+        }
+      }
+    },
+    "%lld chapters on the watch" : {
+      "comment" : "Watch send row: chapters already on the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld chapitres sur la montre"
           }
         }
       }
@@ -373,6 +472,17 @@
         }
       }
     },
+    "Apple Watch" : {
+      "comment" : "Settings section title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apple Watch"
+          }
+        }
+      }
+    },
     "Are you sure you want to delete this bookmark?" : {
       "comment" : "Delete bookmark confirmation message",
       "localizations" : {
@@ -474,6 +584,17 @@
         }
       }
     },
+    "Book opening delay" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Délai à l’ouverture du livre"
+          }
+        }
+      }
+    },
     "Bookmark" : {
       "comment" : "Default bookmark title",
       "localizations" : {
@@ -529,6 +650,17 @@
         }
       }
     },
+    "Books are sent from the iPhone: open a book, then “Send to Apple Watch”." : {
+      "comment" : "Empty state: how to get books onto the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres s'envoient depuis l'iPhone : ouvre un livre, puis « Envoyer sur l'Apple Watch »."
+          }
+        }
+      }
+    },
     "books completed" : {
       "comment" : "Books completed caption",
       "localizations" : {
@@ -558,6 +690,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler la minuterie"
+          }
+        }
+      }
+    },
+    "ch." : {
+      "comment" : "Widget: chapter abbreviation before a number",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ch."
+          }
+        }
+      }
+    },
+    "Ch." : {
+      "comment" : "Chapter label prefix before a chapter number",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ch."
           }
         }
       }
@@ -597,6 +751,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chapitre %d / %d"
+          }
+        }
+      }
+    },
+    "Chapter %lld queued" : {
+      "comment" : "Watch send status: chapter queued to transfer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chapitre %lld en attente"
           }
         }
       }
@@ -678,6 +843,17 @@
         }
       }
     },
+    "Clear Watch" : {
+      "comment" : "Settings: button to erase everything on the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vider la montre"
+          }
+        }
+      }
+    },
     "Close Player" : {
       "comment" : "Close player accessibility label",
       "localizations" : {
@@ -707,6 +883,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminé · %@"
+          }
+        }
+      }
+    },
+    "Connect AirPods" : {
+      "comment" : "Player caption: needs headphones to play locally",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connecte des AirPods"
           }
         }
       }
@@ -828,6 +1015,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "jours"
+          }
+        }
+      }
+    },
+    "Delay playback when opening the full player. Miniplayer controls start immediately." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retarde la lecture à l’ouverture du lecteur complet. Les commandes du mini-lecteur restent immédiates."
           }
         }
       }
@@ -1420,6 +1618,17 @@
         }
       }
     },
+    "No book" : {
+      "comment" : "Widget: nothing is currently playing",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun livre"
+          }
+        }
+      }
+    },
     "No bookmarks yet" : {
       "comment" : "No bookmarks empty state title",
       "localizations" : {
@@ -1551,6 +1760,17 @@
         }
       }
     },
+    "Nothing on the watch" : {
+      "comment" : "Empty state: no book on the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien sur la montre"
+          }
+        }
+      }
+    },
     "Now Playing" : {
       "comment" : "Player header label",
       "localizations" : {
@@ -1562,6 +1782,17 @@
         }
       }
     },
+    "Off" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Désactivé"
+          }
+        }
+      }
+    },
     "OK" : {
       "comment" : "Dismiss alert button\nOK button",
       "localizations" : {
@@ -1569,6 +1800,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "OK"
+          }
+        }
+      }
+    },
+    "on iPhone" : {
+      "comment" : "Book/player status suffix: audio is on the iPhone, not the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur l'iPhone"
+          }
+        }
+      }
+    },
+    "On the watch" : {
+      "comment" : "Book status: already downloaded to the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur la montre"
           }
         }
       }
@@ -1727,6 +1980,17 @@
         }
       }
     },
+    "Preparing chapter %lld" : {
+      "comment" : "Watch send status: chapter being exported",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparation du chapitre %lld"
+          }
+        }
+      }
+    },
     "Previous Chapter" : {
       "comment" : "Previous chapter accessibility label",
       "localizations" : {
@@ -1800,6 +2064,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Objectifs de lecture"
+          }
+        }
+      }
+    },
+    "ready" : {
+      "comment" : "Chapter status: downloaded and ready to play",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prêt"
+          }
+        }
+      }
+    },
+    "receiving" : {
+      "comment" : "Book status suffix: chapter currently transferring to the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "réception"
           }
         }
       }
@@ -1905,6 +2191,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Renommer le livre audio"
+          }
+        }
+      }
+    },
+    "Request ch. %lld" : {
+      "comment" : "Empty state action: ask the phone to send a specific chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demander le ch. %lld"
           }
         }
       }
@@ -2039,6 +2336,17 @@
         }
       }
     },
+    "Resume what you're currently listening to." : {
+      "comment" : "Widget gallery description",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprends l'écoute en cours."
+          }
+        }
+      }
+    },
     "Resuming %@" : {
       "localizations" : {
         "fr" : {
@@ -2155,6 +2463,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recherche…"
+          }
+        }
+      }
+    },
+    "Send to Apple Watch" : {
+      "comment" : "Send-to-watch button label",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyer sur l'Apple Watch"
+          }
+        }
+      }
+    },
+    "Sending chapter %lld · %lld %%" : {
+      "comment" : "Watch send status: chapter transferring, with percent complete",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoi du chapitre %lld · %lld %%"
+          }
+        }
+      }
+    },
+    "sending from iPhone" : {
+      "comment" : "Chapter status: currently transferring from the iPhone",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "envoi depuis l'iPhone"
           }
         }
       }
@@ -2277,6 +2618,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fin du chapitre en cours"
+          }
+        }
+      }
+    },
+    "Sleep timer" : {
+      "comment" : "Navigation title: sleep timer picker",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minuteur de sommeil"
           }
         }
       }
@@ -2555,6 +2907,17 @@
         }
       }
     },
+    "Timer" : {
+      "comment" : "Player chip label when no sleep timer is running",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Minuteur"
+          }
+        }
+      }
+    },
     "Title" : {
       "comment" : "Sort by title",
       "localizations" : {
@@ -2785,6 +3148,17 @@
         }
       }
     },
+    "used · Clear" : {
+      "comment" : "On-watch storage: bytes used, paired with a button to clear everything",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "utilisés · Vider"
+          }
+        }
+      }
+    },
     "Version" : {
       "comment" : "App version label",
       "localizations" : {
@@ -2803,6 +3177,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Affichage"
+          }
+        }
+      }
+    },
+    "waiting" : {
+      "comment" : "Book/chapter status: queued, transfer not started yet",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en attente"
+          }
+        }
+      }
+    },
+    "Waiting for ch." : {
+      "comment" : "Player caption prefix: paused, waiting for a chapter from the phone",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En attente du ch."
           }
         }
       }

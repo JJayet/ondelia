@@ -208,18 +208,21 @@ struct BookDetailView: View {
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.resumeButton)
 
             HStack(spacing: 10) {
-                Button { showingChapters = true } label: {
+                Button { withHapticFeedback { showingChapters = true } } label: {
                     secondaryLabel(NSLocalizedString("Chapters", comment: "Chapter list sheet title"))
                 }
                 .buttonStyle(.plain)
                 .disabled(chapters.isEmpty)
 
-                Button { showingBookmarks = true } label: {
+                Button { withHapticFeedback { showingBookmarks = true } } label: {
                     secondaryLabel(NSLocalizedString("Bookmarks", comment: "Bookmarks button title"))
                 }
                 .buttonStyle(.plain)
             }
             .padding(.top, 10)
+
+            WatchSendRowView(audiobook: audiobook)
+                .padding(.top, 10)
         }
         .padding(18)
         .glassCard(cornerRadius: 28)
@@ -234,8 +237,9 @@ struct BookDetailView: View {
     }
 
     private func play() {
+        withHapticFeedback(.medium) {}
         audioManager.loadAudiobook(audiobook)
-        audioManager.startPlayback()
+        audioManager.startPlaybackAfterOpeningBook()
         playerRouter?.present(audiobook)
     }
 }
@@ -267,7 +271,7 @@ private struct BackButton: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        Button { dismiss() } label: {
+        Button { withHapticFeedback { dismiss() } } label: {
             Image(systemName: "chevron.left")
                 .font(.system(size: 15, weight: .semibold))
                 .frame(width: 38, height: 38)
