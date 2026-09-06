@@ -15,6 +15,11 @@ struct TranscriptionView: View {
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     
     @State private var transcription: TranscriptionResult?
+    /// Grouped once per transcript. As a computed property it re-ran on every playback tick.
+    @State private var groupedSentences: [TranscriptSentence] = []
+    /// The one transcription in flight, so closing the sheet cancels it instead of leaving it
+    /// to finish for nobody, and reopening never runs two at once.
+    @State private var transcriptionTask: Task<Void, Never>?
     @State private var translatedText = ""
     @State private var showingError = false
     @State private var errorMessage = ""
@@ -48,8 +53,7 @@ struct TranscriptionView: View {
     /// cached before timings were stored, and for the translation, which has no timeline of
     /// its own.
     private var sentences: [TranscriptSentence] {
-        guard !showingTranslation, let transcription else { return [] }
-        return TranscriptSentence.group(transcription.segments, offset: chapterStart)
+        showingTranslation ? [] : groupedSentences
     }
 
     var displayText: String {
@@ -171,6 +175,10 @@ struct TranscriptionView: View {
             loadChapterTitle()
             startTranscription()
         }
+        .onDisappear {
+            transcriptionTask?.cancel()
+            transcriptionTask = nil
+        }
         .onChange(of: currentChapterIndex) { _, _ in
             loadChapterTitle()
             translatedText = "" // Reset translation when chapter changes
@@ -239,14 +247,21 @@ struct TranscriptionView: View {
     }
     
     private func startTranscription(bypassCache: Bool = false) {
-        Task {
+        transcriptionTask?.cancel()
+        transcriptionTask = Task {
             do {
-                transcription = try await transcriptionManager.transcribeCurrentChapter(
+                let result = try await transcriptionManager.transcribeCurrentChapter(
                     for: audiobook,
                     chapterIndex: currentChapterIndex,
                     bypassCache: bypassCache
                 )
+                guard !Task.isCancelled else { return }
+                transcription = result
+                groupedSentences = TranscriptSentence.group(result.segments, offset: chapterStart)
+            } catch is CancellationError {
+                return
             } catch {
+                guard !Task.isCancelled else { return }
                 errorMessage = error.localizedDescription
                 showingError = true
             }
@@ -256,6 +271,7 @@ struct TranscriptionView: View {
     /// Refresh means "transcribe again", so it has to skip the cache the first run wrote.
     private func refreshTranscription() {
         transcription = nil
+        groupedSentences = []
         translatedText = ""
         showingTranslation = false
         startTranscription(bypassCache: true)

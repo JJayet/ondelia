@@ -186,7 +186,7 @@ extension AudiobookManager {
             // Copy cover image if it exists
             if let coverImage = folderAudiobook.coverImage {
                 let coverImageURL = destinationFolderURL.appendingPathComponent("cover.jpg")
-                if let imageData = coverImage.jpegData(compressionQuality: 0.8) {
+                if let imageData = coverImage.coverJPEGData() {
                     try imageData.write(to: coverImageURL)
             Log.library.debug("   🖼️ Saved cover image")
         }

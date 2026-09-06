@@ -87,7 +87,7 @@ extension AudiobookManager {
                     duration: folderAudiobook.totalDuration,
                     currentPosition: 0,
                     isFinished: false,
-                    coverImageData: folderAudiobook.coverImage?.jpegData(compressionQuality: 0.8),
+                    coverImageData: folderAudiobook.coverImage?.coverJPEGData(),
                     dateAdded: Date(),
                     lastPlayed: Date.distantPast
                 )

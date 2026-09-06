@@ -110,7 +110,7 @@ final class AudiobookManager {
     // MARK: - Cover Image Management
     @MainActor
     func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
-        let imageData = image.jpegData(compressionQuality: 0.8)
+        let imageData = image.coverJPEGData()
         audiobook.coverImageData = imageData
         CoverImageCache.invalidate(audiobook)
         for sibling in coverBatch where sibling.persistentModelID != audiobook.persistentModelID {

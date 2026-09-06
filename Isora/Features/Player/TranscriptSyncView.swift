@@ -10,8 +10,10 @@ import SwiftUI
 /// Times are shifted by `offset` at grouping time: the recogniser sees one chapter file and
 /// counts from zero, while the player counts from the start of the book. Without the shift a
 /// tap on chapter two seeks back into chapter one, and nothing ever highlights.
-struct TranscriptSentence: Identifiable {
-    let id = UUID()
+struct TranscriptSentence: Identifiable, Equatable {
+    /// Sentences never share a start, and a stable id is what keeps the rows in place: a fresh
+    /// UUID per grouping made every playback tick rebuild the list and re-target the scroll.
+    var id: TimeInterval { start }
     let text: String
     let start: TimeInterval
     let end: TimeInterval
@@ -55,7 +57,7 @@ struct TranscriptSyncView: View {
     let onSeek: (TimeInterval) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var activeID: UUID? {
+    private var activeID: TranscriptSentence.ID? {
         sentences.first { $0.contains(currentTime) }?.id
     }
 

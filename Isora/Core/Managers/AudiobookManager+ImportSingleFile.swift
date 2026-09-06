@@ -33,7 +33,7 @@ extension AudiobookManager {
                     duration: metadata.duration,
                     currentPosition: 0,
                     isFinished: false,
-                    coverImageData: metadata.coverImage?.jpegData(compressionQuality: 0.8),
+                    coverImageData: metadata.coverImage?.coverJPEGData(),
                     dateAdded: Date(),
                     lastPlayed: Date.distantPast
                 )
@@ -137,7 +137,7 @@ extension AudiobookManager {
                     duration: metadata.duration,
                     currentPosition: 0,
                     isFinished: false,
-                    coverImageData: coverImage?.jpegData(compressionQuality: 0.8),
+                    coverImageData: coverImage?.coverJPEGData(),
                     dateAdded: Date(),
                     lastPlayed: Date.distantPast
                 )

@@ -43,7 +43,7 @@ nonisolated enum NowPlayingSharedStore {
         d.set(duration, forKey: "np_duration")
         d.set(Date().timeIntervalSince1970, forKey: "np_updatedAt")
         d.set(playbackRate, forKey: "np_playbackRate")
-        persistCover(coverImageData)
+        persistCoverIfChanged(coverImageData, bookID: audiobook?.id, defaults: d)
         d.removeObject(forKey: "np_coverImageData") // Remove data written by older versions.
         writeChapter(chapter, into: d)
         if reloadTimeline {
@@ -140,6 +140,20 @@ nonisolated enum NowPlayingSharedStore {
         FileManager.default
             .containerURL(forSecurityApplicationGroupIdentifier: appGroupID)?
             .appendingPathComponent(coverFileName)
+    }
+
+    /// The progress timer calls `write` every few seconds with the same cover. Reading the
+    /// file back to compare bytes each time was wasted main-actor work, so the cover file is
+    /// touched only when the book or the cover's size changed since the last write.
+    private static func persistCoverIfChanged(_ data: Data?, bookID: UUID?, defaults d: UserDefaults) {
+        let stamp = bookID.map { "\($0.uuidString):\(data?.count ?? 0)" }
+        guard stamp != d.string(forKey: "np_coverStamp") else { return }
+        persistCover(data)
+        if let stamp {
+            d.set(stamp, forKey: "np_coverStamp")
+        } else {
+            d.removeObject(forKey: "np_coverStamp")
+        }
     }
 
     private static func persistCover(_ data: Data?) {

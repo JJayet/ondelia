@@ -151,6 +151,10 @@ final class SpeechTranscriptionManager {
                 }
                 return (text, timings)
             }
+            // The collector awaits `transcriber.results` until the analyzer finishes. If setup
+            // or finalisation throws below, nothing else ends that stream, so cancel it on every
+            // exit; after a normal completion the task is already done and this is a no-op.
+            defer { collector.cancel() }
 
             let analyzer = try await SpeechAnalyzer(inputAudioFile: file, modules: [transcriber])
             try await analyzer.finalizeAndFinishThroughEndOfInput()
