@@ -1,0 +1,41 @@
+Isora/App/MainTabView.swift
+  s_1e9888e79dd654::t_c8250bfc5a3bef 29
+Isora/Resources/Localizable.xcstrings
+  s_1e9888e79dd654::t_c8250bfc5a3bef 4-6,622-625,1752-1762,2285,2492-2513,2856
+  s_1e9888e79dd654::t_566b152a617f4b 615-621
+Isora/Shared/MiniPlayerBar.swift
+  s_1e9888e79dd654::t_c8250bfc5a3bef 6-7,18-30,32,37,44,50,52-54,56-61,64-65,67-68,71-78,81-84,94-95
+Isora/Features/Settings/SettingsView.swift
+  s_1e9888e79dd654::t_c8250bfc5a3bef 9
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_1e9888e79dd654::t_ad275d61e99dff 27
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_1e9888e79dd654::t_99d56bcf875671 77-83
+Isora/Features/Player/ChapterScrubber.swift
+  s_1e9888e79dd654::t_c8250bfc5a3bef 3-5,10,13-19,28-39,46-48,52-55,57,59-60,62,64-80,82-84,86-93,99-100,102,151,157
+  s_1e9888e79dd654::t_99d56bcf875671 9,56,58,150,152-156
+Isora/Features/Player/PlayerView+Controls.swift
+  s_1e9888e79dd654::t_69af0607999c06 129-130,175
+  s_1e9888e79dd654::t_0bb09090142a5d 136-137
+  s_1e9888e79dd654::t_ad275d61e99dff 138,198-227
+  s_1e9888e79dd654::t_e4f2a9a69348a8 228-229
+Isora/Features/Player/PlayerView+Layout.swift
+  s_1e9888e79dd654::t_c8250bfc5a3bef 139
+  s_1e9888e79dd654::t_99d56bcf875671 74-76,138
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "3473bdfee33d425ce2a4c2dc00a9c7c4060ba8af",
+  "prompts": {},
+  "sessions": {
+    "s_1e9888e79dd654": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5aa0e1a3-6ab8-4b38-9cec-001db3407a77",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
