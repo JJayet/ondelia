@@ -220,6 +220,9 @@ struct BookDetailView: View {
                 .buttonStyle(.plain)
             }
             .padding(.top, 10)
+
+            WatchSendRowView(audiobook: audiobook)
+                .padding(.top, 10)
         }
         .padding(18)
         .glassCard(cornerRadius: 28)

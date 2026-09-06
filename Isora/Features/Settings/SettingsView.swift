@@ -20,6 +20,7 @@ struct SettingsView: View {
                     playbackSection
                     goalsSection
                     integrationsSection
+                    WatchSettingsSection()
                     dataSection
                     aboutSection
                 }

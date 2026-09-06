@@ -57,10 +57,13 @@ final class AudiobookManager {
     
     func resetProgress(for audiobook: AudiobookModel) {
         audiobook.currentPosition = 0
+        audiobook.positionUpdatedAt = Date()
+        WatchSyncService.shared.pushSnapshot()
     }
     
     func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval) {
         audiobook.currentPosition = currentTime
+        audiobook.positionUpdatedAt = Date()
         audiobook.lastPlayed = Date()
         
         // Mark as finished if within 30 seconds of the end
@@ -91,8 +94,9 @@ final class AudiobookManager {
         
         bookmark.audiobook = audiobook
         context.insert(bookmark)
-        
+
         swiftDataController.save()
+        WatchSyncService.shared.pushSnapshot()
     }
     
     @MainActor
@@ -100,6 +104,7 @@ final class AudiobookManager {
         let context = swiftDataController.context
         context.delete(bookmark)
         swiftDataController.save()
+        WatchSyncService.shared.pushSnapshot()
     }
 
     // MARK: - Cover Image Management
@@ -154,6 +159,7 @@ final class AudiobookManager {
     func markAsRead(_ audiobook: AudiobookModel) {
         audiobook.isFinished = true
         audiobook.currentPosition = audiobook.duration // Set to end
+        audiobook.positionUpdatedAt = Date()
         swiftDataController.save()
         syncToHardcover(audiobook)
         fetchAudiobooks()

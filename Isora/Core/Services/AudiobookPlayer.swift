@@ -44,14 +44,20 @@ final class AudiobookPlayer {
     /// Called when AVFoundation rejects the item that was supposed to play. A file can pass
     /// loading — the manifest carries its duration — and only fail once it is decoded.
     var onPlaybackFailed: (@MainActor () -> Void)?
+    /// Called with the track that just finished, before the queue moves on to the next one.
+    /// The watch uses it to stop at a chapter it has not been sent yet.
+    var onTrackEnded: (@MainActor (_ trackIndex: Int) -> Void)?
 
     /// Maps a queued item back to its track, so a tick can tell where playback has reached.
     private var trackIndexByItem: [ObjectIdentifier: Int] = [:]
     private var timeObserver: Any?
+    private var itemEndObserver: (any NSObjectProtocol)?
 
     init() {
         player.actionAtItemEnd = .advance
+        #if !os(watchOS)
         player.allowsExternalPlayback = false
+        #endif
     }
 
     /// Stops playback and releases the queue. The manager calls this before dropping the player
@@ -59,7 +65,7 @@ final class AudiobookPlayer {
     /// engines did, leaving remote-control targets registered against dead objects.
     func tearDown() {
         pause()
-        removeTimeObserver()
+        removeObservers()
         player.removeAllItems()
         trackIndexByItem.removeAll()
         tracks = []
@@ -89,7 +95,7 @@ final class AudiobookPlayer {
         duration = newTracks.last?.end ?? 0
         currentTime = 0
         moveQueue(to: 0)
-        addTimeObserver()
+        addObservers()
         Log.audio.debug("✅ AudiobookPlayer: Loaded \(newTracks.count) track(s)")
         return true
     }
@@ -214,8 +220,23 @@ final class AudiobookPlayer {
 
     // MARK: - Progress
 
-    private func addTimeObserver() {
-        removeTimeObserver()
+    private func addObservers() {
+        removeObservers()
+        // The queue advances on its own, so the item carried by the notification is the only
+        // reliable way to name the track that ended once the callback runs.
+        itemEndObserver = NotificationCenter.default.addObserver(
+            forName: AVPlayerItem.didPlayToEndTimeNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            // Only the identity crosses into the actor: `AVPlayerItem` is not `Sendable`.
+            guard let item = notification.object as? AVPlayerItem else { return }
+            let key = ObjectIdentifier(item)
+            MainActor.assumeIsolated {
+                guard let self, let index = self.trackIndexByItem[key] else { return }
+                self.onTrackEnded?(index)
+            }
+        }
         let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
         // Delivered on the main queue, which is already where this class lives.
         timeObserver = player.addPeriodicTimeObserver(forInterval: interval, queue: .main) { [weak self] _ in
@@ -223,7 +244,11 @@ final class AudiobookPlayer {
         }
     }
 
-    private func removeTimeObserver() {
+    private func removeObservers() {
+        if let itemEndObserver {
+            NotificationCenter.default.removeObserver(itemEndObserver)
+            self.itemEndObserver = nil
+        }
         guard let timeObserver else { return }
         player.removeTimeObserver(timeObserver)
         self.timeObserver = nil

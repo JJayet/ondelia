@@ -67,6 +67,9 @@ struct IsoraApp: App {
                         // Initialize widgets on app startup
                         WidgetCenter.shared.reloadAllTimelines()
                         playbackCommandCoordinator.consumePendingCommand()
+                        // One activation for the process; the service resumes any transfer the
+                        // last launch left in its queue.
+                        WatchSyncService.shared.activate()
                     }
                     .onChange(of: scenePhase) { _, phase in
                         switch phase {

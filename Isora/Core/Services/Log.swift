@@ -21,4 +21,6 @@ enum Log {
     static let ui = Logger(subsystem: subsystem, category: "ui")
     /// Hardcover matching and shelf sync.
     static let hardcover = Logger(subsystem: subsystem, category: "hardcover")
+    /// Apple Watch connectivity: snapshots, events, chapter export and transfers.
+    static let sync = Logger(subsystem: subsystem, category: "sync")
 }
