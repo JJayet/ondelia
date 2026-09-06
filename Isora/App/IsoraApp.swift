@@ -112,10 +112,10 @@ struct IsoraApp: App {
         MediaIntentDonations.refreshUserContext()
         // Files can be handed over while the app is in the background.
         AudiobookManager.shared.importInboxFiles()
-        // Refresh Now Playing info when app becomes active
+        // Refresh Now Playing info when app becomes active. Not `resumePlayback`: that applies
+        // the smart rewind, which turned every unlock into a two-second stutter.
         if globalAudioManager.isPlaying() {
-            // Update now playing info to ensure it's current
-            globalAudioManager.resumePlayback()
+            globalAudioManager.playbackStateDidChange()
         }
     }
 }
