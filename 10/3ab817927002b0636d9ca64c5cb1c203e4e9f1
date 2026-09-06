@@ -1,0 +1,43 @@
+Isora/Core/Managers/AudiobookManager.swift
+  s_28cb5bfc997f1c::t_32a870989c18ce 113
+Isora/Shared/NowPlayingSharedStore.swift
+  s_28cb5bfc997f1c::t_77dad1b658686f 46
+  s_28cb5bfc997f1c::t_6a294a0002dd91 145-158
+Isora/Core/Managers/AudiobookManager+FileCopy.swift
+  s_28cb5bfc997f1c::t_32a870989c18ce 189
+Isora/Features/Player/TranscriptSyncView.swift
+  s_28cb5bfc997f1c::t_bfa965f44ce614 13-16
+  s_28cb5bfc997f1c::t_9c411b0e28791e 60
+Isora/Features/Player/TranscriptionView.swift
+  s_28cb5bfc997f1c::t_42c0df3866cf7e 56
+  s_28cb5bfc997f1c::t_03feb4c7459f8d 178-181
+  s_28cb5bfc997f1c::t_6be6049f476fdc 274
+  s_28cb5bfc997f1c::t_8eb2d265e763d1 250-251,253,258-262,264
+  s_28cb5bfc997f1c::t_e80dd6b840a7e6 18-22
+IsoraTests/Shared/UIImageCoverTests.swift
+  s_28cb5bfc997f1c::t_f68d47a75280f3 1-41
+Isora/Shared/UIImage+Cover.swift
+  s_28cb5bfc997f1c::t_8e290cbb299622 1-24
+Isora/Core/Managers/AudiobookManager+ImportFolder.swift
+  s_28cb5bfc997f1c::t_32a870989c18ce 90
+Isora/Core/Managers/AudiobookManager+ImportSingleFile.swift
+  s_28cb5bfc997f1c::t_32a870989c18ce 36,140
+Isora/Core/Services/SpeechTranscriptionManager.swift
+  s_28cb5bfc997f1c::t_6ff85279ab1037 154-157
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "103ab817927002b0636d9ca64c5cb1c203e4e9f1",
+  "prompts": {},
+  "sessions": {
+    "s_28cb5bfc997f1c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "160389d2-14d6-4fa3-982f-52823c9eecc3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
