@@ -1,0 +1,55 @@
+Isora/Features/Player/ChapterScrubber.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 53,109,124-126
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 28
+Isora/Features/Bookmarks/BookmarksView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 85,91,108,142,147,149,186,190
+Isora/Core/Managers/GlobalAudioManager.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 34,77,163
+Isora/Features/Library/BookDetailView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 211,217,240,242,274
+Isora/Features/Library/LibraryView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 66,69
+Isora/Features/Player/TranscriptionSubviews.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 22-26,36-38
+Isora/Features/Player/TranscriptSyncView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 79
+Isora/Resources/Localizable.xcstrings
+  s_28cb5bfc997f1c::t_9612c29b23ba84 4-36
+Isora/Shared/PlayerHaptics.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 1-14
+Isora/App/MainTabView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 30
+Isora/Shared/MiniPlayerBar.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 54,72
+Isora/Features/Player/PlayerView+Layout.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 41,43,60
+Isora/Core/Managers/GlobalAudioManager+Playback.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 10,19,36-63,69
+Isora/Features/Player/PlayerView+Controls.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 129,149,154,163,204,207,210,213,216,219,222,228
+Isora/Features/Player/ChaptersListView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 35,56
+Isora/Features/Settings/SettingsView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 10
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 62-75
+Isora/Features/Player/TranscriptionView.swift
+  s_28cb5bfc997f1c::t_9612c29b23ba84 130,138,157,166
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "410e7fed95af7f59a49777f47ea73709f9a6290b",
+  "prompts": {},
+  "sessions": {
+    "s_28cb5bfc997f1c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "160389d2-14d6-4fa3-982f-52823c9eecc3",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
