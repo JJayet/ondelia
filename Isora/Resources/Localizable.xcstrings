@@ -3105,7 +3105,7 @@
       }
     },
     "Unknown Author" : {
-      "comment" : "Default audiobook author",
+      "comment" : "Default audiobook author\nDefault author for audiobooks without author",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3116,7 +3116,7 @@
       }
     },
     "Unknown Title" : {
-      "comment" : "Default audiobook title",
+      "comment" : "Default audiobook title\nDefault title for audiobooks without title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
