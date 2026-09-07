@@ -1,0 +1,19 @@
+Isora/Resources/Localizable.xcstrings
+  s_5cc2f451e61014::t_013478eefbf8dc 431-441,555,687-697,1601-1633,1656-1666,2040,2233-2243,2430,2728,3232-3242
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "6768d69fe72caf43036fef9fd22607368ea56865",
+  "prompts": {},
+  "sessions": {
+    "s_5cc2f451e61014": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1205f4c-907f-40de-9695-2ba53929fb57",
+        "model": "unknown"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
