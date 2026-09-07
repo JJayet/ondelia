@@ -1,0 +1,35 @@
+.gitignore
+  s_5cc2f451e61014::t_7dc480ca0500de 27
+.claude/settings.local.json
+  s_8d68a57da8c54f::t_51901481a1d9ba 1-54
+Isora/Features/Player/TranscriptSyncView.swift
+  s_5cc2f451e61014::t_dae29f45923aad 52-66,69-71,74-87,91-92,97-109,119-133
+Isora/Features/Player/TranscriptionView.swift
+  s_5cc2f451e61014::t_601b78e39656b5 7-9,108
+IsoraTests/Core/Services/TranscriptSentenceTests.swift
+  s_5cc2f451e61014::t_1d6db827d7bbed 61-73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b7d9b2a178c206d46ce90a347b233d4bed7ab452",
+  "prompts": {},
+  "sessions": {
+    "s_5cc2f451e61014": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1205f4c-907f-40de-9695-2ba53929fb57",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_8d68a57da8c54f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a4479ec3-3ba4-4703-a707-fa21895972cd",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
