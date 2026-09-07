@@ -1,0 +1,114 @@
+Isora/Core/Managers/GlobalAudioManager.swift
+  s_5cc2f451e61014::t_baa9a55fd77a88 151-157
+Isora/Features/Library/QueueSectionView.swift
+  s_5cc2f451e61014::t_c2122fd2ffdb21 1-89,91-103
+  s_5cc2f451e61014::t_1478ca108f5c82 90
+Isora/Features/Library/WatchSendRowView.swift
+  s_5cc2f451e61014::t_82c7b90960214f 13
+Isora/Features/Library/LibraryHeaderView.swift
+  s_5cc2f451e61014::t_91a4ef47b70881 7,10-11,17-19,32-34,46-62,70-75,82
+Isora/Features/Library/SeriesCardView.swift
+  s_5cc2f451e61014::t_3aec40a2220479 159
+  s_5cc2f451e61014::t_950b911327278a 76-78
+Isora/Features/Settings/StatisticsView.swift
+  s_5cc2f451e61014::t_adf5a8679ad4ca 49
+IsoraTests/Core/Managers/PlayQueueTests.swift
+  s_5cc2f451e61014::t_98172eeb988a0d 1-23,25-26,29-43,45-48,51-55,57-81
+  s_5cc2f451e61014::t_75966044bd1666 49-50,56
+  s_5cc2f451e61014::t_cde3aa8aa8b8a4 24,27-28,44
+Isora/Core/Services/MediaIntentDonations.swift
+  s_5cc2f451e61014::t_60f3d81dbb5598 67-69,71-75,77-82
+Isora/Features/Library/LibraryView+Content.swift
+  s_5cc2f451e61014::t_828a7fb0223580 174
+  s_5cc2f451e61014::t_1478ca108f5c82 11-15,48-49,123-124
+  s_5cc2f451e61014::t_38546695933be7 201,206-212,219-223
+  s_5cc2f451e61014::t_279100fee4fec9 77-78,147,163-169,171
+  s_5cc2f451e61014::t_6af4cb7ebc6beb 50,125
+  s_5cc2f451e61014::t_f1dc432a00f4f3 148
+  s_5cc2f451e61014::t_5fcea739d48b8f 228
+  s_5cc2f451e61014::t_26bbb2e17d5f7a 51-55,126-127
+Isora/Features/Library/StatisticsCardView.swift
+  s_5cc2f451e61014::t_1781f8dd1accd4 10
+Isora/Features/Library/AudiobookGridItemView.swift
+  s_5cc2f451e61014::t_2df54e3aa91ecc 45-46,49-54
+  s_5cc2f451e61014::t_be7b8004e165a8 5,8-9
+  s_5cc2f451e61014::t_92d8f75164a06a 30
+  s_5cc2f451e61014::t_5bbf45978a8691 10
+Isora/Core/Managers/AudiobookManager.swift
+  s_5cc2f451e61014::t_17019534955a30 136-137
+Isora/Resources/Localizable.xcstrings
+  s_5cc2f451e61014::t_387381a540e44b 3249-3336
+Isora/Features/Settings/BackupRestoreView.swift
+  s_5cc2f451e61014::t_06386239a3cabb 81
+  s_5cc2f451e61014::t_c5426d3d09c2b0 61,63,69
+  s_5cc2f451e61014::t_853e9748bcf3d0 30
+  s_5cc2f451e61014::t_566731db6ada43 50
+Isora/Features/Library/ImagePickerView.swift
+  s_5cc2f451e61014::t_f6d216773f260b 33
+  s_5cc2f451e61014::t_8a8cca1dafa8c6 120
+  s_5cc2f451e61014::t_4724d6e26e34fc 96
+Isora/Features/Settings/SettingsView.swift
+  s_5cc2f451e61014::t_9014a3b2e34258 38,40
+  s_5cc2f451e61014::t_6ba36a0eef0ec4 11
+  s_5cc2f451e61014::t_00a6bb052b4d96 53,55
+Isora/Features/Library/BookActionsMenu.swift
+  s_5cc2f451e61014::t_27a7772eb8b8fe 1-69
+Isora/Core/Managers/PlayQueue.swift
+  s_5cc2f451e61014::t_df4997abb9e968 50-52,55,58-59,61-67
+  s_5cc2f451e61014::t_1230b8930c613d 1-49,53-54,56-57,60,68-74
+Isora/Features/Settings/WatchSettingsSection.swift
+  s_5cc2f451e61014::t_c9afecc00f7aad 21
+Isora/Shared/AccessibilityIdentifiers.swift
+  s_5cc2f451e61014::t_6d8dbe7d1d451d 31-32
+Isora/Features/Hardcover/HardcoverBookPickerView.swift
+  s_5cc2f451e61014::t_12d2f84c889e9b 33,75
+  s_5cc2f451e61014::t_ce1194e9a2d560 26-28
+Isora/Features/Search/SearchView.swift
+  s_5cc2f451e61014::t_8075cb06e5221b 114-119,123-125,130
+  s_5cc2f451e61014::t_7b4d9aaa738c07 175
+  s_5cc2f451e61014::t_9e8ea2dc63170f 99
+Isora/Features/Library/BookDetailView.swift
+  s_5cc2f451e61014::t_6ba36a0eef0ec4 43-59
+  s_5cc2f451e61014::t_dac81f368b01f8 7
+Isora/Features/Hardcover/HardcoverSettingsView.swift
+  s_5cc2f451e61014::t_12d2f84c889e9b 101
+  s_5cc2f451e61014::t_de528c79089545 143-146
+Isora/Features/Library/EnhancedAudiobookRowView.swift
+  s_5cc2f451e61014::t_98968434fb011f 17
+Isora/Features/Library/LibraryView+Alerts.swift
+  s_5cc2f451e61014::t_1d621159195437 79-83
+Isora/App/AppShortcuts.swift
+  s_5cc2f451e61014::t_6ba36a0eef0ec4 7-21,50,52,54,123,129,133
+  s_5cc2f451e61014::t_2e65e6378462d3 27-28,30
+Isora/Features/Library/LibraryView.swift
+  s_5cc2f451e61014::t_5a7ec665a7f49a 139
+  s_5cc2f451e61014::t_6af4cb7ebc6beb 90-95
+  s_5cc2f451e61014::t_279100fee4fec9 27-28
+  s_5cc2f451e61014::t_d473c91e2fabdf 75-89
+Isora/Shared/PlayerHaptics.swift
+  s_5cc2f451e61014::t_6a52a091d570b3 3-20,28,30
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_5cc2f451e61014::t_a55abc8aa0f968 26-38,58-64,67-70,75-101,103,110
+Isora/Features/Library/EmptyLibraryView.swift
+  s_5cc2f451e61014::t_f3584426e260ba 35
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_5cc2f451e61014::t_6ba36a0eef0ec4 42-53
+  s_5cc2f451e61014::t_32648fc69e52d3 147-150
+  s_5cc2f451e61014::t_427d74c9fe6bd7 187,194,207
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "ce7161e28bd57fc1b20192cd3cc199b6cd81c4b3",
+  "prompts": {},
+  "sessions": {
+    "s_5cc2f451e61014": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d1205f4c-907f-40de-9695-2ba53929fb57",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
