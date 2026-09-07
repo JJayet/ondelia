@@ -58,4 +58,17 @@ struct TranscriptSentenceTests {
     func emptyInput() {
         #expect(TranscriptSentence.group([]).isEmpty)
     }
+
+    @Test("sentenceID(at:) finds the sentence spoken, or the last one started")
+    func sentenceLookup() {
+        let sentences = (0..<5).map {
+            TranscriptSentence(text: "s\($0)", start: Double($0 * 10), end: Double($0 * 10 + 8))
+        }
+        #expect(sentences.sentenceID(at: -1) == nil)
+        #expect(sentences.sentenceID(at: 0) == 0)
+        #expect(sentences.sentenceID(at: 25) == 20)
+        #expect(sentences.sentenceID(at: 29) == 20) // in the gap, keeps the last one
+        #expect(sentences.sentenceID(at: 1000) == 40)
+        #expect([TranscriptSentence]().sentenceID(at: 5) == nil)
+    }
 }

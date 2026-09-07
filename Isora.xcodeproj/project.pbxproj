@@ -7,24 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
 		F140E5FF304DE9D0004492CC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F140E600304DE9D0004492CC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
 		F140E60F304DE9D1004492CC /* IsoraWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F140E5FE304DE9D0004492CC /* IsoraWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F1A887002E66445100718F1B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F1A887022E66445100718F1B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
 		F1A887132E66445200718F1B /* IsoraWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F1A886FD2E66445100718F1B /* IsoraWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		F140E7A0304DEA0000000011 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
-			proxyType = 1;
-			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
-			remoteInfo = "IsoraWatch Watch App";
-		};
 		F13289B22E4DBA6D004EC064 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
@@ -60,6 +53,13 @@
 			remoteGlobalIDString = F140E5FD304DE9D0004492CC;
 			remoteInfo = IsoraWatchWidgetExtension;
 		};
+		F140E7A0304DEA0000000011 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
+			remoteInfo = "IsoraWatch Watch App";
+		};
 		F1A887112E66445200718F1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
@@ -70,17 +70,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
-		F140E7A0304DEA0000000013 /* Embed Watch Content */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
-			dstSubfolderSpec = 16;
-			files = (
-				F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */,
-			);
-			name = "Embed Watch Content";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		F140E614304DE9D1004492CC /* Embed Foundation Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -90,6 +79,17 @@
 				F140E60F304DE9D1004492CC /* IsoraWatchWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F140E7A0304DEA0000000013 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		F1A887182E66445200718F1B /* Embed Foundation Extensions */ = {
@@ -151,8 +151,8 @@
 				"Core/Services/AudiobookPlayer+Tracks.swift",
 				Core/Services/Log.swift,
 				Core/Services/SafeImportPath.swift,
-				Resources/Localizable.xcstrings,
 				Resources/audiobook.icon,
+				Resources/Localizable.xcstrings,
 				Shared/NowPlayingSharedStore.swift,
 				Shared/TimeFormatting.swift,
 				Shared/WatchSync/SyncModels.swift,
@@ -756,11 +756,6 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
-		F140E7A0304DEA0000000012 /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
-			targetProxy = F140E7A0304DEA0000000011 /* PBXContainerItemProxy */;
-		};
 		F13289B32E4DBA6D004EC064 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = F132899F2E4DBA6B004EC064 /* Isora */;
@@ -785,6 +780,11 @@
 			isa = PBXTargetDependency;
 			target = F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */;
 			targetProxy = F140E60D304DE9D1004492CC /* PBXContainerItemProxy */;
+		};
+		F140E7A0304DEA0000000012 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			targetProxy = F140E7A0304DEA0000000011 /* PBXContainerItemProxy */;
 		};
 		F1A887122E66445200718F1B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

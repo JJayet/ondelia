@@ -24,3 +24,4 @@ xcuserdata/
 .codegraph/
 .testagent/
 output/
+.claude/worktrees/

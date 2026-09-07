@@ -4,10 +4,11 @@ struct TranscriptionView: View {
     let audiobook: AudiobookModel
 
     // Read live rather than passed in: the transcript follows playback while the sheet is up,
-    // and a value captured at presentation would freeze at the moment it opened.
+    // and a value captured at presentation would freeze at the moment it opened. The playback
+    // position itself is deliberately not read here: `TranscriptSyncView` watches it, so the
+    // 4 Hz tick rebuilds the highlighted row and not this whole screen.
     private let audio = GlobalAudioManager.shared
     private var currentChapterIndex: Int { audio.currentChapterIndex }
-    private var currentTime: TimeInterval { audio.getCurrentTime() }
 
     private let transcriptionManager = SpeechTranscriptionManager.shared
     private let translationManager = TranslationManager.shared
@@ -104,7 +105,7 @@ struct TranscriptionView: View {
                         startTranscription()
                     }
                 } else if !sentences.isEmpty {
-                    TranscriptSyncView(sentences: sentences, currentTime: currentTime) { time in
+                    TranscriptSyncView(sentences: sentences) { time in
                         audio.seek(to: time)
                     }
                 } else {

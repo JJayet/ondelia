@@ -49,40 +49,64 @@ struct TranscriptSentence: Identifiable, Equatable {
     }
 }
 
+extension Array where Element == TranscriptSentence {
+    /// The sentence being spoken at `time`, or the last one that started before it. Binary
+    /// search: sentences are in start order, and this runs four times a second on a list that
+    /// can hold every sentence of a single-file book.
+    func sentenceID(at time: TimeInterval) -> TranscriptSentence.ID? {
+        var low = 0
+        var high = count
+        while low < high {
+            let mid = (low + high) / 2
+            if self[mid].start <= time { low = mid + 1 } else { high = mid }
+        }
+        return low > 0 ? self[low - 1].id : nil
+    }
+}
+
 /// The transcript lined up against playback: the sentence being spoken is highlighted, and
 /// tapping any sentence seeks to it.
+///
+/// This layer is the only one that watches the clock. It turns the 4 Hz position into a
+/// sentence id, and the rows below only rebuild when that id changes.
 struct TranscriptSyncView: View {
     let sentences: [TranscriptSentence]
-    let currentTime: TimeInterval
+    let onSeek: (TimeInterval) -> Void
+    private let audio = GlobalAudioManager.shared
+
+    var body: some View {
+        TranscriptRows(sentences: sentences, activeID: sentences.sentenceID(at: audio.getCurrentTime()), onSeek: onSeek)
+            .equatable()
+    }
+}
+
+/// A `List`, not a `LazyVStack`: the collection view underneath keeps only the visible rows
+/// alive and can jump to any row without laying out the thousands before it.
+private struct TranscriptRows: View, Equatable {
+    let sentences: [TranscriptSentence]
+    let activeID: TranscriptSentence.ID?
     let onSeek: (TimeInterval) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    private var activeID: TranscriptSentence.ID? {
-        sentences.first { $0.contains(currentTime) }?.id
+    nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
+        lhs.activeID == rhs.activeID && lhs.sentences == rhs.sentences
     }
 
     var body: some View {
         ScrollViewReader { proxy in
-            ScrollView {
-                LazyVStack(alignment: .leading, spacing: 12) {
-                    ForEach(sentences) { sentence in
-                        let isActive = sentence.id == activeID
-                        HStack(alignment: .firstTextBaseline, spacing: 12) {
-                            Text(sentence.start.clockFormatted)
-                                .font(.caption.monospacedDigit())
-                                .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-                            Text(sentence.text)
-                                .font(.body)
-                                .lineSpacing(4)
-                                .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                                .frame(maxWidth: .infinity, alignment: .leading)
-                        }
-                        .contentShape(Rectangle())
-                        .onTapGesture { withHapticFeedback { onSeek(sentence.start) } }
-                        .id(sentence.id)
-                    }
-                }
-                .padding()
+            List(sentences) { sentence in
+                row(sentence, isActive: sentence.id == activeID)
+                    .listRowSeparator(.hidden)
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .id(sentence.id)
+            }
+            .listStyle(.plain)
+            .scrollContentBackground(.hidden)
+            // Opening the transcript lands on the line being spoken, not on the first page.
+            .onAppear {
+                guard let activeID else { return }
+                proxy.scrollTo(activeID, anchor: .center)
             }
             .onChange(of: activeID) { _, id in
                 guard let id else { return }
@@ -91,5 +115,20 @@ struct TranscriptSyncView: View {
                 }
             }
         }
+    }
+
+    private func row(_ sentence: TranscriptSentence, isActive: Bool) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 12) {
+            Text(sentence.start.clockFormatted)
+                .font(.caption.monospacedDigit())
+                .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
+            Text(sentence.text)
+                .font(.body)
+                .lineSpacing(4)
+                .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .contentShape(Rectangle())
+        .onTapGesture { withHapticFeedback { onSeek(sentence.start) } }
     }
 }
