@@ -64,16 +64,21 @@ enum MediaIntentDonations {
     }
 
     /// Tells the system this is a media app and how much it holds. Cheap, so it runs whenever
-    /// the app becomes active rather than trying to spot the moment the library changed.
+    /// the app becomes active rather than trying to spot the moment the library changed. On a
+    /// cold launch the store is still opening at that point, so this waits for it instead of
+    /// silently skipping the one context update a fresh install gets.
     static func refreshUserContext() {
-        let store = SwiftDataController.shared
-        guard store.isLoaded,
-              let count = try? store.context.fetchCount(FetchDescriptor<AudiobookModel>()) else { return }
+        Task { @MainActor in
+            let store = SwiftDataController.shared
+            await store.whenLoaded()
+            guard store.isLoaded,
+                  let count = try? store.context.fetchCount(FetchDescriptor<AudiobookModel>()) else { return }
 
-        let context = INMediaUserContext()
-        // Nothing to subscribe to: the library is whatever the listener imported.
-        context.subscriptionStatus = .notSubscribed
-        context.numberOfLibraryItems = count
-        context.becomeCurrent()
+            let context = INMediaUserContext()
+            // Nothing to subscribe to: the library is whatever the listener imported.
+            context.subscriptionStatus = .notSubscribed
+            context.numberOfLibraryItems = count
+            context.becomeCurrent()
+        }
     }
 }

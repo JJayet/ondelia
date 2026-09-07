@@ -4,17 +4,30 @@ import SwiftData
 // Spotlight / Siri App Shortcuts. Run in the app process; the system launches the app in the
 // background when needed, so these talk to GlobalAudioManager directly.
 
+/// Siri reads these out; a success needs no line of its own — the audio starting is the answer.
+enum PlaybackIntentError: Error, CustomLocalizedStringResourceConvertible {
+    case emptyLibrary
+    case nothingPlaying
+    case bookMissing
+
+    var localizedStringResource: LocalizedStringResource {
+        switch self {
+        case .emptyLibrary: return "No audiobook in your library"
+        case .nothingPlaying: return "Nothing is playing"
+        case .bookMissing: return "That audiobook is no longer in your library"
+        }
+    }
+}
+
 struct ResumeLastBookIntent: AudioPlaybackIntent {
     static let title: LocalizedStringResource = "Resume Last Book"
     static let description = IntentDescription("Resume the most recently played audiobook")
 
     @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
-        guard let book = await PlaybackCommands.loadedBook() else {
-            return .result(dialog: "No audiobook in your library")
-        }
+    func perform() async throws -> some IntentResult {
+        guard await PlaybackCommands.loadedBook() != nil else { throw PlaybackIntentError.emptyLibrary }
         GlobalAudioManager.shared.startPlayback() // queued via pendingAutoplay until ready
-        return .result(dialog: "Resuming \(book.title ?? "")")
+        return .result()
     }
 }
 
@@ -34,11 +47,11 @@ struct SleepEndOfChapterIntent: AudioPlaybackIntent {
     static let description = IntentDescription("Stop playback when the current chapter ends")
 
     @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
+    func perform() async throws -> some IntentResult {
         let manager = GlobalAudioManager.shared
-        guard manager.currentAudiobook != nil else { return .result(dialog: "Nothing is playing") }
+        guard manager.currentAudiobook != nil else { throw PlaybackIntentError.nothingPlaying }
         manager.setSleepTimerEndOfChapter()
-        return .result(dialog: "Sleep timer set")
+        return .result()
     }
 }
 
@@ -107,19 +120,17 @@ struct PlayAudiobookIntent: AudioPlaybackIntent {
     var audiobook: AudiobookEntity
 
     @MainActor
-    func perform() async throws -> some IntentResult & ProvidesDialog {
+    func perform() async throws -> some IntentResult {
         let store = SwiftDataController.shared
         await store.whenLoaded()
         let id = audiobook.id
         var descriptor = FetchDescriptor<AudiobookModel>(predicate: #Predicate { $0.id == id })
         descriptor.fetchLimit = 1
-        guard let book = try? store.context.fetch(descriptor).first else {
-            return .result(dialog: "That audiobook is no longer in your library")
-        }
+        guard let book = try? store.context.fetch(descriptor).first else { throw PlaybackIntentError.bookMissing }
         let manager = GlobalAudioManager.shared
         manager.loadAudiobook(book)
         manager.startPlayback() // queued via pendingAutoplay until the engine is ready
-        return .result(dialog: "Playing \(audiobook.title)")
+        return .result()
     }
 }
 

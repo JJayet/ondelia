@@ -8,6 +8,11 @@ extension LibraryView {
         groupSeries ? grouping.standalone : filteredAudiobooks
     }
 
+    /// Books stacked to play next, in queue order.
+    var queuedBooks: [AudiobookModel] {
+        PlayQueue.shared.books(in: audiobookManager.audiobooks)
+    }
+
     @ViewBuilder
     var seriesBanner: some View {
         SeriesGroupingBanner(
@@ -40,6 +45,14 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
+            // Play queue
+            if !queuedBooks.isEmpty {
+                QueueSectionView(books: queuedBooks, horizontalPadding: 0, onSelect: playQueued)
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            }
+
             // Series, grouped by Hardcover
             if !grouping.series.isEmpty {
                 seriesBanner
@@ -61,7 +74,8 @@ extension LibraryView {
             LibraryHeaderView(
                 viewMode: $viewMode,
                 sortOption: $sortOption,
-                filterOption: $filterOption
+                filterOption: $filterOption,
+                gridColumns: $gridColumns
             )
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
@@ -106,6 +120,11 @@ extension LibraryView {
                     ContinueReadingSection(books: continueReadingBooks, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
                 }
 
+                // Play queue
+                if !queuedBooks.isEmpty {
+                    QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
+                }
+
                 // Series, grouped by Hardcover
                 if !grouping.series.isEmpty {
                     VStack(spacing: 12) {
@@ -125,7 +144,8 @@ extension LibraryView {
                     LibraryHeaderView(
                         viewMode: $viewMode,
                         sortOption: $sortOption,
-                        filterOption: $filterOption
+                        filterOption: $filterOption,
+                        gridColumns: $gridColumns
                     )
                     .padding(.horizontal)
 
@@ -140,40 +160,18 @@ extension LibraryView {
                                     .padding(.horizontal)
                             }
 
-                            LazyVGrid(columns: [
-                                GridItem(.flexible(), spacing: 16),
-                                GridItem(.flexible(), spacing: 16)
-                            ], spacing: 16) {
+                            LazyVGrid(
+                                columns: Array(
+                                    repeating: GridItem(.flexible(), spacing: gridColumns >= 4 ? 10 : 16),
+                                    count: gridColumns
+                                ),
+                                spacing: gridColumns >= 4 ? 10 : 16
+                            ) {
                                 ForEach(shelfBooks, id: \.id) { audiobook in
-                                    AudiobookGridItemView(audiobook: audiobook) { audiobookForDetail = audiobook }
+                                    AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { audiobookForDetail = audiobook }
                                     .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
                                     .contextMenu {
-                                        Button(NSLocalizedString("Rename", comment: "Rename button")) {
-                                            audiobookToRename = audiobook
-                                            newAudiobookTitle = audiobook.title ?? ""
-                                            activeAlert = .rename
-                                        }
-
-                                        Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {
-                                            if audiobook.isFinished {
-                                                audiobookManager.markAsUnread(audiobook)
-                                            } else {
-                                                audiobookManager.markAsRead(audiobook)
-                                            }
-                                        }
-
-                                        Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
-                                            audiobookForImagePicker = audiobook
-                                        }
-                                        if HardcoverService.shared.isLinked {
-                                            Button(NSLocalizedString("Link to Hardcover", comment: "Hardcover link menu item")) {
-                                                audiobookForHardcover = audiobook
-                                            }
-                                        }
-
-                                        Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                                            activeAlert = .confirmDelete(audiobook)
-                                        }
+                                        BookActionsMenu(audiobook: audiobook, actions: bookActions)
                                     }
                                 }
                             }
@@ -200,52 +198,34 @@ extension LibraryView {
             // bookmarks with nothing to confirm and nothing to undo.
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                 Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                    activeAlert = .confirmDelete(audiobook)
+                    withHapticFeedback { activeAlert = .confirmDelete(audiobook) }
                 }
             }
             .swipeActions(edge: .leading) {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        if audiobook.isFinished {
-                            audiobookManager.markAsUnread(audiobook)
-                        } else {
-                            audiobookManager.markAsRead(audiobook)
+                    withHapticFeedback {
+                        withAnimation(.easeInOut(duration: 0.3)) {
+                            if audiobook.isFinished {
+                                audiobookManager.markAsUnread(audiobook)
+                            } else {
+                                audiobookManager.markAsRead(audiobook)
+                            }
                         }
                     }
                 }
                 .tint(audiobook.isFinished ? .orange : .green)
 
                 Button(NSLocalizedString("Rename", comment: "Rename button")) {
-                    audiobookToRename = audiobook
-                    newAudiobookTitle = audiobook.title ?? ""
-                    activeAlert = .rename
+                    withHapticFeedback {
+                        audiobookToRename = audiobook
+                        newAudiobookTitle = audiobook.title ?? ""
+                        activeAlert = .rename
+                    }
                 }
                 .tint(.blue)
             }
             .contextMenu {
-                Button(NSLocalizedString("Rename", comment: "Rename button")) {
-                    audiobookToRename = audiobook
-                    newAudiobookTitle = audiobook.title ?? ""
-                    activeAlert = .rename
-                }
-
-                Button(audiobook.isFinished ? NSLocalizedString("Mark as Unread", comment: "Mark as unread") : NSLocalizedString("Mark as Read", comment: "Mark as read")) {
-                    if audiobook.isFinished {
-                        audiobookManager.markAsUnread(audiobook)
-                    } else {
-                        audiobookManager.markAsRead(audiobook)
-                    }
-                }
-
-                Button(NSLocalizedString("Change Cover Image", comment: "Change cover image button")) {
-                    audiobookForImagePicker = audiobook
-                }
-
-                if HardcoverService.shared.isLinked {
-                    Button(NSLocalizedString("Link to Hardcover", comment: "Hardcover link menu item")) {
-                        audiobookForHardcover = audiobook
-                    }
-                }
+                BookActionsMenu(audiobook: audiobook, actions: bookActions)
             }
     }
 }

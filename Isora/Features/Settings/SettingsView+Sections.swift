@@ -39,6 +39,18 @@ extension SettingsView {
                     }
                 }
             }
+
+            SettingsDivider()
+
+            SettingsRow(title: NSLocalizedString("Books per row", comment: "Grid density menu title")) {
+                Picker(selection: $gridColumns) {
+                    ForEach([2, 3, 4], id: \.self) { count in
+                        Text(verbatim: "\(count)").tag(count)
+                    }
+                } label: { Text(verbatim: "") }
+                .labelsHidden()
+                .pickerStyle(.menu)
+            }
         }
     }
 
@@ -132,8 +144,10 @@ extension SettingsView {
     var goalsSection: some View {
         SettingsSection(title: NSLocalizedString("Reading Goals", comment: "Settings section: Reading Goals")) {
             Button {
-                tempGoal = statistics.monthlyGoal / 3600
-                showingGoalEditor = true
+                withHapticFeedback {
+                    tempGoal = statistics.monthlyGoal / 3600
+                    showingGoalEditor = true
+                }
             } label: {
                 SettingsRow(title: NSLocalizedString("Monthly Goal", comment: "Monthly goal setting label")) {
                     SettingsValue(text: statistics.formattedMonthlyGoal)
@@ -170,13 +184,14 @@ extension SettingsView {
                 .padding(.vertical, 15)
             }
             .buttonStyle(.plain)
+            .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
         }
     }
 
     var dataSection: some View {
         SettingsSection(title: NSLocalizedString("Data", comment: "Settings section: Data management")) {
             Button {
-                showingBackupRestore = true
+                withHapticFeedback { showingBackupRestore = true }
             } label: {
                 SettingsRow(title: NSLocalizedString("Restore Backup", comment: "Restore backup button label")) {
                     Image(systemName: "chevron.right")
@@ -189,7 +204,7 @@ extension SettingsView {
             SettingsDivider()
 
             Button {
-                showResetStatsConfirm = true
+                withHapticFeedback { showResetStatsConfirm = true }
             } label: {
                 SettingsRow(
                     title: NSLocalizedString("Reset Listening Stats", comment: "Reset stats button label"),

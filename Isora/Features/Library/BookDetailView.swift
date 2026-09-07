@@ -4,6 +4,7 @@ import SwiftUI
 /// how far in you are, and the ways in — resume, chapters, bookmarks.
 struct BookDetailView: View {
     let audiobook: AudiobookModel
+    let actions: BookActions
 
     @Environment(\.playerRouter) private var playerRouter
     private let audioManager = GlobalAudioManager.shared
@@ -39,7 +40,23 @@ struct BookDetailView: View {
         .task { await HardcoverService.shared.refreshDetails(for: audiobook) }
         .scrollContentBackground(.hidden)
         .ignoresSafeArea(edges: .top)
-        .toolbar(.hidden, for: .navigationBar)
+        // The bar stays, transparent: hiding it also disables the swipe-back gesture. The
+        // system back button reads as a glass circle over the artwork, so no custom one.
+        .navigationTitle("")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbarBackground(.hidden, for: .navigationBar)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    BookActionsMenu(audiobook: audiobook, actions: actions)
+                } label: {
+                    Image(systemName: "ellipsis")
+                }
+                .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
+                .accessibilityLabel(NSLocalizedString("More", comment: "Book actions menu"))
+                .accessibilityIdentifier(AccessibilityIdentifiers.Library.bookActionsMenu)
+            }
+        }
         .sheet(isPresented: $showingChapters) {
             ChapterListView(chapters: chapters, currentChapter: currentChapter) { chapter in
                 // The seek is queued when this book is not the one loaded: `loadAudiobook` is
@@ -85,11 +102,6 @@ struct BookDetailView: View {
         }
         .frame(height: 300)
         .clipped()
-        .overlay(alignment: .topLeading) {
-            BackButton()
-                .padding(.leading, 16)
-                .padding(.top, 58)
-        }
     }
 
     // MARK: - Identity
@@ -263,22 +275,6 @@ private struct DetailChip: View {
         .padding(.horizontal, 12)
         .frame(height: 28)
         .glassEffect(.regular, in: Capsule())
-    }
-}
-
-/// The circular glass back button the design puts over the header artwork.
-private struct BackButton: View {
-    @Environment(\.dismiss) private var dismiss
-
-    var body: some View {
-        Button { withHapticFeedback { dismiss() } } label: {
-            Image(systemName: "chevron.left")
-                .font(.system(size: 15, weight: .semibold))
-                .frame(width: 38, height: 38)
-                .glassEffect(.regular, in: Circle())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(NSLocalizedString("Back", comment: "Back button"))
     }
 }
 

@@ -23,6 +23,19 @@ extension PlayerView {
                 }
             }
 
+            if let next = nextQueuedBook {
+                Button {
+                    withHapticFeedback {
+                        audioManager.loadAudiobook(next)
+                        audioManager.startPlaybackAfterOpeningBook()
+                        PlayQueue.shared.remove(next)
+                    }
+                } label: {
+                    nextBookRow(next)
+                }
+                .buttonStyle(.plain)
+            }
+
             if sleepTimeRemaining > 0 {
                 Menu { sleepTimerMenuItems } label: { sleepTimerRow }
                     .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
@@ -42,22 +55,59 @@ extension PlayerView {
         return Array(chapters.dropFirst(index + 1).prefix(2))
     }
 
+    /// The book the play queue would start once this one ends — hidden when it is this book.
+    var nextQueuedBook: AudiobookModel? {
+        guard let next = PlayQueue.shared.books(in: audiobookManager.audiobooks).first,
+              next.id != audiobook.id else { return nil }
+        return next
+    }
+
     @ViewBuilder
     private func upNextRow(_ chapter: ChapterModel) -> some View {
-        HStack(spacing: 12) {
+        row(
+            title: chapterTitle(chapter),
+            trailing: max(chapter.endTime - chapter.startTime, 0).hoursMinutesFormatted
+        ) {
             Text(verbatim: "\(chapter.chapterNumber)")
                 .font(.system(size: 12))
                 .monospacedDigit()
                 .foregroundStyle(.tertiary)
+        }
+    }
 
-            Text(chapterTitle(chapter))
+    @ViewBuilder
+    private func nextBookRow(_ book: AudiobookModel) -> some View {
+        row(
+            title: String(
+                format: NSLocalizedString("Next: %@", comment: "Player: next queued book"),
+                book.title ?? AudiobookModel.unknownTitle
+            ),
+            trailing: book.duration.hoursMinutesFormatted
+        ) {
+            Image(systemName: "text.line.first.and.arrowtriangle.forward")
+                .font(.system(size: 12))
+                .foregroundStyle(.tertiary)
+        }
+    }
+
+    /// One row of the up-next list: a small leading marker, a title, a duration.
+    @ViewBuilder
+    private func row<Leading: View>(
+        title: String,
+        trailing: String,
+        @ViewBuilder leading: () -> Leading
+    ) -> some View {
+        HStack(spacing: 12) {
+            leading()
+
+            Text(title)
                 .font(.system(size: 14, weight: .semibold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.8)
 
             Spacer(minLength: 8)
 
-            Text(max(chapter.endTime - chapter.startTime, 0).hoursMinutesFormatted)
+            Text(trailing)
                 .font(.system(size: 12))
                 .monospacedDigit()
                 .foregroundStyle(.secondary)

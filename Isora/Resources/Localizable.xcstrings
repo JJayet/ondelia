@@ -3246,6 +3246,94 @@
           }
         }
       }
+    },
+    "Add to Queue" : {
+      "comment" : "Add to queue button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à la file d'attente"
+          }
+        }
+      }
+    },
+    "Remove from Queue" : {
+      "comment" : "Remove from queue button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de la file d'attente"
+          }
+        }
+      }
+    },
+    "More" : {
+      "comment" : "Book actions menu",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus"
+          }
+        }
+      }
+    },
+    "Books per row" : {
+      "comment" : "Grid density menu title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres par ligne"
+          }
+        }
+      }
+    },
+    "Up Next" : {
+      "comment" : "Section title for the play queue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À suivre"
+          }
+        }
+      }
+    },
+    "Move Up" : {
+      "comment" : "Move a book earlier in the play queue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacer vers le haut"
+          }
+        }
+      }
+    },
+    "Move Down" : {
+      "comment" : "Move a book later in the play queue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Déplacer vers le bas"
+          }
+        }
+      }
+    },
+    "Next: %@" : {
+      "comment" : "Player: next queued book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ensuite : %@"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

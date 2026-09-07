@@ -14,7 +14,7 @@ struct EnhancedAudiobookRowView: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { withHapticFeedback { onTap() } }) {
             HStack(spacing: 13) {
                 CoverArtView(audiobook: audiobook, size: coverSize, cornerRadius: 13)
 

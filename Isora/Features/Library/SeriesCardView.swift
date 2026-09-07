@@ -73,7 +73,9 @@ struct SeriesCardView: View {
 
     private var header: some View {
         Button {
-            withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
+            withHapticFeedback {
+                withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
+            }
         } label: {
             HStack(spacing: 8) {
                 Text(group.name)
@@ -154,7 +156,7 @@ struct SeriesCardView: View {
     @ViewBuilder
     private func volumeRow(_ book: AudiobookModel) -> some View {
         Button {
-            onSelect(book)
+            withHapticFeedback { onSelect(book) }
         } label: {
             HStack(spacing: 12) {
                 CoverArtView(audiobook: book, size: 52, cornerRadius: 12)

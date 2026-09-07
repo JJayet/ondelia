@@ -27,7 +27,7 @@ struct BackupRestoreView: View {
                     Section {
                         ForEach(backups, id: \.url) { backup in
                             Button {
-                                pendingRestore = backup.url
+                                withHapticFeedback { pendingRestore = backup.url }
                             } label: {
                                 Label(
                                     backup.date.formatted(date: .abbreviated, time: .shortened),
@@ -47,7 +47,7 @@ struct BackupRestoreView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {
-                    Button(NSLocalizedString("Done", comment: "Done button")) { dismiss() }
+                    Button(NSLocalizedString("Done", comment: "Done button")) { withHapticFeedback { dismiss() } }
                 }
             }
         }
@@ -58,15 +58,15 @@ struct BackupRestoreView: View {
             titleVisibility: .visible
         ) {
             Button(NSLocalizedString("Restore", comment: "Restore button"), role: .destructive) {
-                restore()
+                withHapticFeedback { restore() }
             }
-            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { withHapticFeedback {} }
         }
         .alert(
             NSLocalizedString("Restored", comment: "Restore success alert title"),
             isPresented: $didRestore
         ) {
-            Button(NSLocalizedString("OK", comment: "OK button")) { dismiss() }
+            Button(NSLocalizedString("OK", comment: "OK button")) { withHapticFeedback { dismiss() } }
         } message: {
             Text(NSLocalizedString(
                 "Quit and reopen the app to finish restoring your library.",
@@ -78,7 +78,7 @@ struct BackupRestoreView: View {
             isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } }),
             presenting: errorMessage
         ) { _ in
-            Button(NSLocalizedString("OK", comment: "OK button")) {}
+            Button(NSLocalizedString("OK", comment: "OK button")) { withHapticFeedback {} }
         } message: { message in
             Text(message)
         }

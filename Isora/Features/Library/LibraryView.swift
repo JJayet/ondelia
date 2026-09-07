@@ -24,6 +24,8 @@ struct LibraryView: View {
     @AppStorage("library.filterOption") var filterOption: FilterOption = .all
     /// Series grouping is Hardcover's doing, so it can be switched off from the banner.
     @AppStorage("library.groupSeries") var groupSeries = true
+    /// Books per row in grid mode: 2, 3 or 4.
+    @AppStorage("library.gridColumns") var gridColumns = 2
     @State var showingImporter = false
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     // Dependency injection initializer to enable previews/tests to control state
@@ -70,6 +72,27 @@ struct LibraryView: View {
         playerRouter?.present(audiobook)
     }
 
+    /// The book-actions menu closures, wired to this screen's own alert/sheet state so the
+    /// menu can be shown from the grid, the list rows and the detail screen alike.
+    var bookActions: BookActions {
+        BookActions(
+            rename: { audiobook in
+                audiobookToRename = audiobook
+                newAudiobookTitle = audiobook.title ?? ""
+                activeAlert = .rename
+            },
+            changeCover: { audiobookForImagePicker = $0 },
+            linkHardcover: { audiobookForHardcover = $0 },
+            delete: { activeAlert = .confirmDelete($0) }
+        )
+    }
+
+    /// A queued book played by hand leaves the queue: it is no longer "next".
+    func playQueued(_ audiobook: AudiobookModel) {
+        PlayQueue.shared.remove(audiobook)
+        playAndPresent(audiobook)
+    }
+
     var continueReadingBooks: [AudiobookModel] {
         audiobookManager.audiobooks
             .filter { $0.currentPosition > 0 && !$0.isFinished }
@@ -113,7 +136,7 @@ struct LibraryView: View {
         .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar { importToolbarItem }
-        .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0) }
+        .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
         .onAppear {
             // Fetch audiobooks when the view first appears
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {

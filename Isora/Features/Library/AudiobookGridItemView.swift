@@ -2,7 +2,11 @@ import SwiftUI
 
 struct AudiobookGridItemView: View {
     let audiobook: AudiobookModel
+    var columns: Int = 2
     let onTap: () -> Void
+
+    private var titleFontSize: CGFloat { columns >= 3 ? 11.5 : 12.5 }
+    private var metaFontSize: CGFloat { columns >= 3 ? 10 : 11 }
 
     private var progressPercentage: Double {
         guard audiobook.duration > 0 else { return 0 }
@@ -23,7 +27,7 @@ struct AudiobookGridItemView: View {
     }
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { withHapticFeedback { onTap() } }) {
             VStack(alignment: .leading, spacing: 8) {
                 CoverArtView(audiobook: audiobook, size: nil)
                     // The progress hairline rides the bottom edge of the artwork itself.
@@ -38,14 +42,16 @@ struct AudiobookGridItemView: View {
                     }
 
                 Text(audiobook.title ?? AudiobookModel.unknownTitle)
-                    .font(.system(size: 12.5, weight: .semibold))
-                    .lineLimit(2)
+                    .font(.system(size: titleFontSize, weight: .semibold))
+                    .lineLimit(columns >= 4 ? 1 : 2)
                     .multilineTextAlignment(.leading)
 
-                Text(meta)
-                    .font(.system(size: 11))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                if columns < 4 {
+                    Text(meta)
+                        .font(.system(size: metaFontSize))
+                        .foregroundStyle(.secondary)
+                        .lineLimit(1)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())

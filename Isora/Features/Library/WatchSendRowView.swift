@@ -10,7 +10,7 @@ struct WatchSendRowView: View {
     var body: some View {
         if sync.isPaired && sync.isWatchAppInstalled {
             VStack(spacing: 6) {
-                Button { sync.sendToWatch(book: audiobook) } label: {
+                Button { withHapticFeedback { sync.sendToWatch(book: audiobook) } } label: {
                     HStack(spacing: 8) {
                         Image(systemName: "applewatch").font(.system(size: 13, weight: .semibold))
                         Text("Send to Apple Watch")

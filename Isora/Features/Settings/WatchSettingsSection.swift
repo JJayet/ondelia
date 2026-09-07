@@ -18,7 +18,7 @@ struct WatchSettingsSection: View {
                         SettingsDivider()
                     }
 
-                    Button { sync.clearWatch() } label: {
+                    Button { withHapticFeedback { sync.clearWatch() } } label: {
                         SettingsRow(title: String(localized: "Clear Watch"), titleColor: .red)
                     }
                     .buttonStyle(.plain)

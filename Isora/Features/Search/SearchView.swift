@@ -96,7 +96,7 @@ struct SearchView: View {
                         HStack {
                             Spacer()
                             Button {
-                                resetFilters()
+                                withHapticFeedback { resetFilters() }
                             } label: {
                                 Label(NSLocalizedString("Clear Filters", comment: "Clear filters button"), systemImage: "line.3.horizontal.decrease.circle")
                             }
@@ -111,19 +111,23 @@ struct SearchView: View {
                         SearchResultRow(audiobook: book, query: debouncedQuery)
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                let audio = GlobalAudioManager.shared
-                                audio.loadAudiobook(book)
-                                audio.startPlayback()
-                                playerRouter?.present(book)
+                                withHapticFeedback(.medium) {
+                                    let audio = GlobalAudioManager.shared
+                                    audio.loadAudiobook(book)
+                                    audio.startPlayback()
+                                    playerRouter?.present(book)
+                                }
                             }
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
-                                    if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }
+                                    withHapticFeedback {
+                                        if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }
+                                    }
                                 }.tint(book.isFinished ? .orange : .green)
                             }
                             .swipeActions(edge: .trailing) {
                                 Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                                    audiobookManager.deleteAudiobook(book)
+                                    withHapticFeedback { audiobookManager.deleteAudiobook(book) }
                                 }
                             }
                     }
@@ -168,7 +172,7 @@ struct SearchView: View {
 
             if filtersActive {
                 Button {
-                    resetFilters()
+                    withHapticFeedback { resetFilters() }
                 } label: {
                     Label(NSLocalizedString("Clear", comment: "Clear filters short label"), systemImage: "xmark.circle")
                 }

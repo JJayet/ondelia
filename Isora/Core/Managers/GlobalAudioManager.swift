@@ -148,6 +148,13 @@ final class GlobalAudioManager {
             AudiobookManager.shared.markAsFinished(audiobook)
         }
         playbackStateDidChange()
+
+        // Roll into the next stacked book, the way a playlist does. `startPlaybackAfterOpeningBook`
+        // plays as soon as the load finishes, via `pendingAutoplay`.
+        if let next = PlayQueue.shared.popNext(from: AudiobookManager.shared.audiobooks) {
+            loadAudiobook(next)
+            startPlaybackAfterOpeningBook()
+        }
     }
 
     /// The file turned out to be unplayable once AVFoundation actually read it. Stop claiming

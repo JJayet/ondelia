@@ -98,6 +98,7 @@ struct HardcoverSettingsView: View {
             if !token.isEmpty {
                 Section {
                     Button {
+                        withHapticFeedback {}
                         Task {
                             isRefreshing = true
                             defer { isRefreshing = false }
@@ -139,8 +140,10 @@ struct HardcoverSettingsView: View {
 
                 Section {
                     Button(role: .destructive) {
-                        token = ""
-                        tokenFocused = false
+                        withHapticFeedback {
+                            token = ""
+                            tokenFocused = false
+                        }
                     } label: {
                         Text(NSLocalizedString("Remove Token", comment: "Hardcover unlink button"))
                             .frame(maxWidth: .infinity)

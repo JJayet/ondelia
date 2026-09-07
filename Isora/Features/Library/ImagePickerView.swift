@@ -30,7 +30,7 @@ struct ImagePickerView: View {
                 // Action Buttons
                 HStack(spacing: 16) {
                     Button(NSLocalizedString("Search Google Images", comment: "Search Google Images button")) {
-                        searchGoogleImages()
+                        withHapticFeedback { searchGoogleImages() }
                     }
                     .buttonStyle(.glassProminent)
                     .disabled(isLoading)
@@ -93,7 +93,7 @@ struct ImagePickerView: View {
                                         .clipped()
                                         .clipShape(.rect(cornerRadius: 8))
                                         .onTapGesture {
-                                            downloadAndSelectImage(result)
+                                            withHapticFeedback { downloadAndSelectImage(result) }
                                         }
                                 } placeholder: {
                                     Rectangle()
@@ -117,7 +117,7 @@ struct ImagePickerView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
+                    Button(NSLocalizedString("Cancel", comment: "Cancel button")) { withHapticFeedback { dismiss() } }
                 }
             }
         }

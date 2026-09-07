@@ -8,6 +8,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(ChapterScrubber.showChapterTimesKey) var showChapterTimes = true
     @AppStorage("playback.bookOpeningDelayMS") var bookOpeningDelayMS = 200
+    @AppStorage("library.gridColumns") var gridColumns = 2
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
     @State var showResetStatsConfirm = false
@@ -34,9 +35,9 @@ struct SettingsView: View {
                 TextField(NSLocalizedString("Hours", comment: "Hours text field placeholder"), value: $tempGoal, format: .number)
                     .keyboardType(.decimalPad)
 
-                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { withHapticFeedback {} }
                 Button(NSLocalizedString("Save", comment: "Save button")) {
-                    statistics.updateMonthlyGoal(tempGoal * 3600) // Convert hours to seconds
+                    withHapticFeedback { statistics.updateMonthlyGoal(tempGoal * 3600) } // Convert hours to seconds
                 }
             } message: {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
@@ -49,9 +50,9 @@ struct SettingsView: View {
             NSLocalizedString("Reset Stats?", comment: "Reset stats confirm title"),
             isPresented: $showResetStatsConfirm
         ) {
-            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) { withHapticFeedback {} }
             Button(NSLocalizedString("Reset", comment: "Reset button"), role: .destructive) {
-                statistics.resetAll()
+                withHapticFeedback { statistics.resetAll() }
             }
         } message: {
             Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books and goals remain.", comment: "Reset stats confirm message"))

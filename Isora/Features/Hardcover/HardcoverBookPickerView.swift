@@ -23,11 +23,14 @@ struct HardcoverBookPickerView: View {
                 .navigationBarTitleDisplayMode(.inline)
                 .toolbar {
                     ToolbarItem(placement: .cancellationAction) {
-                        Button(NSLocalizedString("Cancel", comment: "Cancel button")) { dismiss() }
+                        Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
+                            withHapticFeedback { dismiss() }
+                        }
                     }
                     if audiobook.hardcover != nil {
                         ToolbarItem(placement: .confirmationAction) {
                             Button(NSLocalizedString("Unlink", comment: "Hardcover unlink button"), role: .destructive) {
+                                withHapticFeedback {}
                                 Task {
                                     await service.link(nil, to: audiobook)
                                     dismiss()
@@ -69,6 +72,7 @@ struct HardcoverBookPickerView: View {
         } else {
             List(hits) { hit in
                 Button {
+                    withHapticFeedback {}
                     Task {
                         await service.link(HardcoverLink(hit), to: audiobook)
                         dismiss()

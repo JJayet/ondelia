@@ -32,7 +32,7 @@ struct EmptyLibraryView: View {
             }
 
             Button(NSLocalizedString("Import Audiobook", comment: "Import button title"), systemImage: "plus.circle") {
-                onImport()
+                withHapticFeedback { onImport() }
             }
             .buttonStyle(.glassProminent)
         }

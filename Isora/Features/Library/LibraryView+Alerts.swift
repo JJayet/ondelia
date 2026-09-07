@@ -76,6 +76,11 @@ extension LibraryView {
                 withAnimation(.easeInOut(duration: 0.3)) {
                     audiobookManager.deleteAudiobook(audiobook)
                 }
+                // Deleting the book being shown by the pushed detail screen pops it, rather than
+                // leaving that screen stranded on a book that no longer exists.
+                if audiobookForDetail?.id == audiobook.id {
+                    audiobookForDetail = nil
+                }
             }
         }
     }

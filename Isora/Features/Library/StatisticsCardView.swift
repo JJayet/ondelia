@@ -7,7 +7,7 @@ struct StatisticsCardView: View {
     let onTap: () -> Void
 
     var body: some View {
-        Button(action: onTap) {
+        Button(action: { withHapticFeedback { onTap() } }) {
             HStack(spacing: 16) {
                 StreakRing(progress: statistics.monthlyGoalProgress, days: statistics.currentStreak)
                     .frame(width: 66, height: 66)

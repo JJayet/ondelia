@@ -4,14 +4,19 @@ struct LibraryHeaderView: View {
     @Binding var viewMode: LibraryView.ViewMode
     @Binding var sortOption: LibraryView.SortOption
     @Binding var filterOption: LibraryView.FilterOption
+    @Binding var gridColumns: Int
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private static let gridColumnChoices = [2, 3, 4]
 
     var body: some View {
         HStack(spacing: 9) {
             Menu {
                 ForEach(LibraryView.FilterOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { filterOption = option }
+                        withHapticFeedback {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { filterOption = option }
+                        }
                     }
                 }
             } label: {
@@ -24,7 +29,9 @@ struct LibraryHeaderView: View {
             Menu {
                 ForEach(LibraryView.SortOption.allCases, id: \.rawValue) { option in
                     Button(option.displayName) {
-                        withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { sortOption = option }
+                        withHapticFeedback {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.2)) { sortOption = option }
+                        }
                     }
                 }
             } label: {
@@ -36,9 +43,23 @@ struct LibraryHeaderView: View {
 
             Spacer(minLength: 0)
 
-            Button {
-                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
-                    viewMode = viewMode == .list ? .grid : .list
+            Menu {
+                Section(NSLocalizedString("Books per row", comment: "Grid density menu title")) {
+                    ForEach(Self.gridColumnChoices, id: \.self) { count in
+                        Button {
+                            withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+                                gridColumns = count
+                                if viewMode == .list { viewMode = .grid }
+                            }
+                        } label: {
+                            HStack {
+                                Text(verbatim: "\(count)")
+                                if gridColumns == count {
+                                    Image(systemName: "checkmark")
+                                }
+                            }
+                        }
+                    }
                 }
             } label: {
                 Image(systemName: viewMode.icon)
@@ -46,12 +67,19 @@ struct LibraryHeaderView: View {
                     .foregroundStyle(.secondary)
                     .frame(width: 34, height: 34)
                     .contentShape(Rectangle())
+            } primaryAction: {
+                withHapticFeedback {
+                    withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+                        viewMode = viewMode == .list ? .grid : .list
+                    }
+                }
             }
             .accessibilityLabel(
                 viewMode == .list
                     ? NSLocalizedString("Show Grid", comment: "Switch library to grid")
                     : NSLocalizedString("Show List", comment: "Switch library to list")
             )
+            .accessibilityValue(viewMode == .grid ? Text(verbatim: "\(gridColumns)") : Text(verbatim: ""))
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.viewModeToggle)
         }
     }

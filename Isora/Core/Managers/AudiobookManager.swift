@@ -133,6 +133,8 @@ final class AudiobookManager {
             audio.unload()
         }
 
+        PlayQueue.shared.remove(audiobook)
+
         // Delete physical file
         if let fileURL = audiobook.resolvedFileURL {
             try? FileManager.default.removeItem(at: fileURL)
