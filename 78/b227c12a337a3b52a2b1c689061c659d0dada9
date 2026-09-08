@@ -1,0 +1,70 @@
+Isora/Features/Library/LibraryView+Collections.swift
+  s_4273004de35177::t_1b3988955ef075 1-41
+Isora/Features/Library/CollectionGroup.swift
+  s_4273004de35177::t_1b3988955ef075 1-86,91-94,96-111,113-128
+  s_4273004de35177::t_61db8ba7fc0eae 87-90,95,112
+Isora/Core/Models/SwiftData/CollectionModel.swift
+  s_4273004de35177::t_1b3988955ef075 1-27
+Isora/Core/Models/SwiftData/IsoraSchema.swift
+  s_4273004de35177::t_1b3988955ef075 17-18
+Isora/Features/Library/CollectionPickerView.swift
+  s_4273004de35177::t_1b3988955ef075 1-74
+Isora/Core/Managers/AudiobookManager+Fetch.swift
+  s_4273004de35177::t_1b3988955ef075 58-59
+Isora/Core/Services/HardcoverService.swift
+  s_4273004de35177::t_1b3988955ef075 174
+Isora/Features/Library/LibraryView+Selection.swift
+  s_4273004de35177::t_1b3988955ef075 99-106
+  s_4273004de35177::t_623b58cf3ca44e 98
+Isora/Features/Library/LibraryView+Content.swift
+  s_4273004de35177::t_61db8ba7fc0eae 5,7,44,107,109
+  s_4273004de35177::t_1b3988955ef075 43,45,48,106,110
+Isora/Features/Settings/SettingsView.swift
+  s_4273004de35177::t_1b3988955ef075 13-15,30
+Isora/Features/Library/CollectionCardView.swift
+  s_4273004de35177::t_1b3988955ef075 1-262
+Isora/Core/Managers/AudiobookManager+Collections.swift
+  s_4273004de35177::t_1b3988955ef075 1-131
+Isora/Core/Managers/GlobalAudioManager.swift
+  s_4273004de35177::t_1b3988955ef075 47-49,156-159
+Isora/Features/Library/BookActionsMenu.swift
+  s_4273004de35177::t_1b3988955ef075 8,48-51
+  s_4273004de35177::t_f8e6c7f0632baf 52-53
+Isora/Features/Library/LibraryView.swift
+  s_4273004de35177::t_1b3988955ef075 19-23,30,70-74,97,191-196
+  s_4273004de35177::t_61db8ba7fc0eae 68-69
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_1b3988955ef075 40-61,497-507,1012-1033,1122-1132,1144-1154,1254-1264,1276-1286,1408-1418,1876-1886,2051-2061,2541-2551,2596-2606,2990-3000
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_4273004de35177::t_1b3988955ef075 57-75,135-139,141
+  s_4273004de35177::t_f4f9eda65c5802 140,142
+Isora/Core/Managers/AudiobookManager.swift
+  s_4273004de35177::t_1b3988955ef075 23-25,144
+IsoraTests/Core/Services/CollectionGroupTests.swift
+  s_4273004de35177::t_1b3988955ef075 1-54,57-89,92-147
+  s_4273004de35177::t_61db8ba7fc0eae 55-56,90-91
+Isora.xcodeproj/project.pbxproj
+  s_4273004de35177::t_1b3988955ef075 149,171,200
+Isora/Features/Library/LibraryView+Alerts.swift
+  s_4273004de35177::t_1b3988955ef075 12-13,22-23,39-45,57-59,64-65,67,111-125,164-172
+  s_4273004de35177::t_3d02cf5bddecf1 173
+MISSING_FEATURES.md
+  s_4273004de35177::t_e67cacfd7f8014 15,17
+  s_4273004de35177::t_61db8ba7fc0eae 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "78b227c12a337a3b52a2b1c689061c659d0dada9",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
