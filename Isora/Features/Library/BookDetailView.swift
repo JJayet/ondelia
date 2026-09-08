@@ -206,27 +206,28 @@ struct BookDetailView: View {
 
             ProgressLine(value: audiobook.progressFraction, height: 6)
 
-            Button(action: play) {
-                HStack(spacing: 9) {
-                    Image(systemName: "play.fill").font(.system(size: 14, weight: .bold))
-                    Text(
-                        audiobook.currentPosition > 0
-                            ? String(
-                                format: NSLocalizedString("Resume at %@", comment: "Resume playback at a timestamp"),
-                                audiobook.currentPosition.clockFormatted
-                            )
-                            : NSLocalizedString("Play", comment: "Play playback accessibility label")
-                    )
-                    .font(.system(size: 15.5, weight: .semibold))
-                }
-                .foregroundStyle(.black)
+            if !AudiobookManager.shared.hasFile(audiobook) {
+                Label(
+                    NSLocalizedString("Not on this device", comment: "Missing audio badge"),
+                    systemImage: "icloud.and.arrow.down"
+                )
+                .font(.system(size: 15.5, weight: .semibold))
                 .frame(maxWidth: .infinity)
                 .frame(height: 52)
-                .background(.tint, in: Capsule())
+                .glassEffect(.regular, in: Capsule())
+                .padding(.top, 16)
+
+                Text(NSLocalizedString(
+                    "Import the same audio file on this device to play it here.",
+                    comment: "Missing audio explanation"
+                ))
+                .font(.system(size: 12.5))
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.top, 8)
+            } else {
+                resumeButton
             }
-            .buttonStyle(.plain)
-            .padding(.top, 16)
-            .accessibilityIdentifier(AccessibilityIdentifiers.Library.resumeButton)
 
             HStack(spacing: 10) {
                 Button { withHapticFeedback { showingChapters = true } } label: {
@@ -247,6 +248,30 @@ struct BookDetailView: View {
         }
         .padding(18)
         .glassCard(cornerRadius: 28)
+    }
+
+    private var resumeButton: some View {
+        Button(action: play) {
+            HStack(spacing: 9) {
+                Image(systemName: "play.fill").font(.system(size: 14, weight: .bold))
+                Text(
+                    audiobook.currentPosition > 0
+                        ? String(
+                            format: NSLocalizedString("Resume at %@", comment: "Resume playback at a timestamp"),
+                            audiobook.currentPosition.clockFormatted
+                        )
+                        : NSLocalizedString("Play", comment: "Play playback accessibility label")
+                )
+                .font(.system(size: 15.5, weight: .semibold))
+            }
+            .foregroundStyle(.black)
+            .frame(maxWidth: .infinity)
+            .frame(height: 52)
+            .background(.tint, in: Capsule())
+        }
+        .buttonStyle(.plain)
+        .padding(.top, 16)
+        .accessibilityIdentifier(AccessibilityIdentifiers.Library.resumeButton)
     }
 
     private func secondaryLabel(_ title: String) -> some View {

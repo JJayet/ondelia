@@ -3,8 +3,8 @@ import SwiftData
 
 @Model
 final class ChapterTranscriptionModel {
-    var id: UUID
-    var chapterIndex: Int16
+    var id: UUID = UUID()
+    var chapterIndex: Int16 = 0
     var transcriptionText: String?
     var language: String?
     var transcriptionEngine: String?

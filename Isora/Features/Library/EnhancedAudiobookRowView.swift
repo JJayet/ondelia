@@ -35,7 +35,11 @@ struct EnhancedAudiobookRowView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if audiobook.isFinished {
+                if !hasFile {
+                    Image(systemName: "icloud.and.arrow.down")
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                } else if audiobook.isFinished {
                     Image(systemName: "checkmark")
                         .font(.caption.weight(.bold))
                         .foregroundStyle(.green)
@@ -51,9 +55,18 @@ struct EnhancedAudiobookRowView: View {
         .buttonStyle(.plain)
     }
 
+    /// Synced from another device, or its file went missing: the row says so instead of the time left.
+    private var hasFile: Bool { AudiobookManager.shared.hasFile(audiobook) }
+
     /// One line under the title: what state the book is in, and how much of it is left.
     private var status: String {
         let author = audiobook.author ?? AudiobookModel.unknownAuthor
+        if !hasFile {
+            return String(
+                format: NSLocalizedString("%@ · Not on this device", comment: "Author and missing-audio status"),
+                author
+            )
+        }
         if audiobook.isFinished {
             return String(
                 format: NSLocalizedString("%@ · Completed", comment: "Author and finished status"),

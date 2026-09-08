@@ -215,6 +215,23 @@ extension SettingsView {
 
     var dataSection: some View {
         SettingsSection(title: NSLocalizedString("Data", comment: "Settings section: Data management")) {
+            SettingsRow(title: NSLocalizedString("iCloud Sync", comment: "iCloud sync toggle")) {
+                Toggle("", isOn: $iCloudSync)
+                    .labelsHidden()
+            }
+            Text(NSLocalizedString(
+                "Progress, bookmarks and book details sync through iCloud. Audio stays on each device. Takes effect the next time the app starts.",
+                comment: "iCloud sync explanation"
+            ))
+            .font(.system(size: 11.5))
+            .foregroundStyle(.secondary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 18)
+            .padding(.bottom, 14)
+            .padding(.top, -8)
+
+            SettingsDivider()
+
             Button {
                 withHapticFeedback { showingStorage = true }
             } label: {

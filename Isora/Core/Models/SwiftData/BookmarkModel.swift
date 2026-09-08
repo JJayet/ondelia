@@ -3,10 +3,10 @@ import SwiftData
 
 @Model
 final class BookmarkModel {
-    var id: UUID
+    var id: UUID = UUID()
     var title: String?
     var note: String?
-    var timestamp: Double
+    var timestamp: Double = 0
     var dateCreated: Date?
     
     var audiobook: AudiobookModel?

@@ -3,11 +3,11 @@ import SwiftData
 
 @Model
 final class ChapterModel {
-    var id: UUID
+    var id: UUID = UUID()
     var title: String?
-    var chapterNumber: Int16
-    var startTime: Double
-    var endTime: Double
+    var chapterNumber: Int16 = 0
+    var startTime: Double = 0
+    var endTime: Double = 0
     
     var audiobook: AudiobookModel?
     

@@ -33,6 +33,19 @@ extension AudiobookManager {
         return nil
     }
 
+    /// The library entry a just-copied folder fills: one that already points at that path, whose
+    /// audio was missing until now. A synced book from another device, or a folder that was
+    /// deleted from Files. The copy chose the path because nothing was there, so a matching row
+    /// is that book and not a coincidence; the duration guards against a same-named stranger.
+    @MainActor
+    func entryAwaitingFolder(at localURL: URL, duration: TimeInterval) -> AudiobookModel? {
+        let path = localURL.standardizedFileURL.path
+        return audiobooks.first { book in
+            guard book.resolvedFileURL?.standardizedFileURL.path == path else { return false }
+            return book.duration <= 0 || abs(book.duration - duration) < 1
+        }
+    }
+
     /// Whether an incoming file is as long as the book claiming it, within a second.
     /// A book stored with no duration has nothing to check against, so the name has to do.
     nonisolated func duration(of url: URL, matches expected: TimeInterval) async -> Bool {

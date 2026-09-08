@@ -18,7 +18,7 @@ struct TranscriptionStoreTests {
         ])
         let container = try ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)]
+            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)]
         )
         return (TranscriptionStore(modelContainer: container), container)
     }

@@ -123,7 +123,7 @@ struct DatabaseBackupTests {
 
         let container = try ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(schema: schema, url: storeURL)]
+            configurations: [ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)]
         )
         let context = ModelContext(container)
         context.insert(AudiobookModel(title: "Worth keeping", duration: 60, currentPosition: 25))
@@ -140,7 +140,7 @@ struct DatabaseBackupTests {
 
         let restored = try ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(schema: schema, url: copy)]
+            configurations: [ModelConfiguration(schema: schema, url: copy, cloudKitDatabase: .none)]
         )
         let books = try ModelContext(restored).fetch(FetchDescriptor<AudiobookModel>())
         #expect(books.count == 1)

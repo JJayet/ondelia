@@ -15,6 +15,7 @@ struct SettingsView: View {
     @State var showResetStatsConfirm = false
     @State var showingBackupRestore = false
     @State var showingStorage = false
+    @AppStorage(SwiftDataController.iCloudSyncKey) var iCloudSync = true
     /// Whole library folder, shown beside the Storage row. Recomputed each time Settings opens.
     @State var storageBytes: Int64?
 

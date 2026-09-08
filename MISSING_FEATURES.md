@@ -14,7 +14,10 @@ Effort is an estimate for one developer familiar with the codebase, derived from
 4. ~~**Storage usage view** (M)~~ Done 2026-09-08. Per-book sizes, orphan total, swipe to delete.
 5. ~~**Bulk select, delete, and mark finished** (M)~~ Done 2026-09-08. Custom collections still deferred.
 6. **CarPlay** (L, plus entitlement lead time). Request the entitlement now; build once granted.
-7. **Cloud position/bookmark sync via CloudKit** (L). Only if multi-device users appear.
+7. ~~**Cloud position/bookmark sync via CloudKit** (L)~~ Done 2026-09-08. SwiftData + CloudKit private database, on by default, Settings > Data toggle.
+   - Synced: books, positions, finished state, bookmarks, chapters, covers, transcripts, Hardcover links. Audio never syncs; a book without its file shows "Not on this device" and importing the same file or folder fills it in.
+   - Before release: deploy the schema from the CloudKit Console development environment to production, and open Signing & Capabilities once so Xcode registers the `iCloud.io.jayet.isora` container.
+   - Known gaps: the same book imported on two devices before they sync makes two rows (no automatic dedupe); restoring a database backup on a syncing device can resurrect deleted rows.
 8. Everything else: wait for a concrete user request.
 
 Dropped from the earlier order: recovery bookmarks moved from #1 to #3 in a much smaller form, and Audiobookshelf integration moved off the list until server owners show up as users.

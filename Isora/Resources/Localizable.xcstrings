@@ -15,6 +15,17 @@
         }
       }
     },
+    "%@ · Not on this device" : {
+      "comment" : "Author and missing-audio status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Pas sur cet appareil"
+          }
+        }
+      }
+    },
     "%d audiobooks, their progress and their bookmarks will be removed. This cannot be undone." : {
       "comment" : "Bulk delete confirmation alert message",
       "localizations" : {
@@ -22,6 +33,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d livres audio, leur progression et leurs signets seront supprimés. Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "%d files in the library folder that no book uses will be removed." : {
+      "comment" : "Orphan cleanup confirmation",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d fichiers du dossier de la bibliothèque qu'aucun livre n'utilise seront supprimés."
           }
         }
       }
@@ -1174,6 +1196,17 @@
         }
       }
     },
+    "Delete other files" : {
+      "comment" : "Remove library files no book uses",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les autres fichiers"
+          }
+        }
+      }
+    },
     "Done" : {
       "comment" : "Done button",
       "localizations" : {
@@ -1361,6 +1394,17 @@
         }
       }
     },
+    "iCloud Sync" : {
+      "comment" : "iCloud sync toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation iCloud"
+          }
+        }
+      }
+    },
     "Import Audiobook" : {
       "comment" : "Import button accessibility label\nImport button title",
       "localizations" : {
@@ -1379,6 +1423,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Échec de l’importation"
+          }
+        }
+      }
+    },
+    "Import the same audio file on this device to play it here." : {
+      "comment" : "Missing audio explanation",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Importez le même fichier audio sur cet appareil pour l'écouter ici."
           }
         }
       }
@@ -1883,6 +1938,17 @@
         }
       }
     },
+    "Not on this device" : {
+      "comment" : "Missing audio badge",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas sur cet appareil"
+          }
+        }
+      }
+    },
     "Not Started" : {
       "comment" : "Filter: books not started",
       "localizations" : {
@@ -2025,13 +2091,13 @@
         }
       }
     },
-    "Other files are in the library folder but belong to no book, usually left by an interrupted import." : {
+    "Other files are in the library folder but belong to no book: an interrupted import, or a book deleted on another device." : {
       "comment" : "Storage footer explaining orphan files",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les autres fichiers sont dans le dossier de la bibliothèque mais n'appartiennent à aucun livre, souvent après une importation interrompue."
+            "value" : "Les autres fichiers sont dans le dossier de la bibliothèque mais n'appartiennent à aucun livre : une importation interrompue, ou un livre supprimé sur un autre appareil."
           }
         }
       }
@@ -2198,6 +2264,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Portée de la barre de progression"
+          }
+        }
+      }
+    },
+    "Progress, bookmarks and book details sync through iCloud. Audio stays on each device. Takes effect the next time the app starts." : {
+      "comment" : "iCloud sync explanation",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La progression, les signets et les détails des livres se synchronisent via iCloud. L'audio reste sur chaque appareil. Prend effet au prochain démarrage de l'app."
           }
         }
       }

@@ -11,7 +11,7 @@ struct SchemaMigrationTests {
         let container = try ModelContainer(
             for: schema,
             migrationPlan: IsoraMigrationPlan.self,
-            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true)]
+            configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)]
         )
         let context = container.mainContext
 

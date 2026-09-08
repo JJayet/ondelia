@@ -98,11 +98,37 @@ final class SwiftDataController {
         if initiallyLoad { initializeAsync() }
     }
 
+    /// Settings toggle. Read once, when the container is built: switching needs a relaunch.
+    static let iCloudSyncKey = "sync.iCloud"
+    static let cloudKitContainerID = "iCloud.io.jayet.isora"
+
+    static var isICloudSyncEnabled: Bool {
+        UserDefaults.standard.object(forKey: iCloudSyncKey) as? Bool ?? true
+    }
+
     private func buildContainer(inMemory: Bool) throws -> ModelContainer {
+        guard !inMemory, Self.isICloudSyncEnabled else {
+            return try buildContainer(inMemory: inMemory, cloudKit: .none)
+        }
+        do {
+            return try buildContainer(inMemory: false, cloudKit: .private(Self.cloudKitContainerID))
+        } catch {
+            // The store is the library. A missing entitlement or an unsupported model must not
+            // stop the app from opening it; it opens without sync instead.
+            Log.store.error("❌ SwiftData: CloudKit store refused, opening locally: \(error)")
+            return try buildContainer(inMemory: false, cloudKit: .none)
+        }
+    }
+
+    private func buildContainer(
+        inMemory: Bool,
+        cloudKit: ModelConfiguration.CloudKitDatabase
+    ) throws -> ModelContainer {
         let schema = Schema(versionedSchema: IsoraSchemaV1.self)
         let modelConfiguration = ModelConfiguration(
             schema: schema,
-            isStoredInMemoryOnly: inMemory
+            isStoredInMemoryOnly: inMemory,
+            cloudKitDatabase: cloudKit
         )
         return try ModelContainer(
             for: schema,

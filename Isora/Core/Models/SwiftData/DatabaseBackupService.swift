@@ -148,7 +148,7 @@ enum DatabaseBackupService {
         ])
         return (try? ModelContainer(
             for: schema,
-            configurations: [ModelConfiguration(schema: schema, url: storeURL)]
+            configurations: [ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)]
         )) != nil
     }
 

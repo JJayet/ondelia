@@ -81,7 +81,10 @@ extension AudiobookManager {
         }
 
         let context = swiftDataController.context
-        let audiobook = AudiobookModel(
+        // The same merge done on another device already synced its book here, folder missing:
+        // this folder is that book's audio, so no second row.
+        let synced = entryAwaitingFolder(at: merged.folderURL, duration: merged.totalDuration)
+        let audiobook = synced ?? AudiobookModel(
             title: title,
             author: author ?? "Unknown Author",
             narrator: narrator,
@@ -93,16 +96,18 @@ extension AudiobookManager {
             dateAdded: Date(),
             lastPlayed: Date.distantPast
         )
-        context.insert(audiobook)
-        for item in merged.chapters {
-            let chapter = ChapterModel(
-                title: item.title,
-                chapterNumber: Int16(item.chapterNumber),
-                startTime: item.startTimeInBook,
-                endTime: item.startTimeInBook + item.duration
-            )
-            chapter.audiobook = audiobook
-            context.insert(chapter)
+        if synced == nil {
+            context.insert(audiobook)
+            for item in merged.chapters {
+                let chapter = ChapterModel(
+                    title: item.title,
+                    chapterNumber: Int16(item.chapterNumber),
+                    startTime: item.startTimeInBook,
+                    endTime: item.startTimeInBook + item.duration
+                )
+                chapter.audiobook = audiobook
+                context.insert(chapter)
+            }
         }
 
         do {
@@ -110,7 +115,7 @@ extension AudiobookManager {
         } catch {
             // The originals are still untouched, so dropping the copy undoes the whole merge.
             try? FileManager.default.removeItem(at: merged.folderURL)
-            context.delete(audiobook)
+            if synced == nil { context.delete(audiobook) }
             isImporting = false
             currentImportFileName = nil
             importErrorMessage = String(

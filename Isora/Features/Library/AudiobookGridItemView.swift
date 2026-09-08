@@ -30,6 +30,17 @@ struct AudiobookGridItemView: View {
         Button(action: { withHapticFeedback { onTap() } }) {
             VStack(alignment: .leading, spacing: 8) {
                 CoverArtView(audiobook: audiobook, size: nil)
+                    .overlay(alignment: .topLeading) {
+                        if !AudiobookManager.shared.hasFile(audiobook) {
+                            Image(systemName: "icloud.and.arrow.down")
+                                .font(.system(size: 12, weight: .semibold))
+                                .padding(6)
+                                .background(.black.opacity(0.45), in: Circle())
+                                .foregroundStyle(.white)
+                                .padding(6)
+                                .accessibilityLabel(NSLocalizedString("Not on this device", comment: "Missing audio badge"))
+                        }
+                    }
                     // The progress hairline rides the bottom edge of the artwork itself.
                     .overlay(alignment: .bottom) {
                         if audiobook.currentPosition > 0 {

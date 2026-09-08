@@ -41,9 +41,13 @@ final class AudiobookManager {
     var importBatch: [AudiobookModel] = []
     /// Name to suggest for that merge, set when the batch clearly came from one folder.
     var pendingMergeTitle: String?
+    /// See `+RemoteChanges`.
+    var remoteChangeObserver: (any NSObjectProtocol)?
+    var remoteRefetchTask: Task<Void, Never>?
 
     init(swiftDataController: SwiftDataController = .shared) {
         self.swiftDataController = swiftDataController
+        observeRemoteChanges()
     }
 
     func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {

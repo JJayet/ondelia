@@ -6,6 +6,7 @@ struct StorageView: View {
     private let manager = AudiobookManager.shared
     @State private var report: StorageReport?
     @State private var pendingDelete: AudiobookModel?
+    @State private var confirmingOrphanDelete = false
 
     var body: some View {
         NavigationStack {
@@ -23,10 +24,16 @@ struct StorageView: View {
                         ))
                     } footer: {
                         if report.otherBytes > 0 {
-                            Text(NSLocalizedString(
-                                "Other files are in the library folder but belong to no book, usually left by an interrupted import.",
-                                comment: "Storage footer explaining orphan files"
-                            ))
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text(NSLocalizedString(
+                                    "Other files are in the library folder but belong to no book: an interrupted import, or a book deleted on another device.",
+                                    comment: "Storage footer explaining orphan files"
+                                ))
+                                Button(NSLocalizedString("Delete other files", comment: "Remove library files no book uses"), role: .destructive) {
+                                    confirmingOrphanDelete = true
+                                }
+                                .disabled(manager.isImporting)
+                            }
                         }
                     }
 
@@ -53,6 +60,26 @@ struct StorageView: View {
                 }
             }
             .task { await refresh() }
+            .alert(
+                NSLocalizedString("Delete other files", comment: "Remove library files no book uses"),
+                isPresented: $confirmingOrphanDelete
+            ) {
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                    for url in report?.orphans ?? [] {
+                        try? FileManager.default.removeItem(at: url)
+                    }
+                    Task { await refresh() }
+                }
+            } message: {
+                Text(String(
+                    format: NSLocalizedString(
+                        "%d files in the library folder that no book uses will be removed.",
+                        comment: "Orphan cleanup confirmation"
+                    ),
+                    report?.orphans.count ?? 0
+                ))
+            }
             .alert(
                 NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title"),
                 isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
@@ -100,13 +127,11 @@ struct StorageReport: Sendable {
 
     /// Heaviest first.
     let books: [Entry]
-    /// Everything under the library folder, whether or not a book points at it.
-    let libraryBytes: Int64
-    /// Bytes of the books that live inside the library folder, so `otherBytes` can be derived.
-    let inLibraryBytes: Int64
+    /// Top-level items in the library folder that no book points into.
+    let orphans: [URL]
+    let otherBytes: Int64
 
     var booksBytes: Int64 { books.reduce(0) { $0 + $1.bytes } }
-    var otherBytes: Int64 { max(libraryBytes - inLibraryBytes, 0) }
     var totalBytes: Int64 { booksBytes + otherBytes }
 
     @MainActor
@@ -115,24 +140,39 @@ struct StorageReport: Sendable {
         let libraryURL = AudiobookModel.libraryFolderURL
         return await Task.detached(priority: .userInitiated) {
             var entries: [Entry] = []
-            var inLibrary: Int64 = 0
             for (id, title, url) in inputs {
                 guard let url else { continue }
-                let bytes = StorageUsage.bytes(at: url)
-                entries.append(Entry(id: id, title: title, bytes: bytes))
-                if url.path.hasPrefix(libraryURL.path) { inLibrary += bytes }
+                entries.append(Entry(id: id, title: title, bytes: StorageUsage.bytes(at: url)))
             }
             entries.sort { $0.bytes > $1.bytes }
+            let orphans = StorageUsage.orphans(in: libraryURL, referenced: inputs.compactMap(\.2))
             return StorageReport(
                 books: entries,
-                libraryBytes: StorageUsage.bytes(at: libraryURL),
-                inLibraryBytes: inLibrary
+                orphans: orphans,
+                otherBytes: orphans.reduce(0) { $0 + StorageUsage.bytes(at: $1) }
             )
         }.value
     }
 }
 
 enum StorageUsage {
+    /// Top-level items of `folder` that none of `referenced` sits in or under.
+    nonisolated static func orphans(in folder: URL, referenced: [URL]) -> [URL] {
+        let root = folder.standardizedFileURL.path
+        // A book's first path component under the library is the item that belongs to it.
+        let owned = Set(referenced.compactMap { url -> String? in
+            let path = url.standardizedFileURL.path
+            guard path.hasPrefix(root + "/") else { return nil }
+            return path.dropFirst(root.count + 1).split(separator: "/").first.map(String.init)
+        })
+        let items = (try? FileManager.default.contentsOfDirectory(
+            at: folder,
+            includingPropertiesForKeys: nil,
+            options: [.skipsHiddenFiles]
+        )) ?? []
+        return items.filter { !owned.contains($0.lastPathComponent) }.sorted { $0.lastPathComponent < $1.lastPathComponent }
+    }
+
     /// Bytes at a path: the file itself, or every file under a folder.
     nonisolated static func bytes(at url: URL) -> Int64 {
         let keys: Set<URLResourceKey> = [.isDirectoryKey, .fileSizeKey]

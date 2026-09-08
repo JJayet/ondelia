@@ -78,6 +78,12 @@ extension AudiobookManager {
         // Persist on the main model context; clean up the copy if persistence fails.
         do {
             try await MainActor.run {
+                if let existing = entryAwaitingFolder(at: localFolderURL, duration: folderAudiobook.totalDuration) {
+                    Log.library.debug("🔗 AudiobookManager: Folder fills the missing audio of an existing book")
+                    importBatch.append(existing)
+                    fetchAudiobooks()
+                    return
+                }
                 let context = swiftDataController.context
                 let audiobook = AudiobookModel(
                     title: folderAudiobook.title,

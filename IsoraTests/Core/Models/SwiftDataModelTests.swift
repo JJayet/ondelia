@@ -11,7 +11,8 @@ struct SwiftDataModelTests {
     init() throws {
         container = try ModelContainer(
             for: AudiobookModel.self, BookmarkModel.self, ChapterModel.self, ChapterTranscriptionModel.self,
-            configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+            // `.none`: the default is `.automatic`, which reaches for CloudKit now that the app has the entitlement.
+            configurations: ModelConfiguration(isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         )
     }
 
