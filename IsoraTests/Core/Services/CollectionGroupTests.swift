@@ -128,6 +128,22 @@ struct CollectionGroupTests {
         #expect(titles() == ["Alpha", "Gamma", "Beta"])
     }
 
+    @Test("Publication date: oldest first, undated last; Hardcover's day string parses as UTC")
+    func releaseDateOrder() throws {
+        let old = book("Old", series: "Saga", position: 2)
+        old.hardcover?.releaseDate = try #require(HardcoverAPI.releaseDate(from: "1965-08-01"))
+        let recent = book("Recent", series: "Saga", position: 1)
+        recent.hardcover?.releaseDate = try #require(HardcoverAPI.releaseDate(from: "2021-03-15"))
+        let undated = book("Undated", series: "Saga", position: 3)
+
+        let sorted = CollectionGroup.sorted([undated, recent, old], by: .releaseDate)
+        #expect(sorted.compactMap(\.title) == ["Old", "Recent", "Undated"])
+        #expect(HardcoverAPI.releaseDate(from: "not a date") == nil)
+        var utc = Calendar(identifier: .gregorian)
+        utc.timeZone = TimeZone(identifier: "UTC")!
+        #expect(utc.component(.year, from: old.hardcover!.releaseDate!) == 1965)
+    }
+
     @Test("Progress is weighted by length and the current book is the one in progress")
     func progressAndCurrent() {
         let done = book("One", duration: 1000, at: 1000)

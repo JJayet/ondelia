@@ -2411,6 +2411,17 @@
         }
       }
     },
+    "Publication date" : {
+      "comment" : "Collection order: Hardcover release date",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Date de publication"
+          }
+        }
+      }
+    },
     "Purple" : {
       "comment" : "Purple accent color",
       "localizations" : {

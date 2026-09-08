@@ -48,6 +48,7 @@ enum CollectionSort: Int, CaseIterable {
     case title = 2
     case author = 3
     case dateAdded = 4
+    case releaseDate = 5
 
     var displayName: String {
         switch self {
@@ -56,6 +57,7 @@ enum CollectionSort: Int, CaseIterable {
         case .title: return NSLocalizedString("Title", comment: "Sort by title")
         case .author: return NSLocalizedString("Author", comment: "Sort by author")
         case .dateAdded: return NSLocalizedString("Date Added", comment: "Sort by date added")
+        case .releaseDate: return NSLocalizedString("Publication date", comment: "Collection order: Hardcover release date")
         }
     }
 }

@@ -130,6 +130,16 @@ struct CollectionGroup: Identifiable {
             return books.sorted { lhs, rhs in
                 lhs.dateAdded == rhs.dateAdded ? byTitle(lhs, rhs) : lhs.dateAdded < rhs.dateAdded
             }
+        case .releaseDate:
+            // Oldest first; books Hardcover has no date for go last, by title.
+            return books.sorted { lhs, rhs in
+                switch (lhs.hardcover?.releaseDate, rhs.hardcover?.releaseDate) {
+                case let (left?, right?) where left != right: return left < right
+                case (nil, .some): return false
+                case (.some, nil): return true
+                default: return byTitle(lhs, rhs)
+                }
+            }
         }
     }
 

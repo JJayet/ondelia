@@ -140,8 +140,18 @@ extension HardcoverAPI {
             summary: book.description?.trimmingCharacters(in: .whitespacesAndNewlines),
             genres: book.tags(in: "Genre"),
             moods: book.tags(in: "Mood"),
-            contentWarnings: book.tags(in: "Content Warning")
+            contentWarnings: book.tags(in: "Content Warning"),
+            releaseDate: book.releaseDate.flatMap(releaseDate(from:))
         )
+    }
+
+    /// Hardcover's "YYYY-MM-DD", read as a UTC calendar day so it is the same day everywhere.
+    static func releaseDate(from text: String) -> Date? {
+        let parts = text.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(identifier: "UTC")!
+        return calendar.date(from: DateComponents(year: parts[0], month: parts[1], day: parts[2]))
     }
 
     /// Every volume of a series, in reading order — including the ones the reader does not own,

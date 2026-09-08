@@ -51,6 +51,11 @@ struct HardcoverLink: Codable, Hashable, Sendable {
     var genres: [String]?
     var moods: [String]?
     var contentWarnings: [String]?
+    /// First publication date as Hardcover has it, for ordering a collection by it.
+    var releaseDate: Date?
+    /// Whether Hardcover has been asked for the release date. Links written before the field
+    /// existed have `detailsChecked` set and no date, so they are asked once more.
+    var releaseDateChecked: Bool?
     /// Whether Hardcover has been asked for the above. A book with no description at all is a
     /// real answer, so nil-vs-asked cannot be told apart without this.
     var detailsChecked: Bool?
@@ -77,7 +82,9 @@ struct HardcoverLink: Codable, Hashable, Sendable {
         genres: [String]? = nil,
         moods: [String]? = nil,
         contentWarnings: [String]? = nil,
-        detailsChecked: Bool? = nil
+        detailsChecked: Bool? = nil,
+        releaseDate: Date? = nil,
+        releaseDateChecked: Bool? = nil
     ) {
         self.id = id
         self.title = title
@@ -97,6 +104,8 @@ struct HardcoverLink: Codable, Hashable, Sendable {
         self.moods = moods
         self.contentWarnings = contentWarnings
         self.detailsChecked = detailsChecked
+        self.releaseDate = releaseDate
+        self.releaseDateChecked = releaseDateChecked
     }
 
     /// The compact volume badge — "#1", or "#1.5" for a novella between two volumes.

@@ -151,6 +151,11 @@ struct BookDetailView: View {
                 DetailChip(text: fileBytes.formatted(.byteCount(style: .file)))
             }
 
+            // First publication year, once Hardcover has said. The day is not worth the width.
+            if let released = audiobook.hardcover?.releaseDate {
+                DetailChip(text: released.formatted(.dateTime.year()), icon: "calendar")
+            }
+
             if let link = audiobook.hardcover {
                 DetailChip(
                     text: [link.seriesName, link.volumeBadge].compactMap { $0 }.joined(separator: " ")

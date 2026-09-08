@@ -132,7 +132,7 @@ final class HardcoverService {
     /// every time it is pushed.
     func refreshDetails(for audiobook: AudiobookModel, force: Bool = false) async {
         guard let token, let link = audiobook.hardcover else { return }
-        guard force || link.detailsChecked != true else { return }
+        guard force || link.detailsChecked != true || link.releaseDateChecked != true else { return }
 
         do {
             let details = try await HardcoverAPI.details(bookID: link.id, token: token)
@@ -142,7 +142,9 @@ final class HardcoverService {
             current.genres = details?.genres
             current.moods = details?.moods
             current.contentWarnings = details?.contentWarnings
+            current.releaseDate = details?.releaseDate
             current.detailsChecked = true
+            current.releaseDateChecked = true
             audiobook.hardcover = current
             save()
         } catch {

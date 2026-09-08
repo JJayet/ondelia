@@ -63,6 +63,7 @@ extension HardcoverAPI {
         let genres: [String]
         let moods: [String]
         let contentWarnings: [String]
+        let releaseDate: Date?
     }
 
     struct BookDetailsResponse: Decodable {
@@ -70,6 +71,8 @@ extension HardcoverAPI {
 
         struct Book: Decodable {
             let description: String?
+            /// `release_date` is a plain "YYYY-MM-DD", nil when Hardcover does not know it.
+            let releaseDate: String?
             /// `cached_tags` is a free-form jsonb column: a bucket per category, each holding
             /// rows that carry a `tag` among other fields. Anything that does not fit that
             /// shape is dropped rather than failing the whole decode.
@@ -86,11 +89,13 @@ extension HardcoverAPI {
             enum CodingKeys: String, CodingKey {
                 case description
                 case cachedTags = "cached_tags"
+                case releaseDate = "release_date"
             }
 
             init(from decoder: Decoder) throws {
                 let container = try decoder.container(keyedBy: CodingKeys.self)
                 description = try? container.decodeIfPresent(String.self, forKey: .description)
+                releaseDate = try? container.decodeIfPresent(String.self, forKey: .releaseDate)
                 cachedTags = (try? container.decodeIfPresent([String: [Tag]].self, forKey: .cachedTags)) ?? [:]
             }
         }

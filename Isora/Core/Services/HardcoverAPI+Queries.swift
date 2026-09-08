@@ -40,6 +40,7 @@ extension HardcoverAPI {
           books(where: {id: {_eq: $id}}, limit: 1) {
             description
             cached_tags
+            release_date
           }
         }
         """
