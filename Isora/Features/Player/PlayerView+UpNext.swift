@@ -67,7 +67,10 @@ extension PlayerView {
     }
 
     /// The book the play queue would start once this one ends — hidden when it is this book.
+    /// What starts when this book ends, the same way `handlePlaybackEnded` decides it: a
+    /// collection playing back to back names the next book; otherwise the play queue's head.
     var nextQueuedBook: AudiobookModel? {
+        if let chained = audiobookManager.nextBook(after: audiobook) { return chained }
         guard let next = PlayQueue.shared.books(in: audiobookManager.audiobooks).first,
               next.id != audiobook.id else { return nil }
         return next
