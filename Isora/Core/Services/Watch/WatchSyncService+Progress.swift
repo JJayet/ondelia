@@ -78,7 +78,7 @@ extension WatchSyncService {
         // listener is worse than a few seconds of drift.
         let audio = GlobalAudioManager.shared
         if audio.currentAudiobook?.id == bookID, !audio.isPlaying() {
-            audio.seek(to: position)
+            audio.seek(to: position, rememberOrigin: false)
         }
         pushSnapshot()
     }

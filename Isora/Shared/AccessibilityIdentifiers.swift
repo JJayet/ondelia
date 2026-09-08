@@ -18,6 +18,7 @@ enum AccessibilityIdentifiers {
         static let coverArt = "player_cover_art"
         static let upNextSection = "player_up_next_section"
         static let sleepTimerRow = "player_sleep_timer_row"
+        static let undoSeekRow = "player_undo_seek_row"
     }
     
     // MARK: - Library View

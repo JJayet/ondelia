@@ -37,6 +37,7 @@ struct StorageView: View {
                                     Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                                         pendingDelete = manager.audiobooks.first { $0.id == entry.id }
                                     }
+                                    .tint(.red)
                                 }
                         }
                     }

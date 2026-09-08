@@ -202,6 +202,8 @@ extension LibraryView {
                 Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                     withHapticFeedback { activeAlert = .confirmDelete(audiobook) }
                 }
+                // The app-wide accent tint wins over the destructive role's red without this.
+                .tint(.red)
             }
             .swipeActions(edge: .leading) {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {

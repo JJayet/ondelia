@@ -8,6 +8,17 @@ extension PlayerView {
     @ViewBuilder
     var upNextSection: some View {
         VStack(alignment: .leading, spacing: 8) {
+            if let origin = audioManager.undoSeekOrigin {
+                Button {
+                    withHapticFeedback { audioManager.undoLastSeek() }
+                } label: {
+                    undoSeekRow(origin)
+                }
+                .buttonStyle(.plain)
+                .padding(.bottom, 4)
+                .accessibilityIdentifier(AccessibilityIdentifiers.Player.undoSeekRow)
+            }
+
             if !upNextChapters.isEmpty {
                 SectionLabel(NSLocalizedString("Up next", comment: "Player: next chapters section"))
                     .padding(.horizontal, 8)
@@ -114,6 +125,28 @@ extension PlayerView {
         }
         .padding(.horizontal, 16)
         .frame(height: 46)
+        .glassCard(cornerRadius: 18)
+        .contentShape(Rectangle())
+    }
+
+    /// "Back to 12:34", offered for a minute after a jump the listener may not have meant.
+    private func undoSeekRow(_ origin: TimeInterval) -> some View {
+        HStack(spacing: 10) {
+            Image(systemName: "arrow.uturn.backward")
+                .font(.system(size: 13, weight: .semibold))
+                .foregroundStyle(.tint)
+
+            Text(String(
+                format: NSLocalizedString("Back to %@", comment: "Player: undo the last seek, with the position it left"),
+                origin.clockFormatted
+            ))
+            .font(.system(size: 13, weight: .medium))
+            .monospacedDigit()
+
+            Spacer(minLength: 0)
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 44)
         .glassCard(cornerRadius: 18)
         .contentShape(Rectangle())
     }

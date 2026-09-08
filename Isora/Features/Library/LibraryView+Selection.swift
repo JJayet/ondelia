@@ -116,6 +116,7 @@ extension LibraryView {
         } label: {
             Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
         }
+        .tint(.red)
         .disabled(selectedIDs.isEmpty)
     }
 }

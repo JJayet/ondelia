@@ -91,6 +91,7 @@ struct QueueSectionView: View {
                 systemImage: "minus.circle"
             )
         }
+        .tint(.red)
     }
 }
 

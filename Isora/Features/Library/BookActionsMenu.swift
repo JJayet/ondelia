@@ -65,5 +65,7 @@ struct BookActionsMenu: View {
         } label: {
             Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
         }
+        // The destructive role reddens the title; the glyph still follows the app accent.
+        .tint(.red)
     }
 }

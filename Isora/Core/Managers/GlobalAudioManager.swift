@@ -33,6 +33,9 @@ final class GlobalAudioManager {
     var pendingSeek: TimeInterval?
     var delayedStartTask: Task<Void, Never>?
     var loadTask: Task<Void, Never>?
+    /// Where the last sizeable seek started, while the player still offers to go back. See `+UndoSeek`.
+    var undoSeekOrigin: TimeInterval?
+    var undoSeekTask: Task<Void, Never>?
 
     // Session and remote controls are process-wide; see `+AudioSession` and `+RemoteCommands`.
     var hasActivatedAudioSession = false
@@ -77,6 +80,7 @@ final class GlobalAudioManager {
         cancelDelayedStart()
         loadTask?.cancel()
         teardownPlayer()
+        clearUndoSeek()
 
         currentAudiobook = audiobook
         isLoading = true
@@ -171,6 +175,7 @@ final class GlobalAudioManager {
         loadTask?.cancel()
         stopProgressPersistence()
         cancelSleepTimer()
+        clearUndoSeek()
         teardownPlayer()
         currentAudiobook = nil
         pendingAutoplay = false

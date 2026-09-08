@@ -130,13 +130,21 @@ extension GlobalAudioManager {
         seek(to: index > 0 ? chapters[index - 1].startTime : 0)
     }
 
-    func seek(to time: TimeInterval) {
+    /// `rememberOrigin` is off for seeks the listener did not make, such as a position arriving
+    /// from the watch, so they never show an undo.
+    func seek(to time: TimeInterval, rememberOrigin: Bool = true) {
         // A chapter or bookmark tapped while the book is still loading has nothing to seek yet;
         // the load applies it when the player exists.
         guard let player else {
             if isLoading { pendingSeek = time }
             return
         }
+        if rememberOrigin { rememberSeekOrigin(player.currentTime, target: time) }
+        performSeek(to: time)
+    }
+
+    func performSeek(to time: TimeInterval) {
+        guard let player else { return }
         player.seek(to: time)
         // A deliberate jump is worth writing straight away rather than waiting for the save timer.
         persistProgress()

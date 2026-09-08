@@ -10,7 +10,7 @@ Effort is an estimate for one developer familiar with the codebase, derived from
 
 1. ~~**Separate skip intervals** (S)~~ Done 2026-09-08, Watch fix included.
 2. ~~**Automatic sleep timer** (S)~~ Done 2026-09-08.
-3. **Undo last seek** (S–M) instead of a full recovery-bookmark history.
+3. ~~**Undo last seek** (S–M)~~ Done 2026-09-08. "Back to 12:34" row in the player for 60 s after a jump of 10 s or more.
 4. ~~**Storage usage view** (M)~~ Done 2026-09-08. Per-book sizes, orphan total, swipe to delete.
 5. ~~**Bulk select, delete, and mark finished** (M)~~ Done 2026-09-08. Custom collections still deferred.
 6. **CarPlay** (L, plus entitlement lead time). Request the entitlement now; build once granted.
