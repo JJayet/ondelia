@@ -50,14 +50,20 @@ extension AudiobookManager {
         for (seriesID, series) in bySeries {
             let ordered = series.books.sorted(by: CollectionGroup.inReadingOrder).map(\.id)
             if let existing = collections.first(where: { $0.hardcoverSeriesID == seriesID }) {
-                // A series collection follows Hardcover: its name and its volume order are not
-                // the listener's to edit, so they are simply kept in step.
+                // A series collection follows Hardcover for its name and its members. The order
+                // is the listener's: a volume that is new to it goes on the end, and the sort
+                // mode decides how the card shows it.
                 if existing.name != series.name { existing.name = series.name; changed = true }
-                if existing.bookIDs != ordered { existing.bookIDs = ordered; changed = true }
+                let members = Set(ordered)
+                var ids = existing.bookIDs.filter { members.contains($0) }
+                ids += ordered.filter { !ids.contains($0) }
+                if existing.bookIDs != ids { existing.bookIDs = ids; changed = true }
             } else if declined.contains(seriesID) {
                 continue
             } else if Self.autoSeriesCollections {
-                swiftDataController.context.insert(CollectionModel(name: series.name, hardcoverSeriesID: seriesID, bookIDs: ordered))
+                swiftDataController.context.insert(
+                    CollectionModel(name: series.name, hardcoverSeriesID: seriesID, bookIDs: ordered, sort: .seriesPosition)
+                )
                 changed = true
             } else if collectionPrompt == nil {
                 collectionPrompt = CollectionPrompt(seriesID: seriesID, name: series.name, bookIDs: ordered)
@@ -73,7 +79,9 @@ extension AudiobookManager {
     func respondToCollectionPrompt(_ prompt: CollectionPrompt, create: Bool) {
         collectionPrompt = nil
         if create {
-            swiftDataController.context.insert(CollectionModel(name: prompt.name, hardcoverSeriesID: prompt.seriesID, bookIDs: prompt.bookIDs))
+            swiftDataController.context.insert(
+                CollectionModel(name: prompt.name, hardcoverSeriesID: prompt.seriesID, bookIDs: prompt.bookIDs, sort: .seriesPosition)
+            )
             swiftDataController.save()
             fetchCollections()
         } else {
@@ -101,6 +109,45 @@ extension AudiobookManager {
 
     func remove(_ book: AudiobookModel, from collection: CollectionModel) {
         collection.bookIDs.removeAll { $0 == book.id }
+        swiftDataController.save()
+        fetchCollections()
+    }
+
+    func setSort(_ sort: CollectionSort, for collection: CollectionModel) {
+        // Going manual keeps what the listener was looking at, so the drag starts from there.
+        if sort == .manual, collection.sort != .manual {
+            let byID = Dictionary(audiobooks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            let shown = CollectionGroup.sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort).map(\.id)
+            collection.bookIDs = shown + collection.bookIDs.filter { !shown.contains($0) }
+        }
+        collection.sort = sort
+        swiftDataController.save()
+        fetchCollections()
+    }
+
+    /// Manual order: puts `book` where `target` is (dropping onto a row), or at the end when
+    /// `target` is nil. Switches the collection to manual if it was not.
+    func move(_ book: AudiobookModel, before target: AudiobookModel?, in collection: CollectionModel) {
+        guard book.id != target?.id else { return }
+        if collection.sort != .manual { setSort(.manual, for: collection) }
+        var ids = collection.bookIDs.filter { $0 != book.id }
+        if let target, let index = ids.firstIndex(of: target.id) {
+            ids.insert(book.id, at: index)
+        } else {
+            ids.append(book.id)
+        }
+        collection.bookIDs = ids
+        swiftDataController.save()
+        fetchCollections()
+    }
+
+    /// Manual order: one step up (`-1`) or down (`+1`) in the list as shown.
+    func move(_ book: AudiobookModel, by offset: Int, in collection: CollectionModel) {
+        if collection.sort != .manual { setSort(.manual, for: collection) }
+        guard let index = collection.bookIDs.firstIndex(of: book.id) else { return }
+        let destination = index + offset
+        guard collection.bookIDs.indices.contains(destination) else { return }
+        collection.bookIDs.swapAt(index, destination)
         swiftDataController.save()
         fetchCollections()
     }

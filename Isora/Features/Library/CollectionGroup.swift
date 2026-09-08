@@ -96,7 +96,7 @@ struct CollectionGroup: Identifiable {
         let byID = Dictionary(audiobooks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         var groups: [CollectionGroup] = []
         for collection in collections {
-            let books = collection.bookIDs.compactMap { byID[$0] }
+            let books = sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort)
             if !books.isEmpty || keepEmpty {
                 groups.append(CollectionGroup(collection: collection, books: books))
             }
@@ -110,6 +110,31 @@ struct CollectionGroup: Identifiable {
             return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
         }
         return groups
+    }
+
+    /// `bookIDs` order for manual; otherwise the chosen key, ties broken by title.
+    static func sorted(_ books: [AudiobookModel], by sort: CollectionSort) -> [AudiobookModel] {
+        switch sort {
+        case .manual:
+            return books
+        case .seriesPosition:
+            return books.sorted(by: inReadingOrder)
+        case .title:
+            return books.sorted(by: byTitle)
+        case .author:
+            return books.sorted { lhs, rhs in
+                let names = (lhs.author ?? "").localizedStandardCompare(rhs.author ?? "")
+                return names == .orderedSame ? byTitle(lhs, rhs) : names == .orderedAscending
+            }
+        case .dateAdded:
+            return books.sorted { lhs, rhs in
+                lhs.dateAdded == rhs.dateAdded ? byTitle(lhs, rhs) : lhs.dateAdded < rhs.dateAdded
+            }
+        }
+    }
+
+    private static func byTitle(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
+        (lhs.title ?? "").localizedStandardCompare(rhs.title ?? "") == .orderedAscending
     }
 
     /// Volume order, falling back to title for the books Hardcover has no position for.

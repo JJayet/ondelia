@@ -14,7 +14,10 @@ extension LibraryView {
                 activeAlert = .renameCollection
             },
             onDelete: { audiobookManager.deleteCollection($0) },
-            onRemoveBook: { book, collection in audiobookManager.remove(book, from: collection) }
+            onRemoveBook: { book, collection in audiobookManager.remove(book, from: collection) },
+            onSort: { sort, collection in audiobookManager.setSort(sort, for: collection) },
+            onMove: { book, target, collection in audiobookManager.move(book, before: target, in: collection) },
+            onMoveBy: { book, offset, collection in audiobookManager.move(book, by: offset, in: collection) }
         )
     }
 

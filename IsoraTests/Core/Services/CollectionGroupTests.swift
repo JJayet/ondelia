@@ -50,6 +50,7 @@ struct CollectionGroupTests {
         let series = manager.collections[0]
         #expect(series.name == "Mistborn")
         #expect(series.hardcoverSeriesID == 1)
+        #expect(series.sort == .seriesPosition)
         #expect(series.bookIDs == [first.id, third.id, unknown.id])
 
         let groups = CollectionGroup.build(collections: manager.collections, audiobooks: manager.audiobooks, keepEmpty: true)
@@ -94,6 +95,37 @@ struct CollectionGroupTests {
         #expect(commute.bookIDs == [b.id])
         manager.removeFromAllCollections(bookID: a.id)
         #expect(favourites.bookIDs.isEmpty)
+    }
+
+    @Test("Sorting: manual keeps ids order, series order and title sort, moves switch to manual")
+    func ordering() {
+        UserDefaults.standard.removeObject(forKey: AudiobookManager.autoSeriesCollectionsKey)
+        let b = book("Beta", series: "Saga", position: 2)
+        let a = book("Alpha", series: "Saga", position: 3)
+        let c = book("Gamma", series: "Saga", position: 1)
+        let manager = manager(with: [b, a, c])
+        let series = manager.collections[0]
+        func titles() -> [String] {
+            CollectionGroup.build(collections: manager.collections, audiobooks: manager.audiobooks, keepEmpty: true)[0]
+                .books.compactMap(\.title)
+        }
+
+        #expect(titles() == ["Gamma", "Beta", "Alpha"])
+        manager.setSort(.title, for: series)
+        #expect(titles() == ["Alpha", "Beta", "Gamma"])
+
+        // Moving starts from the order on screen, then edits it.
+        manager.move(c, by: -1, in: series)
+        #expect(series.sort == .manual)
+        #expect(titles() == ["Alpha", "Gamma", "Beta"])
+        manager.move(a, before: nil, in: series)
+        #expect(titles() == ["Gamma", "Beta", "Alpha"])
+        manager.move(a, before: c, in: series)
+        #expect(titles() == ["Alpha", "Gamma", "Beta"])
+
+        // A reconcile keeps the hand-made order and only appends what is new to the series.
+        manager.reconcileSeriesCollections()
+        #expect(titles() == ["Alpha", "Gamma", "Beta"])
     }
 
     @Test("Progress is weighted by length and the current book is the one in progress")

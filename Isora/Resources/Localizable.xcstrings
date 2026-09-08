@@ -1741,6 +1741,17 @@
         }
       }
     },
+    "Manual" : {
+      "comment" : "Collection order: as arranged by hand",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Manuel"
+          }
+        }
+      }
+    },
     "Mark as Read" : {
       "comment" : "Mark as read",
       "localizations" : {
@@ -2928,6 +2939,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "envoi depuis l'iPhone"
+          }
+        }
+      }
+    },
+    "Series order" : {
+      "comment" : "Collection order: Hardcover volume position",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ordre de la série"
           }
         }
       }

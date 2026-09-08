@@ -10,6 +10,11 @@ struct CollectionCardView: View {
     let onRename: (CollectionModel) -> Void
     let onDelete: (CollectionModel) -> Void
     let onRemoveBook: (AudiobookModel, CollectionModel) -> Void
+    let onSort: (CollectionSort, CollectionModel) -> Void
+    /// Manual order: `(book, target)` drops the book where the target row is, or at the end.
+    let onMove: (AudiobookModel, AudiobookModel?, CollectionModel) -> Void
+    /// Manual order: one step up or down.
+    let onMoveBy: (AudiobookModel, Int, CollectionModel) -> Void
 
     /// Collapsed cards show only their spines; one being listened to opens by itself.
     @State private var expanded: Bool?
@@ -79,6 +84,22 @@ struct CollectionCardView: View {
             .accessibilityValue(countLabel)
 
             Menu {
+                Menu {
+                    ForEach(sortChoices, id: \.rawValue) { sort in
+                        Button {
+                            withHapticFeedback { onSort(sort, group.collection) }
+                        } label: {
+                            if group.collection.sort == sort {
+                                Label(sort.displayName, systemImage: "checkmark")
+                            } else {
+                                Text(sort.displayName)
+                            }
+                        }
+                    }
+                } label: {
+                    Label(NSLocalizedString("Sort by", comment: "Search sort picker label"), systemImage: "arrow.up.arrow.down")
+                }
+
                 // A series takes its name from Hardcover, so only hand-made collections rename.
                 if !group.isSeries {
                     Button { onRename(group.collection) } label: {
@@ -100,6 +121,13 @@ struct CollectionCardView: View {
             .accessibilityLabel(NSLocalizedString("More", comment: "Book actions menu"))
         }
     }
+
+    /// Series order only means something when Hardcover positions exist.
+    private var sortChoices: [CollectionSort] {
+        CollectionSort.allCases.filter { $0 != .seriesPosition || group.isSeries }
+    }
+
+    private var isManual: Bool { group.collection.sort == .manual }
 
     /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
     private var countLabel: String {
@@ -189,13 +217,31 @@ struct CollectionCardView: View {
         .buttonStyle(.plain)
         .contextMenu {
             BookActionsMenu(audiobook: book, actions: bookActions)
+            Divider()
+            // Reachable without a drag, and the only way with VoiceOver. Picking one on a sorted
+            // collection switches it to manual order.
+            Button { withHapticFeedback { onMoveBy(book, -1, group.collection) } } label: {
+                Label(NSLocalizedString("Move Up", comment: "Move a book one step up in a collection"), systemImage: "arrow.up")
+            }
+            .disabled(isManual && group.books.first?.id == book.id)
+            Button { withHapticFeedback { onMoveBy(book, 1, group.collection) } } label: {
+                Label(NSLocalizedString("Move Down", comment: "Move a book one step down in a collection"), systemImage: "arrow.down")
+            }
+            .disabled(isManual && group.books.last?.id == book.id)
             // Series membership is Hardcover's call; only a hand-made collection lets go of a book.
             if !group.isSeries {
-                Divider()
                 Button { onRemoveBook(book, group.collection) } label: {
                     Label(NSLocalizedString("Remove from Collection", comment: "Take a book out of a collection"), systemImage: "minus.circle")
                 }
             }
+        }
+        // Drag to reorder, in manual order only: a sorted list would snap straight back.
+        .draggable(book.id.uuidString)
+        .dropDestination(for: String.self) { items, _ in
+            guard isManual, let id = items.first.flatMap(UUID.init),
+                  let dragged = group.books.first(where: { $0.id == id }) else { return false }
+            withHapticFeedback { onMove(dragged, book, group.collection) }
+            return true
         }
         .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
     }
