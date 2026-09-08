@@ -1,0 +1,40 @@
+Isora/Core/Services/HardcoverService.swift
+  s_4273004de35177::t_c95b3f6fb5d915 135,145,147
+Isora/Core/Services/HardcoverAPI.swift
+  s_4273004de35177::t_c95b3f6fb5d915 143-144,148-154
+  s_4273004de35177::t_7315619116e472 155-156
+Isora/Features/Library/BookDetailView.swift
+  s_4273004de35177::t_577add0253b8e0 154-158
+Isora/Core/Services/HardcoverAPI+Models.swift
+  s_4273004de35177::t_c95b3f6fb5d915 66,74-75,92,98
+Isora/Core/Models/HardcoverLink.swift
+  s_4273004de35177::t_c95b3f6fb5d915 54-58,85-87,107-108
+Isora/Core/Models/SwiftData/CollectionModel.swift
+  s_4273004de35177::t_c95b3f6fb5d915 51,60
+Isora/Features/Library/CollectionGroup.swift
+  s_4273004de35177::t_c95b3f6fb5d915 133-142
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_c95b3f6fb5d915 2414-2424
+Isora/Core/Services/HardcoverAPI+Queries.swift
+  s_4273004de35177::t_c95b3f6fb5d915 43
+IsoraTests/Core/Services/CollectionGroupTests.swift
+  s_4273004de35177::t_c95b3f6fb5d915 131-146
+MISSING_FEATURES.md
+  s_4273004de35177::t_c95b3f6fb5d915 16
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "e9e3406f05da554c4547a8ba5371d3e190618e40",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
