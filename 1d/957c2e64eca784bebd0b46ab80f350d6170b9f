@@ -1,0 +1,19 @@
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_4273004de35177::t_dbfe89e52afe7d 70-71,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "1d957c2e64eca784bebd0b46ab80f350d6170b9f",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
