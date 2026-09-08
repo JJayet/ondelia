@@ -1,0 +1,36 @@
+Isora/Core/Managers/AudiobookManager+Collections.swift
+  s_4273004de35177::t_adeb4224119981 53-55,57-60,64-66,82-84,114-152
+Isora/Features/Library/LibraryView+Collections.swift
+  s_4273004de35177::t_adeb4224119981 17-20
+Isora/Features/Library/CollectionCardView.swift
+  s_4273004de35177::t_adeb4224119981 13-17,87-102,125-131,220-230,238-244
+  s_4273004de35177::t_4532d06993362c 245
+IsoraTests/Core/Services/CollectionGroupTests.swift
+  s_4273004de35177::t_adeb4224119981 53,100-128
+  s_4273004de35177::t_89bacdc66db268 129-130
+Isora/Core/Models/SwiftData/CollectionModel.swift
+  s_4273004de35177::t_adeb4224119981 17-18,20-27,33,37-60
+Isora/Features/Library/CollectionGroup.swift
+  s_4273004de35177::t_adeb4224119981 99,115-138
+  s_4273004de35177::t_d2675ce256c8a3 139
+MISSING_FEATURES.md
+  s_4273004de35177::t_a632138d0a29c6 16
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_181001173d3241 1744-1754,2946-2956
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "d2d67cd86dd37b0828c669119fa7c0be388a7b82",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
