@@ -1,0 +1,74 @@
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_9682bb130c36b9 18-28,40-50,1199-1209,1397-1407,1430-1440,1941-1951,2094,2100,2271-2281
+Isora/Core/Managers/AudiobookManager+ImportFolder.swift
+  s_4273004de35177::t_9682bb130c36b9 81-86
+IsoraTests/Core/Models/TranscriptionStoreTests.swift
+  s_4273004de35177::t_683334a2460ace 21
+Isora/Core/Models/SwiftData/ChapterModel.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 6,8-10
+IsoraTests/Core/Managers/RelinkTests.swift
+  s_4273004de35177::t_683334a2460ace 126,143
+IsoraTests/Core/Models/SchemaMigrationTests.swift
+  s_4273004de35177::t_683334a2460ace 14
+Isora/Resources/Isora.entitlements
+  s_4273004de35177::t_de3e6f1c91e0c4 5-14
+MISSING_FEATURES.md
+  s_4273004de35177::t_26dbcefd781d1b 17-20
+Isora/Core/Models/SwiftData/DatabaseBackupService.swift
+  s_4273004de35177::t_499632f8e0874c 151
+Isora/Features/Settings/SettingsView.swift
+  s_4273004de35177::t_9682bb130c36b9 18
+Isora/Core/Models/SwiftData/BookmarkModel.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 6,9
+Isora/Core/Models/SwiftData/ChapterTranscriptionModel.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 6-7
+Isora/Features/Library/AudiobookGridItemView.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 33-43
+Isora/Features/Library/EnhancedAudiobookRowView.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 38-42,58-60,64-69
+Isora/Resources/Info.plist
+  s_4273004de35177::t_de3e6f1c91e0c4 54
+Isora/Core/Managers/AudiobookManager+Relink.swift
+  s_4273004de35177::t_9682bb130c36b9 36-48
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_4273004de35177::t_9682bb130c36b9 218-234
+Isora/Features/Library/BookDetailView.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 209-214,217-229
+  s_4273004de35177::t_9682bb130c36b9 253-274
+  s_4273004de35177::t_748c72b096afab 275-276
+IsoraTests/Core/Managers/FolderRelinkTests.swift
+  s_4273004de35177::t_9682bb130c36b9 1-38
+Isora/Features/Settings/StorageView.swift
+  s_4273004de35177::t_9682bb130c36b9 9,27-36,63-82,130-132,145,148,151-152,159-175
+IsoraTests/Core/Models/SwiftDataModelTests.swift
+  s_4273004de35177::t_499632f8e0874c 14-15
+Isora/Core/Managers/AudiobookManager+Merge.swift
+  s_4273004de35177::t_9682bb130c36b9 84-87,99-110,118
+Isora/Core/Models/SwiftData/AudiobookModel.swift
+  s_4273004de35177::t_8f3ac03504442b 32-47,54-60
+  s_4273004de35177::t_de3e6f1c91e0c4 4-5,8,13-15,19-20
+Isora/Core/Models/SwiftData/SwiftDataController.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 101-108,110-126,130-131
+Isora/Core/Managers/AudiobookManager+RemoteChanges.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 1-26,30,32-36
+  s_4273004de35177::t_73a109dfef5b18 27-28
+  s_4273004de35177::t_1047866c7607a9 29,31
+Isora/Core/Managers/AudiobookManager.swift
+  s_4273004de35177::t_de3e6f1c91e0c4 44-46,50
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "8b2cf829c9213127480659996d35e3b41000fdad",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
