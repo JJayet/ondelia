@@ -20,6 +20,10 @@ struct CoverTint: Equatable {
 
 @MainActor
 enum CoverTintCache {
+    /// Cap on remembered tints. A tint is two colours and cheap to sample again, so there is no
+    /// reason to hold one per book in a library of any size for the whole run.
+    private static let limit = 256
+
     private static var tints: [UUID: CoverTint] = [:]
 
     static func tint(for audiobook: AudiobookModel?) -> CoverTint {
@@ -27,6 +31,9 @@ enum CoverTintCache {
         if let cached = tints[audiobook.id] { return cached }
         guard let image = CoverImageCache.image(for: audiobook) else { return .fallback }
         let tint = Self.sample(image)
+        // ponytail: flushes the whole dictionary at the cap. Swap in an LRU if a huge library
+        // makes the re-sampling visible.
+        if tints.count >= Self.limit { tints.removeAll() }
         tints[audiobook.id] = tint
         return tint
     }

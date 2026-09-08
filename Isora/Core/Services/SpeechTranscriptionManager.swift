@@ -15,7 +15,6 @@ final class SpeechTranscriptionManager {
     static let shared = SpeechTranscriptionManager()
 
     var isTranscribing = false
-    var currentTranscription = ""
     var transcriptionProgress: Double = 0
 
     private let swiftDataController = SwiftDataController.shared
@@ -146,7 +145,7 @@ final class SpeechTranscriptionManager {
                     timings.append(contentsOf: Self.timings(in: attributed))
                     let reached = result.range.end.seconds
                     if totalSeconds > 0, reached.isFinite {
-                        self?.report(progress: min(reached / totalSeconds, 1), text: text)
+                        self?.transcriptionProgress = min(reached / totalSeconds, 1)
                     }
                 }
                 return (text, timings)
@@ -162,7 +161,6 @@ final class SpeechTranscriptionManager {
             let (text, timings) = try await collector.value
             let segments = Self.makeSegments(timings)
 
-            currentTranscription = text
             transcriptionProgress = 1
             Log.transcription.debug("✅ SpeechTranscriptionManager: Transcription completed")
 
@@ -175,11 +173,6 @@ final class SpeechTranscriptionManager {
             Log.transcription.error("❌ SpeechTranscriptionManager: Transcription error: \(error)")
             throw TranscriptionError.transcriptionFailed(error)
         }
-    }
-
-    private func report(progress: Double, text: String) {
-        transcriptionProgress = progress
-        currentTranscription = text
     }
 
     private static func makeTranscriber(locale: Locale) -> SpeechTranscriber {
