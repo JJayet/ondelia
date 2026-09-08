@@ -1,0 +1,46 @@
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_4273004de35177::t_27c91664424761 11-21,132-149
+  s_4273004de35177::t_14ddb2931973e4 150-153
+IsoraTests/Core/Managers/UndoSeekTests.swift
+  s_4273004de35177::t_27c91664424761 1-36
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_27c91664424761 620-630
+Isora/Features/Library/BookActionsMenu.swift
+  s_4273004de35177::t_4e8781176f9cdc 68-69
+Isora/Core/Managers/GlobalAudioManager+Playback.swift
+  s_4273004de35177::t_27c91664424761 133-135,142-147
+Isora/Features/Settings/StorageView.swift
+  s_4273004de35177::t_4e8781176f9cdc 40
+Isora/Core/Managers/GlobalAudioManager.swift
+  s_4273004de35177::t_27c91664424761 36-38,83,178
+Isora/Features/Library/LibraryView+Content.swift
+  s_4273004de35177::t_4e8781176f9cdc 205-206
+Isora/Features/Library/LibraryView+Selection.swift
+  s_4273004de35177::t_4e8781176f9cdc 119
+MISSING_FEATURES.md
+  s_4273004de35177::t_e5a8db30d26a2d 13
+Isora/Shared/AccessibilityIdentifiers.swift
+  s_4273004de35177::t_27c91664424761 21
+Isora/Features/Library/QueueSectionView.swift
+  s_4273004de35177::t_2cfcdf719ca8a8 94
+Isora/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_4273004de35177::t_27c91664424761 81
+Isora/Core/Managers/GlobalAudioManager+UndoSeek.swift
+  s_4273004de35177::t_27c91664424761 1-42
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "f6713e6d7f67bc96788e8bb0c0fb4c1296bd665a",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
