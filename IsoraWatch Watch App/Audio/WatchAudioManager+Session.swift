@@ -66,14 +66,20 @@ extension WatchAudioManager {
         guard !remoteCommandsInstalled else { return }
         remoteCommandsInstalled = true
         let center = MPRemoteCommandCenter.shared()
-        center.skipForwardCommand.preferredIntervals = [15]
-        center.skipBackwardCommand.preferredIntervals = [15]
+        applyRemoteSkipIntervals()
 
         center.playCommand.addTarget { _ in Self.perform { $0.play() } }
         center.pauseCommand.addTarget { _ in Self.perform { $0.pause() } }
         center.togglePlayPauseCommand.addTarget { _ in Self.perform { $0.toggle() } }
         center.skipForwardCommand.addTarget { _ in Self.perform { $0.skipForward() } }
         center.skipBackwardCommand.addTarget { _ in Self.perform { $0.skipBackward() } }
+    }
+
+    /// Called on install and whenever a snapshot changes the phone's setting.
+    func applyRemoteSkipIntervals() {
+        let center = MPRemoteCommandCenter.shared()
+        center.skipForwardCommand.preferredIntervals = [NSNumber(value: PhoneSyncService.shared.skipForwardSeconds)]
+        center.skipBackwardCommand.preferredIntervals = [NSNumber(value: PhoneSyncService.shared.skipBackSeconds)]
     }
 
     /// The command targets are called on an arbitrary queue, so they only ever schedule work.

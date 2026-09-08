@@ -27,6 +27,10 @@ struct LibraryView: View {
     /// Books per row in grid mode: 2, 3 or 4.
     @AppStorage("library.gridColumns") var gridColumns = 2
     @State var showingImporter = false
+    /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
+    /// mark-read / mark-unread / delete for the whole selection.
+    @State var selecting = false
+    @State var selectedIDs: Set<UUID> = []
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager) {
@@ -107,7 +111,7 @@ struct LibraryView: View {
     }
 
     @ToolbarContentBuilder
-    private var importToolbarItem: some ToolbarContent {
+    var importToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             Button {
                 showingImporter = true
@@ -135,7 +139,7 @@ struct LibraryView: View {
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
         .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
         .navigationBarTitleDisplayMode(.large)
-        .toolbar { importToolbarItem }
+        .toolbar { libraryToolbar }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
         .onAppear {
             // Fetch audiobooks when the view first appears

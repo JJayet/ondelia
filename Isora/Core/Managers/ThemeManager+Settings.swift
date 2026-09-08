@@ -54,6 +54,7 @@ enum AccentColor: Int, CaseIterable {
 }
 
 enum SkipInterval: Int, CaseIterable {
+    case ten = 10
     case fifteen = 15
     case thirty = 30
     case sixty = 60

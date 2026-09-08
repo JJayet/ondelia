@@ -34,7 +34,12 @@ extension WatchSyncService {
             return nil
         }
         let books = Self.selectBooks(from: AudiobookManager.shared.audiobooks, onWatch: booksOnWatch)
-        let snapshot = LibrarySnapshot(books: books.map(Self.summary(for:)), nowPlaying: nowPlayingState())
+        let snapshot = LibrarySnapshot(
+            books: books.map(Self.summary(for:)),
+            nowPlaying: nowPlayingState(),
+            skipBackSeconds: ThemeManager.shared.skipBackInterval.seconds,
+            skipForwardSeconds: ThemeManager.shared.skipForwardInterval.seconds
+        )
         guard let data = try? SyncCodec.encode(snapshot) else { return nil }
         do {
             try session.updateApplicationContext([SyncKeys.snapshot: data])

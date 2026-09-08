@@ -31,10 +31,9 @@ extension GlobalAudioManager {
     /// whenever the setting changes — `setupRemoteCommands` runs before `ThemeManager` has
     /// even finished loading its defaults.
     func applyRemoteSkipInterval() {
-        let interval = NSNumber(value: ThemeManager.shared.skipInterval.seconds)
         let center = MPRemoteCommandCenter.shared()
-        center.skipForwardCommand.preferredIntervals = [interval]
-        center.skipBackwardCommand.preferredIntervals = [interval]
+        center.skipForwardCommand.preferredIntervals = [NSNumber(value: ThemeManager.shared.skipForwardInterval.seconds)]
+        center.skipBackwardCommand.preferredIntervals = [NSNumber(value: ThemeManager.shared.skipBackInterval.seconds)]
     }
 
     // MARK: - Registration

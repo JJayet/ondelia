@@ -34,6 +34,9 @@ extension PhoneSyncService {
         }
         bookOrder = snapshot.books.map(\.id)
         phoneNowPlaying = snapshot.nowPlaying
+        skipBackSeconds = snapshot.skipBackSeconds ?? 15
+        skipForwardSeconds = snapshot.skipForwardSeconds ?? 15
+        WatchAudioManager.shared.applyRemoteSkipIntervals()
     }
 
     private func upsert(_ summary: BookSummary, existing: AudiobookModel?, context: ModelContext) {

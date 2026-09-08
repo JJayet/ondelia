@@ -71,7 +71,7 @@ struct MiniPlayerBar: View {
                 Button {
                     withHapticFeedback { audio.skipForward() }
                 } label: {
-                    Image(systemName: "goforward.\(ThemeManager.shared.skipInterval.rawValue)")
+                    Image(systemName: "goforward.\(ThemeManager.shared.skipForwardInterval.rawValue)")
                         .frame(width: 44, height: 44)
                         .contentShape(Rectangle())
                 }

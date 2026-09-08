@@ -56,18 +56,23 @@ extension SettingsView {
 
     var playbackSection: some View {
         SettingsSection(title: NSLocalizedString("Playback", comment: "Settings section: Playback")) {
-            SettingsRow(title: NSLocalizedString("Skip Interval", comment: "Skip interval picker label")) {
-                Picker(selection: $themeManager.skipInterval) {
-                    ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
-                        Text(interval.displayName).tag(interval)
-                    }
-                } label: { Text(verbatim: "") }
-                .labelsHidden()
-                .pickerStyle(.menu)
-                .onChange(of: themeManager.skipInterval) { _, newInterval in
-                    themeManager.setSkipInterval(newInterval)
-                }
-            }
+            skipIntervalRow(
+                title: NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"),
+                selection: Binding(
+                    get: { themeManager.skipBackInterval },
+                    set: { themeManager.setSkipBackInterval($0) }
+                )
+            )
+
+            SettingsDivider()
+
+            skipIntervalRow(
+                title: NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"),
+                selection: Binding(
+                    get: { themeManager.skipForwardInterval },
+                    set: { themeManager.setSkipForwardInterval($0) }
+                )
+            )
 
             SettingsDivider()
 
@@ -96,6 +101,14 @@ extension SettingsView {
                     )
                 )
                 .labelsHidden()
+            }
+
+            SettingsDivider()
+
+            // Off by default. On, every play starts the last timer the listener chose.
+            SettingsRow(title: NSLocalizedString("Auto Sleep Timer", comment: "Start the last used sleep timer on every play")) {
+                Toggle("", isOn: $autoSleepTimer)
+                    .labelsHidden()
             }
 
             SettingsDivider()
@@ -138,6 +151,18 @@ extension SettingsView {
                     .pickerStyle(.menu)
                 }
             }
+        }
+    }
+
+    private func skipIntervalRow(title: String, selection: Binding<SkipInterval>) -> some View {
+        SettingsRow(title: title) {
+            Picker("", selection: selection) {
+                ForEach(SkipInterval.allCases, id: \.rawValue) { interval in
+                    Text(interval.displayName).tag(interval)
+                }
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
         }
     }
 
@@ -190,6 +215,17 @@ extension SettingsView {
 
     var dataSection: some View {
         SettingsSection(title: NSLocalizedString("Data", comment: "Settings section: Data management")) {
+            Button {
+                withHapticFeedback { showingStorage = true }
+            } label: {
+                SettingsRow(title: NSLocalizedString("Storage", comment: "Storage view title")) {
+                    SettingsValue(text: storageBytes?.formatted(.byteCount(style: .file)) ?? "")
+                }
+            }
+            .buttonStyle(.plain)
+
+            SettingsDivider()
+
             Button {
                 withHapticFeedback { showingBackupRestore = true }
             } label: {

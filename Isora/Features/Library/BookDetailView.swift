@@ -11,6 +11,7 @@ struct BookDetailView: View {
 
     @State private var showingChapters = false
     @State private var showingBookmarks = false
+    @State private var fileBytes: Int64?
 
     private var chapters: [ChapterModel] { audiobook.sortedChapters }
 
@@ -38,6 +39,10 @@ struct BookDetailView: View {
         // The blurb, genres, moods and content warnings come from Hardcover the first time this
         // screen is opened, and are stored on the link afterwards.
         .task { await HardcoverService.shared.refreshDetails(for: audiobook) }
+        .task {
+            guard let url = audiobook.resolvedFileURL else { return }
+            fileBytes = await Task.detached { StorageUsage.bytes(at: url) }.value
+        }
         .scrollContentBackground(.hidden)
         .ignoresSafeArea(edges: .top)
         // The bar stays, transparent: hiding it also disables the swipe-back gesture. The
@@ -140,6 +145,10 @@ struct BookDetailView: View {
                         chapters.count
                     )
                 )
+            }
+
+            if let fileBytes, fileBytes > 0 {
+                DetailChip(text: fileBytes.formatted(.byteCount(style: .file)))
             }
 
             if let link = audiobook.hardcover {

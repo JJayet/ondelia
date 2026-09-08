@@ -7,11 +7,23 @@ import Foundation
 struct LibrarySnapshot: Codable, Sendable, Equatable {
     let books: [BookSummary]
     let nowPlaying: NowPlayingState?
+    /// The phone's skip settings, so the watch's buttons match. Optional: an older phone
+    /// build sends neither, and the watch keeps its 15 s default.
+    let skipBackSeconds: TimeInterval?
+    let skipForwardSeconds: TimeInterval?
     let sentAt: Date
 
-    init(books: [BookSummary], nowPlaying: NowPlayingState? = nil, sentAt: Date = Date()) {
+    init(
+        books: [BookSummary],
+        nowPlaying: NowPlayingState? = nil,
+        skipBackSeconds: TimeInterval? = nil,
+        skipForwardSeconds: TimeInterval? = nil,
+        sentAt: Date = Date()
+    ) {
         self.books = books
         self.nowPlaying = nowPlaying
+        self.skipBackSeconds = skipBackSeconds
+        self.skipForwardSeconds = skipForwardSeconds
         self.sentAt = sentAt
     }
 }

@@ -1,7 +1,32 @@
 import Foundation
 
 extension GlobalAudioManager {
+    /// UserDefaults keys. The toggle is bound from Settings; the other two remember the last
+    /// timer chosen so the automatic one repeats it.
+    static let autoSleepTimerKey = "playback.autoSleepTimer"
+    static let lastSleepTimerSecondsKey = "sleepTimer.lastSeconds"
+    static let lastSleepTimerEndOfChapterKey = "sleepTimer.lastEndOfChapter"
+
     func setSleepTimer(_ seconds: TimeInterval) {
+        UserDefaults.standard.set(seconds, forKey: Self.lastSleepTimerSecondsKey)
+        UserDefaults.standard.set(false, forKey: Self.lastSleepTimerEndOfChapterKey)
+        startSleepTimer(seconds)
+    }
+
+    /// Starts the remembered timer when the setting is on and none is running. Called on every
+    /// play, so a timer that already fired is set again on the next resume.
+    func startAutomaticSleepTimerIfEnabled() {
+        let defaults = UserDefaults.standard
+        guard defaults.bool(forKey: Self.autoSleepTimerKey), sleepTimer == nil else { return }
+        if defaults.bool(forKey: Self.lastSleepTimerEndOfChapterKey) {
+            setSleepTimerEndOfChapter()
+            return
+        }
+        let seconds = defaults.object(forKey: Self.lastSleepTimerSecondsKey) as? TimeInterval
+        setSleepTimer(seconds ?? 900)
+    }
+
+    private func startSleepTimer(_ seconds: TimeInterval) {
         cancelSleepTimer()
         sleepTimeRemaining = seconds
         sleepTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] _ in
@@ -32,13 +57,14 @@ extension GlobalAudioManager {
     /// arrives in half the time, and a seek or a speed change moves it again. So the boundary is
     /// remembered and the countdown recomputed from it on every tick.
     func setSleepTimerEndOfChapter() {
+        UserDefaults.standard.set(true, forKey: Self.lastSleepTimerEndOfChapterKey)
         let now = getCurrentTime()
         guard let chapter = currentAudiobook?.sortedChapters
             .first(where: { now >= $0.startTime && now < $0.endTime }) else {
-            setSleepTimer(900)
+            startSleepTimer(900)
             return
         }
-        setSleepTimer(sleepSecondsUntil(chapter.endTime))
+        startSleepTimer(sleepSecondsUntil(chapter.endTime))
         sleepChapterEnd = chapter.endTime
     }
 

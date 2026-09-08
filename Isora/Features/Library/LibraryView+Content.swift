@@ -168,7 +168,8 @@ extension LibraryView {
                                 spacing: gridColumns >= 4 ? 10 : 16
                             ) {
                                 ForEach(shelfBooks, id: \.id) { audiobook in
-                                    AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { audiobookForDetail = audiobook }
+                                    AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { tapBook(audiobook) }
+                                    .overlay(alignment: .topTrailing) { selectionBadge(for: audiobook) }
                                     .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
                                     .contextMenu {
                                         BookActionsMenu(audiobook: audiobook, actions: bookActions)
@@ -189,7 +190,8 @@ extension LibraryView {
 extension LibraryView {
     @ViewBuilder
     func libraryRow(audiobook: AudiobookModel) -> some View {
-        EnhancedAudiobookRowView(audiobook: audiobook) { audiobookForDetail = audiobook }
+        EnhancedAudiobookRowView(audiobook: audiobook) { tapBook(audiobook) }
+            .overlay(alignment: .topTrailing) { selectionBadge(for: audiobook) }
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)

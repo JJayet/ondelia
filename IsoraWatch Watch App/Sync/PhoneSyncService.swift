@@ -15,6 +15,9 @@ final class PhoneSyncService: NSObject, WCSessionDelegate {
     var phoneNowPlaying: NowPlayingState?
     /// Book order as the phone sent it — "content on the watch first, then most recent".
     var bookOrder: [UUID] = []
+    /// Mirrors the phone's skip settings; 15 s until the first snapshot says otherwise.
+    var skipBackSeconds: TimeInterval = 15
+    var skipForwardSeconds: TimeInterval = 15
     var isReachable = false
     var isPhoneAppInstalled = false
 

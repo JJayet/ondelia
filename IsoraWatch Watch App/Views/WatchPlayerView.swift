@@ -104,7 +104,7 @@ struct WatchPlayerView: View {
 
     private var transport: some View {
         HStack(spacing: 12) {
-            roundButton("gobackward.15", size: 38) { skip(-15) }
+            roundButton("gobackward.\(Int(sync.skipBackSeconds))", size: 38) { skip(-sync.skipBackSeconds) }
             Button(action: togglePlayback) {
                 Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                     .font(.system(size: 22, weight: .bold))
@@ -112,7 +112,7 @@ struct WatchPlayerView: View {
             }
             .buttonStyle(.plain)
             .background(tint.opacity(0.35), in: Circle())
-            roundButton("goforward.15", size: 38) { skip(15) }
+            roundButton("goforward.\(Int(sync.skipForwardSeconds))", size: 38) { skip(sync.skipForwardSeconds) }
         }
     }
 

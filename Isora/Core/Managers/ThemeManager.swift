@@ -7,7 +7,11 @@ final class ThemeManager {
     
     var currentTheme: AppTheme = .system
     var accentColor: AccentColor = .blue
-    var skipInterval: SkipInterval = .fifteen
+    /// Separate, so a listener can step back 10 s to re-hear a sentence and forward 30 s past
+    /// a recap. Both keys fall back to the old shared "skipInterval" so existing users keep
+    /// the interval they chose.
+    var skipBackInterval: SkipInterval = .fifteen
+    var skipForwardInterval: SkipInterval = .fifteen
     /// When on, every book plays at `globalSpeed` instead of its own remembered speed.
     var globalSpeedEnabled: Bool = false
     var globalSpeed: Float = 1.0
@@ -22,8 +26,6 @@ final class ThemeManager {
     private func loadSettings() {
         let theme: AppTheme
         let accent: AccentColor
-        let skip: SkipInterval
-        
         // Load from UserDefaults on background queue
         if let themeRawValue = UserDefaults.standard.object(forKey: "selectedTheme") as? Int,
            let loadedTheme = AppTheme(rawValue: themeRawValue) {
@@ -39,13 +41,6 @@ final class ThemeManager {
             accent = .blue
         }
         
-        if let skipRawValue = UserDefaults.standard.object(forKey: "skipInterval") as? Int,
-           let loadedSkip = SkipInterval(rawValue: skipRawValue) {
-            skip = loadedSkip
-        } else {
-            skip = .fifteen
-        }
-        
         let storedGlobalSpeed = UserDefaults.standard.object(forKey: "globalSpeed") as? Double
         // `bool(forKey:)` reads an absent key as false, which would ship the feature off.
         let storedSmartRewind = UserDefaults.standard.object(forKey: "smartRewindEnabled") as? Bool
@@ -56,7 +51,8 @@ final class ThemeManager {
         self.smartRewindEnabled = storedSmartRewind ?? true
         self.currentTheme = theme
         self.accentColor = accent
-        self.skipInterval = skip
+        self.skipBackInterval = Self.loadSkipInterval(key: "skipBackInterval")
+        self.skipForwardInterval = Self.loadSkipInterval(key: "skipForwardInterval")
 
         // Remote commands are registered before this runs, with the default interval.
         GlobalAudioManager.shared.applyRemoteSkipInterval()
@@ -72,10 +68,28 @@ final class ThemeManager {
         UserDefaults.standard.set(color.rawValue, forKey: "accentColor")
     }
     
-    func setSkipInterval(_ interval: SkipInterval) {
-        skipInterval = interval
-        UserDefaults.standard.set(interval.rawValue, forKey: "skipInterval")
+    private static func loadSkipInterval(key: String) -> SkipInterval {
+        let defaults = UserDefaults.standard
+        let raw = (defaults.object(forKey: key) ?? defaults.object(forKey: "skipInterval")) as? Int
+        return raw.flatMap(SkipInterval.init) ?? .fifteen
+    }
+
+    func setSkipBackInterval(_ interval: SkipInterval) {
+        skipBackInterval = interval
+        UserDefaults.standard.set(interval.rawValue, forKey: "skipBackInterval")
+        skipIntervalsDidChange()
+    }
+
+    func setSkipForwardInterval(_ interval: SkipInterval) {
+        skipForwardInterval = interval
+        UserDefaults.standard.set(interval.rawValue, forKey: "skipForwardInterval")
+        skipIntervalsDidChange()
+    }
+
+    /// The lock screen glyphs and the watch both show the interval, so both follow the setting.
+    private func skipIntervalsDidChange() {
         GlobalAudioManager.shared.applyRemoteSkipInterval()
+        WatchSyncService.shared.pushSnapshot()
     }
 
     func setGlobalSpeedEnabled(_ enabled: Bool) {

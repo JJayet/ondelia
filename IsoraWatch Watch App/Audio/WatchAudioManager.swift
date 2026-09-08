@@ -109,11 +109,11 @@ final class WatchAudioManager {
     }
 
     func skipForward() {
-        seek(to: player.currentTime + 15)
+        seek(to: player.currentTime + PhoneSyncService.shared.skipForwardSeconds)
     }
 
     func skipBackward() {
-        seek(to: player.currentTime - 15)
+        seek(to: player.currentTime - PhoneSyncService.shared.skipBackSeconds)
     }
 
     func seek(to time: TimeInterval, persist: Bool = true) {

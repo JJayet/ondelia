@@ -27,9 +27,9 @@ extension PlayerView {
             Spacer(minLength: 8)
 
             Button {
-                withHapticFeedback { audioManager.skipBackward(themeManager.skipInterval.seconds) }
+                withHapticFeedback { audioManager.skipBackward(themeManager.skipBackInterval.seconds) }
             } label: {
-                seekLabel("gobackward.\(Int(themeManager.skipInterval.seconds))")
+                seekLabel("gobackward.\(themeManager.skipBackInterval.rawValue)")
             }
             .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Skip Backward", comment: "Skip backward accessibility label"))
@@ -42,9 +42,9 @@ extension PlayerView {
             Spacer(minLength: 8)
 
             Button {
-                withHapticFeedback { audioManager.skipForward(themeManager.skipInterval.seconds) }
+                withHapticFeedback { audioManager.skipForward(themeManager.skipForwardInterval.seconds) }
             } label: {
-                seekLabel("goforward.\(Int(themeManager.skipInterval.seconds))")
+                seekLabel("goforward.\(themeManager.skipForwardInterval.rawValue)")
             }
             .buttonStyle(.plain)
             .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))

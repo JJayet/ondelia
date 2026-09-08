@@ -8,6 +8,7 @@ extension LibraryView {
         case merge(MergePrompt)
         case importFailed(String)
         case confirmDelete(AudiobookModel)
+        case confirmDeleteMany([AudiobookModel])
 
         var id: String {
             switch self {
@@ -15,6 +16,7 @@ extension LibraryView {
             case .merge(let prompt): return prompt.id.uuidString
             case .importFailed: return "importFailed"
             case .confirmDelete(let book): return "delete-\(book.id)"
+            case .confirmDeleteMany: return "delete-many"
             }
         }
 
@@ -28,6 +30,8 @@ extension LibraryView {
                 return NSLocalizedString("Import Failed", comment: "Import error alert title")
             case .confirmDelete:
                 return NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title")
+            case .confirmDeleteMany:
+                return NSLocalizedString("Delete Audiobooks", comment: "Bulk delete confirmation alert title")
             }
         }
     }
@@ -39,7 +43,7 @@ extension LibraryView {
             prompt.respond(false)
         case .importFailed:
             audiobookManager.importErrorMessage = nil
-        case .rename, .confirmDelete, .none:
+        case .rename, .confirmDelete, .confirmDeleteMany, .none:
             break
         }
         audiobookToRename = nil
@@ -82,6 +86,12 @@ extension LibraryView {
                     audiobookForDetail = nil
                 }
             }
+
+        case .confirmDeleteMany(let books):
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                withAnimation(.easeInOut(duration: 0.3)) { deleteSelected(books) }
+            }
         }
     }
 
@@ -111,6 +121,14 @@ extension LibraryView {
                     comment: "Delete confirmation alert message"
                 ),
                 audiobook.title ?? AudiobookModel.unknownTitle
+            ))
+        case .confirmDeleteMany(let books):
+            Text(String(
+                format: NSLocalizedString(
+                    "%d audiobooks, their progress and their bookmarks will be removed. This cannot be undone.",
+                    comment: "Bulk delete confirmation alert message"
+                ),
+                books.count
             ))
         }
     }

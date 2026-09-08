@@ -27,6 +27,7 @@ extension GlobalAudioManager {
         player.play()
         playbackState = .playing
         playbackStateDidChange()
+        startAutomaticSleepTimerIfEnabled()
         // Feeds the system's media suggestions — the row of covers in Control Center.
         if let currentAudiobook {
             MediaIntentDonations.donatePlayback(of: currentAudiobook)
@@ -94,12 +95,12 @@ extension GlobalAudioManager {
 
     /// Defaults to the interval chosen in Settings, so every caller that has no interval of
     /// its own — mini player, widget, App Intents — follows the setting instead of a literal.
-    func skipForward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
+    func skipForward(_ interval: TimeInterval = ThemeManager.shared.skipForwardInterval.seconds) {
         player?.skipForward(interval)
         playbackStateDidChange()
     }
 
-    func skipBackward(_ interval: TimeInterval = ThemeManager.shared.skipInterval.seconds) {
+    func skipBackward(_ interval: TimeInterval = ThemeManager.shared.skipBackInterval.seconds) {
         player?.skipBackward(interval)
         playbackStateDidChange()
     }

@@ -8,11 +8,15 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @AppStorage(ChapterScrubber.showChapterTimesKey) var showChapterTimes = true
     @AppStorage("playback.bookOpeningDelayMS") var bookOpeningDelayMS = 200
+    @AppStorage(GlobalAudioManager.autoSleepTimerKey) var autoSleepTimer = false
     @AppStorage("library.gridColumns") var gridColumns = 2
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
     @State var showResetStatsConfirm = false
     @State var showingBackupRestore = false
+    @State var showingStorage = false
+    /// Whole library folder, shown beside the Storage row. Recomputed each time Settings opens.
+    @State var storageBytes: Int64?
 
     var body: some View {
         NavigationStack {
@@ -43,6 +47,11 @@ struct SettingsView: View {
                 Text(NSLocalizedString("Set your monthly listening goal in hours", comment: "Monthly goal alert message"))
             }
             .sheet(isPresented: $showingBackupRestore) { BackupRestoreView() }
+            .sheet(isPresented: $showingStorage) { StorageView() }
+            .task {
+                let url = AudiobookModel.libraryFolderURL
+                storageBytes = await Task.detached { StorageUsage.bytes(at: url) }.value
+            }
             .scrollContentBackground(.hidden)
             .background(TintedBackground(intensity: 0.6))
         }
