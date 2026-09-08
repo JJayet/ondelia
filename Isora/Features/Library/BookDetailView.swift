@@ -28,6 +28,7 @@ struct BookDetailView: View {
                     titleBlock
                     chips
                     progressCard
+                    metaLine
                     summary
                 }
                 .padding(.horizontal, 16)
@@ -147,15 +148,6 @@ struct BookDetailView: View {
                 )
             }
 
-            if let fileBytes, fileBytes > 0 {
-                DetailChip(text: fileBytes.formatted(.byteCount(style: .file)))
-            }
-
-            // First publication year, once Hardcover has said. The day is not worth the width.
-            if let released = audiobook.hardcover?.releaseDate {
-                DetailChip(text: released.formatted(.dateTime.year()), icon: "calendar")
-            }
-
             if let link = audiobook.hardcover {
                 DetailChip(
                     text: [link.seriesName, link.volumeBadge].compactMap { $0 }.joined(separator: " ")
@@ -166,6 +158,29 @@ struct BookDetailView: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    // MARK: - Size and publication
+
+    /// "743 MB · Published 15 March 2021", under the player card. Chips ran out of room for it.
+    @ViewBuilder
+    private var metaLine: some View {
+        let parts: [String] = [
+            fileBytes.flatMap { $0 > 0 ? $0.formatted(.byteCount(style: .file)) : nil },
+            audiobook.hardcover?.releaseDate.map {
+                String(
+                    format: NSLocalizedString("Published %@", comment: "Book detail: first publication date"),
+                    $0.formatted(date: .long, time: .omitted)
+                )
+            }
+        ].compactMap { $0 }
+        if !parts.isEmpty {
+            Text(parts.joined(separator: " · "))
+                .font(.system(size: 12.5))
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity)
+                .multilineTextAlignment(.center)
+        }
     }
 
     // MARK: - Summary

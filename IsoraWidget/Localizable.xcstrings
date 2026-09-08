@@ -12,6 +12,9 @@
         }
       }
     },
+    "Author" : {
+      "comment" : "Sort by author"
+    },
     "Chapter 1: Introduction" : {
       "localizations" : {
         "fr" : {
@@ -21,6 +24,12 @@
           }
         }
       }
+    },
+    "Date Added" : {
+      "comment" : "Sort by date added"
+    },
+    "Manual" : {
+      "comment" : "Collection order: as arranged by hand"
     },
     "Nothing playing" : {
       "comment" : "A placeholder text that appears when there is no audiobook playing.",
@@ -76,6 +85,9 @@
         }
       }
     },
+    "Publication date" : {
+      "comment" : "Collection order: Hardcover release date"
+    },
     "Sample Audiobook" : {
       "localizations" : {
         "fr" : {
@@ -105,6 +117,9 @@
           }
         }
       }
+    },
+    "Series order" : {
+      "comment" : "Collection order: Hardcover volume position"
     },
     "Skip backward" : {
       "comment" : "Intent to skip backward in playback.",
@@ -149,6 +164,9 @@
           }
         }
       }
+    },
+    "Title" : {
+      "comment" : "Sort by title"
     },
     "Toggle playback" : {
       "localizations" : {

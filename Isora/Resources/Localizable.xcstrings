@@ -4,83 +4,6 @@
     "" : {
 
     },
-    "%@ used" : {
-      "comment" : "Storage total header",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ utilisés"
-          }
-        }
-      }
-    },
-    "%@ · Not on this device" : {
-      "comment" : "Author and missing-audio status",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Pas sur cet appareil"
-          }
-        }
-      }
-    },
-    "%d audiobooks, their progress and their bookmarks will be removed. This cannot be undone." : {
-      "comment" : "Bulk delete confirmation alert message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres audio, leur progression et leurs signets seront supprimés. Cette action est irréversible."
-          }
-        }
-      }
-    },
-    "%d books" : {
-      "comment" : "Number of books in a collection",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres"
-          }
-        }
-      }
-    },
-    "%d books in your library belong to this series on Hardcover. Group them into a collection?" : {
-      "comment" : "Series collection offer message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres de votre bibliothèque appartiennent à cette série sur Hardcover. Les regrouper dans une collection ?"
-          }
-        }
-      }
-    },
-    "%d files in the library folder that no book uses will be removed." : {
-      "comment" : "Orphan cleanup confirmation",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d fichiers du dossier de la bibliothèque qu'aucun livre n'utilise seront supprimés."
-          }
-        }
-      }
-    },
-    "%d selected" : {
-      "comment" : "Selection count in the library toolbar",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d sélectionnés"
-          }
-        }
-      }
-    },
     "-%@" : {
       "comment" : "Player: time remaining, negative clock format",
       "localizations" : {
@@ -154,6 +77,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ · lu par %@"
+          }
+        }
+      }
+    },
+    "%@ · Not on this device" : {
+      "comment" : "Author and missing-audio status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Pas sur cet appareil"
           }
         }
       }
@@ -246,6 +180,17 @@
         }
       }
     },
+    "%@ used" : {
+      "comment" : "Storage total header",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ utilisés"
+          }
+        }
+      }
+    },
     "%@, %@ of %@" : {
       "comment" : "Accessibility progress: percent, elapsed time of total time",
       "localizations" : {
@@ -268,6 +213,39 @@
         }
       }
     },
+    "%d audiobooks, their progress and their bookmarks will be removed. This cannot be undone." : {
+      "comment" : "Bulk delete confirmation alert message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres audio, leur progression et leurs signets seront supprimés. Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "%d books" : {
+      "comment" : "Number of books in a collection",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres"
+          }
+        }
+      }
+    },
+    "%d books in your library belong to this series on Hardcover. Group them into a collection?" : {
+      "comment" : "Series collection offer message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres de votre bibliothèque appartiennent à cette série sur Hardcover. Les regrouper dans une collection ?"
+          }
+        }
+      }
+    },
     "%d chapters" : {
       "comment" : "Chapter count chip",
       "localizations" : {
@@ -275,6 +253,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d chapitres"
+          }
+        }
+      }
+    },
+    "%d files in the library folder that no book uses will be removed." : {
+      "comment" : "Orphan cleanup confirmation",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d fichiers du dossier de la bibliothèque qu'aucun livre n'utilise seront supprimés."
           }
         }
       }
@@ -292,6 +281,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d sur %d"
+          }
+        }
+      }
+    },
+    "%d selected" : {
+      "comment" : "Selection count in the library toolbar",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d sélectionnés"
           }
         }
       }
@@ -1863,7 +1863,7 @@
       }
     },
     "Move Down" : {
-      "comment" : "Move a book later in the play queue",
+      "comment" : "Move a book later in the play queue\nMove a book one step down in a collection",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1874,7 +1874,7 @@
       }
     },
     "Move Up" : {
-      "comment" : "Move a book earlier in the play queue",
+      "comment" : "Move a book earlier in the play queue\nMove a book one step up in a collection",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2418,6 +2418,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Date de publication"
+          }
+        }
+      }
+    },
+    "Published %@" : {
+      "comment" : "Book detail: first publication date",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Publié le %@"
           }
         }
       }
