@@ -1,0 +1,90 @@
+IsoraTests/Core/Managers/AutoSleepTimerTests.swift
+  s_4273004de35177::t_90ca9723828f7d 1-55
+Isora/Core/Managers/ThemeManager+Settings.swift
+  s_4273004de35177::t_deb44e9d6465d3 57
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_90ca9723828f7d 586-596
+  s_4273004de35177::t_5f3081a5362054 6-38,552-562,753-763,1144-1154,2006-2027,2649-2670,2946-2956
+Isora/Core/Managers/ThemeManager.swift
+  s_4273004de35177::t_deb44e9d6465d3 10-14,54-55,71-90,92
+Isora/Features/Player/PlayerView+Controls.swift
+  s_4273004de35177::t_deb44e9d6465d3 30,32,45,47
+Isora/Shared/MiniPlayerBar.swift
+  s_4273004de35177::t_deb44e9d6465d3 74
+Isora/Features/Library/LibraryView+Alerts.swift
+  s_4273004de35177::t_d90e1dd6d063cd 11,19,33-34,46,89-94,125-131
+  s_4273004de35177::t_896dbed7ec9f34 132
+Isora/Features/Library/LibraryView.swift
+  s_4273004de35177::t_d90e1dd6d063cd 30-33,114,142
+Isora/Features/Library/LibraryView+Content.swift
+  s_4273004de35177::t_d90e1dd6d063cd 171-172,193-194
+Isora/Features/Settings/SettingsView.swift
+  s_4273004de35177::t_d90e1dd6d063cd 17-19,50-54
+  s_4273004de35177::t_90ca9723828f7d 11
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_4273004de35177::t_deb44e9d6465d3 59-60,65-70,75,158,160-165
+  s_4273004de35177::t_90ca9723828f7d 108-115
+  s_4273004de35177::t_d90e1dd6d063cd 219-228
+  s_4273004de35177::t_564d58384943c8 61-64,71-74,157,159
+  s_4273004de35177::t_8183033e920cb1 166-168,218
+Isora/Core/Managers/GlobalAudioManager+SleepTimer.swift
+  s_4273004de35177::t_90ca9723828f7d 4-9,11-29,60,64,67
+Isora/Features/Library/LibraryView+Selection.swift
+  s_4273004de35177::t_d90e1dd6d063cd 1-121
+IsoraTests/Core/Services/StorageUsageTests.swift
+  s_4273004de35177::t_d66b2ddd95b769 1-9,11-27
+  s_4273004de35177::t_febf5de0585d0c 10
+"IsoraWatch Watch App/Sync/PhoneSyncService+Snapshot.swift"
+  s_4273004de35177::t_deb44e9d6465d3 37-39
+Isora/Core/Managers/GlobalAudioManager+Playback.swift
+  s_4273004de35177::t_deb44e9d6465d3 98,103
+  s_4273004de35177::t_90ca9723828f7d 30
+Isora/Core/Services/Watch/WatchSyncService+Snapshot.swift
+  s_4273004de35177::t_deb44e9d6465d3 37-42
+"IsoraWatch Watch App/Sync/PhoneSyncService.swift"
+  s_4273004de35177::t_deb44e9d6465d3 18-20
+"IsoraWatch Watch App/Audio/WatchAudioManager.swift"
+  s_4273004de35177::t_deb44e9d6465d3 112,116
+Isora/Features/Library/BookDetailView.swift
+  s_4273004de35177::t_d90e1dd6d063cd 14,42-45,150-151
+  s_4273004de35177::t_c9348d8463811f 152-153
+Isora/Features/Settings/StorageView.swift
+  s_4273004de35177::t_d90e1dd6d063cd 1-151
+Isora/Core/Managers/GlobalAudioManager+RemoteCommands.swift
+  s_4273004de35177::t_deb44e9d6465d3 35-36
+"IsoraWatch Watch App/Audio/WatchAudioManager+Session.swift"
+  s_4273004de35177::t_deb44e9d6465d3 69,78-82
+  s_4273004de35177::t_09d2e2717729ca 83-84
+MISSING_FEATURES.md
+  s_72b31e05fabb6c::t_0b20f46500b228 1-6,8,10,22-23,37-52,55,58-84,92-94,96-101
+  s_4273004de35177::t_f7d40a9d1b6b7d 7,9,13,16-21,24-36,53-54,57,85-91,95,102
+  s_4273004de35177::t_b4f998de51f8a5 11-12,14-15,56
+Isora/Shared/WatchSync/SyncModels.swift
+  s_4273004de35177::t_deb44e9d6465d3 10-13,16-22,25-26
+"IsoraWatch Watch App/Views/WatchPlayerView.swift"
+  s_4273004de35177::t_deb44e9d6465d3 107,115
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "141b77833ac67fbfbe3b172651901310a4666948",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_72b31e05fabb6c": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a07ad7-b68d-7771-96c9-d1109bd5ba49",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
