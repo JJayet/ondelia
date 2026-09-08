@@ -1,0 +1,19 @@
+Isora/Features/Library/CollectionDetailView.swift
+  s_4273004de35177::t_e1e02495b1c124 58,65
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "4aa00a2a857cdadf5f6360500139af98acd91486",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
