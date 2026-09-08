@@ -152,6 +152,31 @@ extension AudiobookManager {
         fetchCollections()
     }
 
+    func setAutoContinue(_ on: Bool, for collection: CollectionModel) {
+        collection.autoContinue = on
+        swiftDataController.save()
+        fetchCollections()
+    }
+
+    /// The books of a collection in the order its card shows them.
+    func orderedBooks(in collection: CollectionModel) -> [AudiobookModel] {
+        let byID = Dictionary(audiobooks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        return CollectionGroup.sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort)
+    }
+
+    /// What plays after `book` ends: the next unfinished, present book of the first collection
+    /// that holds it and chains its books. Nil when nothing does.
+    func nextBook(after book: AudiobookModel) -> AudiobookModel? {
+        for collection in collections where collection.autoContinue && collection.bookIDs.contains(book.id) {
+            let ordered = orderedBooks(in: collection)
+            guard let index = ordered.firstIndex(where: { $0.id == book.id }) else { continue }
+            if let next = ordered.dropFirst(index + 1).first(where: { !$0.isFinished && hasFile($0) }) {
+                return next
+            }
+        }
+        return nil
+    }
+
     func renameCollection(_ collection: CollectionModel, to name: String) {
         let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }

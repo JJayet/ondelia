@@ -1,58 +1,16 @@
 import SwiftUI
 
-/// One collection on the shelf: the name, how many books, and the books themselves, each with
-/// its own progress. A series card can also list the volumes Hardcover knows that the shelf lacks.
+/// One collection on the shelf: name, count, overlapping covers and the totals. Tapping opens
+/// `CollectionDetailView`, where the books, the order and the actions live.
 struct CollectionCardView: View {
     let group: CollectionGroup
-    let showMissing: Bool
-    let bookActions: BookActions
-    let onSelect: (AudiobookModel) -> Void
-    let onRename: (CollectionModel) -> Void
-    let onDelete: (CollectionModel) -> Void
-    let onRemoveBook: (AudiobookModel, CollectionModel) -> Void
-    let onSort: (CollectionSort, CollectionModel) -> Void
-    /// Manual order: `(book, target)` drops the book where the target row is, or at the end.
-    let onMove: (AudiobookModel, AudiobookModel?, CollectionModel) -> Void
-    /// Manual order: one step up or down.
-    let onMoveBy: (AudiobookModel, Int, CollectionModel) -> Void
-
-    /// Collapsed cards show only their spines; one being listened to opens by itself.
-    @State private var expanded: Bool?
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private var isExpanded: Bool {
-        expanded ?? (group.progressFraction > 0 && group.progressFraction < 1)
-    }
+    let onOpen: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            header
-
-            if isExpanded {
-                VStack(spacing: 10) {
-                    ForEach(group.volumes(showMissing: showMissing)) { volume in
-                        switch volume {
-                        case .owned(let book): volumeRow(book)
-                        case .missing(let listing): missingRow(listing)
-                        }
-                    }
-                }
-                .padding(.top, 14)
-            } else {
-                spines.padding(.top, 12)
-            }
-        }
-        .padding(16)
-        .glassCard(cornerRadius: 28)
-    }
-
-    private var header: some View {
-        HStack(spacing: 8) {
-            Button {
-                withHapticFeedback {
-                    withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
-                }
-            } label: {
+        Button {
+            withHapticFeedback { onOpen() }
+        } label: {
+            VStack(spacing: 12) {
                 HStack(spacing: 8) {
                     if group.isSeries {
                         Image(systemName: "books.vertical.fill")
@@ -73,98 +31,41 @@ struct CollectionCardView: View {
 
                     Spacer(minLength: 0)
 
-                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: "chevron.right")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.tertiary)
                 }
-                .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(group.name)
-            .accessibilityValue(countLabel)
 
-            Menu {
-                Menu {
-                    ForEach(sortChoices, id: \.rawValue) { sort in
-                        Button {
-                            withHapticFeedback { onSort(sort, group.collection) }
-                        } label: {
-                            if group.collection.sort == sort {
-                                Label(sort.displayName, systemImage: "checkmark")
-                            } else {
-                                Text(sort.displayName)
-                            }
+                HStack(spacing: 13) {
+                    HStack(spacing: -14) {
+                        ForEach(Array(group.books.prefix(3)), id: \.id) { book in
+                            CoverArtView(audiobook: book, size: 44, cornerRadius: 8)
                         }
                     }
-                } label: {
-                    Label(NSLocalizedString("Sort by", comment: "Search sort picker label"), systemImage: "arrow.up.arrow.down")
-                }
 
-                // A series takes its name from Hardcover, so only hand-made collections rename.
-                if !group.isSeries {
-                    Button { onRename(group.collection) } label: {
-                        Label(NSLocalizedString("Rename", comment: "Rename button"), systemImage: "pencil")
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(group.totalDuration.hoursMinutesFormatted)
+                            .font(.system(size: 14, weight: .semibold))
+                        Text(subtitle)
+                            .font(.system(size: 11.5))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
                     }
+
+                    Spacer(minLength: 0)
                 }
-                Button(role: .destructive) { onDelete(group.collection) } label: {
-                    Label(NSLocalizedString("Delete Collection", comment: "Delete a collection, keeping its books"), systemImage: "trash")
-                }
-                .tint(.red)
-            } label: {
-                Image(systemName: "ellipsis")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .frame(width: 28, height: 28)
-                    .contentShape(Rectangle())
             }
-            .buttonStyle(.plain)
-            .accessibilityLabel(NSLocalizedString("More", comment: "Book actions menu"))
+            .padding(16)
+            .contentShape(Rectangle())
+            .glassCard(cornerRadius: 28)
         }
+        .buttonStyle(.plain)
+        .accessibilityLabel(group.name)
+        .accessibilityValue(countLabel)
     }
-
-    /// Series order only means something when Hardcover positions exist.
-    private var sortChoices: [CollectionSort] {
-        CollectionSort.allCases.filter { $0 != .seriesPosition || group.isSeries }
-    }
-
-    private var isManual: Bool { group.collection.sort == .manual }
 
     /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
-    private var countLabel: String {
-        guard group.isSeries else {
-            return String(format: NSLocalizedString("%d books", comment: "Number of books in a collection"), group.books.count)
-        }
-        guard let total = group.catalogueCount, total > group.books.count else {
-            return String(format: NSLocalizedString("%d volumes", comment: "Number of books in a series"), group.books.count)
-        }
-        return String(
-            format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
-            group.books.count,
-            total
-        )
-    }
-
-    /// The collapsed state: overlapping covers, then the totals.
-    private var spines: some View {
-        HStack(spacing: 13) {
-            HStack(spacing: -14) {
-                ForEach(Array(group.books.prefix(3)), id: \.id) { book in
-                    CoverArtView(audiobook: book, size: 44, cornerRadius: 8)
-                }
-            }
-
-            VStack(alignment: .leading, spacing: 4) {
-                Text(group.totalDuration.hoursMinutesFormatted)
-                    .font(.system(size: 14, weight: .semibold))
-                Text(subtitle)
-                    .font(.system(size: 11.5))
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-            }
-
-            Spacer(minLength: 0)
-        }
-    }
+    var countLabel: String { group.countLabel }
 
     private var subtitle: String {
         guard let current = group.currentBook, current.currentPosition > 0 else {
@@ -178,131 +79,32 @@ struct CollectionCardView: View {
             current.title ?? AudiobookModel.unknownTitle
         )
     }
+}
 
-    @ViewBuilder
-    private func volumeRow(_ book: AudiobookModel) -> some View {
-        Button {
-            withHapticFeedback { onSelect(book) }
-        } label: {
-            HStack(spacing: 12) {
-                CoverArtView(audiobook: book, size: 52, cornerRadius: 12)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    HStack(alignment: .firstTextBaseline, spacing: 7) {
-                        if group.isSeries, let badge = book.hardcover?.volumeBadge {
-                            Text(badge)
-                                .font(.system(size: 9, weight: .semibold))
-                                .tracking(1)
-                                .foregroundStyle(book.currentPosition > 0 && !book.isFinished ? AnyShapeStyle(.tint) : AnyShapeStyle(.tertiary))
-                        }
-                        Text(book.title ?? AudiobookModel.unknownTitle)
-                            .font(.system(size: 13.5, weight: .semibold))
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.8)
-                    }
-
-                    if book.currentPosition > 0 && !book.isFinished {
-                        ProgressLine(value: book.progressFraction)
-                    }
-
-                    Text(status(book))
-                        .font(.system(size: 11))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .contentShape(Rectangle())
+extension CollectionGroup {
+    /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
+    @MainActor
+    var countLabel: String {
+        guard isSeries else {
+            return String(format: NSLocalizedString("%d books", comment: "Number of books in a collection"), books.count)
         }
-        .buttonStyle(.plain)
-        .contextMenu {
-            BookActionsMenu(audiobook: book, actions: bookActions)
-            Divider()
-            // Reachable without a drag, and the only way with VoiceOver. Picking one on a sorted
-            // collection switches it to manual order.
-            Button { withHapticFeedback { onMoveBy(book, -1, group.collection) } } label: {
-                Label(NSLocalizedString("Move Up", comment: "Move a book one step up in a collection"), systemImage: "arrow.up")
-            }
-            .disabled(isManual && group.books.first?.id == book.id)
-            Button { withHapticFeedback { onMoveBy(book, 1, group.collection) } } label: {
-                Label(NSLocalizedString("Move Down", comment: "Move a book one step down in a collection"), systemImage: "arrow.down")
-            }
-            .disabled(isManual && group.books.last?.id == book.id)
-            // Series membership is Hardcover's call; only a hand-made collection lets go of a book.
-            if !group.isSeries {
-                Button { onRemoveBook(book, group.collection) } label: {
-                    Label(NSLocalizedString("Remove from Collection", comment: "Take a book out of a collection"), systemImage: "minus.circle")
-                }
-            }
+        guard let total = catalogueCount, total > books.count else {
+            return String(format: NSLocalizedString("%d volumes", comment: "Number of books in a series"), books.count)
         }
-        // Drag to reorder, in manual order only: a sorted list would snap straight back.
-        .draggable(book.id.uuidString)
-        .dropDestination(for: String.self) { items, _ in
-            guard isManual, let id = items.first.flatMap(UUID.init),
-                  let dragged = group.books.first(where: { $0.id == id }) else { return false }
-            withHapticFeedback { onMove(dragged, book, group.collection) }
-            return true
-        }
-        .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
+        return String(
+            format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
+            books.count,
+            total
+        )
     }
 
-    /// A volume Hardcover lists that the shelf does not hold.
-    @ViewBuilder
-    private func missingRow(_ volume: SeriesVolume) -> some View {
-        HStack(spacing: 12) {
-            AsyncImage(url: volume.artworkURL) { image in
-                image.resizable().aspectRatio(contentMode: .fill)
-            } placeholder: {
-                RoundedRectangle(cornerRadius: 12, style: .continuous)
-                    .fill(.quaternary)
-                    .overlay {
-                        Image(systemName: "questionmark")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundStyle(.tertiary)
-                    }
-            }
-            .frame(width: 52, height: 52)
-            .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-            .opacity(0.7)
-
-            VStack(alignment: .leading, spacing: 6) {
-                HStack(alignment: .firstTextBaseline, spacing: 7) {
-                    if let badge = volume.badge {
-                        Text(badge)
-                            .font(.system(size: 9, weight: .semibold))
-                            .tracking(1)
-                            .foregroundStyle(.tertiary)
-                    }
-                    Text(volume.title)
-                        .font(.system(size: 13.5, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.8)
-                }
-
-                Text(NSLocalizedString("Not in your library", comment: "Series volume the reader does not own"))
-                    .font(.system(size: 11))
-                    .foregroundStyle(.tertiary)
-                    .lineLimit(1)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-        }
-        .accessibilityElement(children: .combine)
+    /// The author every book shares, or the first one's; nil when there is none.
+    var author: String? {
+        let authors = books.compactMap(\.author).filter { !$0.isEmpty }
+        return authors.first
     }
 
-    private func status(_ book: AudiobookModel) -> String {
-        if book.isFinished {
-            return String(
-                format: NSLocalizedString("Completed · %@", comment: "Finished book with its duration"),
-                book.duration.hoursMinutesFormatted
-            )
-        }
-        if book.currentPosition > 0 {
-            return String(
-                format: NSLocalizedString("in progress · %@ left", comment: "Remaining listening time"),
-                max(book.duration - book.currentPosition, 0).hoursMinutesFormatted
-            )
-        }
-        return book.duration.hoursMinutesFormatted
+    var remaining: TimeInterval {
+        books.reduce(0) { $0 + max($1.duration - $1.currentPosition, 0) }
     }
 }

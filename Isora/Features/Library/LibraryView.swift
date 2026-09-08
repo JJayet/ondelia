@@ -13,6 +13,8 @@ struct LibraryView: View {
     @State var audiobookForImagePicker: AudiobookModel?
     /// The book whose detail screen is pushed, if any.
     @State var audiobookForDetail: AudiobookModel?
+    /// The collection whose screen is pushed, if any.
+    @State var collectionForDetail: CollectionModel?
     @State var audiobookForHardcover: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
@@ -149,6 +151,7 @@ struct LibraryView: View {
         .navigationBarTitleDisplayMode(.large)
         .toolbar { libraryToolbar }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
+        .navigationDestination(item: $collectionForDetail) { collectionDetail($0) }
         .onAppear {
             // Fetch audiobooks when the view first appears
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {

@@ -144,6 +144,23 @@ struct CollectionGroupTests {
         #expect(utc.component(.year, from: old.hardcover!.releaseDate!) == 1965)
     }
 
+    @Test("Back to back: the next unfinished, present book of a chaining collection")
+    func nextBook() {
+        UserDefaults.standard.removeObject(forKey: AudiobookManager.autoSeriesCollectionsKey)
+        let one = book("One"), two = book("Two"), three = book("Three")
+        two.isFinished = true
+        let manager = manager(with: [one, two, three])
+        let collection = manager.createCollection(name: "Trilogy", books: [one, two, three])!
+
+        #expect(manager.nextBook(after: one) == nil)
+        manager.setAutoContinue(true, for: collection)
+        // Files are not on disk in a test, so nothing qualifies yet.
+        #expect(manager.nextBook(after: one) == nil)
+        three.fileURL = Bundle(for: SwiftDataController.self).bundlePath
+        #expect(manager.nextBook(after: one)?.title == "Three")
+        #expect(manager.nextBook(after: three) == nil)
+    }
+
     @Test("Progress is weighted by length and the current book is the one in progress")
     func progressAndCurrent() {
         let done = book("One", duration: 1000, at: 1000)

@@ -151,18 +151,22 @@ final class GlobalAudioManager {
     private func handlePlaybackEnded() {
         Log.audio.debug("✅ GlobalAudioManager: Reached the end of the book")
         playbackState = .paused
+        let library = AudiobookManager.shared
+        // A collection that chains its books names the next one; the play queue is the fallback.
+        // Decided before the book can be deleted below, which would take it out of its collections.
+        let chained = currentAudiobook.flatMap { library.nextBook(after: $0) }
         if let audiobook = currentAudiobook {
-            AudiobookManager.shared.markAsFinished(audiobook)
-            // Deleting unloads this player; the queue below still rolls on to the next book.
+            library.markAsFinished(audiobook)
+            // Deleting unloads this player; the next book below still starts.
             if UserDefaults.standard.bool(forKey: Self.deleteOnCompletionKey) {
-                AudiobookManager.shared.deleteAudiobook(audiobook)
+                library.deleteAudiobook(audiobook)
             }
         }
         playbackStateDidChange()
 
-        // Roll into the next stacked book, the way a playlist does. `startPlaybackAfterOpeningBook`
+        // Roll into the next book, the way a playlist does. `startPlaybackAfterOpeningBook`
         // plays as soon as the load finishes, via `pendingAutoplay`.
-        if let next = PlayQueue.shared.popNext(from: AudiobookManager.shared.audiobooks) {
+        if let next = chained ?? PlayQueue.shared.popNext(from: library.audiobooks) {
             loadAudiobook(next)
             startPlaybackAfterOpeningBook()
         }

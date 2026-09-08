@@ -3,21 +3,23 @@ import SwiftUI
 // MARK: - Collections on the shelf
 extension LibraryView {
     func collectionCard(_ group: CollectionGroup) -> some View {
-        CollectionCardView(
-            group: group,
-            showMissing: showMissingSeriesBooks,
+        CollectionCardView(group: group) { collectionForDetail = group.collection }
+    }
+
+    func collectionDetail(_ collection: CollectionModel) -> some View {
+        CollectionDetailView(
+            collection: collection,
             bookActions: bookActions,
-            onSelect: { audiobookForDetail = $0 },
+            onSelectBook: { audiobookForDetail = $0 },
             onRename: { collection in
                 collectionToRename = collection
                 newCollectionName = collection.name
                 activeAlert = .renameCollection
             },
-            onDelete: { audiobookManager.deleteCollection($0) },
-            onRemoveBook: { book, collection in audiobookManager.remove(book, from: collection) },
-            onSort: { sort, collection in audiobookManager.setSort(sort, for: collection) },
-            onMove: { book, target, collection in audiobookManager.move(book, before: target, in: collection) },
-            onMoveBy: { book, offset, collection in audiobookManager.move(book, by: offset, in: collection) }
+            onDelete: { collection in
+                collectionForDetail = nil
+                audiobookManager.deleteCollection(collection)
+            }
         )
     }
 

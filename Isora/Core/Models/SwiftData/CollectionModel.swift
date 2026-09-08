@@ -16,6 +16,8 @@ final class CollectionModel {
     var dateCreated: Date = Date()
     /// `CollectionSort` raw value. Manual means `bookIDs` order, which the listener can drag.
     var sortRaw: Int = 0
+    /// When a book in this collection plays to its end, the next unfinished one starts.
+    var autoContinue: Bool = false
 
     init(
         id: UUID = UUID(),
