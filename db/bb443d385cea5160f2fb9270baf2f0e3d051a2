@@ -1,0 +1,24 @@
+Isora/Core/Services/SpeechTranscriptionManager.swift
+  s_88be3ced07ff0c::t_508df063574379 148
+Isora/Shared/CoverImageCache.swift
+  s_88be3ced07ff0c::t_cb50c92fa94de4 6-9,12-19,26-28,39-47
+  s_88be3ced07ff0c::t_07377aa89c7d3b 48-49
+Isora/Shared/LiquidGlass.swift
+  s_88be3ced07ff0c::t_508df063574379 23-26,34-36
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "dbbb443d385cea5160f2fb9270baf2f0e3d051a2",
+  "prompts": {},
+  "sessions": {
+    "s_88be3ced07ff0c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e271aaca-276e-4bf3-872e-8b0060e63b42",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
