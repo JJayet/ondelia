@@ -1,0 +1,21 @@
+Isora/Features/Library/BookDetailView.swift
+  s_4273004de35177::t_4ef18a343126a1 31,163-185
+Isora/Resources/Localizable.xcstrings
+  s_4273004de35177::t_ac5f32a08df827 84-94,183-193,216-248,260-270,288-298,1866,1877,2425-2435
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "358ac14e706962efe2edca008dd3cd5ca1561676",
+  "prompts": {},
+  "sessions": {
+    "s_4273004de35177": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "34aae6c3-ef9d-41e5-ac2d-95089c3bae6d",
+        "model": "unknown"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
