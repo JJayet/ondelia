@@ -55,13 +55,14 @@ struct CollectionDetailView: View {
     private var hero: some View {
         VStack(spacing: 8) {
             ZStack {
+                // First book on top, each next one a step behind it.
                 ForEach(Array(group.books.prefix(3).enumerated()), id: \.element.id) { index, book in
                     let spread = Double(index) - Double(min(group.books.count, 3) - 1) / 2
                     CoverArtView(audiobook: book, size: 118, cornerRadius: 18)
                         .rotationEffect(.degrees(spread * 12))
                         .offset(x: spread * 62, y: abs(spread) * 6)
                         .shadow(color: .black.opacity(0.35), radius: 14, y: 8)
-                        .zIndex(index == 1 ? 1 : 0)
+                        .zIndex(Double(-index))
                 }
             }
             .frame(height: 150)
