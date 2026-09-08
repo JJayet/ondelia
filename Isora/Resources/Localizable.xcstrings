@@ -37,6 +37,28 @@
         }
       }
     },
+    "%d books" : {
+      "comment" : "Number of books in a collection",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres"
+          }
+        }
+      }
+    },
+    "%d books in your library belong to this series on Hardcover. Group them into a collection?" : {
+      "comment" : "Series collection offer message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres de votre bibliothèque appartiennent à cette série sur Hardcover. Les regrouper dans une collection ?"
+          }
+        }
+      }
+    },
     "%d files in the library folder that no book uses will be removed." : {
       "comment" : "Orphan cleanup confirmation",
       "localizations" : {
@@ -242,17 +264,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@×"
-          }
-        }
-      }
-    },
-    "%d books grouped into %d series via Hardcover" : {
-      "comment" : "Series grouping banner",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres regroupés en %d séries via Hardcover"
           }
         }
       }
@@ -479,6 +490,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ajouter un signet"
+          }
+        }
+      }
+    },
+    "Add to Collection" : {
+      "comment" : "Collection picker title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajouter à une collection"
           }
         }
       }
@@ -987,6 +1009,28 @@
         }
       }
     },
+    "Collection name" : {
+      "comment" : "New collection name placeholder",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom de la collection"
+          }
+        }
+      }
+    },
+    "Collections" : {
+      "comment" : "Existing collections section",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collections"
+          }
+        }
+      }
+    },
     "Completed" : {
       "comment" : "Filter: completed books",
       "localizations" : {
@@ -1075,6 +1119,17 @@
         }
       }
     },
+    "Create" : {
+      "comment" : "Create button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer"
+          }
+        }
+      }
+    },
     "Create a token at hardcover.app under Settings → API, then paste it here." : {
       "comment" : "Hardcover token section footer",
       "localizations" : {
@@ -1082,6 +1137,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Créez un jeton sur hardcover.app dans Réglages → API, puis collez-le ici."
+          }
+        }
+      }
+    },
+    "Create the collection “%@”?" : {
+      "comment" : "Series collection offer title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Créer la collection « %@ » ?"
           }
         }
       }
@@ -1185,6 +1251,17 @@
         }
       }
     },
+    "Delete book when finished" : {
+      "comment" : "Delete on completion toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le livre une fois terminé"
+          }
+        }
+      }
+    },
     "Delete Bookmark" : {
       "comment" : "Delete bookmark alert title",
       "localizations" : {
@@ -1192,6 +1269,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer le signet"
+          }
+        }
+      }
+    },
+    "Delete Collection" : {
+      "comment" : "Delete a collection, keeping its books",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer la collection"
           }
         }
       }
@@ -1313,6 +1401,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Grille"
+          }
+        }
+      }
+    },
+    "Group series into collections" : {
+      "comment" : "Automatic series collections toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Regrouper les séries en collections"
           }
         }
       }
@@ -1774,6 +1873,17 @@
         }
       }
     },
+    "New Collection" : {
+      "comment" : "New collection section",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nouvelle collection"
+          }
+        }
+      }
+    },
     "New title" : {
       "comment" : "Placeholder for new title",
       "localizations" : {
@@ -1934,6 +2044,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Absent de ta bibliothèque"
+          }
+        }
+      }
+    },
+    "Not Now" : {
+      "comment" : "Decline the series collection offer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas maintenant"
           }
         }
       }
@@ -2417,6 +2538,17 @@
         }
       }
     },
+    "Remove from Collection" : {
+      "comment" : "Take a book out of a collection",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retirer de la collection"
+          }
+        }
+      }
+    },
     "Remove from Queue" : {
       "comment" : "Remove from queue button",
       "localizations" : {
@@ -2457,6 +2589,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Renommer le livre audio"
+          }
+        }
+      }
+    },
+    "Rename Collection" : {
+      "comment" : "Rename collection alert title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Renommer la collection"
           }
         }
       }
@@ -2840,6 +2983,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher l’original"
+          }
+        }
+      }
+    },
+    "Show series books you don't own" : {
+      "comment" : "Toggle for catalogue volumes in series cards",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher les livres de la série que vous n'avez pas"
           }
         }
       }

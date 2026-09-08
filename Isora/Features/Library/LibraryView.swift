@@ -16,14 +16,18 @@ struct LibraryView: View {
     @State var audiobookForHardcover: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
+    @State var collectionToRename: CollectionModel?
+    @State var newCollectionName = ""
+    /// Books waiting for the collection picker sheet; empty when it is closed.
+    @State var booksForCollectionPicker: [AudiobookModel] = []
+    @State var showingCollectionPicker = false
     /// One presentation slot for every alert this screen raises: SwiftUI only reliably drives one.
     @State var activeAlert: ActiveAlert?
     // Kept across launches: re-picking the same sort and view on every cold start was noise.
     @AppStorage("library.viewMode") var viewMode: ViewMode = .list
     @AppStorage("library.sortOption") var sortOption: SortOption = .lastPlayed
     @AppStorage("library.filterOption") var filterOption: FilterOption = .all
-    /// Series grouping is Hardcover's doing, so it can be switched off from the banner.
-    @AppStorage("library.groupSeries") var groupSeries = true
+    @AppStorage(CollectionGroup.showMissingKey) var showMissingSeriesBooks = true
     /// Books per row in grid mode: 2, 3 or 4.
     @AppStorage("library.gridColumns") var gridColumns = 2
     @State var showingImporter = false
@@ -61,10 +65,13 @@ struct LibraryView: View {
         return filtered.sorted { sortOption.isOrderedBefore($0, $1) }
     }
 
-    /// The filtered library split into series and everything else. Computed whether or not
-    /// grouping is on, so the banner can say what turning it on would do.
-    var grouping: (series: [SeriesGroup], standalone: [AudiobookModel]) {
-        SeriesGroup.group(filteredAudiobooks)
+    /// The collections, resolved against the filtered library.
+    var collectionGroups: [CollectionGroup] {
+        CollectionGroup.build(
+            collections: audiobookManager.collections,
+            audiobooks: filteredAudiobooks,
+            keepEmpty: filterOption == .all
+        )
     }
 
     // MARK: - Actions
@@ -87,6 +94,7 @@ struct LibraryView: View {
             },
             changeCover: { audiobookForImagePicker = $0 },
             linkHardcover: { audiobookForHardcover = $0 },
+            addToCollection: { openCollectionPicker(for: [$0]) },
             delete: { activeAlert = .confirmDelete($0) }
         )
     }
@@ -179,6 +187,12 @@ struct LibraryView: View {
         }
         .sheet(item: $audiobookForHardcover) { audiobook in
             HardcoverBookPickerView(audiobook: audiobook)
+        }
+        .sheet(isPresented: $showingCollectionPicker, onDismiss: { booksForCollectionPicker = [] }) {
+            CollectionPickerView(books: booksForCollectionPicker)
+        }
+        .onChange(of: audiobookManager.collectionPrompt?.id, initial: true) { _, _ in
+            offerCollectionPromptIfIdle()
         }
         .onChange(of: audiobookManager.mergePrompt?.id, initial: true) { _, _ in
             guard let prompt = audiobookManager.mergePrompt else {

@@ -10,6 +10,9 @@ struct SettingsView: View {
     @AppStorage("playback.bookOpeningDelayMS") var bookOpeningDelayMS = 200
     @AppStorage(GlobalAudioManager.autoSleepTimerKey) var autoSleepTimer = false
     @AppStorage("library.gridColumns") var gridColumns = 2
+    @AppStorage(AudiobookManager.autoSeriesCollectionsKey) var autoSeriesCollections = true
+    @AppStorage(CollectionGroup.showMissingKey) var showMissingSeriesBooks = true
+    @AppStorage(GlobalAudioManager.deleteOnCompletionKey) var deleteOnCompletion = false
     @State var showingGoalEditor = false
     @State var tempGoal: Double = 0
     @State var showResetStatsConfirm = false
@@ -24,6 +27,7 @@ struct SettingsView: View {
             ScrollView {
                 VStack(spacing: 22) {
                     appearanceSection
+                    librarySection
                     playbackSection
                     goalsSection
                     integrationsSection

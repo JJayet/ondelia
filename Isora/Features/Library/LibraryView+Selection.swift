@@ -96,6 +96,15 @@ extension LibraryView {
         .disabled(selectedIDs.count == shelfBooks.count)
 
         Button {
+            let books = selectedBooks
+            endSelecting()
+            openCollectionPicker(for: books)
+        } label: {
+            Label(NSLocalizedString("Add to Collection", comment: "Collection picker title"), systemImage: "folder.badge.plus")
+        }
+        .disabled(selectedIDs.isEmpty)
+
+        Button {
             withHapticFeedback { markSelected(finished: true) }
         } label: {
             Label(NSLocalizedString("Mark as Read", comment: "Mark as read"), systemImage: "checkmark.circle")

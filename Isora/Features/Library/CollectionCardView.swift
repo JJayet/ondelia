@@ -1,47 +1,17 @@
 import SwiftUI
 
-/// Says what Hardcover did to the shelf, and lets it be undone.
-struct SeriesGroupingBanner: View {
-    let seriesCount: Int
-    let bookCount: Int
-    @Binding var isOn: Bool
-
-    var body: some View {
-        HStack(spacing: 11) {
-            Image(systemName: "books.vertical.fill")
-                .font(.system(size: 14, weight: .semibold))
-                .foregroundStyle(.tint)
-
-            Text(
-                String(
-                    format: NSLocalizedString(
-                        "%d books grouped into %d series via Hardcover",
-                        comment: "Series grouping banner"
-                    ),
-                    bookCount,
-                    seriesCount
-                )
-            )
-            .font(.system(size: 12.5))
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            Toggle(isOn: $isOn) { Text(verbatim: "") }
-                .labelsHidden()
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 13)
-        .glassCard(cornerRadius: 22)
-    }
-}
-
-/// One series as the design has it: the name, how many volumes, and the volumes themselves in
-/// reading order, each with its own progress.
-struct SeriesCardView: View {
-    let group: SeriesGroup
+/// One collection on the shelf: the name, how many books, and the books themselves, each with
+/// its own progress. A series card can also list the volumes Hardcover knows that the shelf lacks.
+struct CollectionCardView: View {
+    let group: CollectionGroup
+    let showMissing: Bool
+    let bookActions: BookActions
     let onSelect: (AudiobookModel) -> Void
+    let onRename: (CollectionModel) -> Void
+    let onDelete: (CollectionModel) -> Void
+    let onRemoveBook: (AudiobookModel, CollectionModel) -> Void
 
-    /// Collapsed series show only their spines; a series being listened to opens by itself.
+    /// Collapsed cards show only their spines; one being listened to opens by itself.
     @State private var expanded: Bool?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -55,7 +25,7 @@ struct SeriesCardView: View {
 
             if isExpanded {
                 VStack(spacing: 10) {
-                    ForEach(group.volumes) { volume in
+                    ForEach(group.volumes(showMissing: showMissing)) { volume in
                         switch volume {
                         case .owned(let book): volumeRow(book)
                         case .missing(let listing): missingRow(listing)
@@ -72,44 +42,72 @@ struct SeriesCardView: View {
     }
 
     private var header: some View {
-        Button {
-            withHapticFeedback {
-                withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
+        HStack(spacing: 8) {
+            Button {
+                withHapticFeedback {
+                    withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { expanded = !isExpanded }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    if group.isSeries {
+                        Image(systemName: "books.vertical.fill")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(.tint)
+                    }
+                    Text(group.name)
+                        .font(.system(size: 17, weight: .bold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+
+                    Text(countLabel)
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .frame(height: 20)
+                        .background(.quaternary, in: Capsule())
+
+                    Spacer(minLength: 0)
+
+                    Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                }
+                .contentShape(Rectangle())
             }
-        } label: {
-            HStack(spacing: 8) {
-                Text(group.name)
-                    .font(.system(size: 17, weight: .bold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+            .buttonStyle(.plain)
+            .accessibilityLabel(group.name)
+            .accessibilityValue(countLabel)
 
-                Text(volumeCount)
-                .font(.system(size: 10, weight: .semibold))
-                .foregroundStyle(.secondary)
-                .padding(.horizontal, 8)
-                .frame(height: 20)
-                .background(.quaternary, in: Capsule())
-
-                Spacer(minLength: 0)
-
-                Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(.tertiary)
+            Menu {
+                // A series takes its name from Hardcover, so only hand-made collections rename.
+                if !group.isSeries {
+                    Button { onRename(group.collection) } label: {
+                        Label(NSLocalizedString("Rename", comment: "Rename button"), systemImage: "pencil")
+                    }
+                }
+                Button(role: .destructive) { onDelete(group.collection) } label: {
+                    Label(NSLocalizedString("Delete Collection", comment: "Delete a collection, keeping its books"), systemImage: "trash")
+                }
+                .tint(.red)
+            } label: {
+                Image(systemName: "ellipsis")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 28, height: 28)
+                    .contentShape(Rectangle())
             }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .accessibilityLabel(NSLocalizedString("More", comment: "Book actions menu"))
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(group.name)
-        .accessibilityValue(volumeCount)
     }
 
-    /// "3 volumes" on its own, or "3 of 6" once Hardcover has said how long the series is.
-    private var volumeCount: String {
+    /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
+    private var countLabel: String {
+        guard group.isSeries else {
+            return String(format: NSLocalizedString("%d books", comment: "Number of books in a collection"), group.books.count)
+        }
         guard let total = group.catalogueCount, total > group.books.count else {
-            return String(
-                format: NSLocalizedString("%d volumes", comment: "Number of books in a series"),
-                group.books.count
-            )
+            return String(format: NSLocalizedString("%d volumes", comment: "Number of books in a series"), group.books.count)
         }
         return String(
             format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
@@ -163,7 +161,7 @@ struct SeriesCardView: View {
 
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(alignment: .firstTextBaseline, spacing: 7) {
-                        if let badge = book.hardcover?.volumeBadge {
+                        if group.isSeries, let badge = book.hardcover?.volumeBadge {
                             Text(badge)
                                 .font(.system(size: 9, weight: .semibold))
                                 .tracking(1)
@@ -189,6 +187,16 @@ struct SeriesCardView: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .contextMenu {
+            BookActionsMenu(audiobook: book, actions: bookActions)
+            // Series membership is Hardcover's call; only a hand-made collection lets go of a book.
+            if !group.isSeries {
+                Divider()
+                Button { onRemoveBook(book, group.collection) } label: {
+                    Label(NSLocalizedString("Remove from Collection", comment: "Take a book out of a collection"), systemImage: "minus.circle")
+                }
+            }
+        }
         .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
     }
 

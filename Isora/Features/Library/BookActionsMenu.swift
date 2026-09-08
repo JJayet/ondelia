@@ -5,6 +5,7 @@ struct BookActions {
     var rename: (AudiobookModel) -> Void
     var changeCover: (AudiobookModel) -> Void
     var linkHardcover: (AudiobookModel) -> Void
+    var addToCollection: (AudiobookModel) -> Void
     var delete: (AudiobookModel) -> Void
 }
 
@@ -42,6 +43,12 @@ struct BookActionsMenu: View {
             } else {
                 Label(NSLocalizedString("Mark as Read", comment: "Mark as read"), systemImage: "checkmark.circle")
             }
+        }
+
+        Button {
+            actions.addToCollection(audiobook)
+        } label: {
+            Label(NSLocalizedString("Add to Collection", comment: "Collection picker title"), systemImage: "folder.badge.plus")
         }
 
         Button {

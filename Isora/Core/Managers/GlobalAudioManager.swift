@@ -44,6 +44,9 @@ final class GlobalAudioManager {
     /// `addTarget` hands back an opaque token, so `Any` is what there is to keep.
     var remoteCommandTargets: [(command: MPRemoteCommand, target: Any)] = []
 
+    /// Settings key: a book that plays to its end is deleted from the library.
+    static let deleteOnCompletionKey = "playback.deleteOnCompletion"
+
     enum PlaybackState {
         case stopped
         case loading
@@ -150,6 +153,10 @@ final class GlobalAudioManager {
         playbackState = .paused
         if let audiobook = currentAudiobook {
             AudiobookManager.shared.markAsFinished(audiobook)
+            // Deleting unloads this player; the queue below still rolls on to the next book.
+            if UserDefaults.standard.bool(forKey: Self.deleteOnCompletionKey) {
+                AudiobookManager.shared.deleteAudiobook(audiobook)
+            }
         }
         playbackStateDidChange()
 

@@ -12,7 +12,9 @@ Effort is an estimate for one developer familiar with the codebase, derived from
 2. ~~**Automatic sleep timer** (S)~~ Done 2026-09-08.
 3. ~~**Undo last seek** (S–M)~~ Done 2026-09-08. "Back to 12:34" row in the player for 60 s after a jump of 10 s or more.
 4. ~~**Storage usage view** (M)~~ Done 2026-09-08. Per-book sizes, orphan total, swipe to delete.
-5. ~~**Bulk select, delete, and mark finished** (M)~~ Done 2026-09-08. Custom collections still deferred.
+5. ~~**Bulk select, delete, and mark finished** (M)~~ Done 2026-09-08.
+   ~~Custom collections~~ Done 2026-09-08: `CollectionModel` (ordered book ids, synced). Hardcover series are collections made automatically (Settings > Library toggle; off, the library offers each new series once). Hand-made collections via Select or a book's menu; a book can be in several and stays on the main shelf too. Series cards can hide the volumes you do not own. Still to do: manual reordering inside a collection, ordering by Hardcover metadata.
+   Also added: Settings > Playback "Delete book when finished".
 6. **CarPlay** (L, plus entitlement lead time). Request the entitlement now; build once granted.
 7. ~~**Cloud position/bookmark sync via CloudKit** (L)~~ Done 2026-09-08. SwiftData + CloudKit private database, on by default, Settings > Data toggle.
    - Synced: books, positions, finished state, bookmarks, chapters, covers, transcripts, Hardcover links. Audio never syncs; a book without its file shows "Not on this device" and importing the same file or folder fills it in.

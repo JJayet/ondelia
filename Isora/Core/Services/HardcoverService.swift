@@ -171,6 +171,7 @@ final class HardcoverService {
             current.seriesChecked = true
             audiobook.hardcover = current
             save()
+            AudiobookManager.shared.reconcileSeriesCollections()
 
             if let series { await refreshCatalog(seriesID: series.id, force: force) }
         } catch {

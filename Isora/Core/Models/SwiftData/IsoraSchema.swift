@@ -14,7 +14,8 @@ enum IsoraSchemaV1: VersionedSchema {
             AudiobookModel.self,
             BookmarkModel.self,
             ChapterModel.self,
-            ChapterTranscriptionModel.self
+            ChapterTranscriptionModel.self,
+            CollectionModel.self
         ]
     }
 }

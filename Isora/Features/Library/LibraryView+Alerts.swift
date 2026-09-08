@@ -9,6 +9,8 @@ extension LibraryView {
         case importFailed(String)
         case confirmDelete(AudiobookModel)
         case confirmDeleteMany([AudiobookModel])
+        case renameCollection
+        case createCollection(CollectionPrompt)
 
         var id: String {
             switch self {
@@ -17,6 +19,8 @@ extension LibraryView {
             case .importFailed: return "importFailed"
             case .confirmDelete(let book): return "delete-\(book.id)"
             case .confirmDeleteMany: return "delete-many"
+            case .renameCollection: return "rename-collection"
+            case .createCollection(let prompt): return prompt.id.uuidString
             }
         }
 
@@ -32,6 +36,13 @@ extension LibraryView {
                 return NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title")
             case .confirmDeleteMany:
                 return NSLocalizedString("Delete Audiobooks", comment: "Bulk delete confirmation alert title")
+            case .renameCollection:
+                return NSLocalizedString("Rename Collection", comment: "Rename collection alert title")
+            case .createCollection(let prompt):
+                return String(
+                    format: NSLocalizedString("Create the collection “%@”?", comment: "Series collection offer title"),
+                    prompt.name
+                )
             }
         }
     }
@@ -43,12 +54,17 @@ extension LibraryView {
             prompt.respond(false)
         case .importFailed:
             audiobookManager.importErrorMessage = nil
-        case .rename, .confirmDelete, .confirmDeleteMany, .none:
+        case .createCollection(let prompt):
+            audiobookManager.respondToCollectionPrompt(prompt, create: false)
+        case .rename, .confirmDelete, .confirmDeleteMany, .renameCollection, .none:
             break
         }
         audiobookToRename = nil
         newAudiobookTitle = ""
+        collectionToRename = nil
+        newCollectionName = ""
         activeAlert = nil
+        offerCollectionPromptIfIdle()
     }
 
     @ViewBuilder
@@ -92,6 +108,21 @@ extension LibraryView {
             Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
                 withAnimation(.easeInOut(duration: 0.3)) { deleteSelected(books) }
             }
+
+        case .renameCollection:
+            TextField(NSLocalizedString("Collection name", comment: "New collection name placeholder"), text: $newCollectionName)
+                .onSubmit { commitCollectionRename() }
+            Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+            Button(NSLocalizedString("Save", comment: "Save button")) { commitCollectionRename() }
+                .disabled(newCollectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+
+        case .createCollection(let prompt):
+            Button(NSLocalizedString("Create", comment: "Create button")) {
+                audiobookManager.respondToCollectionPrompt(prompt, create: true)
+            }
+            Button(NSLocalizedString("Not Now", comment: "Decline the series collection offer"), role: .cancel) {
+                audiobookManager.respondToCollectionPrompt(prompt, create: false)
+            }
         }
     }
 
@@ -129,6 +160,16 @@ extension LibraryView {
                     comment: "Bulk delete confirmation alert message"
                 ),
                 books.count
+            ))
+        case .renameCollection:
+            EmptyView()
+        case .createCollection(let prompt):
+            Text(String(
+                format: NSLocalizedString(
+                    "%d books in your library belong to this series on Hardcover. Group them into a collection?",
+                    comment: "Series collection offer message"
+                ),
+                prompt.bookIDs.count
             ))
         }
     }

@@ -20,6 +20,9 @@ final class AudiobookManager {
     let swiftDataController: SwiftDataController
     
     var audiobooks: [AudiobookModel] = []
+    /// Every collection, series and hand-made. See `+Collections`.
+    var collections: [CollectionModel] = []
+    var collectionPrompt: CollectionPrompt?
     var isImporting = false
     var importQueueTotal: Int = 0
     var importQueueCompleted: Int = 0
@@ -138,6 +141,7 @@ final class AudiobookManager {
         }
 
         PlayQueue.shared.remove(audiobook)
+        removeFromAllCollections(bookID: audiobook.id)
 
         // Delete physical file
         if let fileURL = audiobook.resolvedFileURL {

@@ -54,6 +54,25 @@ extension SettingsView {
         }
     }
 
+    var librarySection: some View {
+        SettingsSection(title: NSLocalizedString("Library", comment: "Library navigation title")) {
+            // On by default: a Hardcover series becomes a collection as soon as a volume is linked.
+            // Off, the library asks once per series instead.
+            SettingsRow(title: NSLocalizedString("Group series into collections", comment: "Automatic series collections toggle")) {
+                Toggle("", isOn: $autoSeriesCollections)
+                    .labelsHidden()
+                    .onChange(of: autoSeriesCollections) { _, _ in AudiobookManager.shared.reconcileSeriesCollections() }
+            }
+
+            SettingsDivider()
+
+            SettingsRow(title: NSLocalizedString("Show series books you don't own", comment: "Toggle for catalogue volumes in series cards")) {
+                Toggle("", isOn: $showMissingSeriesBooks)
+                    .labelsHidden()
+            }
+        }
+    }
+
     var playbackSection: some View {
         SettingsSection(title: NSLocalizedString("Playback", comment: "Settings section: Playback")) {
             skipIntervalRow(
@@ -108,6 +127,14 @@ extension SettingsView {
             // Off by default. On, every play starts the last timer the listener chose.
             SettingsRow(title: NSLocalizedString("Auto Sleep Timer", comment: "Start the last used sleep timer on every play")) {
                 Toggle("", isOn: $autoSleepTimer)
+                    .labelsHidden()
+            }
+
+            SettingsDivider()
+
+            // Off by default: the file, its progress and its bookmarks go the moment the book ends.
+            SettingsRow(title: NSLocalizedString("Delete book when finished", comment: "Delete on completion toggle")) {
+                Toggle("", isOn: $deleteOnCompletion)
                     .labelsHidden()
             }
 

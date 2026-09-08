@@ -1,41 +1,39 @@
 import Foundation
 
-/// Books that Hardcover puts in the same series, in reading order.
-///
-/// One volume is still a series: the shelf says which series the book belongs to and where it
-/// sits in it, which is the whole point of asking Hardcover.
-struct SeriesGroup: Identifiable {
-    let name: String
+/// One collection as the shelf shows it: the stored collection plus the books it resolves to,
+/// in the collection's order, after the library's filter.
+struct CollectionGroup: Identifiable {
+    /// Settings key: whether a series card lists the volumes Hardcover knows that the shelf lacks.
+    static let showMissingKey = "library.showMissingSeriesBooks"
+
+    let collection: CollectionModel
     let books: [AudiobookModel]
 
-    var id: String { name }
+    var id: UUID { collection.id }
+    var name: String { collection.name }
+    var seriesID: Int? { collection.hardcoverSeriesID }
+    var isSeries: Bool { collection.isSeries }
 
     var totalDuration: TimeInterval {
         books.reduce(0) { $0 + $1.duration }
     }
 
-    /// Progress across the whole series, weighted by length — so a finished short volume does
-    /// not read as more progress than half of a long one.
+    /// Progress across the whole collection, weighted by length — so a finished short volume
+    /// does not read as more progress than half of a long one.
     var progressFraction: Double {
         let total = totalDuration
         guard total > 0 else { return 0 }
         return books.reduce(0) { $0 + $1.currentPosition } / total
     }
 
-    /// The volume being listened to, if any: the first unfinished book with progress, else the
+    /// The book being listened to, if any: the first unfinished book with progress, else the
     /// first unfinished one.
     var currentBook: AudiobookModel? {
         books.first { $0.currentPosition > 0 && !$0.isFinished } ?? books.first { !$0.isFinished }
     }
 
-    /// Hardcover's id for this series, taken from whichever volume is linked.
-    var seriesID: Int? {
-        books.compactMap { $0.hardcover?.seriesID }.first
-    }
-
-    /// One entry in the series as the card lists it.
+    /// One entry in the card.
     enum Volume: Identifiable {
-        /// A volume in the library.
         case owned(AudiobookModel)
         /// A volume Hardcover lists that the library does not hold.
         case missing(SeriesVolume)
@@ -55,12 +53,11 @@ struct SeriesGroup: Identifiable {
         }
     }
 
-    /// Every volume Hardcover lists for this series, with the ones on the shelf resolved to the
-    /// books themselves. Falls back to just the owned books when the catalogue has not been
-    /// fetched — the card then reads exactly as it did before.
+    /// The card's rows. A series with `showMissing` on lists Hardcover's whole catalogue, the
+    /// owned volumes resolved to the books themselves; otherwise just the books, in order.
     @MainActor
-    var volumes: [Volume] {
-        guard let seriesID else { return books.map(Volume.owned) }
+    func volumes(showMissing: Bool) -> [Volume] {
+        guard showMissing, let seriesID else { return books.map(Volume.owned) }
         let catalogue = SeriesCatalog.volumes(for: seriesID)
         guard !catalogue.isEmpty else { return books.map(Volume.owned) }
 
@@ -76,7 +73,6 @@ struct SeriesGroup: Identifiable {
         entries += books
             .filter { book in book.hardcover.map { !listed.contains($0.id) } ?? true }
             .map(Volume.owned)
-
         return entries.sorted { $0.sortKey < $1.sortKey }
     }
 
@@ -88,34 +84,36 @@ struct SeriesGroup: Identifiable {
         return count > 0 ? count : nil
     }
 
-    /// Splits a library into its series and everything else.
-    static func group(_ audiobooks: [AudiobookModel]) -> (series: [SeriesGroup], standalone: [AudiobookModel]) {
-        var byName: [String: [AudiobookModel]] = [:]
-        var standalone: [AudiobookModel] = []
-
-        for audiobook in audiobooks {
-            if let name = audiobook.hardcover?.seriesName, !name.isEmpty {
-                byName[name, default: []].append(audiobook)
-            } else {
-                standalone.append(audiobook)
+    /// Resolves every collection against the (already filtered and sorted) library. The shelf
+    /// itself keeps every book: a collection is another way in, not a place a book moves to.
+    /// Collections the filter emptied are dropped unless nothing is filtered, so an empty
+    /// hand-made collection still has somewhere to be seen.
+    static func build(
+        collections: [CollectionModel],
+        audiobooks: [AudiobookModel],
+        keepEmpty: Bool
+    ) -> [CollectionGroup] {
+        let byID = Dictionary(audiobooks.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var groups: [CollectionGroup] = []
+        for collection in collections {
+            let books = collection.bookIDs.compactMap { byID[$0] }
+            if !books.isEmpty || keepEmpty {
+                groups.append(CollectionGroup(collection: collection, books: books))
             }
         }
-
-        var series = byName.map { SeriesGroup(name: $0.key, books: $0.value.sorted(by: inReadingOrder)) }
-
-        // Series with something in progress first, then alphabetically, so the shelf opens on
-        // what is actually being listened to.
-        series.sort { lhs, rhs in
+        // Collections with something in progress first, then alphabetically, so the shelf opens
+        // on what is actually being listened to.
+        groups.sort { lhs, rhs in
             let left = lhs.progressFraction > 0 && lhs.progressFraction < 1
             let right = rhs.progressFraction > 0 && rhs.progressFraction < 1
             guard left == right else { return left }
             return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
         }
-        return (series, standalone)
+        return groups
     }
 
     /// Volume order, falling back to title for the books Hardcover has no position for.
-    private static func inReadingOrder(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
+    static func inReadingOrder(_ lhs: AudiobookModel, _ rhs: AudiobookModel) -> Bool {
         switch (lhs.hardcover?.seriesPosition, rhs.hardcover?.seriesPosition) {
         case let (left?, right?) where left != right:
             return left < right

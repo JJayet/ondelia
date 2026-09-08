@@ -2,27 +2,14 @@ import SwiftUI
 
 // MARK: - List / Grid content
 extension LibraryView {
-    /// The books shown on the shelf itself: everything, less whatever a series card already
-    /// shows.
+    /// The shelf lists every book, whether or not a collection card also shows it.
     var shelfBooks: [AudiobookModel] {
-        groupSeries ? grouping.standalone : filteredAudiobooks
+        filteredAudiobooks
     }
 
     /// Books stacked to play next, in queue order.
     var queuedBooks: [AudiobookModel] {
         PlayQueue.shared.books(in: audiobookManager.audiobooks)
-    }
-
-    @ViewBuilder
-    var seriesBanner: some View {
-        SeriesGroupingBanner(
-            seriesCount: grouping.series.count,
-            bookCount: grouping.series.reduce(0) { $0 + $1.books.count },
-            isOn: Binding(
-                get: { groupSeries },
-                set: { newValue in withAnimation(reduceMotion ? nil : .snappy(duration: 0.25)) { groupSeries = newValue } }
-            )
-        )
     }
 
     // Extracted to help the type-checker
@@ -53,21 +40,12 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
-            // Series, grouped by Hardcover
-            if !grouping.series.isEmpty {
-                seriesBanner
+            // Collections: Hardcover series and hand-made ones
+            ForEach(collectionGroups) { group in
+                collectionCard(group)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-
-                if groupSeries {
-                    ForEach(grouping.series) { group in
-                        SeriesCardView(group: group) { audiobookForDetail = $0 }
-                            .listRowBackground(Color.clear)
-                            .listRowSeparator(.hidden)
-                            .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                    }
-                }
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
             }
 
             // Header with filters
@@ -125,14 +103,11 @@ extension LibraryView {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
-                // Series, grouped by Hardcover
-                if !grouping.series.isEmpty {
+                // Collections: Hardcover series and hand-made ones
+                if !collectionGroups.isEmpty {
                     VStack(spacing: 12) {
-                        seriesBanner
-                        if groupSeries {
-                            ForEach(grouping.series) { group in
-                                SeriesCardView(group: group) { audiobookForDetail = $0 }
-                            }
+                        ForEach(collectionGroups) { group in
+                            collectionCard(group)
                         }
                     }
                     .padding(.horizontal)
