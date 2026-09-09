@@ -24,6 +24,7 @@ extension AudiobookManager {
             try? await Task.sleep(for: .seconds(1))
             guard !Task.isCancelled, let self, self.swiftDataController.isLoaded else { return }
             self.fetchAudiobooks()
+            ReadingStatistics.shared.reload()
             // A book deleted on another device may be the one loaded here. Checked on the model
             // itself, not by membership in `audiobooks`: a book the player holds from elsewhere
             // must not be torn down by a refetch.

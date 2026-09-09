@@ -48,6 +48,17 @@
         }
       }
     },
+    "%@ · %d finished" : {
+      "comment" : "Completed: narrator and count",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %d terminés"
+          }
+        }
+      }
+    },
     "%@ · %lld %%" : {
       "comment" : "On-watch storage: chapter status with sending percent (nested composite)",
       "localizations" : {
@@ -114,6 +125,17 @@
         }
       }
     },
+    "%@ days" : {
+      "comment" : "Completed: duration in days",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ jours"
+          }
+        }
+      }
+    },
     "%@ in progress" : {
       "comment" : "Volume currently being listened to",
       "localizations" : {
@@ -169,8 +191,20 @@
         }
       }
     },
+    "%@ this month · %@ goal" : {
+      "comment" : "Snapshot: month against goal",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ ce mois · objectif %@"
+          }
+        }
+      }
+    },
     "%@ this month · of %@ goal" : {
       "comment" : "Monthly listening against the goal",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -191,6 +225,17 @@
         }
       }
     },
+    "%@ vs last week" : {
+      "comment" : "Snapshot: week over week change",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ vs semaine dernière"
+          }
+        }
+      }
+    },
     "%@, %@ of %@" : {
       "comment" : "Accessibility progress: percent, elapsed time of total time",
       "localizations" : {
@@ -202,6 +247,28 @@
         }
       }
     },
+    "%@, %d of %d" : {
+      "comment" : "Milestone accessibility: progress",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, %d sur %d"
+          }
+        }
+      }
+    },
+    "%@, earned" : {
+      "comment" : "Milestone accessibility: unlocked",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@, obtenu"
+          }
+        }
+      }
+    },
     "%@×" : {
       "comment" : "Speed picker: playback rate multiplier",
       "localizations" : {
@@ -209,6 +276,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@×"
+          }
+        }
+      }
+    },
+    "%d active" : {
+      "comment" : "Heatmap: active days count",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d actifs"
+          }
+        }
+      }
+    },
+    "%d active days in the last %d weeks" : {
+      "comment" : "Heatmap accessibility",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d jours actifs sur les %d dernières semaines"
           }
         }
       }
@@ -225,7 +314,7 @@
       }
     },
     "%d books" : {
-      "comment" : "Number of books in a collection",
+      "comment" : "CarPlay collection row: number of books\nNumber of books in a collection",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -296,6 +385,17 @@
         }
       }
     },
+    "%d this year" : {
+      "comment" : "Snapshot: books finished this year",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d cette année"
+          }
+        }
+      }
+    },
     "%d volumes" : {
       "comment" : "Number of books in a series",
       "localizations" : {
@@ -336,6 +436,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d %% de la série"
+          }
+        }
+      }
+    },
+    "%dd" : {
+      "comment" : "Snapshot: streak in days, short",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%dj"
           }
         }
       }
@@ -439,6 +550,36 @@
         }
       }
     },
+    "100 Hours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 heures"
+          }
+        }
+      }
+    },
+    "500 Hours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "500 heures"
+          }
+        }
+      }
+    },
+    "1000 Hours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1000 heures"
+          }
+        }
+      }
+    },
     "A copy of your library is kept once a day." : {
       "comment" : "Empty backup list description",
       "localizations" : {
@@ -527,6 +668,17 @@
         }
       }
     },
+    "Afternoon" : {
+      "comment" : "Time of day: 12–17",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Après-midi"
+          }
+        }
+      }
+    },
     "All" : {
       "comment" : "Filter: all audiobooks",
       "localizations" : {
@@ -534,6 +686,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Tous"
+          }
+        }
+      }
+    },
+    "All Time" : {
+      "comment" : "Completed: all time",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au total"
           }
         }
       }
@@ -649,6 +812,28 @@
         }
       }
     },
+    "Avg Finish" : {
+      "comment" : "Completed: average finish",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Durée moy."
+          }
+        }
+      }
+    },
+    "Avg Session" : {
+      "comment" : "Snapshot tile",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Session moy."
+          }
+        }
+      }
+    },
     "Back" : {
       "comment" : "Back button",
       "extractionState" : "stale",
@@ -684,6 +869,28 @@
         }
       }
     },
+    "Best %dd" : {
+      "comment" : "Snapshot: best streak in days",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Record %dj"
+          }
+        }
+      }
+    },
+    "Best Month" : {
+      "comment" : "Snapshot tile",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Meilleur mois"
+          }
+        }
+      }
+    },
     "Best streak: %d days. %@ of this month's goal." : {
       "comment" : "Streak card footnote",
       "localizations" : {
@@ -691,6 +898,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Meilleure série : %d jours. %@ de l'objectif du mois."
+          }
+        }
+      }
+    },
+    "Bibliophile" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bibliophile"
           }
         }
       }
@@ -796,6 +1013,7 @@
     },
     "books completed" : {
       "comment" : "Books completed caption",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -812,6 +1030,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Livres par ligne"
+          }
+        }
+      }
+    },
+    "Bookworm" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dévoreur de livres"
           }
         }
       }
@@ -845,6 +1073,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler la minuterie"
+          }
+        }
+      }
+    },
+    "Century Reader" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecteur centenaire"
           }
         }
       }
@@ -1054,7 +1292,7 @@
       }
     },
     "Completed" : {
-      "comment" : "Filter: completed books",
+      "comment" : "Filter: completed books\nSnapshot tile",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1071,6 +1309,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Terminé · %@"
+          }
+        }
+      }
+    },
+    "Completed Audiobooks" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres audio terminés"
           }
         }
       }
@@ -1093,6 +1342,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connecté"
+          }
+        }
+      }
+    },
+    "Continue Listening" : {
+      "comment" : "CarPlay tab: books in progress",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
           }
         }
       }
@@ -1176,6 +1436,7 @@
     },
     "Current Streak" : {
       "comment" : "Current streak stat card title",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1339,6 +1600,16 @@
         }
       }
     },
+    "Early Bird" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lève-tôt"
+          }
+        }
+      }
+    },
     "End of chapter" : {
       "comment" : "Sleep timer option: stop at end of current chapter",
       "localizations" : {
@@ -1372,6 +1643,17 @@
         }
       }
     },
+    "Evening" : {
+      "comment" : "Time of day: 17–21",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Soirée"
+          }
+        }
+      }
+    },
     "Failed to download image: %@" : {
       "comment" : "Image download error message",
       "localizations" : {
@@ -1379,6 +1661,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de télécharger l'image : %@"
+          }
+        }
+      }
+    },
+    "Fastest" : {
+      "comment" : "Completed: fastest finish",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le plus rapide"
           }
         }
       }
@@ -1394,6 +1687,16 @@
         }
       }
     },
+    "First Finish" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premier livre"
+          }
+        }
+      }
+    },
     "for %@" : {
       "comment" : "Cover image for audiobook title",
       "localizations" : {
@@ -1401,6 +1704,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "pour %@"
+          }
+        }
+      }
+    },
+    "Genres" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Genres"
           }
         }
       }
@@ -1522,6 +1836,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progression à partir de laquelle un livre compte comme commencé. La dépasser marque le livre comme en cours de lecture sur Hardcover ; le terminer le marque comme lu."
+          }
+        }
+      }
+    },
+    "Hundred Days" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cent jours d'affilée"
           }
         }
       }
@@ -1686,6 +2010,17 @@
         }
       }
     },
+    "Late Night" : {
+      "comment" : "Time of day: 21–24",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fin de soirée"
+          }
+        }
+      }
+    },
     "Library" : {
       "comment" : "Library navigation title\nLibrary tab title",
       "localizations" : {
@@ -1715,6 +2050,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Clair"
+          }
+        }
+      }
+    },
+    "Link books to Hardcover to see genres." : {
+      "comment" : "Statistics: genre card empty state",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Liez vos livres à Hardcover pour voir les genres."
           }
         }
       }
@@ -1752,13 +2098,36 @@
         }
       }
     },
+    "Listened" : {
+      "comment" : "Snapshot tile",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouté"
+          }
+        }
+      }
+    },
     "listened in total" : {
       "comment" : "Total listening caption",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "écoutées au total"
+          }
+        }
+      }
+    },
+    "Listening Heatmap" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Calendrier d'écoute"
           }
         }
       }
@@ -1774,8 +2143,20 @@
         }
       }
     },
+    "Longest %@" : {
+      "comment" : "Snapshot: longest session",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Plus longue %@"
+          }
+        }
+      }
+    },
     "longest streak, in days" : {
       "comment" : "Longest streak caption",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1884,6 +2265,38 @@
         }
       }
     },
+    "Milestone earned" : {
+      "comment" : "Toast title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape franchie"
+          }
+        }
+      }
+    },
+    "Milestones" : {
+      "comment" : "Statistics: badges row",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étapes"
+          }
+        }
+      }
+    },
+    "Month of Days" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un mois d'affilée"
+          }
+        }
+      }
+    },
     "Monthly Goal" : {
       "comment" : "Monthly goal alert title\nMonthly goal setting label",
       "localizations" : {
@@ -1902,6 +2315,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Plus"
+          }
+        }
+      }
+    },
+    "Morning" : {
+      "comment" : "Time of day: 5–12",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Matin"
           }
         }
       }
@@ -1972,6 +2396,27 @@
         }
       }
     },
+    "Night" : {
+      "comment" : "Time of day: 0–5",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nuit"
+          }
+        }
+      }
+    },
+    "Night Owl" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Oiseau de nuit"
+          }
+        }
+      }
+    },
     "No audiobook in your library" : {
       "localizations" : {
         "fr" : {
@@ -2015,6 +2460,17 @@
         }
       }
     },
+    "No collections" : {
+      "comment" : "CarPlay empty state: no collections",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune collection"
+          }
+        }
+      }
+    },
     "No images found" : {
       "comment" : "No images found message",
       "localizations" : {
@@ -2033,6 +2489,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune image trouvée pour ce livre audio"
+          }
+        }
+      }
+    },
+    "No listening yet" : {
+      "comment" : "Snapshot: empty",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas encore d'écoute"
           }
         }
       }
@@ -2147,12 +2614,34 @@
         }
       }
     },
+    "Nothing in progress" : {
+      "comment" : "CarPlay empty state: no book started",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun livre en cours"
+          }
+        }
+      }
+    },
     "Nothing is playing" : {
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune lecture en cours"
+          }
+        }
+      }
+    },
+    "Nothing last week" : {
+      "comment" : "Snapshot: no comparison",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien la semaine dernière"
           }
         }
       }
@@ -2164,6 +2653,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rien sur la montre"
+          }
+        }
+      }
+    },
+    "Nothing yet" : {
+      "comment" : "Statistics: empty list",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien pour l'instant"
           }
         }
       }
@@ -3350,6 +3850,17 @@
         }
       }
     },
+    "Streak" : {
+      "comment" : "Snapshot tile",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Série"
+          }
+        }
+      }
+    },
     "Synced %@" : {
       "comment" : "Hardcover status: relative last sync",
       "localizations" : {
@@ -3496,11 +4007,23 @@
     },
     "this month · %@ goal" : {
       "comment" : "Monthly goal caption",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
             "value" : "ce mois-ci · objectif %@"
+          }
+        }
+      }
+    },
+    "This Week" : {
+      "comment" : "Snapshot tile",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette semaine"
           }
         }
       }
@@ -3512,6 +4035,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés."
+          }
+        }
+      }
+    },
+    "This Year" : {
+      "comment" : "Completed: this year",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cette année"
+          }
+        }
+      }
+    },
+    "Time of Day" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Moment de la journée"
           }
         }
       }
@@ -3555,6 +4100,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Basculer la lecture"
+          }
+        }
+      }
+    },
+    "Top Authors" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteurs les plus écoutés"
+          }
+        }
+      }
+    },
+    "Top Narrator" : {
+      "comment" : "Completed: most finished narrator",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Narrateur favori"
+          }
+        }
+      }
+    },
+    "Top Narrators" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Narrateurs les plus écoutés"
           }
         }
       }
@@ -3834,6 +4412,27 @@
         }
       }
     },
+    "Week Warrior" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une semaine d'affilée"
+          }
+        }
+      }
+    },
+    "Yearly Book Mix" : {
+      "comment" : "Statistics card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Livres de l'année"
+          }
+        }
+      }
+    },
     "You're in for a good time" : {
       "comment" : "Transcription loader phrase",
       "localizations" : {
@@ -3857,7 +4456,7 @@
       }
     },
     "Your library is empty" : {
-      "comment" : "Empty library title",
+      "comment" : "CarPlay empty state: no books\nEmpty library title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

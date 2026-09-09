@@ -20,9 +20,21 @@ enum IsoraSchemaV1: VersionedSchema {
     }
 }
 
-/// No stages yet — V1 is the only schema. Adding V2 means appending it to `schemas` and a
-/// stage here; the container already routes through this plan.
+/// Version 2 adds the listening log. Nothing else changes, so the migration is lightweight.
+enum IsoraSchemaV2: VersionedSchema {
+    static var versionIdentifier: Schema.Version { Schema.Version(2, 0, 0) }
+
+    static var models: [any PersistentModel.Type] {
+        IsoraSchemaV1.models + [ListeningSessionModel.self]
+    }
+}
+
+/// The schema every store (phone, watch, tests) is built from.
+typealias IsoraCurrentSchema = IsoraSchemaV2
+
 enum IsoraMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [IsoraSchemaV1.self] }
-    static var stages: [MigrationStage] { [] }
+    static var schemas: [any VersionedSchema.Type] { [IsoraSchemaV1.self, IsoraSchemaV2.self] }
+    static var stages: [MigrationStage] {
+        [.lightweight(fromVersion: IsoraSchemaV1.self, toVersion: IsoraSchemaV2.self)]
+    }
 }

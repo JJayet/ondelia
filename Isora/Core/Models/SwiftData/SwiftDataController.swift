@@ -124,7 +124,7 @@ final class SwiftDataController {
         inMemory: Bool,
         cloudKit: ModelConfiguration.CloudKitDatabase
     ) throws -> ModelContainer {
-        let schema = Schema(versionedSchema: IsoraSchemaV1.self)
+        let schema = Schema(versionedSchema: IsoraCurrentSchema.self)
         let modelConfiguration = ModelConfiguration(
             schema: schema,
             isStoredInMemoryOnly: inMemory,

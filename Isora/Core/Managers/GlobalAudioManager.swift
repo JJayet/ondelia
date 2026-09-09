@@ -14,8 +14,6 @@ final class GlobalAudioManager {
     var isReady = false
     var playbackState: PlaybackState = .stopped
     var sleepTimeRemaining: TimeInterval = 0
-    /// The book last counted towards `booksCompleted`, so finishing it counts once.
-    var completionCountedBookID: UUID?
 
     /// Derived rather than assigned. As a stored flag it drifted: `stopPlayback` cleared it,
     /// but the tab accessory keyed off `currentAudiobook`, so the mini player stayed up.

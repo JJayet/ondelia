@@ -8,8 +8,6 @@ struct LibraryView: View {
     let audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
-    let statistics = ReadingStatistics.shared
-    @State var showingStatistics = false
     @State var audiobookForImagePicker: AudiobookModel?
     /// The book whose detail screen is pushed, if any.
     @State var audiobookForDetail: AudiobookModel?
@@ -150,6 +148,10 @@ struct LibraryView: View {
         .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
         .navigationBarTitleDisplayMode(.large)
         .toolbar { libraryToolbar }
+        // A swipe can delete the last book while selecting; nothing is left to select.
+        .onChange(of: shelfBooks.isEmpty) { _, empty in
+            if empty { endSelecting() }
+        }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
         .navigationDestination(item: $collectionForDetail) { collectionDetail($0) }
         .onAppear {
@@ -173,9 +175,6 @@ struct LibraryView: View {
                 handleImport(urls: urls)
             }
             .ignoresSafeArea()
-        }
-        .sheet(isPresented: $showingStatistics) {
-            StatisticsView(statistics: statistics)
         }
         .refreshable {
             withAnimation(.easeInOut(duration: 0.5)) {

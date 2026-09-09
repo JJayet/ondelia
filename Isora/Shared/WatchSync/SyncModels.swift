@@ -115,6 +115,8 @@ struct NowPlayingState: Codable, Sendable, Equatable {
 /// One-shot facts, sent through `transferUserInfo` so they are queued and guaranteed.
 enum SyncEvent: Codable, Sendable, Equatable {
     case progress(bookID: UUID, position: TimeInterval, at: Date)
+    /// Wall-clock seconds the watch played `bookID`, ending at `at`. The phone keeps the log.
+    case listened(bookID: UUID, seconds: TimeInterval, at: Date)
     case bookmarkAdded(bookID: UUID, bookmark: BookmarkSummary)
     case chapterRequested(bookID: UUID, chapterNumber: Int)
     case chapterDeleted(bookID: UUID, chapterNumber: Int)

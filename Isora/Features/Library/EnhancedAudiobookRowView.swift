@@ -2,6 +2,8 @@ import SwiftUI
 
 struct EnhancedAudiobookRowView: View {
     let audiobook: AudiobookModel
+    /// Selecting: whether this row is picked. Nil when the library is not selecting.
+    var selection: Bool? = nil
     let onTap: () -> Void
 
     /// The cover grows with the text beside it, so the row keeps its proportions at every type
@@ -35,7 +37,9 @@ struct EnhancedAudiobookRowView: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
-                if !hasFile {
+                if let selection {
+                    SelectionMark(isSelected: selection)
+                } else if !hasFile {
                     Image(systemName: "icloud.and.arrow.down")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)

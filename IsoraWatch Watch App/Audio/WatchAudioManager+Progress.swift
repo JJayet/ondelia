@@ -42,6 +42,7 @@ extension WatchAudioManager {
         noticeChapterChange()
         advanceSleepTimer()
         secondsSincePersist += 1
+        listenedSecondsUnsent += 1
         guard secondsSincePersist >= Self.persistInterval else { return }
         secondsSincePersist = 0
         persistProgress()
@@ -59,6 +60,9 @@ extension WatchAudioManager {
         book.lastPlayed = now
         WatchLibraryStore.save()
         PhoneSyncService.shared.send(SyncEvent.progress(bookID: book.id, position: position, at: now))
+        guard listenedSecondsUnsent > 0 else { return }
+        PhoneSyncService.shared.send(SyncEvent.listened(bookID: book.id, seconds: TimeInterval(listenedSecondsUnsent), at: now))
+        listenedSecondsUnsent = 0
     }
 
     // MARK: - Chapters

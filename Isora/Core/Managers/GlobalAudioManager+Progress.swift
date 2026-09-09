@@ -32,11 +32,8 @@ extension GlobalAudioManager {
     /// timer runs whenever a book plays, while `PlayerViewModel`'s tick stopped with the player
     /// screen — so the mini player and the lock screen both counted as no listening.
     func accrueListening(_ seconds: TimeInterval, into statistics: ReadingStatistics = .shared) {
-        statistics.addListeningTime(seconds)
-        guard let audiobook = currentAudiobook, audiobook.isFinished,
-              completionCountedBookID != audiobook.id else { return }
-        completionCountedBookID = audiobook.id
-        statistics.markBookCompleted()
+        guard let audiobook = currentAudiobook else { return }
+        statistics.addListeningTime(seconds, for: audiobook)
     }
 
     func stopProgressPersistence() {

@@ -58,8 +58,16 @@ final class AudiobookManager {
     }
     
     func markAsFinished(_ audiobook: AudiobookModel) {
-        audiobook.isFinished = true
+        setFinished(audiobook)
         syncToHardcover(audiobook)
+    }
+
+    /// The only writer of `isFinished = true`: the first flip is a completion in the log, and
+    /// the log keeps it even after the book is deleted.
+    private func setFinished(_ audiobook: AudiobookModel) {
+        guard !audiobook.isFinished else { return }
+        audiobook.isFinished = true
+        ReadingStatistics.shared.recordFinish(audiobook)
     }
     
     func resetProgress(for audiobook: AudiobookModel) {
@@ -75,7 +83,7 @@ final class AudiobookManager {
         
         // Mark as finished if within 30 seconds of the end
         if audiobook.duration > 0 && (audiobook.duration - currentTime) <= 30 {
-            audiobook.isFinished = true
+            setFinished(audiobook)
         }
         
         swiftDataController.save()
@@ -167,7 +175,7 @@ final class AudiobookManager {
     
     @MainActor
     func markAsRead(_ audiobook: AudiobookModel) {
-        audiobook.isFinished = true
+        setFinished(audiobook)
         audiobook.currentPosition = audiobook.duration // Set to end
         audiobook.positionUpdatedAt = Date()
         swiftDataController.save()

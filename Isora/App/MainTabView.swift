@@ -5,6 +5,7 @@ import SwiftUI
 struct MainTabView: View {
     private let themeManager = ThemeManager.shared
     private let globalAudioManager = GlobalAudioManager.shared
+    private let statistics = ReadingStatistics.shared
     @State private var playerRouter = PlayerRouter()
     @State private var selectedTab = 1
     @State private var searchText: String = ""
@@ -17,6 +18,14 @@ struct MainTabView: View {
         themedTabs
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
             .tint(themeManager.accentColor.color)
+            .overlay(alignment: .top) {
+                if let milestone = statistics.newlyUnlocked {
+                    MilestoneToast(milestone: milestone) {
+                        withAnimation { statistics.newlyUnlocked = nil }
+                    }
+                }
+            }
+            .animation(.spring(duration: 0.4), value: statistics.newlyUnlocked)
     }
 
     @ViewBuilder
@@ -53,6 +62,13 @@ struct MainTabView: View {
                 Label(NSLocalizedString("Library", comment: "Library tab title"), systemImage: "books.vertical.fill")
             }
             .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.libraryTab)
+
+            Tab(value: 4) {
+                StatisticsView(statistics: statistics)
+            } label: {
+                Label(NSLocalizedString("Statistics", comment: "Statistics view title"), systemImage: "chart.bar.fill")
+            }
+            .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.statisticsTab)
 
             Tab(value: 2) {
                 SettingsView()

@@ -42,6 +42,7 @@ enum AccessibilityIdentifiers {
     // MARK: - Tab Bar
     enum TabBar {
         static let libraryTab = "tab_bar_library"
+        static let statisticsTab = "tab_bar_statistics"
         static let settingsTab = "tab_bar_settings"
     }
 }

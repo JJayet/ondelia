@@ -25,7 +25,7 @@ final class WatchLibraryStore {
     }
 
     private init() {
-        let schema = Schema(versionedSchema: IsoraSchemaV1.self)
+        let schema = Schema(versionedSchema: IsoraCurrentSchema.self)
         // Default location: the watch app's own Application Support, same as the phone store.
         do {
             container = try ModelContainer(

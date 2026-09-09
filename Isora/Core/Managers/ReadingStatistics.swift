@@ -1,146 +1,144 @@
 import Foundation
 import SwiftData
 
+/// The listening log and the numbers read straight off it. Sessions are appended while a
+/// book plays (phone or watch) and never touched again; the cards compute from them.
 @MainActor
 @Observable
 final class ReadingStatistics {
     static let shared = ReadingStatistics()
-    private let swiftDataController = SwiftDataController.shared
-    
-    var totalListeningTime: TimeInterval = 0
-    var booksCompleted: Int = 0
-    var currentStreak: Int = 0
-    var longestStreak: Int = 0
-    var monthlyGoal: TimeInterval = 3600 * 10 // 10 hours default
-    var monthlyProgress: TimeInterval = 0
-    private var monthlyAnchor: Date = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-    
-    init() {
-        loadStatistics()
-        calculateCurrentMonthProgress()
-    }
-    
-    private func loadStatistics() {
-        totalListeningTime = UserDefaults.standard.double(forKey: "totalListeningTime")
-        booksCompleted = UserDefaults.standard.integer(forKey: "booksCompleted")
-        currentStreak = UserDefaults.standard.integer(forKey: "currentStreak")
-        longestStreak = UserDefaults.standard.integer(forKey: "longestStreak")
-        monthlyGoal = UserDefaults.standard.double(forKey: "monthlyGoal")
-        monthlyProgress = UserDefaults.standard.double(forKey: "monthlyProgress")
-        if let anchor = UserDefaults.standard.object(forKey: "monthlyAnchor") as? Date {
-            monthlyAnchor = anchor
-        }
-        
-        if monthlyGoal == 0 {
-            monthlyGoal = 3600 * 10 // Default 10 hours
-        }
-    }
-    
-    private func saveStatistics() {
-        UserDefaults.standard.set(totalListeningTime, forKey: "totalListeningTime")
-        UserDefaults.standard.set(booksCompleted, forKey: "booksCompleted")
-        UserDefaults.standard.set(currentStreak, forKey: "currentStreak")
-        UserDefaults.standard.set(longestStreak, forKey: "longestStreak")
-        UserDefaults.standard.set(monthlyGoal, forKey: "monthlyGoal")
-        UserDefaults.standard.set(monthlyProgress, forKey: "monthlyProgress")
-        UserDefaults.standard.set(monthlyAnchor, forKey: "monthlyAnchor")
-    }
-    
-    @MainActor
-    func addListeningTime(_ time: TimeInterval) {
-        // Ensure current month anchor and reset if the month rolled over
-        let startOfMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-        if startOfMonth != monthlyAnchor {
-            monthlyAnchor = startOfMonth
-            monthlyProgress = 0
-        }
-        totalListeningTime += time
-        // Count real time spent listening, not content position deltas
-        monthlyProgress += time
+    private let store: SwiftDataController
 
-        updateStreak()
-        saveStatistics()
-    }
-    
-    func markBookCompleted() {
-        booksCompleted += 1
-        updateStreak()
-        saveStatistics()
+    private(set) var sessions: [ListeningSessionModel] = []
+    var monthlyGoal: TimeInterval = 3600 * 10
+    /// Just crossed a badge's line; the tab view shows it and clears it.
+    var newlyUnlocked: Milestone?
+
+    /// Hours, books and streak counted before the log existed. Per device, never synced; the
+    /// log starts from zero on top of them so nobody's total drops on update.
+    private(set) var legacyListeningTime: TimeInterval = 0
+    private(set) var legacyBooksCompleted: Int = 0
+    private(set) var legacyLongestStreak: Int = 0
+
+    /// A pause under this long keeps the same session going.
+    private static let sessionGap: TimeInterval = 120
+    private var openSession: ListeningSessionModel?
+    private var lastTickAt: Date = .distantPast
+
+    init(store: SwiftDataController = .shared) {
+        self.store = store
+        let defaults = UserDefaults.standard
+        monthlyGoal = defaults.double(forKey: "monthlyGoal")
+        if monthlyGoal == 0 { monthlyGoal = 3600 * 10 }
+        legacyListeningTime = defaults.double(forKey: "totalListeningTime")
+        legacyBooksCompleted = defaults.integer(forKey: "booksCompleted")
+        legacyLongestStreak = defaults.integer(forKey: "longestStreak")
+        Task { await store.whenLoaded(); reload() }
     }
 
-    // MARK: - Reset
-    func resetAll() {
-        totalListeningTime = 0
-        currentStreak = 0
-        longestStreak = 0
-        // Preserve user's monthly goal, but reset progress
-        monthlyProgress = 0
-        monthlyAnchor = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-        UserDefaults.standard.removeObject(forKey: "lastListenDate")
-        saveStatistics()
+    /// Fetches the log. Also called after CloudKit merges another device's sessions.
+    func reload() {
+        guard store.isLoaded else { return }
+        sessions = (try? store.context.fetch(FetchDescriptor<ListeningSessionModel>())) ?? []
+        if UserDefaults.standard.array(forKey: "shownMilestones") == nil {
+            // First run with badges: what is already earned is not news.
+            UserDefaults.standard.set(unlockedMilestones.map(\.id), forKey: "shownMilestones")
+        }
     }
-    
-    
-    internal func updateStreak() {
-        let today = Calendar.current.startOfDay(for: Date())
-        let lastListenDate = UserDefaults.standard.object(forKey: "lastListenDate") as? Date ?? Date.distantPast
-        let lastListenDay = Calendar.current.startOfDay(for: lastListenDate)
-        
-        let daysBetween = Calendar.current.dateComponents([.day], from: lastListenDay, to: today).day ?? 0
-        
-        if daysBetween == 0 {
-            // Same day, don't change streak
-        } else if daysBetween == 1 {
-            // Consecutive day
-            currentStreak += 1
-            if currentStreak > longestStreak {
-                longestStreak = currentStreak
-            }
+
+    // MARK: - Writing
+
+    /// `seconds` of wall-clock listening to `book`, ending at `at`. Speed is irrelevant here:
+    /// two hours at 2× is two hours.
+    func addListeningTime(_ seconds: TimeInterval, for book: AudiobookModel, at: Date = Date()) {
+        guard store.isLoaded, seconds > 0 else { return }
+        if let openSession, openSession.bookID == book.id, at.timeIntervalSince(lastTickAt) < Self.sessionGap {
+            openSession.seconds += seconds
         } else {
-            // Streak broken
-            currentStreak = 1
+            let session = ListeningSessionModel(book: book, startedAt: at.addingTimeInterval(-seconds), seconds: seconds)
+            store.context.insert(session)
+            sessions.append(session)
+            openSession = session
         }
-        
-        UserDefaults.standard.set(Date(), forKey: "lastListenDate")
+        lastTickAt = at
+        checkMilestones()
     }
-    
-    @MainActor
-    private func calculateCurrentMonthProgress() {
-        // Maintain progress as accumulated listening time only; reset when the month changes
-        let startOfMonth = Calendar.current.dateInterval(of: .month, for: Date())?.start ?? Date()
-        if startOfMonth != monthlyAnchor {
-            monthlyAnchor = startOfMonth
-            monthlyProgress = 0
-            saveStatistics()
+
+    /// The book just went from unfinished to finished. Rides on the open session when one is
+    /// running, otherwise leaves a zero-second marker so the completion outlives the book.
+    func recordFinish(_ book: AudiobookModel) {
+        guard store.isLoaded else { return }
+        if let openSession, openSession.bookID == book.id, !openSession.finishedBook {
+            openSession.finishedBook = true
+        } else {
+            let marker = ListeningSessionModel(book: book, finishedBook: true)
+            store.context.insert(marker)
+            sessions.append(marker)
         }
+        store.save()
+        checkMilestones()
     }
-    
-    @MainActor
+
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
-        saveStatistics()
-        
-        // Recalculate monthly progress to update UI immediately
-        calculateCurrentMonthProgress()
-
+        UserDefaults.standard.set(newGoal, forKey: "monthlyGoal")
     }
-    
-    // MARK: - Computed Properties
+
+    /// Clears the log and the pre-log counters. The goal stays.
+    func resetAll() {
+        for session in sessions { store.context.delete(session) }
+        sessions = []
+        openSession = nil
+        legacyListeningTime = 0
+        legacyBooksCompleted = 0
+        legacyLongestStreak = 0
+        for key in ["totalListeningTime", "booksCompleted", "longestStreak", "currentStreak", "monthlyProgress", "lastListenDate"] {
+            UserDefaults.standard.removeObject(forKey: key)
+        }
+        UserDefaults.standard.set([String](), forKey: "shownMilestones")
+        store.save()
+    }
+
+    // MARK: - Reading
+
+    var stats: ListeningStats { ListeningStats(sessions) }
+
+    var totalListeningTime: TimeInterval { legacyListeningTime + stats.totalSeconds }
+    var booksCompleted: Int { legacyBooksCompleted + stats.booksCompleted }
+    var currentStreak: Int { stats.currentStreak }
+    var longestStreak: Int { max(legacyLongestStreak, stats.longestStreak) }
+    var monthlyProgress: TimeInterval { stats.thisMonth }
+
     var monthlyGoalProgress: Double {
         guard monthlyGoal > 0 else { return 0 }
         return min(monthlyProgress / monthlyGoal, 1.0)
     }
-    
-    var formattedTotalTime: String {
-        return totalListeningTime.hoursMinutesFormatted
+
+    var formattedTotalTime: String { totalListeningTime.hoursMinutesFormatted }
+    var formattedMonthlyProgress: String { monthlyProgress.hoursMinutesFormatted }
+    var formattedMonthlyGoal: String { monthlyGoal.hoursMinutesFormatted }
+
+    // MARK: - Milestones
+
+    func progress(of milestone: Milestone, in stats: ListeningStats? = nil) -> Int {
+        milestone.progress(
+            in: stats ?? self.stats,
+            legacyHours: Int(legacyListeningTime / 3600),
+            legacyBooks: legacyBooksCompleted,
+            legacyStreak: legacyLongestStreak
+        )
     }
-    
-    var formattedMonthlyProgress: String {
-        return monthlyProgress.hoursMinutesFormatted
+
+    var unlockedMilestones: [Milestone] {
+        let stats = self.stats
+        return Milestone.all.filter { progress(of: $0, in: stats) >= $0.target }
     }
-    
-    var formattedMonthlyGoal: String {
-        return monthlyGoal.hoursMinutesFormatted
+
+    private func checkMilestones() {
+        var shown = Set(UserDefaults.standard.stringArray(forKey: "shownMilestones") ?? [])
+        guard let fresh = unlockedMilestones.first(where: { !shown.contains($0.id) }) else { return }
+        shown.insert(fresh.id)
+        UserDefaults.standard.set(Array(shown), forKey: "shownMilestones")
+        newlyUnlocked = fresh
     }
-    
 }

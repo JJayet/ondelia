@@ -39,6 +39,8 @@ final class WatchAudioManager {
     // Ticker bookkeeping, driven from `WatchAudioManager+Progress`.
     var ticker: Task<Void, Never>?
     var secondsSincePersist = 0
+    /// Real seconds played since the phone was last told, for its listening log.
+    var listenedSecondsUnsent = 0
     var lastChapterNumber: Int?
     var remoteCommandsInstalled = false
 

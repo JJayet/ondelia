@@ -16,6 +16,9 @@ extension WatchSyncService {
         switch event {
         case let .progress(bookID, position, at):
             applyRemoteProgress(bookID: bookID, position: position, at: at)
+        case let .listened(bookID, seconds, at):
+            guard let book = book(bookID) else { break }
+            ReadingStatistics.shared.addListeningTime(seconds, for: book, at: at)
         case let .bookmarkAdded(bookID, bookmark):
             applyRemoteBookmark(bookID: bookID, bookmark: bookmark)
         case let .chapterRequested(bookID, chapterNumber):

@@ -22,18 +22,13 @@ extension LibraryView {
         }
     }
 
-    /// The check badge over a cell while selecting. Sits on the cover in the grid and on the
-    /// card's corner in the list; the same view serves both.
+    /// The check badge over a grid cell while selecting. The list row draws `SelectionMark`
+    /// itself, in place of its chevron.
     @ViewBuilder
     func selectionBadge(for audiobook: AudiobookModel) -> some View {
         if selecting {
-            let isSelected = selectedIDs.contains(audiobook.id)
-            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                .font(.system(size: 22))
-                .symbolRenderingMode(.palette)
-                .foregroundStyle(.white, isSelected ? Color.accentColor : Color.black.opacity(0.35))
+            SelectionMark(isSelected: selectedIDs.contains(audiobook.id))
                 .padding(8)
-                .accessibilityHidden(true)
         }
     }
 
@@ -127,5 +122,18 @@ extension LibraryView {
         }
         .tint(.red)
         .disabled(selectedIDs.isEmpty)
+    }
+}
+
+/// The circle that becomes a check when a book is picked.
+struct SelectionMark: View {
+    let isSelected: Bool
+
+    var body: some View {
+        Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
+            .font(.system(size: 22))
+            .symbolRenderingMode(.palette)
+            .foregroundStyle(.white, isSelected ? Color.accentColor : Color.black.opacity(0.35))
+            .accessibilityHidden(true)
     }
 }

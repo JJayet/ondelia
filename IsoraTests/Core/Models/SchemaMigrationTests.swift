@@ -7,7 +7,7 @@ import SwiftData
 struct SchemaMigrationTests {
     @Test("Container built from the migration plan stores and fetches a book")
     func versionedContainerRoundTrips() throws {
-        let schema = Schema(versionedSchema: IsoraSchemaV1.self)
+        let schema = Schema(versionedSchema: IsoraCurrentSchema.self)
         let container = try ModelContainer(
             for: schema,
             migrationPlan: IsoraMigrationPlan.self,

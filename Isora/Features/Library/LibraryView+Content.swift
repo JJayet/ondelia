@@ -16,14 +16,6 @@ extension LibraryView {
     @ViewBuilder
     var listModeContent: some View {
         List {
-            // Statistics Card
-            if !audiobookManager.audiobooks.isEmpty {
-                StatisticsCardView(statistics: statistics) { showingStatistics = true }
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            }
-
             // Continue Reading Section
             if !continueReadingBooks.isEmpty {
                 ContinueReadingSection(books: continueReadingBooks, headerPadding: 0, rowPadding: 4) { playAndPresent($0) }
@@ -85,14 +77,6 @@ extension LibraryView {
     var gridModeContent: some View {
         ScrollView {
             LazyVStack(spacing: 24) {
-                // Statistics Card
-                if !audiobookManager.audiobooks.isEmpty {
-                    StatisticsCardView(statistics: statistics) {
-                        showingStatistics = true
-                    }
-                    .padding(.horizontal)
-                }
-
                 // Continue Reading Section
                 if !continueReadingBooks.isEmpty {
                     ContinueReadingSection(books: continueReadingBooks, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
@@ -165,8 +149,10 @@ extension LibraryView {
 extension LibraryView {
     @ViewBuilder
     func libraryRow(audiobook: AudiobookModel) -> some View {
-        EnhancedAudiobookRowView(audiobook: audiobook) { tapBook(audiobook) }
-            .overlay(alignment: .topTrailing) { selectionBadge(for: audiobook) }
+        EnhancedAudiobookRowView(
+            audiobook: audiobook,
+            selection: selecting ? selectedIDs.contains(audiobook.id) : nil
+        ) { tapBook(audiobook) }
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
             .listRowBackground(Color.clear)
             .listRowSeparator(.hidden)
