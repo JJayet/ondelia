@@ -82,11 +82,16 @@ enum FolderImporter {
             
             // Look for cover image
             let coverImage = await findCoverImage(in: folderURL)
+            var narrator: String?
+            if let first = chapters.first,
+               let firstURL = try? SafeImportPath.containedFileURL(for: first.fileName, inside: folderURL) {
+                narrator = await MetadataExtractor.extractMetadata(from: firstURL)?.narrator
+            }
             
             let folderAudiobook = FolderAudiobook(
                 title: title,
                 author: author,
-                narrator: nil, // Could be extracted from folder name if needed
+                narrator: narrator,
                 totalDuration: cumulativeTime,
                 chapters: chapters,
                 folderPath: folderURL.path,
@@ -241,15 +246,13 @@ enum FolderImporter {
         
         // Prefer the folder artwork. A hand-picked file selection carries no access to its folder,
         // so fall back to the artwork embedded in the first file.
-        var coverImage = await findCoverImage(in: folderURL)
-        if coverImage == nil {
-            coverImage = await MetadataExtractor.extractMetadata(from: audioFiles[0])?.coverImage
-        }
+        let embedded = await MetadataExtractor.extractMetadata(from: audioFiles[0])
+        let coverImage = await findCoverImage(in: folderURL) ?? embedded?.coverImage
         
         let folderAudiobook = FolderAudiobook(
             title: title,
             author: author,
-            narrator: nil,
+            narrator: embedded?.narrator,
             totalDuration: cumulativeTime,
             chapters: chapters,
             folderPath: folderURL.path,

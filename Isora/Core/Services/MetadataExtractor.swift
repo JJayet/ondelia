@@ -14,6 +14,27 @@ struct AudiobookMetadata {
 }
 
 enum MetadataExtractor {
+    /// Narrators have no common key. Audible and iTunes write `©nrt`, ID3 taggers use a `TXXX`
+    /// frame described "narrator", and most rippers put the narrator in Composer.
+    /// ponytail: the composer fallback trusts audiobook tagging habits; a real composer tag on
+    /// a music file would land here too.
+    static func narratorTag(in metadata: [AVMetadataItem]) async -> String? {
+        let explicit = metadata.filter { item in
+            let id = item.identifier?.rawValue.lowercased() ?? ""
+            let info = (item.extraAttributes?[.info] as? String)?.lowercased() ?? ""
+            return id.contains("%a9nrt") || id.contains("narrator") || info.contains("narrator")
+        }
+        let composer = metadata.filter {
+            $0.identifier == .iTunesMetadataComposer || $0.identifier == .id3MetadataComposer
+        }
+        for item in explicit + composer {
+            guard let raw = try? await item.load(.stringValue) else { continue }
+            let value = raw.trimmingCharacters(in: .whitespacesAndNewlines)
+            if !value.isEmpty { return value }
+        }
+        return nil
+    }
+
     static func extractMetadata(from url: URL) async -> AudiobookMetadata? {
         Log.library.debug("🎵 MetadataExtractor: Starting metadata extraction for: \(url.lastPathComponent)")
         
@@ -100,18 +121,8 @@ enum MetadataExtractor {
                 default:
                     break
                 }
-                
-                // Check for narrator in additional metadata with error handling
-                if let identifier = item.identifier?.rawValue {
-                    if identifier.lowercased().contains("narrator") {
-                        do {
-                            narrator = try await item.load(.stringValue)
-                        } catch {
-                            Log.library.debug("   ⚠️ Could not load narrator: \(error.localizedDescription)")
-                        }
-                    }
-                }
             }
+            narrator = await narratorTag(in: metadata)
             
         Log.library.debug("✅ MetadataExtractor: Metadata extraction completed:")
         Log.library.debug("   Title: \(title)")

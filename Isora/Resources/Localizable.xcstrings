@@ -2374,6 +2374,17 @@
         }
       }
     },
+    "Narrated by %@" : {
+      "comment" : "Book detail: narrator credit",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lu par %@"
+          }
+        }
+      }
+    },
     "Next Chapter" : {
       "comment" : "Next chapter accessibility label",
       "localizations" : {
@@ -4418,6 +4429,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une semaine d'affilée"
+          }
+        }
+      }
+    },
+    "Written by %@" : {
+      "comment" : "Book detail: author credit",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écrit par %@"
           }
         }
       }

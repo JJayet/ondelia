@@ -40,6 +40,7 @@ struct BookDetailView: View {
         // The blurb, genres, moods and content warnings come from Hardcover the first time this
         // screen is opened, and are stored on the link afterwards.
         .task { await HardcoverService.shared.refreshDetails(for: audiobook) }
+        .task { await backfillNarrator() }
         .task {
             guard let url = audiobook.resolvedFileURL else { return }
             fileBytes = await Task.detached { StorageUsage.bytes(at: url) }.value
@@ -118,21 +119,36 @@ struct BookDetailView: View {
                 .font(.system(size: 23, weight: .bold))
                 .multilineTextAlignment(.center)
 
-            Text(credits)
+            Text(String(
+                format: NSLocalizedString("Written by %@", comment: "Book detail: author credit"),
+                audiobook.author ?? AudiobookModel.unknownAuthor
+            ))
+            .font(.system(size: 14))
+            .foregroundStyle(.secondary)
+            .multilineTextAlignment(.center)
+
+            if let narrator = audiobook.narrator {
+                Text(String(
+                    format: NSLocalizedString("Narrated by %@", comment: "Book detail: narrator credit"),
+                    narrator
+                ))
                 .font(.system(size: 14))
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
+            }
         }
     }
 
-    private var credits: String {
-        let author = audiobook.author ?? AudiobookModel.unknownAuthor
-        guard let narrator = audiobook.narrator else { return author }
-        return String(
-            format: NSLocalizedString("%@ · narrated by %@", comment: "Author and narrator credit"),
-            author,
-            narrator
-        )
+    /// Books imported before narrators were read carry none. Read it from the first audio file
+    /// when the screen opens; nothing to write when the file has no narrator tag either.
+    /// ponytail: a book with no tag repeats this one asset load on every open.
+    private func backfillNarrator() async {
+        guard audiobook.narrator == nil, let url = audiobook.resolvedFileURL else { return }
+        let tracks = await AudiobookPlayer.makeTracks(at: url, fallbackDuration: audiobook.duration)
+        guard let first = tracks.first?.url,
+              let narrator = await MetadataExtractor.extractMetadata(from: first)?.narrator else { return }
+        audiobook.narrator = narrator
+        AudiobookManager.shared.swiftDataController.save()
     }
 
     private var chips: some View {
