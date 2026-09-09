@@ -1,0 +1,31 @@
+Isora/Core/Services/FolderImporter.swift
+  s_7eb2e8450df39e::t_d61439e160e955 85-89,94,249-250,255
+Isora/Features/Library/BookDetailView.swift
+  s_7eb2e8450df39e::t_d61439e160e955 43,122-134,138,142-151
+Isora/Resources/Localizable.xcstrings
+  s_7eb2e8450df39e::t_ca1d4815c83d06 4436-4437,4442
+  s_7eb2e8450df39e::t_3b7e27bfd6355d 2379-2382,4438-4441
+  s_7eb2e8450df39e::t_b2dabcd8d689a1 2377-2378,2383
+  s_7eb2e8450df39e::t_b2678788dfd00a 2384-2387,4443-4446
+Isora/Core/Services/MetadataExtractor.swift
+  s_7eb2e8450df39e::t_d61439e160e955 17-20,22-37
+  s_7eb2e8450df39e::t_2aceaac88eb958 21,125
+IsoraTests/Core/Services/MetadataExtractorNarratorTests.swift
+  s_7eb2e8450df39e::t_c0658ddbc5af7a 1-45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "895012e92179acbfe418c3e2ee038ef16c160db0",
+  "prompts": {},
+  "sessions": {
+    "s_7eb2e8450df39e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3244c1d-4601-49f7-a412-1f9411333f77",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
