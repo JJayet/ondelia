@@ -115,9 +115,9 @@ extension WatchSyncService {
 
     /// `GlobalAudioManager.persistProgress` just wrote a position.
     func phoneDidPersistProgress(for book: AudiobookModel) {
-        pushSnapshot()
         guard Date().timeIntervalSince(lastProgressSentAt) >= Self.progressInterval else { return }
         flushProgress(for: book)
+        pushSnapshot()
     }
 
     /// `GlobalAudioManager.playbackStateDidChange`: the phone started, paused or stopped.

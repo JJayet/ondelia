@@ -156,7 +156,13 @@ final class SpeechTranscriptionManager {
             defer { collector.cancel() }
 
             let analyzer = try await SpeechAnalyzer(inputAudioFile: file, modules: [transcriber])
-            try await analyzer.finalizeAndFinishThroughEndOfInput()
+            // Closing the view cancels the task; without this the analyzer would run the whole
+            // file to its end before the cancellation is noticed.
+            try await withTaskCancellationHandler {
+                try await analyzer.finalizeAndFinishThroughEndOfInput()
+            } onCancel: {
+                Task { await analyzer.cancelAndFinishNow() }
+            }
 
             let (text, timings) = try await collector.value
             let segments = Self.makeSegments(timings)

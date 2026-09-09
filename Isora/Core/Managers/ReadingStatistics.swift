@@ -136,7 +136,10 @@ final class ReadingStatistics {
 
     private func checkMilestones() {
         var shown = Set(UserDefaults.standard.stringArray(forKey: "shownMilestones") ?? [])
-        guard let fresh = unlockedMilestones.first(where: { !shown.contains($0.id) }) else { return }
+        // Only the unearned badges cost a scan; the shown ones are skipped before any stats work.
+        let stats = self.stats
+        guard let fresh = Milestone.all.first(where: { !shown.contains($0.id) && progress(of: $0, in: stats) >= $0.target })
+        else { return }
         shown.insert(fresh.id)
         UserDefaults.standard.set(Array(shown), forKey: "shownMilestones")
         newlyUnlocked = fresh
