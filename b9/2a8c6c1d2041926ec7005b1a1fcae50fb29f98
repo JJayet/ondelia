@@ -1,0 +1,141 @@
+Isora/Core/Services/CarPlay/CarPlayLibrary.swift
+  s_43f7eaf50ec3da::t_d2fccb92afb2af 1-174
+IsoraUITests/LibrarySelectionUITests.swift
+  s_43f7eaf50ec3da::t_5cb706a3e5cf23 3,8,13-14,17-26
+  s_43f7eaf50ec3da::t_7cb5844c692d9b 1-2,4-7,9-12,15-16,27-29
+Isora/Features/Library/EnhancedAudiobookRowView.swift
+  s_43f7eaf50ec3da::t_5cb706a3e5cf23 5-6,40-42
+"IsoraWatch Watch App/Audio/WatchAudioManager.swift"
+  s_99dd43e9b0f0c7::t_718e5d90f92a4b 42-43
+Isora/Features/Library/LibraryView+Content.swift
+  s_43f7eaf50ec3da::t_5cb706a3e5cf23 152-155
+Isora/Shared/WatchSync/SyncModels.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 118-119
+Isora/Core/Managers/ListeningStats.swift
+  s_99dd43e9b0f0c7::t_4440744f294851 1-210
+Isora/Core/Managers/AudiobookManager.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 61,64-71,86,178
+Isora/Features/Statistics/YearlyMixCard.swift
+  s_99dd43e9b0f0c7::t_ffe1a170831191 13-15
+  s_99dd43e9b0f0c7::t_dc637d96097409 1-12,16-64
+IsoraTests/Core/Services/CarPlayLibraryTests.swift
+  s_43f7eaf50ec3da::t_2cdfe21e0bedfc 1-27
+Isora.xcodeproj/project.pbxproj
+  s_99dd43e9b0f0c7::t_629097331f9820 151
+Isora/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 19-21
+Isora/Features/Statistics/StatisticsView.swift
+  s_99dd43e9b0f0c7::t_a028e0aff13bde 3,37
+  s_99dd43e9b0f0c7::t_38f3194b02e44c 1-2,4-36,38-40,43-138
+  s_99dd43e9b0f0c7::t_1c8e7be9b5add5 41-42
+Isora/Core/Models/SwiftData/SwiftDataController.swift
+  s_99dd43e9b0f0c7::t_629097331f9820 127
+Isora/Features/Statistics/MilestonesRowView.swift
+  s_99dd43e9b0f0c7::t_dc637d96097409 1-90
+"IsoraWatch Watch App/WatchLibraryStore.swift"
+  s_99dd43e9b0f0c7::t_629097331f9820 28
+Isora/Core/Managers/AudiobookManager+RemoteChanges.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 27
+Isora/Core/Models/SwiftData/ListeningSessionModel.swift
+  s_99dd43e9b0f0c7::t_629097331f9820 1-34
+IsoraTests/Core/Managers/ListeningStatsTests.swift
+  s_99dd43e9b0f0c7::t_dc637d96097409 1-29,31-32,35,37-59,61-62,64-73,75-90,92,95-109
+  s_99dd43e9b0f0c7::t_ff99335f2e9f0a 30,33-34,36,60,63,74,91,93-94
+"IsoraWatch Watch App/Audio/WatchAudioManager+Progress.swift"
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 45,63-65
+Isora/Core/Managers/Milestones.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 1-49
+MISSING_FEATURES.md
+  s_99dd43e9b0f0c7::t_ffe1a170831191 21
+Isora/Features/Statistics/StreakRing.swift
+  s_99dd43e9b0f0c7::t_217e1bd2428d0b 1-32
+Isora/Core/Managers/ReadingStatistics.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 4-5,10-36,38-45,49,51-56,58-61,63-64,66-76,78-79,81,84-85,87-99,101-111,116-129,131-134,136-142
+Isora/Features/Statistics/StatisticsCards.swift
+  s_99dd43e9b0f0c7::t_38f3194b02e44c 1-192
+Isora/Resources/Isora.entitlements
+  s_43f7eaf50ec3da::t_33a986099b9e7b 7-8
+Isora/Features/Library/LibraryView+Selection.swift
+  s_43f7eaf50ec3da::t_5cb706a3e5cf23 25-26,30,127-137
+  s_43f7eaf50ec3da::t_0fabf6f3296905 138-139
+Isora/Features/Library/LibraryView.swift
+  s_43f7eaf50ec3da::t_5cb706a3e5cf23 151-154
+Isora/App/MainTabView.swift
+  s_99dd43e9b0f0c7::t_dc637d96097409 8,21-28
+  s_99dd43e9b0f0c7::t_a028e0aff13bde 66-71
+  s_99dd43e9b0f0c7::t_2ff8dd7eda3ce2 72
+Isora/Resources/Localizable.xcstrings
+  s_43f7eaf50ec3da::t_7f53ef74cb8b43 130-133,196-199,230-233,252-255,263-266,285-288,296-299,554-557,574-577,1318-1321,1349-1355,2465-2468,2617-2623
+  s_99dd43e9b0f0c7::t_31fb165621fe67 2108-2111,2406-2409
+  s_99dd43e9b0f0c7::t_1d1ef6a98d062d 450-453,1086-1089,2064-2067,2131-2134,2153-2156
+  s_43f7eaf50ec3da::t_79ebfd85406a3a 53-56,58-61,390-393,395-398,445-448,559-572,579-582,671-681,693-703,815-836,872-893,905-914,1016,1037-1046,1080-1085,1295,1323-1326,1356-1359,1439,1603-1612,1646-1656,1668-1678,1690-1699,1711-1721,1843-1852,2013-2023,2057-2063,2101-2107,2114,2124-2130,2146-2152,2159,2268-2299,2322-2332,2399-2405,2410-2419,2470-2473,2496-2506,2624-2627,2638-2648,2660-2670,3853-3863,4010,4020-4030,4042-4063,4107-4139,4415-4435
+  s_43f7eaf50ec3da::t_55ed40f0c26e2b 2463-2464,2469
+  s_43f7eaf50ec3da::t_7a0beff08ab29e 51-52
+  s_43f7eaf50ec3da::t_db967f70885f17 57
+  s_43f7eaf50ec3da::t_830cd26e0992fd 128-129
+  s_43f7eaf50ec3da::t_3cc3401d22573a 134-136
+  s_43f7eaf50ec3da::t_1f5c5a69da6c04 194-195
+  s_43f7eaf50ec3da::t_4226585642fe1e 200-202
+  s_43f7eaf50ec3da::t_2c88a80f57a3ea 228-229
+  s_43f7eaf50ec3da::t_2b98a428a3cb32 234-236
+  s_43f7eaf50ec3da::t_2d5bb8dd2c94dd 250-251
+  s_43f7eaf50ec3da::t_409b8f0e94082a 256-258,260-262
+  s_43f7eaf50ec3da::t_28924f7eec741e 267-269
+  s_43f7eaf50ec3da::t_0223bcd188bb9f 283-284
+  s_43f7eaf50ec3da::t_88e9f009b1ebdd 289-291,293-295
+  s_43f7eaf50ec3da::t_c9e1c39535c9bf 300-302
+  s_43f7eaf50ec3da::t_44852a1e093354 388-389
+  s_43f7eaf50ec3da::t_77c2434aa63333 394
+  s_43f7eaf50ec3da::t_9ca7b73132bafb 443-444
+  s_43f7eaf50ec3da::t_6ee5cd306e3871 553
+  s_43f7eaf50ec3da::t_48abda923b3f65 558
+  s_43f7eaf50ec3da::t_6072ea7c935c1e 573
+  s_43f7eaf50ec3da::t_6c1a558ae31af8 578
+  s_43f7eaf50ec3da::t_b225c99f1484ae 1316-1317
+  s_43f7eaf50ec3da::t_738c8e0f24309e 1322
+Isora/Core/Models/SwiftData/IsoraSchema.swift
+  s_99dd43e9b0f0c7::t_629097331f9820 23-34,36-39
+Isora/Core/Services/CarPlay/CarPlayNowPlaying.swift
+  s_43f7eaf50ec3da::t_79a493377be0b6 65-67,74,77
+  s_43f7eaf50ec3da::t_abf13be636e140 8
+  s_43f7eaf50ec3da::t_9d529490a3bfed 1-7,9-64,68-73,75-76,78-88
+Isora/Core/Managers/ListeningStats+Finishes.swift
+  s_99dd43e9b0f0c7::t_4440744f294851 1-44
+IsoraTests/Core/Models/SchemaMigrationTests.swift
+  s_99dd43e9b0f0c7::t_629097331f9820 10
+Isora/Core/Services/CarPlay/CarPlaySceneDelegate.swift
+  s_43f7eaf50ec3da::t_1bbf02dab2b2f0 1-59
+Isora/Resources/Info.plist
+  s_43f7eaf50ec3da::t_92cf46bf2b38e9 51-52,55-69
+  s_43f7eaf50ec3da::t_c4b7127b296444 53-54
+Isora/Core/Managers/GlobalAudioManager+Progress.swift
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 35-36
+"IsoraWatch Watch App/Sync/PhoneSyncService+Events.swift"
+  s_99dd43e9b0f0c7::t_0ae921216a1a51 23
+Isora/Shared/AccessibilityIdentifiers.swift
+  s_99dd43e9b0f0c7::t_a028e0aff13bde 45
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "b92a8c6c1d2041926ec7005b1a1fcae50fb29f98",
+  "prompts": {},
+  "sessions": {
+    "s_43f7eaf50ec3da": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "fc024c70-f577-4f3b-aa7e-0e393905dc92",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_99dd43e9b0f0c7": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "35561743-2f9e-4a93-803e-269b7cafd48b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
