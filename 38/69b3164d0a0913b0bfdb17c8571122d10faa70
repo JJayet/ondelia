@@ -1,0 +1,23 @@
+Isora/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_7eb2e8450df39e::t_d69f4f98bb050f 120
+Isora/Core/Managers/ReadingStatistics.swift
+  s_7eb2e8450df39e::t_d69f4f98bb050f 139-142
+Isora/Core/Services/SpeechTranscriptionManager.swift
+  s_7eb2e8450df39e::t_d69f4f98bb050f 159-165
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.2",
+  "base_commit_sha": "3869b3164d0a0913b0bfdb17c8571122d10faa70",
+  "prompts": {},
+  "sessions": {
+    "s_7eb2e8450df39e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d3244c1d-4601-49f7-a412-1f9411333f77",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
