@@ -226,9 +226,6 @@ final class LibraryViewUITests: LibraryViewUITestCase {
             XCTAssertTrue(sortButton.isEnabled, "Sort button should be enabled")
             XCTAssertTrue(sortButton.isHittable, "Sort button should be hittable")
             
-            // Get initial sort state
-            let initialLabel = sortButton.label
-            
             sortButton.tap()
 
             // The control is a menu: it lists the sort options rather than cycling them, and
@@ -237,7 +234,8 @@ final class LibraryViewUITests: LibraryViewUITestCase {
             XCTAssertTrue(titleOption.waitForExistence(timeout: 2), "Sort menu should list the options")
             titleOption.tap()
 
-            XCTAssertNotEqual(sortButton.label, initialLabel, "Sort button should follow the chosen option")
+            // The label is the static menu name ("Sort by"); the choice lives in the value.
+            XCTAssertEqual(sortButton.value as? String, "Title", "Sort button should follow the chosen option")
         } else {
             throw XCTSkip("Sort functionality not available in current implementation")
         }
