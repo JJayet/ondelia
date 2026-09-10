@@ -34,6 +34,7 @@ struct SettingsView: View {
                     integrationsSection
                     WatchSettingsSection()
                     dataSection
+                    TipJarSection()
                     aboutSection
                 }
                 .padding(.horizontal, 16)

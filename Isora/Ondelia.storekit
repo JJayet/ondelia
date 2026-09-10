@@ -1,0 +1,64 @@
+{
+  "identifier": "ONDELIA-TIPJAR",
+  "nonRenewingSubscriptions": [],
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
+  },
+  "settings": {
+    "_applicationInternalID": "",
+    "_developerTeamID": "",
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
+  },
+  "products": [
+    {
+      "displayPrice": "0.99",
+      "familyShareable": false,
+      "internalID": "TIP0",
+      "localizations": [
+        {
+          "description": "A small thank-you, nothing unlocked.",
+          "displayName": "Small Tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "io.jayet.Isora.tip.small",
+      "referenceName": "Small Tip",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "TIP1",
+      "localizations": [
+        {
+          "description": "A small thank-you, nothing unlocked.",
+          "displayName": "Medium Tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "io.jayet.Isora.tip.medium",
+      "referenceName": "Medium Tip",
+      "type": "Consumable"
+    },
+    {
+      "displayPrice": "9.99",
+      "familyShareable": false,
+      "internalID": "TIP2",
+      "localizations": [
+        {
+          "description": "A small thank-you, nothing unlocked.",
+          "displayName": "Large Tip",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "io.jayet.Isora.tip.large",
+      "referenceName": "Large Tip",
+      "type": "Consumable"
+    }
+  ]
+}
