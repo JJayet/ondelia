@@ -112,13 +112,14 @@ struct MainTabView: View {
             playerRouter.present(book)
         }
         .onOpenURL { url in
-            // "Open in Isora" from Files, Mail or AirDrop hands over a file URL.
+            // "Open in Ondelia" from Files, Mail or AirDrop hands over a file URL.
             guard !url.isFileURL else {
                 selectedTab = 1
                 AudiobookManager.shared.handleImportRequest(urls: [url])
                 return
             }
-            guard url.scheme?.caseInsensitiveCompare("Isora") == .orderedSame else { return }
+            // "Isora" kept so links made before the rename to Ondelia still open.
+            guard let scheme = url.scheme?.lowercased(), ["ondelia", "isora"].contains(scheme) else { return }
             switch url.host {
             case "player":
                 selectedTab = 1

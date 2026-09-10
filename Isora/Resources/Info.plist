@@ -33,6 +33,7 @@
 			<string>io.jayet.Isora.player</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
+				<string>ondelia</string>
 				<string>Isora</string>
 			</array>
 		</dict>

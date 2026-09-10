@@ -1,7 +1,7 @@
 import Foundation
 
 extension AudiobookManager {
-    /// Where iOS drops files sent with "Copy to Isora", AirDrop, or Finder file sharing.
+    /// Where iOS drops files sent with "Copy to Ondelia", AirDrop, or Finder file sharing.
     private static var inboxURL: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent("Inbox", isDirectory: true)
