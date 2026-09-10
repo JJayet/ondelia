@@ -9,7 +9,7 @@ import UIKit
 
 /// UI strings, centralized so a later localization pass only touches this file.
 enum WidgetStrings {
-    static let configurationDisplayName = "Isora"
+    static let configurationDisplayName = "Ondelia"
     static let configurationDescription = String(localized: "Resume what you're currently listening to.")
     static let emptyState = String(localized: "No book")
     static let chapterAbbreviation = String(localized: "ch.")

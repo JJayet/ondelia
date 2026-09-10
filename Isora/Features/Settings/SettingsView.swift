@@ -10,6 +10,7 @@ struct SettingsView: View {
     @AppStorage("playback.bookOpeningDelayMS") var bookOpeningDelayMS = 200
     @AppStorage(GlobalAudioManager.autoSleepTimerKey) var autoSleepTimer = false
     @AppStorage("library.gridColumns") var gridColumns = 2
+    @State var appIcon = UIApplication.shared.alternateIconName ?? "Day"
     @AppStorage(AudiobookManager.autoSeriesCollectionsKey) var autoSeriesCollections = true
     @AppStorage(CollectionGroup.showMissingKey) var showMissingSeriesBooks = true
     @AppStorage(GlobalAudioManager.deleteOnCompletionKey) var deleteOnCompletion = false

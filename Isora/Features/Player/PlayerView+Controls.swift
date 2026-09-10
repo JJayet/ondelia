@@ -88,6 +88,7 @@ extension PlayerView {
             ZStack {
                 Circle()
                     .fill(.white)
+                    .shadow(color: .white.opacity(0.6), radius: 28)
                     .shadow(color: .black.opacity(0.45), radius: 18, y: 8)
 
                 if audioManager.playbackState == .loading {

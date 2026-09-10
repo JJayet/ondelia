@@ -1,31 +1,7 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "" : {
-
-    },
-    "-%@" : {
-      "comment" : "Player: time remaining, negative clock format",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "-%@"
-          }
-        }
-      }
-    },
-    "'%@', its progress and its bookmarks will be removed. This cannot be undone." : {
-      "comment" : "Delete confirmation alert message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "« %@ », sa progression et ses signets seront supprimés. Cette action est irréversible."
-          }
-        }
-      }
-    },
+    "" : {},
     "% CH." : {
       "comment" : "Widget: circular gauge caption under the percent value",
       "localizations" : {
@@ -33,72 +9,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "% CH."
-          }
-        }
-      }
-    },
-    "%@ · %@" : {
-      "comment" : "Author and duration",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %@"
-          }
-        }
-      }
-    },
-    "%@ · %d finished" : {
-      "comment" : "Completed: narrator and count",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %d terminés"
-          }
-        }
-      }
-    },
-    "%@ · %lld %%" : {
-      "comment" : "On-watch storage: chapter status with sending percent (nested composite)",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · %lld %%"
-          }
-        }
-      }
-    },
-    "%@ · Completed" : {
-      "comment" : "Author and finished status",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Terminé"
-          }
-        }
-      }
-    },
-    "%@ · narrated by %@" : {
-      "comment" : "Author and narrator credit",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · lu par %@"
-          }
-        }
-      }
-    },
-    "%@ · Not on this device" : {
-      "comment" : "Author and missing-audio status",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ · Pas sur cet appareil"
           }
         }
       }
@@ -202,18 +112,6 @@
         }
       }
     },
-    "%@ this month · of %@ goal" : {
-      "comment" : "Monthly listening against the goal",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%@ ce mois-ci · sur un objectif de %@"
-          }
-        }
-      }
-    },
     "%@ used" : {
       "comment" : "Storage total header",
       "localizations" : {
@@ -232,6 +130,72 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@ vs semaine dernière"
+          }
+        }
+      }
+    },
+    "%@ · %@" : {
+      "comment" : "Author and duration",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %@"
+          }
+        }
+      }
+    },
+    "%@ · %d finished" : {
+      "comment" : "Completed: narrator and count",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %d terminés"
+          }
+        }
+      }
+    },
+    "%@ · %lld %%" : {
+      "comment" : "On-watch storage: chapter status with sending percent (nested composite)",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · %lld %%"
+          }
+        }
+      }
+    },
+    "%@ · Completed" : {
+      "comment" : "Author and finished status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Terminé"
+          }
+        }
+      }
+    },
+    "%@ · Not on this device" : {
+      "comment" : "Author and missing-audio status",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · Pas sur cet appareil"
+          }
+        }
+      }
+    },
+    "%@ · narrated by %@" : {
+      "comment" : "Author and narrator credit",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@ · lu par %@"
           }
         }
       }
@@ -407,17 +371,6 @@
         }
       }
     },
-    "%d%% · %@" : {
-      "comment" : "Progress percentage and duration",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d %% · %@"
-          }
-        }
-      }
-    },
     "%d%% listened" : {
       "comment" : "Percent of the book heard",
       "localizations" : {
@@ -436,6 +389,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d %% de la série"
+          }
+        }
+      }
+    },
+    "%d%% · %@" : {
+      "comment" : "Progress percentage and duration",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d %% · %@"
           }
         }
       }
@@ -484,13 +448,24 @@
         }
       }
     },
-    "5 minutes" : {
-      "comment" : "Sleep timer duration option",
+    "'%@', its progress and its bookmarks will be removed. This cannot be undone." : {
+      "comment" : "Delete confirmation alert message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "5 minutes"
+            "value" : "« %@ », sa progression et ses signets seront supprimés. Cette action est irréversible."
+          }
+        }
+      }
+    },
+    "-%@" : {
+      "comment" : "Player: time remaining, negative clock format",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "-%@"
           }
         }
       }
@@ -502,6 +477,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "10 minutes"
+          }
+        }
+      }
+    },
+    "100 Hours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "100 heures"
+          }
+        }
+      }
+    },
+    "1000 Hours" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1000 heures"
           }
         }
       }
@@ -539,23 +534,13 @@
         }
       }
     },
-    "60 minutes" : {
+    "5 minutes" : {
       "comment" : "Sleep timer duration option",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "60 minutes"
-          }
-        }
-      }
-    },
-    "100 Hours" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "100 heures"
+            "value" : "5 minutes"
           }
         }
       }
@@ -570,12 +555,13 @@
         }
       }
     },
-    "1000 Hours" : {
+    "60 minutes" : {
+      "comment" : "Sleep timer duration option",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "1000 heures"
+            "value" : "60 minutes"
           }
         }
       }
@@ -707,7 +693,18 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Presque terminé..."
+            "value" : "Presque terminé…"
+          }
+        }
+      }
+    },
+    "App Icon" : {
+      "comment" : "App icon setting label",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Icône de l'app"
           }
         }
       }
@@ -834,18 +831,6 @@
         }
       }
     },
-    "Back" : {
-      "comment" : "Back button",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Retour"
-          }
-        }
-      }
-    },
     "Back to %@" : {
       "comment" : "Player: undo the last seek, with the position it left",
       "localizations" : {
@@ -945,17 +930,6 @@
         }
       }
     },
-    "Bookmark at %@" : {
-      "comment" : "Default bookmark title with time",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Signet à %@"
-          }
-        }
-      }
-    },
     "Bookmark Details" : {
       "comment" : "Bookmark details form section header",
       "localizations" : {
@@ -978,6 +952,17 @@
         }
       }
     },
+    "Bookmark at %@" : {
+      "comment" : "Default bookmark title with time",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Signet à %@"
+          }
+        }
+      }
+    },
     "Bookmarks" : {
       "comment" : "Bookmarks button title\nBookmarks view title",
       "localizations" : {
@@ -995,7 +980,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les livres"
+            "value" : "Livres"
           }
         }
       }
@@ -1006,19 +991,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les livres s'envoient depuis l'iPhone : ouvre un livre, puis « Envoyer sur l'Apple Watch »."
-          }
-        }
-      }
-    },
-    "books completed" : {
-      "comment" : "Books completed caption",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "livres terminés"
+            "value" : "Les livres s'envoient depuis l'iPhone : ouvrez un livre, puis « Envoyer sur l'Apple Watch »."
           }
         }
       }
@@ -1072,7 +1045,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Annuler la minuterie"
+            "value" : "Annuler le minuteur"
           }
         }
       }
@@ -1082,18 +1055,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Lecteur centenaire"
-          }
-        }
-      }
-    },
-    "ch." : {
-      "comment" : "Widget: chapter abbreviation before a number",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ch."
+            "value" : "Centurion"
           }
         }
       }
@@ -1159,17 +1121,6 @@
         }
       }
     },
-    "Chapter file not found" : {
-      "comment" : "Transcription error",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fichier du chapitre introuvable"
-          }
-        }
-      }
-    },
     "Chapter Times" : {
       "comment" : "Player chapter time line toggle",
       "localizations" : {
@@ -1177,6 +1128,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Temps du chapitre"
+          }
+        }
+      }
+    },
+    "Chapter file not found" : {
+      "comment" : "Transcription error",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fichier du chapitre introuvable"
           }
         }
       }
@@ -1281,7 +1243,7 @@
       }
     },
     "Collections" : {
-      "comment" : "Existing collections section",
+      "comment" : "Existing collections section\nSection title for collections",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1302,17 +1264,6 @@
         }
       }
     },
-    "Completed · %@" : {
-      "comment" : "Finished book with its duration",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Terminé · %@"
-          }
-        }
-      }
-    },
     "Completed Audiobooks" : {
       "comment" : "Statistics card",
       "localizations" : {
@@ -1324,13 +1275,24 @@
         }
       }
     },
+    "Completed · %@" : {
+      "comment" : "Finished book with its duration",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Terminé · %@"
+          }
+        }
+      }
+    },
     "Connect AirPods" : {
       "comment" : "Player caption: needs headphones to play locally",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Connecte des AirPods"
+            "value" : "Connectez des AirPods"
           }
         }
       }
@@ -1363,7 +1325,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Continuer la lecture"
+            "value" : "Continuer l'écoute"
           }
         }
       }
@@ -1434,18 +1396,6 @@
         }
       }
     },
-    "Current Streak" : {
-      "comment" : "Current streak stat card title",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Série actuelle"
-          }
-        }
-      }
-    },
     "Dark" : {
       "comment" : "Dark appearance theme",
       "localizations" : {
@@ -1479,13 +1429,13 @@
         }
       }
     },
-    "days" : {
-      "comment" : "Days unit for stat card",
+    "Day" : {
+      "comment" : "Light app icon",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "jours"
+            "value" : "Jour"
           }
         }
       }
@@ -1534,17 +1484,6 @@
         }
       }
     },
-    "Delete book when finished" : {
-      "comment" : "Delete on completion toggle",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer le livre une fois terminé"
-          }
-        }
-      }
-    },
     "Delete Bookmark" : {
       "comment" : "Delete bookmark alert title",
       "localizations" : {
@@ -1563,6 +1502,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer la collection"
+          }
+        }
+      }
+    },
+    "Delete book when finished" : {
+      "comment" : "Delete on completion toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le livre une fois terminé"
           }
         }
       }
@@ -1638,7 +1588,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Entrez un nouveau titre pour '%@'"
+            "value" : "Entrez un nouveau titre pour « %@ »"
           }
         }
       }
@@ -1692,18 +1642,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Premier livre"
-          }
-        }
-      }
-    },
-    "for %@" : {
-      "comment" : "Cover image for audiobook title",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pour %@"
+            "value" : "Premier livre terminé"
           }
         }
       }
@@ -1850,17 +1789,6 @@
         }
       }
     },
-    "iCloud Sync" : {
-      "comment" : "iCloud sync toggle",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Synchronisation iCloud"
-          }
-        }
-      }
-    },
     "Import Audiobook" : {
       "comment" : "Import button accessibility label\nImport button title",
       "localizations" : {
@@ -1939,7 +1867,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Importation..."
+            "value" : "Importation…"
           }
         }
       }
@@ -1951,28 +1879,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "En cours"
-          }
-        }
-      }
-    },
-    "in progress · %@ left" : {
-      "comment" : "Remaining listening time",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "en cours · il reste %@"
-          }
-        }
-      }
-    },
-    "in progress · ch. %d of %d" : {
-      "comment" : "Collection row: chapter position",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "en cours · ch. %d sur %d"
           }
         }
       }
@@ -2109,18 +2015,6 @@
         }
       }
     },
-    "listened in total" : {
-      "comment" : "Total listening caption",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "écoutées au total"
-          }
-        }
-      }
-    },
     "Listening Heatmap" : {
       "comment" : "Statistics card",
       "localizations" : {
@@ -2149,19 +2043,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Plus longue %@"
-          }
-        }
-      }
-    },
-    "longest streak, in days" : {
-      "comment" : "Longest streak caption",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "meilleure série, en jours"
+            "value" : "Record %@"
           }
         }
       }
@@ -2173,28 +2055,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Manuel"
-          }
-        }
-      }
-    },
-    "Mark as Read" : {
-      "comment" : "Mark as read",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marquer comme lu"
-          }
-        }
-      }
-    },
-    "Mark as Unread" : {
-      "comment" : "Mark as unread",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Marquer comme non lu"
           }
         }
       }
@@ -2211,6 +2071,28 @@
       }
     },
     "Mark Unread" : {
+      "comment" : "Mark as unread",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer comme non lu"
+          }
+        }
+      }
+    },
+    "Mark as Read" : {
+      "comment" : "Mark as read",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Marquer comme lu"
+          }
+        }
+      }
+    },
+    "Mark as Unread" : {
       "comment" : "Mark as unread",
       "localizations" : {
         "fr" : {
@@ -2352,6 +2234,17 @@
         }
       }
     },
+    "Narrated by %@" : {
+      "comment" : "Book detail: narrator credit",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lu par %@"
+          }
+        }
+      }
+    },
     "New Collection" : {
       "comment" : "New collection section",
       "localizations" : {
@@ -2370,17 +2263,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Nouveau titre"
-          }
-        }
-      }
-    },
-    "Narrated by %@" : {
-      "comment" : "Book detail: narrator credit",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lu par %@"
           }
         }
       }
@@ -2408,7 +2290,7 @@
       }
     },
     "Night" : {
-      "comment" : "Time of day: 0–5",
+      "comment" : "Dark app icon\nTime of day: 0–5",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2428,16 +2310,6 @@
         }
       }
     },
-    "No audiobook in your library" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun livre audio dans votre bibliothèque"
-          }
-        }
-      }
-    },
     "No Backups Yet" : {
       "comment" : "Empty backup list title",
       "localizations" : {
@@ -2445,6 +2317,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune sauvegarde pour le moment"
+          }
+        }
+      }
+    },
+    "No Matches" : {
+      "comment" : "Hardcover empty results title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune correspondance"
+          }
+        }
+      }
+    },
+    "No audiobook in your library" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucun livre audio dans votre bibliothèque"
           }
         }
       }
@@ -2515,17 +2408,6 @@
         }
       }
     },
-    "No Matches" : {
-      "comment" : "Hardcover empty results title",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune correspondance"
-          }
-        }
-      }
-    },
     "No results" : {
       "comment" : "No results title",
       "localizations" : {
@@ -2559,6 +2441,28 @@
         }
       }
     },
+    "Not Now" : {
+      "comment" : "Decline the series collection offer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pas maintenant"
+          }
+        }
+      }
+    },
+    "Not Started" : {
+      "comment" : "Filter: books not started",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Non commencé"
+          }
+        }
+      }
+    },
     "Not connected" : {
       "comment" : "Hardcover status: no token",
       "localizations" : {
@@ -2576,18 +2480,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Absent de ta bibliothèque"
-          }
-        }
-      }
-    },
-    "Not Now" : {
-      "comment" : "Decline the series collection offer",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Pas maintenant"
+            "value" : "Absent de votre bibliothèque"
           }
         }
       }
@@ -2599,17 +2492,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Pas sur cet appareil"
-          }
-        }
-      }
-    },
-    "Not Started" : {
-      "comment" : "Filter: books not started",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Non commencé"
           }
         }
       }
@@ -2690,17 +2572,6 @@
         }
       }
     },
-    "Off" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Désactivé"
-          }
-        }
-      }
-    },
     "OK" : {
       "comment" : "Dismiss alert button\nOK button",
       "localizations" : {
@@ -2712,13 +2583,13 @@
         }
       }
     },
-    "on iPhone" : {
-      "comment" : "Book/player status suffix: audio is on the iPhone, not the watch",
+    "Off" : {
+      "extractionState" : "manual",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "sur l'iPhone"
+            "value" : "Désactivé"
           }
         }
       }
@@ -2842,18 +2713,6 @@
         }
       }
     },
-    "Play a specific audiobook from your library" : {
-      "comment" : "Siri intent to play an audiobook from the user's library.",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lire un livre audio précis de votre bibliothèque"
-          }
-        }
-      }
-    },
     "Play Audiobook" : {
       "comment" : "Title of an intent to play an audiobook.",
       "isCommentAutoGenerated" : true,
@@ -2862,6 +2721,18 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lire un livre audio"
+          }
+        }
+      }
+    },
+    "Play a specific audiobook from your library" : {
+      "comment" : "Siri intent to play an audiobook from the user's library.",
+      "isCommentAutoGenerated" : true,
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire un livre audio précis de votre bibliothèque"
           }
         }
       }
@@ -2916,19 +2787,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vitesse de lecture"
-          }
-        }
-      }
-    },
-    "Playing %@" : {
-      "comment" : "A description of an audiobook being played.",
-      "extractionState" : "stale",
-      "isCommentAutoGenerated" : true,
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lecture de %@"
           }
         }
       }
@@ -3054,28 +2912,6 @@
         }
       }
     },
-    "ready" : {
-      "comment" : "Chapter status: downloaded and ready to play",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "prêt"
-          }
-        }
-      }
-    },
-    "receiving" : {
-      "comment" : "Book status suffix: chapter currently transferring to the watch",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "réception"
-          }
-        }
-      }
-    },
     "Recently Played" : {
       "comment" : "Sort by recently played",
       "localizations" : {
@@ -3148,6 +2984,17 @@
         }
       }
     },
+    "Remove Token" : {
+      "comment" : "Hardcover unlink button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le jeton"
+          }
+        }
+      }
+    },
     "Remove from Collection" : {
       "comment" : "Take a book out of a collection",
       "localizations" : {
@@ -3166,17 +3013,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retirer de la file d'attente"
-          }
-        }
-      }
-    },
-    "Remove Token" : {
-      "comment" : "Hardcover unlink button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Supprimer le jeton"
           }
         }
       }
@@ -3346,6 +3182,16 @@
         }
       }
     },
+    "Resume Last Book" : {
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre le dernier livre lu"
+          }
+        }
+      }
+    },
     "Resume at %@" : {
       "comment" : "Resume playback at a timestamp",
       "localizations" : {
@@ -3353,16 +3199,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reprendre à %@"
-          }
-        }
-      }
-    },
-    "Resume Last Book" : {
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reprendre le dernier livre lu"
           }
         }
       }
@@ -3383,18 +3219,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reprends l'écoute en cours."
-          }
-        }
-      }
-    },
-    "Resuming %@" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Reprise de %@"
+            "value" : "Reprenez l'écoute en cours."
           }
         }
       }
@@ -3443,17 +3268,6 @@
         }
       }
     },
-    "Search failed: %@" : {
-      "comment" : "Search failed error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Erreur de recherche : %@"
-          }
-        }
-      }
-    },
     "Search Google Images" : {
       "comment" : "Search Google Images button",
       "localizations" : {
@@ -3465,13 +3279,24 @@
         }
       }
     },
+    "Search failed: %@" : {
+      "comment" : "Search failed error message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Échec de la recherche : %@"
+          }
+        }
+      }
+    },
     "Search in transcription..." : {
       "comment" : "Search text field placeholder",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Rechercher dans la transcription..."
+            "value" : "Rechercher dans la transcription…"
           }
         }
       }
@@ -3493,7 +3318,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Recherche d'images..."
+            "value" : "Recherche d'images…"
           }
         }
       }
@@ -3549,17 +3374,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Envoi du chapitre %lld · %lld %%"
-          }
-        }
-      }
-    },
-    "sending from iPhone" : {
-      "comment" : "Chapter status: currently transferring from the iPhone",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "envoi depuis l'iPhone"
           }
         }
       }
@@ -3663,9 +3477,8 @@
         }
       }
     },
-    "Skip backward" : {
-      "comment" : "Intent to skip backward in playback.",
-      "isCommentAutoGenerated" : true,
+    "Skip Backward" : {
+      "comment" : "Skip backward accessibility label",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3675,8 +3488,20 @@
         }
       }
     },
-    "Skip Backward" : {
-      "comment" : "Skip backward accessibility label",
+    "Skip Forward" : {
+      "comment" : "Skip forward accessibility label",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avancer"
+          }
+        }
+      }
+    },
+    "Skip backward" : {
+      "comment" : "Intent to skip backward in playback.",
+      "isCommentAutoGenerated" : true,
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3698,13 +3523,13 @@
         }
       }
     },
-    "Skip Forward" : {
-      "comment" : "Skip forward accessibility label",
+    "Sleep Timer" : {
+      "comment" : "Sleep timer accessibility label",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Avancer"
+            "value" : "Minuteur de sommeil"
           }
         }
       }
@@ -3726,28 +3551,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Minuteur de sommeil"
-          }
-        }
-      }
-    },
-    "Sleep Timer" : {
-      "comment" : "Sleep timer accessibility label",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minuteur de sommeil"
-          }
-        }
-      }
-    },
-    "Sleep timer set" : {
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Minuteur de sommeil activé"
           }
         }
       }
@@ -3813,7 +3616,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Démarrage..."
+            "value" : "Démarrage…"
           }
         }
       }
@@ -3911,7 +3714,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Sarcelle"
+            "value" : "Bleu sarcelle"
           }
         }
       }
@@ -4016,18 +3819,6 @@
         }
       }
     },
-    "this month · %@ goal" : {
-      "comment" : "Monthly goal caption",
-      "extractionState" : "stale",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ce mois-ci · objectif %@"
-          }
-        }
-      }
-    },
     "This Week" : {
       "comment" : "Snapshot tile",
       "localizations" : {
@@ -4039,17 +3830,6 @@
         }
       }
     },
-    "This will clear your listening time, streaks, and monthly progress. Your books and goals remain." : {
-      "comment" : "Reset stats confirm message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés."
-          }
-        }
-      }
-    },
     "This Year" : {
       "comment" : "Completed: this year",
       "localizations" : {
@@ -4057,6 +3837,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Cette année"
+          }
+        }
+      }
+    },
+    "This will clear your listening time, streaks, and monthly progress. Your books and goals remain." : {
+      "comment" : "Reset stats confirm message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés."
           }
         }
       }
@@ -4110,7 +3901,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Basculer la lecture"
+            "value" : "Lecture/Pause"
           }
         }
       }
@@ -4242,18 +4033,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Erreur de traduction : %@"
-          }
-        }
-      }
-    },
-    "Try a different term or check spelling." : {
-      "comment" : "No results message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Essayez un autre terme ou vérifiez l'orthographe."
+            "value" : "Échec de la traduction : %@"
           }
         }
       }
@@ -4265,6 +4045,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réessayer"
+          }
+        }
+      }
+    },
+    "Try a different term or check spelling." : {
+      "comment" : "No results message",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayez un autre terme ou vérifiez l'orthographe."
           }
         }
       }
@@ -4335,17 +4126,6 @@
         }
       }
     },
-    "Up next" : {
-      "comment" : "Player: next chapters section",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "À suivre"
-          }
-        }
-      }
-    },
     "Up Next" : {
       "comment" : "Section title for the play queue",
       "localizations" : {
@@ -4357,13 +4137,13 @@
         }
       }
     },
-    "used · Clear" : {
-      "comment" : "On-watch storage: bytes used, paired with a button to clear everything",
+    "Up next" : {
+      "comment" : "Player: next chapters section",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "utilisés · Vider"
+            "value" : "À suivre"
           }
         }
       }
@@ -4396,18 +4176,7 @@
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les tomes"
-          }
-        }
-      }
-    },
-    "waiting" : {
-      "comment" : "Book/chapter status: queued, transfer not started yet",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "en attente"
+            "value" : "Tomes"
           }
         }
       }
@@ -4495,6 +4264,138 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre progression et vos signets n'ont peut-être pas été enregistrés.\n%@"
+          }
+        }
+      }
+    },
+    "ch." : {
+      "comment" : "Widget: chapter abbreviation before a number",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ch."
+          }
+        }
+      }
+    },
+    "days" : {
+      "comment" : "Days unit for stat card",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "jours"
+          }
+        }
+      }
+    },
+    "for %@" : {
+      "comment" : "Cover image for audiobook title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "pour %@"
+          }
+        }
+      }
+    },
+    "iCloud Sync" : {
+      "comment" : "iCloud sync toggle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Synchronisation iCloud"
+          }
+        }
+      }
+    },
+    "in progress · %@ left" : {
+      "comment" : "Remaining listening time",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en cours · il reste %@"
+          }
+        }
+      }
+    },
+    "in progress · ch. %d of %d" : {
+      "comment" : "Collection row: chapter position",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en cours · ch. %d sur %d"
+          }
+        }
+      }
+    },
+    "on iPhone" : {
+      "comment" : "Book/player status suffix: audio is on the iPhone, not the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur l'iPhone"
+          }
+        }
+      }
+    },
+    "ready" : {
+      "comment" : "Chapter status: downloaded and ready to play",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "prêt"
+          }
+        }
+      }
+    },
+    "receiving" : {
+      "comment" : "Book status suffix: chapter currently transferring to the watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "réception"
+          }
+        }
+      }
+    },
+    "sending from iPhone" : {
+      "comment" : "Chapter status: currently transferring from the iPhone",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "envoi depuis l'iPhone"
+          }
+        }
+      }
+    },
+    "used · Clear" : {
+      "comment" : "On-watch storage: bytes used, paired with a button to clear everything",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "utilisés · Vider"
+          }
+        }
+      }
+    },
+    "waiting" : {
+      "comment" : "Book/chapter status: queued, transfer not started yet",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en attente"
           }
         }
       }

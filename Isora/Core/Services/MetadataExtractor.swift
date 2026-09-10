@@ -19,10 +19,11 @@ enum MetadataExtractor {
     /// ponytail: the composer fallback trusts audiobook tagging habits; a real composer tag on
     /// a music file would land here too.
     static func narratorTag(in metadata: [AVMetadataItem]) async -> String? {
-        let explicit = metadata.filter { item in
+        var explicit: [AVMetadataItem] = []
+        for item in metadata {
             let id = item.identifier?.rawValue.lowercased() ?? ""
-            let info = (item.extraAttributes?[.info] as? String)?.lowercased() ?? ""
-            return id.contains("%a9nrt") || id.contains("narrator") || info.contains("narrator")
+            let info = ((try? await item.load(.extraAttributes))?[.info] as? String)?.lowercased() ?? ""
+            if id.contains("%a9nrt") || id.contains("narrator") || info.contains("narrator") { explicit.append(item) }
         }
         let composer = metadata.filter {
             $0.identifier == .iTunesMetadataComposer || $0.identifier == .id3MetadataComposer

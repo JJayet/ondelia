@@ -33,11 +33,24 @@ extension LibraryView {
             }
 
             // Collections: Hardcover series and hand-made ones
+            if !collectionGroups.isEmpty {
+                SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
+            }
             ForEach(collectionGroups) { group in
                 collectionCard(group)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+            }
+
+            if !audiobookManager.audiobooks.isEmpty {
+                SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
             }
 
             // Header with filters
@@ -89,7 +102,8 @@ extension LibraryView {
 
                 // Collections: Hardcover series and hand-made ones
                 if !collectionGroups.isEmpty {
-                    VStack(spacing: 12) {
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         ForEach(collectionGroups) { group in
                             collectionCard(group)
                         }
@@ -99,6 +113,11 @@ extension LibraryView {
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {
+                    if !audiobookManager.audiobooks.isEmpty {
+                        SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
+                            .padding(.horizontal)
+                    }
+
                     // Header with filters
                     LibraryHeaderView(
                         viewMode: $viewMode,

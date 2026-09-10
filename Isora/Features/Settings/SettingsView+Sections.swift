@@ -42,6 +42,21 @@ extension SettingsView {
 
             SettingsDivider()
 
+            // iOS remembers the alternate icon itself, so the picker reads it back rather than storing a copy.
+            SettingsRow(title: NSLocalizedString("App Icon", comment: "App icon setting label")) {
+                Picker(selection: $appIcon) {
+                    Text(NSLocalizedString("Day", comment: "Light app icon")).tag("Day")
+                    Text(NSLocalizedString("Night", comment: "Dark app icon")).tag("Night")
+                } label: { Text(verbatim: "") }
+                .labelsHidden()
+                .pickerStyle(.menu)
+                .onChange(of: appIcon) { _, icon in
+                    UIApplication.shared.setAlternateIconName(icon == "Day" ? nil : icon)
+                }
+            }
+
+            SettingsDivider()
+
             SettingsRow(title: NSLocalizedString("Books per row", comment: "Grid density menu title")) {
                 Picker(selection: $gridColumns) {
                     ForEach([2, 3, 4], id: \.self) { count in

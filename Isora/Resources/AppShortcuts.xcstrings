@@ -54,6 +54,12 @@
               "Listen to ${audiobook} in ${applicationName}"
             ]
           }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire ${audiobook} dans ${applicationName}"
+          }
         }
       }
     },
@@ -103,8 +109,8 @@
         },
         "fr" : {
           "stringUnit" : {
-            "state" : "needs_review",
-            "value" : "Fin du chapitre en cours dans ${applicationName}"
+            "state" : "translated",
+            "value" : "Dormir à la fin du chapitre dans ${applicationName}"
           }
         }
       }
