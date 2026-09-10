@@ -45,7 +45,7 @@ enum WatchUITestBootstrap {
             if onWatch {
                 let folder = WatchLibraryDisk.bookFolder(book.id)
                 try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
-                for number in 1...4 {
+                for number in 1...12 {
                     try Data(count: 2_400_000).write(to: WatchLibraryDisk.chapterURL(bookID: book.id, number: number))
                 }
             }
