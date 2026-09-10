@@ -1,0 +1,44 @@
+IsoraUITests/ScreenshotUITests.swift
+  s_51a0267414ccca::t_416099c95b44c9 9-10
+  s_51a0267414ccca::t_cadc72dbb2dcb0 1-8,11-28,33-49
+  s_51a0267414ccca::t_d4363e287f1cf4 29-32
+Isora/App/UITestBootstrap+Showcase.swift
+  s_51a0267414ccca::t_cadc72dbb2dcb0 1-63,67-69,71-80,82-106
+  s_51a0267414ccca::t_cd2f71c3ec9e4a 81
+  s_51a0267414ccca::t_37cda657666f6f 64-66
+  s_51a0267414ccca::t_24761933232837 70
+IsoraUITests/AudiobookUITestCase.swift
+  s_51a0267414ccca::t_bbf64b704ad12d 32
+  s_51a0267414ccca::t_cadc72dbb2dcb0 22-23,34,56-57
+  s_51a0267414ccca::t_8c4158f8805080 24-31,33
+.gitignore
+  s_51a0267414ccca::t_cd2f71c3ec9e4a 28
+Isora/App/UITestBootstrap.swift
+  s_51a0267414ccca::t_cadc72dbb2dcb0 46-50
+scripts/screenshots.sh
+  s_51a0267414ccca::t_cadc72dbb2dcb0 1,4,7-10,13-17,24-25,31-32,36,42-44
+  s_51a0267414ccca::t_416099c95b44c9 41
+  s_51a0267414ccca::t_21f79d1c4cd391 2-3
+  s_51a0267414ccca::t_1da0b379d02f0b 5-6
+  s_51a0267414ccca::t_55dbe63c02b130 11-12
+  s_51a0267414ccca::t_9ca80f26f189b3 18-23
+  s_51a0267414ccca::t_6522bcd5e43632 26-30
+  s_51a0267414ccca::t_12e64df3cd9871 33-35
+  s_51a0267414ccca::t_14dbb29266d16f 37-40
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "433468d8a96efe142420f479db876840664de926",
+  "prompts": {},
+  "sessions": {
+    "s_51a0267414ccca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa0215f7-e45b-4ed3-8d27-581bf48a10b8",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
