@@ -43,6 +43,11 @@ enum UITestBootstrap {
             try context.save()
         }
 
+        if arguments.contains("--seed-showcase") {
+            try seedShowcase(context: context)
+            return
+        }
+
         // A linked series, for the suites and screenshots that need the library grouped.
         // Seeded once: without `--reset-state` this runs again on every launch, and the shelf
         // would grow a second Mistborn every time.

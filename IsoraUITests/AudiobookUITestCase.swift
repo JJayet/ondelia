@@ -19,8 +19,19 @@ class AudiobookUITestCase: XCTestCase {
     /// Launch arguments a suite needs on top of the shared ones.
     var extraLaunchArguments: [String] { [] }
 
-    var libraryTab: XCUIElement { app.tabBars.buttons["Library"] }
-    var settingsTab: XCUIElement { app.tabBars.buttons["Settings"] }
+    /// Language the app runs in. Fixed so tab labels are known, overridable for screenshots.
+    var language: String { "en" }
+
+    // iPad's top tab strip exposes the identifiers; iPhone's tab bar exposes only localized
+    // labels, so there the lookup falls back to position.
+    var libraryTab: XCUIElement { tab(AccessibilityIdentifiers.TabBar.libraryTab, index: 0) }
+    var statisticsTab: XCUIElement { tab("tab_bar_statistics", index: 1) }
+    var settingsTab: XCUIElement { tab(AccessibilityIdentifiers.TabBar.settingsTab, index: 2) }
+
+    private func tab(_ identifier: String, index: Int) -> XCUIElement {
+        let byIdentifier = app.buttons[identifier].firstMatch
+        return byIdentifier.exists ? byIdentifier : app.tabBars.buttons.element(boundBy: index)
+    }
 
     /// The library rows. The identifier sits on each row's button, not on the collection view
     /// cell SwiftUI wraps it in.
@@ -42,8 +53,8 @@ class AudiobookUITestCase: XCTestCase {
         app = XCUIApplication()
         app.launchArguments += [
             "--uitesting",
-            "-AppleLanguages", "(en)",
-            "-AppleLocale", "en_US"
+            "-AppleLanguages", "(\(language))",
+            "-AppleLocale", language == "fr" ? "fr_FR" : "en_US"
         ] + extraLaunchArguments
         app.launch()
 
