@@ -1,0 +1,33 @@
+IsoraUITests/LibraryViewUITests.swift
+  s_f9e2ba8f5546a4::t_8d44346626a49c 237
+  s_67e330df75a5cc::t_d3822821b98443 238
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "3a31084841d845e84436a2210cf2bf9bc692f7f8",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_67e330df75a5cc": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a08b44-6dbc-7383-a914-017ab02214e0",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_f9e2ba8f5546a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c22b0c11-5179-4e82-88e0-fc9888f97932",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
