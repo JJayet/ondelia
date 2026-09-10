@@ -1,0 +1,14 @@
+TODO.md
+  h_59e29111fad4d9 32,44,48,51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cdcd36271e3f272ddca35e703d2db8f8e0ac0822",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
