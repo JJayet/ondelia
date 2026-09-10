@@ -1,0 +1,23 @@
+Isora/Core/Managers/AudiobookManager+Inbox.swift
+  s_51a0267414ccca::t_fd0fb5a83e3923 4
+Isora/Resources/Info.plist
+  s_51a0267414ccca::t_fd0fb5a83e3923 36
+Isora/App/MainTabView.swift
+  s_51a0267414ccca::t_fd0fb5a83e3923 115,121-122
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cea6d2d4618135ddd724ac34483b85aa74fbfb4f",
+  "prompts": {},
+  "sessions": {
+    "s_51a0267414ccca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa0215f7-e45b-4ed3-8d27-581bf48a10b8",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
