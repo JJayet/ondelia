@@ -10,6 +10,16 @@ import SwiftUI
 
 @main
 struct IsoraWatchApp: App {
+    init() {
+        #if DEBUG
+        do {
+            try WatchUITestBootstrap.prepareIfRequested(context: WatchLibraryStore.shared.context)
+        } catch {
+            Log.store.error("❌ WatchUITestBootstrap: \(error.localizedDescription)")
+        }
+        #endif
+    }
+
     var body: some Scene {
         WindowGroup {
             RootView()
