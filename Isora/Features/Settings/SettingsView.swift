@@ -34,7 +34,7 @@ struct SettingsView: View {
                     integrationsSection
                     WatchSettingsSection()
                     dataSection
-                    TipJarSection()
+                    // TipJarSection() // Hidden until the products exist in App Store Connect.
                     aboutSection
                 }
                 .padding(.horizontal, 16)
