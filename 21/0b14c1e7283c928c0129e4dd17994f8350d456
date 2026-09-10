@@ -1,0 +1,19 @@
+"IsoraWatch Watch App/WatchUITestBootstrap.swift"
+  s_51a0267414ccca::t_9edaf1e45080a1 1-72
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "210b14c1e7283c928c0129e4dd17994f8350d456",
+  "prompts": {},
+  "sessions": {
+    "s_51a0267414ccca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa0215f7-e45b-4ed3-8d27-581bf48a10b8",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
