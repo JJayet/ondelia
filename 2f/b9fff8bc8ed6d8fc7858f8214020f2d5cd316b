@@ -1,0 +1,19 @@
+Isora/Features/Settings/SettingsView.swift
+  s_51a0267414ccca::t_b7f43bf8e49125 37
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2fb9fff8bc8ed6d8fc7858f8214020f2d5cd316b",
+  "prompts": {},
+  "sessions": {
+    "s_51a0267414ccca": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "aa0215f7-e45b-4ed3-8d27-581bf48a10b8",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
