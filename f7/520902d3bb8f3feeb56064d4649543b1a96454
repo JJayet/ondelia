@@ -1,0 +1,24 @@
+Isora.xcodeproj/project.pbxproj
+  s_f9e2ba8f5546a4::t_0ee45b6c38e7a0 810,848,1009,1027,1044,1060,1079,1112,1143,1166,1188,1210,1235,1269,1304,1339
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "f7520902d3bb8f3feeb56064d4649543b1a96454",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_f9e2ba8f5546a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "c22b0c11-5179-4e82-88e0-fc9888f97932",
+        "model": "claude-opus-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
