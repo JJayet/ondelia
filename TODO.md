@@ -29,7 +29,7 @@ Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately
 
 ## Open after the 5 September 2026 audit
 
-- [ ] **Rotate the Google Custom Search API key.** `Config/Secrets.xcconfig` was tracked until
+- [X] **Rotate the Google Custom Search API key.** `Config/Secrets.xcconfig` was tracked until
       `74bf956`; commit `c11cf6b` still contains the key. Create a new key in Google Cloud Console,
       restrict it to bundle `io.jayet.Isora`, revoke the old one.
 - [ ] **UI suite flake in CI.** One `xctrunner` clone failed to launch ("Application failed preflight
@@ -41,11 +41,11 @@ Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately
 
 ## Needs a device to verify
 
-- [ ] **Widget / Control Center from a cold start.** The intents now perform the work in the app
+- [X] **Widget / Control Center from a cold start.** The intents now perform the work in the app
       process (`PlaybackCommands.perform`) instead of posting a Darwin notification that expires
       unheard; the extension's copy of the intent only compiles, guarded by `WIDGET_EXTENSION`.
       This cannot be exercised in the simulator — confirm on a device with the app force-quit.
-- [ ] **Lock screen previous/next chapter** (`nextTrackCommand` / `previousTrackCommand`) and the
+- [X] **Lock screen previous/next chapter** (`nextTrackCommand` / `previousTrackCommand`) and the
       re-applied skip interval: both are `MPRemoteCommandCenter` behaviour, so they need the real
       lock screen.
-- [ ] **"Play &lt;book&gt;" App Shortcut phrase.** Spotlight indexing itself is verified working.
+- [X] **"Play &lt;book&gt;" App Shortcut phrase.** Spotlight indexing itself is verified working.
