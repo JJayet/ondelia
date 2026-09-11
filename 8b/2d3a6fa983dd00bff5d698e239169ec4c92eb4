@@ -1,0 +1,21 @@
+Isora/Features/Player/PlayerView+Controls.swift
+  s_9826cd83e511cb::t_9736675efd23bd 7,90-91,97,101
+Isora/Core/Services/Log.swift
+  s_9826cd83e511cb::t_9736675efd23bd 18
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8b2d3a6fa983dd00bff5d698e239169ec4c92eb4",
+  "prompts": {},
+  "sessions": {
+    "s_9826cd83e511cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592f7b1d-f7af-497d-a539-6ebd468ced63",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
