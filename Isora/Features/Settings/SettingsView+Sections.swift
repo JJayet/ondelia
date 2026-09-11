@@ -320,6 +320,27 @@ extension SettingsView {
 
             SettingsDivider()
 
+            Button { withHapticFeedback { onboardingCompleted = false } } label: {
+                SettingsRow(title: NSLocalizedString("Show Welcome Screen", comment: "Settings: replay the onboarding"))
+            }
+            .buttonStyle(.plain)
+
+            SettingsDivider()
+
+            Button { withHapticFeedback { tipsResetPending = true } } label: {
+                SettingsRow(title: NSLocalizedString("Reset Tips", comment: "Settings: show every in-app tip again")) {
+                    if tipsResetPending {
+                        Text(NSLocalizedString("On next launch", comment: "Settings: tips reset is pending"))
+                            .font(.system(size: 13))
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
+            .buttonStyle(.plain)
+            .disabled(tipsResetPending)
+
+            SettingsDivider()
+
             Link(destination: URL(string: "https://github.com/JJayet/audiobook")!) {
                 SettingsRow(title: NSLocalizedString("GitHub", comment: "GitHub link label")) {
                     Image(systemName: "arrow.up.right")

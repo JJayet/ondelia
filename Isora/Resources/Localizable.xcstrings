@@ -321,6 +321,17 @@
         }
       }
     },
+    "%d imported · Add more" : {
+      "comment" : "Onboarding: import button after a pick",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d importé(s) · Ajouter"
+          }
+        }
+      }
+    },
     "%d of %d" : {
       "comment" : "Owned volumes out of the whole series",
       "localizations" : {
@@ -577,6 +588,17 @@
         }
       }
     },
+    "A few things worth knowing. Tips will point them out as you go." : {
+      "comment" : "Onboarding: ready body",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelques choses à savoir. Des astuces vous les montreront en chemin."
+          }
+        }
+      }
+    },
     "About" : {
       "comment" : "Settings section: About",
       "localizations" : {
@@ -606,6 +628,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Jeton d’accès"
+          }
+        }
+      }
+    },
+    "Access token" : {
+      "comment" : "Onboarding: Hardcover token placeholder",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jeton d'accès"
           }
         }
       }
@@ -687,6 +720,17 @@
         }
       }
     },
+    "All of this is optional and lives in Settings too." : {
+      "comment" : "Onboarding: integrations body",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout ceci est facultatif et se retrouve aussi dans les Réglages."
+          }
+        }
+      }
+    },
     "Almost done..." : {
       "comment" : "Transcription loader phrase",
       "localizations" : {
@@ -721,7 +765,7 @@
       }
     },
     "Apple Watch" : {
-      "comment" : "Settings section title",
+      "comment" : "Apple Watch",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -760,6 +804,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fichiers audio"
+          }
+        }
+      }
+    },
+    "Audio files, a folder of chapters, or a ZIP. Metadata, covers and chapters are read for you." : {
+      "comment" : "Onboarding: import body",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Des fichiers audio, un dossier de chapitres ou un ZIP. Métadonnées, couvertures et chapitres sont lus pour vous."
           }
         }
       }
@@ -1017,6 +1072,17 @@
         }
       }
     },
+    "Bring your books" : {
+      "comment" : "Onboarding: import title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Apportez vos livres"
+          }
+        }
+      }
+    },
     "By book" : {
       "comment" : "Storage section: per-book sizes",
       "localizations" : {
@@ -1150,6 +1216,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Chapitres"
+          }
+        }
+      }
+    },
+    "Chapters live here" : {
+      "comment" : "Tip title: chapter counter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les chapitres sont ici"
           }
         }
       }
@@ -1297,6 +1374,17 @@
         }
       }
     },
+    "Connect, if you like" : {
+      "comment" : "Onboarding: integrations title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Connectez, si vous voulez"
+          }
+        }
+      }
+    },
     "Connected" : {
       "comment" : "Hardcover status: linked, never synced",
       "localizations" : {
@@ -1304,6 +1392,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connecté"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "comment" : "Onboarding: next page button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
           }
         }
       }
@@ -1647,6 +1746,28 @@
         }
       }
     },
+    "From Files or iCloud Drive" : {
+      "comment" : "Onboarding: import source",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis Fichiers ou iCloud Drive"
+          }
+        }
+      }
+    },
+    "From any app" : {
+      "comment" : "Onboarding: share sheet import",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis n'importe quelle app"
+          }
+        }
+      }
+    },
     "From the collection" : {
       "comment" : "Play queue: book a collection plays next",
       "localizations" : {
@@ -1665,6 +1786,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Genres"
+          }
+        }
+      }
+    },
+    "Get Started" : {
+      "comment" : "Onboarding: last page button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Commencer"
           }
         }
       }
@@ -1714,7 +1846,7 @@
       }
     },
     "Hardcover" : {
-      "comment" : "Hardcover picker title",
+      "comment" : "Hardcover integration\nHardcover picker title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1971,6 +2103,17 @@
         }
       }
     },
+    "Line up what plays next and reorder it." : {
+      "comment" : "Onboarding: queue detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Préparez ce qui suit et réordonnez-le."
+          }
+        }
+      }
+    },
     "Link books to Hardcover to see genres." : {
       "comment" : "Statistics: genre card empty state",
       "localizations" : {
@@ -2015,6 +2158,17 @@
         }
       }
     },
+    "Listen on your watch" : {
+      "comment" : "Tip title: Apple Watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écoutez sur votre montre"
+          }
+        }
+      }
+    },
     "Listened" : {
       "comment" : "Snapshot tile",
       "localizations" : {
@@ -2033,6 +2187,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Calendrier d'écoute"
+          }
+        }
+      }
+    },
+    "Listening time, streaks and a monthly goal." : {
+      "comment" : "Onboarding: statistics detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Temps d'écoute, séries de jours et objectif mensuel."
           }
         }
       }
@@ -2176,6 +2341,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Étapes"
+          }
+        }
+      }
+    },
+    "Minutes or end of chapter, with a fade-out." : {
+      "comment" : "Onboarding: sleep timer detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En minutes ou à la fin du chapitre, avec fondu."
           }
         }
       }
@@ -2616,6 +2792,17 @@
         }
       }
     },
+    "On next launch" : {
+      "comment" : "Settings: tips reset is pending",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Au prochain démarrage"
+          }
+        }
+      }
+    },
     "On the watch" : {
       "comment" : "Book status: already downloaded to the watch",
       "localizations" : {
@@ -2627,6 +2814,17 @@
         }
       }
     },
+    "On-device transcription, synced with playback." : {
+      "comment" : "Onboarding: transcript detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcription sur l'appareil, synchronisée avec la lecture."
+          }
+        }
+      }
+    },
     "Open Player" : {
       "comment" : "Accessibility action: expand the mini player",
       "localizations" : {
@@ -2634,6 +2832,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ouvrir le lecteur"
+          }
+        }
+      }
+    },
+    "Open a book and choose \"Send to Apple Watch\". Chapters arrive a few at a time and progress syncs both ways." : {
+      "comment" : "Tip message: Apple Watch",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ouvrez un livre et choisissez « Envoyer sur l'Apple Watch ». Les chapitres arrivent par petits groupes et la progression se synchronise dans les deux sens."
           }
         }
       }
@@ -2682,6 +2891,17 @@
         }
       }
     },
+    "Paste an access token from hardcover.app to track what you listen to and find series." : {
+      "comment" : "Onboarding: Hardcover detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Collez un jeton d'accès de hardcover.app pour suivre vos écoutes et retrouver les séries."
+          }
+        }
+      }
+    },
     "Pause" : {
       "comment" : "Pause playback\nPause playback accessibility label",
       "localizations" : {
@@ -2709,6 +2929,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Met en pause le livre audio en cours"
+          }
+        }
+      }
+    },
+    "Pick one book or many at once." : {
+      "comment" : "Onboarding: import source detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Choisissez un livre ou plusieurs à la fois."
           }
         }
       }
@@ -2781,6 +3012,17 @@
         }
       }
     },
+    "Play the whole series" : {
+      "comment" : "Tip title: collection auto-continue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouter toute la série"
+          }
+        }
+      }
+    },
     "Play/Pause" : {
       "localizations" : {
         "fr" : {
@@ -2835,6 +3077,17 @@
         }
       }
     },
+    "Press and hold a book" : {
+      "comment" : "Tip title: book context menu",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Maintenez un livre appuyé"
+          }
+        }
+      }
+    },
     "Previous Chapter" : {
       "comment" : "Previous chapter accessibility label",
       "localizations" : {
@@ -2853,6 +3106,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Progression"
+          }
+        }
+      }
+    },
+    "Progress and bookmarks on every device. Audio stays local." : {
+      "comment" : "Onboarding: iCloud detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Progression et signets sur tous vos appareils. L'audio reste local."
           }
         }
       }
@@ -2912,6 +3176,17 @@
         }
       }
     },
+    "Queue it, add it to a collection, link it to Hardcover or send it to your watch." : {
+      "comment" : "Tip message: book context menu",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mettez-le en file d'attente, ajoutez-le à une collection, liez-le à Hardcover ou envoyez-le sur votre montre."
+          }
+        }
+      }
+    },
     "Quit and reopen the app to finish restoring your library." : {
       "comment" : "Restore success alert message",
       "localizations" : {
@@ -2930,6 +3205,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Relit la série, le résumé, les genres, les ambiances et les avertissements de contenu de chaque livre lié."
+          }
+        }
+      }
+    },
+    "Read along" : {
+      "comment" : "Tip title: transcript",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire en écoutant"
           }
         }
       }
@@ -3123,6 +3409,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réinitialiser les statistiques ?"
+          }
+        }
+      }
+    },
+    "Reset Tips" : {
+      "comment" : "Settings: show every in-app tip again",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réinitialiser les astuces"
           }
         }
       }
@@ -3389,6 +3686,17 @@
         }
       }
     },
+    "Send a book's chapters to your watch from its page and listen without the phone." : {
+      "comment" : "Onboarding: watch detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Envoyez les chapitres d'un livre sur votre montre depuis sa page et écoutez sans le téléphone."
+          }
+        }
+      }
+    },
     "Send to Apple Watch" : {
       "comment" : "Send-to-watch button label",
       "localizations" : {
@@ -3433,6 +3741,17 @@
         }
       }
     },
+    "Series grouped for you" : {
+      "comment" : "Onboarding: series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les séries regroupées pour vous"
+          }
+        }
+      }
+    },
     "Series order" : {
       "comment" : "Collection order: Hardcover volume position",
       "localizations" : {
@@ -3462,6 +3781,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réglages"
+          }
+        }
+      }
+    },
+    "Share a file to the app, or AirDrop it from a Mac." : {
+      "comment" : "Onboarding: share sheet detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Partagez un fichier vers l'app, ou envoyez-le par AirDrop depuis un Mac."
           }
         }
       }
@@ -3499,6 +3829,17 @@
         }
       }
     },
+    "Show Welcome Screen" : {
+      "comment" : "Settings: replay the onboarding",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher l'écran de bienvenue"
+          }
+        }
+      }
+    },
     "Show series books you don't own" : {
       "comment" : "Toggle for catalogue volumes in series cards",
       "localizations" : {
@@ -3506,6 +3847,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher les livres de la série que vous n'avez pas"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "comment" : "Onboarding: skip button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
           }
         }
       }
@@ -3578,7 +3930,7 @@
       }
     },
     "Sleep timer" : {
-      "comment" : "Navigation title: sleep timer picker",
+      "comment" : "Tip title: sleep timer",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3665,6 +4017,17 @@
         }
       }
     },
+    "Stop after a few minutes or at the end of the chapter. The volume fades out first." : {
+      "comment" : "Tip message: sleep timer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Arrêt après quelques minutes ou à la fin du chapitre. Le volume baisse en douceur avant."
+          }
+        }
+      }
+    },
     "Stop playback when the current chapter ends" : {
       "localizations" : {
         "fr" : {
@@ -3737,6 +4100,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Appuyez sur + pour ajouter un signet à la position actuelle"
+          }
+        }
+      }
+    },
+    "Tap the \"Next\" row to see the queue, drag books into order or start one now." : {
+      "comment" : "Tip message: play queue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez la ligne « Ensuite » pour voir la file d'attente, réordonner les livres ou en lancer un maintenant."
+          }
+        }
+      }
+    },
+    "Tap the counter to see every chapter and jump to one." : {
+      "comment" : "Tip message: chapter counter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez le compteur pour voir tous les chapitres et aller à l'un d'eux."
           }
         }
       }
@@ -3994,6 +4379,17 @@
         }
       }
     },
+    "Transcribe the chapter on your device, follow the sentence being read and tap one to seek." : {
+      "comment" : "Tip message: transcript",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcrivez le chapitre sur votre appareil, suivez la phrase lue et touchez-en une pour vous y rendre."
+          }
+        }
+      }
+    },
     "Transcribed" : {
       "comment" : "Transcription completed status",
       "localizations" : {
@@ -4137,6 +4533,17 @@
         }
       }
     },
+    "Turn on \"Play back to back\" and the next volume starts when this one ends." : {
+      "comment" : "Tip message: collection auto-continue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Activez « Lecture enchaînée » et le tome suivant démarre à la fin de celui-ci."
+          }
+        }
+      }
+    },
     "Type a title or author to find a book in your library." : {
       "comment" : "Search empty message",
       "localizations" : {
@@ -4236,6 +4643,17 @@
         }
       }
     },
+    "Volumes of one series become a collection that plays back to back." : {
+      "comment" : "Onboarding: series detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les tomes d'une série forment une collection qui s'enchaîne."
+          }
+        }
+      }
+    },
     "Waiting for ch." : {
       "comment" : "Player caption prefix: paused, waiting for a chapter from the phone",
       "localizations" : {
@@ -4253,6 +4671,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Une semaine d'affilée"
+          }
+        }
+      }
+    },
+    "Welcome to %@" : {
+      "comment" : "Onboarding: welcome title, %@ is the app name",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenue dans %@"
+          }
+        }
+      }
+    },
+    "What plays next" : {
+      "comment" : "Tip title: play queue",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qui suit"
           }
         }
       }
@@ -4286,6 +4726,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Un bon moment vous attend"
+          }
+        }
+      }
+    },
+    "You're set" : {
+      "comment" : "Onboarding: ready title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous êtes prêt"
+          }
+        }
+      }
+    },
+    "Your audiobooks, played your way. Everything stays on your device unless you connect a service yourself." : {
+      "comment" : "Onboarding: welcome body",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres audio, à votre façon. Tout reste sur votre appareil, sauf si vous connectez un service vous-même."
           }
         }
       }

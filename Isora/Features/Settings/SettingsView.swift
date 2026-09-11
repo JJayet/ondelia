@@ -22,6 +22,8 @@ struct SettingsView: View {
     @AppStorage(SwiftDataController.iCloudSyncKey) var iCloudSync = true
     /// Whole library folder, shown beside the Storage row. Recomputed each time Settings opens.
     @State var storageBytes: Int64?
+    @AppStorage(OnboardingView.completedKey) var onboardingCompleted = false
+    @AppStorage(AppTips.resetPendingKey) var tipsResetPending = false
 
     var body: some View {
         NavigationStack {

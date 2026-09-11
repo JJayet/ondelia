@@ -11,6 +11,7 @@ struct MainTabView: View {
     @State private var searchText: String = ""
     @Namespace private var namespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @AppStorage(OnboardingView.completedKey) private var onboardingCompleted = false
 
     var body: some View {
         // Applied once here: sheets and covers presented from the tabs inherit both, so no
@@ -26,6 +27,14 @@ struct MainTabView: View {
                 }
             }
             .animation(.spring(duration: 0.4), value: statistics.newlyUnlocked)
+            .fullScreenCover(isPresented: Binding(
+                get: { !onboardingCompleted && !OnboardingView.suppressed },
+                set: { if !$0 { onboardingCompleted = true } }
+            )) {
+                OnboardingView { onboardingCompleted = true }
+                    .preferredColorScheme(themeManager.currentTheme.colorScheme)
+                    .tint(themeManager.accentColor.color)
+            }
     }
 
     @ViewBuilder
