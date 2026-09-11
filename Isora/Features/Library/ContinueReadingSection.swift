@@ -60,13 +60,20 @@ struct ContinueReadingSection: View {
             SectionLabel(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
                 .padding(.horizontal, headerPadding)
 
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 16) {
-                    ForEach(entries) { entry in
-                        ContinueReadingCardView(entry: entry) { onSelect(entry.book) }
+            // One card takes the row, like the queue and collection cards under it; only a
+            // strip of several scrolls.
+            if entries.count == 1, let entry = entries.first {
+                ContinueReadingCardView(entry: entry, fullWidth: true) { onSelect(entry.book) }
+                    .padding(.horizontal, headerPadding)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    LazyHStack(spacing: 16) {
+                        ForEach(entries) { entry in
+                            ContinueReadingCardView(entry: entry) { onSelect(entry.book) }
+                        }
                     }
+                    .padding(.horizontal, rowPadding)
                 }
-                .padding(.horizontal, rowPadding)
             }
         }
     }

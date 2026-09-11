@@ -90,10 +90,10 @@ final class GlobalAudioManager {
         pendingAutoplay = false
         pendingSeek = nil
 
-        activateAudioSession()
-
         loadTask = Task { [weak self] in
             guard let self else { return }
+            await self.activateAudioSession()
+            guard !Task.isCancelled else { return }
             let newPlayer = AudiobookPlayer()
             let loaded = await newPlayer.load(audiobook)
             guard !Task.isCancelled else {

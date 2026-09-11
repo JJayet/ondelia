@@ -111,6 +111,10 @@ final class AudiobookPlayer {
         guard tracks.indices.contains(index) else { return }
         for offset in index..<tracks.count {
             let item = AVPlayerItem(url: tracks[offset].url)
+            #if !os(watchOS)
+            // Default is mono and stereo only: a Dolby Atmos track would play, but unspatialised.
+            item.allowedAudioSpatializationFormats = .monoStereoAndMultichannel
+            #endif
             trackIndexByItem[ObjectIdentifier(item)] = offset
             player.insert(item, after: nil)
         }

@@ -30,7 +30,7 @@ struct PlayerView: View {
         return chapters.first { now >= $0.startTime && now < $0.endTime }
             ?? chapters.last { now >= $0.startTime }
     }
-
+  
     @State var showingBookmarks = false
     @State var showingChapterList = false
     @State var showingTranscription = false

@@ -2,6 +2,8 @@ import SwiftUI
 
 struct ContinueReadingCardView: View {
     let entry: ContinueReadingEntry
+    /// Alone on its row the card fills it; in a scrolling strip each card is 320 points.
+    var fullWidth = false
     let onTap: () -> Void
 
     private var audiobook: AudiobookModel { entry.book }
@@ -84,7 +86,8 @@ struct ContinueReadingCardView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             .padding(14)
-            .frame(width: 320)
+            .frame(width: fullWidth ? nil : 320)
+            .frame(maxWidth: .infinity)
             .glassCard()
         }
         .buttonStyle(.plain)
