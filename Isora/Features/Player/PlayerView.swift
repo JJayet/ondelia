@@ -2,7 +2,11 @@ import SwiftUI
 import UIKit
 
 struct PlayerView: View {
-    let audiobook: AudiobookModel
+    /// The book this screen was opened on. Playback can move past it — the end of a book rolls
+    /// into the next one — so the screen follows whatever the engine holds, not this.
+    let openedBook: AudiobookModel
+
+    var audiobook: AudiobookModel { audioManager.currentAudiobook ?? openedBook }
 
     // The engine is a singleton and the view reads it straight through, as `MiniPlayerBar`
     // does. Observation tracks the properties these touch, so the player redraws whenever
@@ -29,9 +33,11 @@ struct PlayerView: View {
     @State var showingBookmarks = false
     @State var showingChapterList = false
     @State var showingTranscription = false
+    @State var showingQueue = false
     // Sheet presentation handles dragging/dismiss. No custom drag state needed.
     @Environment(\.dismiss) var dismiss
     @Environment(\.playerRouter) var playerRouter
+    @Environment(\.accessibilityReduceMotion) var reduceMotion
 
     var coverImage: UIImage? {
         CoverImageCache.image(for: audiobook)
@@ -50,7 +56,7 @@ struct PlayerView: View {
             fullPlayerView(geometry: geometry)
         }
         .onAppear {
-            audioManager.loadAudiobook(audiobook)
+            audioManager.loadAudiobook(openedBook)
         }
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(
@@ -71,6 +77,13 @@ struct PlayerView: View {
         }
         .sheet(isPresented: $showingTranscription) {
             TranscriptionView(audiobook: audiobook)
+        }
+        .sheet(isPresented: $showingQueue) {
+            PlayQueueView(chained: audiobookManager.nextBook(after: audiobook)) { book in
+                audioManager.loadAudiobook(book)
+                audioManager.startPlaybackAfterOpeningBook()
+                PlayQueue.shared.remove(book)
+            }
         }
     }
 }

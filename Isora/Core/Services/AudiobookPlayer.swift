@@ -235,6 +235,10 @@ final class AudiobookPlayer {
             MainActor.assumeIsolated {
                 guard let self, let index = self.trackIndexByItem[key] else { return }
                 self.onTrackEnded?(index)
+                // The periodic observer is timed against the current item, so once the last
+                // one ends and the queue holds nothing it stops firing: the notification is
+                // the only signal the book actually reached its end.
+                if index == self.tracks.count - 1 { self.finishBook() }
             }
         }
         let interval = CMTime(seconds: 0.25, preferredTimescale: CMTimeScale(NSEC_PER_SEC))
@@ -254,15 +258,21 @@ final class AudiobookPlayer {
         self.timeObserver = nil
     }
 
+    /// Settles the player at the end of the book, once: `isPlaying` is the guard, so the tick
+    /// and the end-of-item notification cannot both report the same ending.
+    private func finishBook() {
+        guard isPlaying else { return }
+        isPlaying = false
+        currentTime = duration
+        onPlaybackEnded?()
+    }
+
     private func tick() {
         guard !tracks.isEmpty else { return }
         guard let item = player.currentItem,
               let index = trackIndexByItem[ObjectIdentifier(item)] else {
             // Queue drained: the book played through to its end.
-            guard isPlaying else { return }
-            isPlaying = false
-            currentTime = duration
-            onPlaybackEnded?()
+            finishBook()
             return
         }
         // A file that cannot be decoded fails here rather than at load, so this is where

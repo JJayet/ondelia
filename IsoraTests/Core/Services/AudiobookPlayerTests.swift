@@ -225,6 +225,21 @@ struct AudiobookPlayerTests {
         player.pause()
     }
 
+    @Test("Reaching the end of the last chapter reports the end of the book")
+    func lastChapterEndReportsBookEnd() async throws {
+        let player = AudiobookPlayer()
+        #expect(await player.load(try multiChapterBook(count: 2)))
+        var ended = 0
+        player.onPlaybackEnded = { ended += 1 }
+
+        player.seek(to: player.duration - 0.4)
+        player.play()
+
+        #expect(await waitUntil(timeout: 8) { ended == 1 })
+        #expect(player.isPlaying == false)
+        #expect(player.currentTime == player.duration)
+    }
+
     // MARK: - Rate
 
     @Test("Playback rate is remembered and survives pause and resume")

@@ -10,7 +10,12 @@ extension PlayerView {
     @ViewBuilder
     func fullPlayerView(geometry: GeometryProxy) -> some View {
         ZStack {
+            // Keyed on the book: rolling into the next one cross-fades the backdrop instead of
+            // swapping it in one frame. The rest of the screen redraws in place under the same
+            // animation, so title and rows settle rather than jump.
             PlayerBackdrop(audiobook: audiobook)
+                .id(audiobook.id)
+                .transition(.opacity)
 
             VStack(spacing: 0) {
                 headerControls
@@ -29,6 +34,7 @@ extension PlayerView {
             }
             .padding(.horizontal, 16)
         }
+        .animation(reduceMotion ? nil : .easeInOut(duration: 0.6), value: audiobook.id)
     }
 
     // MARK: - Header

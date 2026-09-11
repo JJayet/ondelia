@@ -8,7 +8,7 @@ struct PlayerSheetView: View {
     var body: some View {
         Group {
             if let book {
-                PlayerView(audiobook: book)
+                PlayerView(openedBook: book)
             } else {
                 VStack(spacing: 12) {
                     ProgressView()
