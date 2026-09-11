@@ -338,17 +338,6 @@ extension SettingsView {
             }
             .buttonStyle(.plain)
             .disabled(tipsResetPending)
-
-            SettingsDivider()
-
-            Link(destination: URL(string: "https://github.com/JJayet/audiobook")!) {
-                SettingsRow(title: NSLocalizedString("GitHub", comment: "GitHub link label")) {
-                    Image(systemName: "arrow.up.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                }
-            }
-            .buttonStyle(.plain)
         }
     }
 }

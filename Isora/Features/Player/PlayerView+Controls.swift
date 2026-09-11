@@ -4,7 +4,7 @@ import UIKit
 extension PlayerView {
     // MARK: - Playback Controls
     //
-    // The design's minimal transport: two glass seek circles around one white play target.
+    // The design's minimal transport: two glass seek circles around one accent-coloured play target.
     // Chapter skips stay as bare glyphs at the edges — the mock drops them, but nothing else
     // on this screen moves a chapter at a time.
     @ViewBuilder
@@ -87,18 +87,18 @@ extension PlayerView {
         } label: {
             ZStack {
                 Circle()
-                    .fill(.white)
-                    .shadow(color: .white.opacity(0.6), radius: 28)
+                    .fill(themeManager.accentColor.color)
+                    .shadow(color: themeManager.accentColor.color.opacity(0.6), radius: 28)
                     .shadow(color: .black.opacity(0.45), radius: 18, y: 8)
 
                 if audioManager.playbackState == .loading {
                     ProgressView()
                         .progressViewStyle(.circular)
-                        .tint(.black)
+                        .tint(.white)
                 } else {
                     Image(systemName: isPlaying ? "pause.fill" : "play.fill")
                         .font(.system(size: 26, weight: .heavy))
-                        .foregroundStyle(.black)
+                        .foregroundStyle(.white)
                         .offset(x: isPlaying ? 0 : 2)
                 }
             }

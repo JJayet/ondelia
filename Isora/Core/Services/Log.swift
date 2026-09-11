@@ -15,7 +15,7 @@ enum Log {
     static let library = Logger(subsystem: subsystem, category: "library")
     /// SwiftData container lifecycle and backups.
     static let store = Logger(subsystem: subsystem, category: "store")
-    /// Speech recognition and translation.
+    /// Speech recognition.
     static let transcription = Logger(subsystem: subsystem, category: "transcription")
     /// Views and view models.
     static let ui = Logger(subsystem: subsystem, category: "ui")
