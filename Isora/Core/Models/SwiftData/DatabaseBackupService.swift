@@ -144,7 +144,8 @@ enum DatabaseBackupService {
             AudiobookModel.self,
             BookmarkModel.self,
             ChapterModel.self,
-            ChapterTranscriptionModel.self
+            ChapterTranscriptionModel.self,
+            TranscriptWindowModel.self
         ])
         return (try? ModelContainer(
             for: schema,

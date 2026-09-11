@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct TranscriptionLoader: View {
+    /// Share of the window recognised so far, 0 to 1. Hidden until the first result lands.
+    var progress: Double = 0
+    var isDownloadingModel = false
+
     @State private var currentPhraseIndex = 0
     @State private var thinking: Bool = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -18,6 +22,21 @@ struct TranscriptionLoader: View {
     }()
     
     var body: some View {
+        VStack(spacing: 16) {
+            phraseRow
+            if isDownloadingModel {
+                Text(NSLocalizedString("Downloading language model…", comment: "Transcription loader: the speech model is being fetched"))
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            } else if progress > 0 {
+                ProgressView(value: progress)
+                    .progressViewStyle(.linear)
+                    .frame(maxWidth: 220)
+            }
+        }
+    }
+
+    private var phraseRow: some View {
         HStack(spacing: 8) {
             Image(systemName: "wand.and.sparkles.inverse")
                 .font(.title)

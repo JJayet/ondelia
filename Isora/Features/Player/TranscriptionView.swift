@@ -5,104 +5,98 @@ struct TranscriptionView: View {
 
     // Read live rather than passed in: the transcript follows playback while the sheet is up,
     // and a value captured at presentation would freeze at the moment it opened. The playback
-    // position itself is deliberately not read here: `TranscriptSyncView` watches it, so the
-    // 4 Hz tick rebuilds the highlighted row and not this whole screen.
+    // position itself is deliberately not read in `body`: `TranscriptSyncView` watches it, so
+    // the 4 Hz tick rebuilds the highlighted row and not this whole screen; this view polls it
+    // every couple of seconds to notice the playhead leaving the window.
     private let audio = GlobalAudioManager.shared
-    private var currentChapterIndex: Int { audio.currentChapterIndex }
-
     private let transcriptionManager = SpeechTranscriptionManager.shared
-    private let translationManager = TranslationManager.shared
     @Environment(\.dismiss) private var dismiss
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    
+
+    /// Everything one load depends on, frozen when it starts: the window, the offset and
+    /// whether to skip the cache. A result is grouped with the offset it was requested under,
+    /// never with whatever the player is on when it completes.
+    private struct LoadKey: Equatable {
+        var request: TranscriptionRequest?
+        var bypassCache = false
+        var generation = 0
+    }
+
+    @State private var loadKey = LoadKey()
     @State private var transcription: TranscriptionResult?
     /// Grouped once per transcript. As a computed property it re-ran on every playback tick.
     @State private var groupedSentences: [TranscriptSentence] = []
-    /// The one transcription in flight, so closing the sheet cancels it instead of leaving it
-    /// to finish for nobody, and reopening never runs two at once.
-    @State private var transcriptionTask: Task<Void, Never>?
-    @State private var translatedText = ""
+    @State private var failed = false
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var searchText = ""
     @State private var highlightedRange: Range<String.Index>?
-    @State private var chapterTitle = NSLocalizedString("Transcription", comment: "Default chapter title for transcription")
-    @State private var showingTranslation = false
-    @State private var isTranslating = false
-    
-    private var transcriptionText: String { transcription?.text ?? "" }
+    @State private var showingLanguagePicker = false
 
-    /// The language to translate into, and the reason to offer translation at all: a book
-    /// already spoken in the reader's language has nothing to translate to.
-    private var readerLanguage: Locale.Language { Locale.current.language }
-
-    private var canTranslate: Bool {
-        guard let source = transcription?.language, !transcriptionText.isEmpty else { return false }
-        return Locale.Language(identifier: source).languageCode != readerLanguage.languageCode
+    /// The book's chosen language. Stored per book; changing it re-keys the request, and the
+    /// cache is keyed by language too, so the old transcript cannot come back in its place.
+    private var languageOverride: Binding<String?> {
+        Binding(
+            get: { TranscriptionRequest.storedLanguage(for: audiobook.id) },
+            set: { language in
+                TranscriptionRequest.storeLanguage(language, for: audiobook.id)
+                updateRequest()
+            }
+        )
     }
 
-    /// Where the chapter being transcribed starts in the book. The recogniser counts from the
-    /// beginning of the chapter file; the player counts from the beginning of the book.
-    private var chapterStart: TimeInterval {
-        guard let tracks = audio.player?.tracks, tracks.indices.contains(currentChapterIndex) else {
-            return 0
-        }
-        return tracks[currentChapterIndex].start
+    private var request: TranscriptionRequest? { loadKey.request }
+
+    /// The partial transcript of this window while it is still being recognised.
+    private var live: SpeechTranscriptionManager.LiveTranscript? {
+        guard let live = transcriptionManager.live, live.request == request else { return nil }
+        return live
     }
+
+    private var isLoaded: Bool { transcription != nil }
+
+    private var displayText: String { transcription?.text ?? live?.text ?? "" }
 
     /// Word timings grouped into sentences, on the player's timeline. Empty for a transcript
-    /// cached before timings were stored, and for the translation, which has no timeline of
-    /// its own.
+    /// cached before timings were stored.
     private var sentences: [TranscriptSentence] {
-        showingTranslation ? [] : groupedSentences
+        if isLoaded { return groupedSentences }
+        return TranscriptSentence.group(live?.segments ?? [], offset: request?.trackStart ?? 0)
     }
 
-    var displayText: String {
-        return showingTranslation && !translatedText.isEmpty ? translatedText : transcriptionText
+    private var chapterTitle: String {
+        guard let request else {
+            return NSLocalizedString("Transcription", comment: "Default chapter title for transcription")
+        }
+        return request.title ?? getChapterTitle(for: audiobook, chapterIndex: request.trackIndex)
     }
-    
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Header with controls
                 TranscriptionHeaderView(
                     searchText: $searchText,
                     transcriptionText: .constant(displayText),
                     highlightedRange: $highlightedRange
                 )
-                
-                // Translation toggle if available
-                if canTranslate {
-                    HStack {
-                        Picker(NSLocalizedString("View", comment: "View picker label"), selection: $showingTranslation) {
-                            Text(NSLocalizedString("Original", comment: "Original text option")).tag(false)
-                            Text(NSLocalizedString("Translated", comment: "Translated text option")).tag(true)
-                        }
-                        .pickerStyle(.segmented)
-                        .onChange(of: showingTranslation) { _, shouldTranslate in
-                            if shouldTranslate && translatedText.isEmpty {
-                                translateText()
-                            }
-                        }
-                        
-                        if isTranslating {
-                            ProgressView()
-                                .scaleEffect(0.8)
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.vertical, 8)
-                    .background(Color.secondaryBackground)
+
+                if !isLoaded, !displayText.isEmpty {
+                    // Text is arriving: a thin bar shows how much of the window is left.
+                    ProgressView(value: transcriptionManager.transcriptionProgress)
+                        .progressViewStyle(.linear)
+                        .padding(.horizontal)
                 }
-                
-                // Main transcription content
-                if transcriptionManager.isTranscribing {
-                    Spacer()
-                    TranscriptionLoader()
-                    Spacer()
-                } else if transcriptionText.isEmpty {
-                    TranscriptionEmptyView {
-                        startTranscription()
+
+                if displayText.isEmpty {
+                    if request == nil || failed {
+                        TranscriptionEmptyView { withHapticFeedback { retry() } }
+                    } else {
+                        Spacer()
+                        TranscriptionLoader(
+                            progress: transcriptionManager.transcriptionProgress,
+                            isDownloadingModel: transcriptionManager.isDownloadingModel
+                        )
+                        Spacer()
                     }
                 } else if !sentences.isEmpty {
                     TranscriptSyncView(sentences: sentences) { time in
@@ -136,106 +130,130 @@ struct TranscriptionView: View {
                         .glassEffect()
                         .background(Color.glassTint, in: Capsule())
                 }
-                
-                ToolbarItem(placement: .topBarTrailing) {
-                    if canTranslate {
-                        Button(action: {
-                            withHapticFeedback {}
-                            if translatedText.isEmpty {
-                                translateText()
-                            } else {
-                                showingTranslation.toggle()
-                            }
-                        }) {
-                            Image(systemName: showingTranslation ? "textformat" : "translate")
-                                .foregroundStyle(showingTranslation ? AnyShapeStyle(.primary) : AnyShapeStyle(.tint))
-                        }
-                        .disabled(isTranslating)
-                        .accessibilityLabel(
-                            showingTranslation
-                                ? NSLocalizedString("Show Original", comment: "Transcription: stop showing the translation")
-                                : NSLocalizedString("Translate", comment: "Transcription: translate the text")
-                        )
-                    }
 
-                    
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { withHapticFeedback { showingLanguagePicker = true } }) {
+                        Image(systemName: "globe")
+                    }
+                    .accessibilityLabel(NSLocalizedString("Transcription language", comment: "Transcription language picker title"))
+
                     Button(action: { withHapticFeedback { refreshTranscription() } }) {
                         Image(systemName: "arrow.clockwise")
                     }
-                    .disabled(transcriptionManager.isTranscribing)
+                    .disabled(request == nil || (!isLoaded && !failed))
                     .accessibilityLabel(NSLocalizedString("Refresh Transcription", comment: "Transcription: transcribe the chapter again"))
                 }
             }
+        }
+        .sheet(isPresented: $showingLanguagePicker) {
+            TranscriptionLanguagePicker(audioURL: request?.url, selection: languageOverride)
         }
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
             Button(NSLocalizedString("OK", comment: "OK button")) { withHapticFeedback {} }
         } message: {
             Text(errorMessage)
         }
-        .onAppear {
-            loadChapterTitle()
-            startTranscription()
-        }
-        .onDisappear {
-            transcriptionTask?.cancel()
-            transcriptionTask = nil
-        }
-        .onChange(of: currentChapterIndex) { _, _ in
-            loadChapterTitle()
-            translatedText = "" // Reset translation when chapter changes
-            showingTranslation = false
+        // Cancelled and restarted whenever the key changes, so a stale load can never deliver
+        // into a newer window; cancelled with the sheet, so nothing runs on for nobody.
+        .task(id: loadKey) { await load(loadKey) }
+        .task { await followPlayhead() }
+    }
+
+    // MARK: - Windows
+
+    /// Moves to the window under the playhead whenever playback leaves the current one.
+    private func followPlayhead() async {
+        while !Task.isCancelled {
+            updateRequest()
+            try? await Task.sleep(for: .seconds(2))
         }
     }
-    
-    private func translateText() {
-        // The transcript is cached untranslated, so the source is whatever was recognised.
-        guard let transcription, !transcription.text.isEmpty else { return }
-        
-        isTranslating = true
-        
-        Task {
-            do {
-                let translated = try await translationManager.translateText(
-                    transcription.text,
-                    from: transcription.language,
-                    to: readerLanguage.languageCode?.identifier ?? "en"
-                )
-                
-                await MainActor.run {
-                    translatedText = translated
-                    showingTranslation = true
-                    isTranslating = false
-                }
-            } catch {
-                await MainActor.run {
-                    errorMessage = String(format: NSLocalizedString("Translation failed: %@", comment: "Translation error message"), error.localizedDescription)
-                    showingError = true
-                    isTranslating = false
-                }
+
+    private func updateRequest() {
+        let time = audio.getCurrentTime()
+        let language = TranscriptionRequest.storedLanguage(for: audiobook.id)
+        if let request, request.contains(bookTime: time), request.language == language { return }
+        guard let next = makeRequest(at: time, language: language) else { return }
+        loadKey = LoadKey(request: next)
+    }
+
+    /// The window after `request`, so it can be warmed while this one is read.
+    private func nextRequest(after request: TranscriptionRequest) -> TranscriptionRequest? {
+        makeRequest(at: request.bookRange.upperBound + 0.5, language: request.language)
+    }
+
+    private func makeRequest(at time: TimeInterval, language: String?) -> TranscriptionRequest? {
+        TranscriptionRequest.make(
+            audiobookID: audiobook.id,
+            chapters: audiobook.sortedChapters,
+            tracks: audio.player?.tracks ?? [],
+            time: time,
+            language: language
+        )
+    }
+
+    // MARK: - Loading
+
+    private func load(_ key: LoadKey) async {
+        guard !Task.isCancelled, key == loadKey else { return }
+        transcription = nil
+        groupedSentences = []
+        failed = false
+        guard let request = key.request else { return }
+
+        do {
+            let result = try await transcriptionManager.transcribe(request, bypassCache: key.bypassCache)
+            // Cache reads can finish successfully after cancellation. Only the current load
+            // may publish text or start prefetching another window.
+            guard !Task.isCancelled, key == loadKey else { return }
+            transcription = result
+            groupedSentences = TranscriptSentence.group(result.segments, offset: request.trackStart)
+
+            // Warm the next window while this one is read, so crossing into it finds a cache hit.
+            if let next = nextRequest(after: request), next != request {
+                _ = try? await transcriptionManager.transcribe(next)
             }
+        } catch is CancellationError {
+            return
+        } catch {
+            guard !Task.isCancelled, key == loadKey else { return }
+            errorMessage = error.localizedDescription
+            showingError = true
+            failed = true
         }
     }
-    
-    private func loadChapterTitle() {
-        chapterTitle = getChapterTitle(for: audiobook, chapterIndex: currentChapterIndex)
+
+    private func retry() {
+        if request == nil {
+            updateRequest()
+        } else {
+            loadKey.generation += 1
+        }
     }
-    
+
+    /// Refresh means "transcribe again", so it has to skip the cache the first run wrote.
+    private func refreshTranscription() {
+        loadKey = LoadKey(request: request, bypassCache: true, generation: loadKey.generation + 1)
+    }
+
+    // MARK: - Titles
+
     private func getChapterTitle(for audiobook: AudiobookModel, chapterIndex: Int) -> String {
         guard let folderURL = audiobook.resolvedFileURL else {
             return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
-        
+
         let manifestURL = folderURL.appendingPathComponent("audiobook_manifest.json")
-        
+
         guard let manifestData = try? Data(contentsOf: manifestURL),
               let manifest = try? JSONSerialization.jsonObject(with: manifestData) as? [String: Any],
               let chaptersData = manifest["chapters"] as? [[String: Any]],
               chapterIndex < chaptersData.count else {
             return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
-        
+
         let chapterData = chaptersData[chapterIndex]
-        
+
         // Try to get title, fallback to fileName without extension, then to Chapter N
         if let title = chapterData["title"] as? String, !title.isEmpty {
             return title
@@ -246,38 +264,6 @@ struct TranscriptionView: View {
             return String(format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"), chapterIndex + 1)
         }
     }
-    
-    private func startTranscription(bypassCache: Bool = false) {
-        transcriptionTask?.cancel()
-        transcriptionTask = Task {
-            do {
-                let result = try await transcriptionManager.transcribeCurrentChapter(
-                    for: audiobook,
-                    chapterIndex: currentChapterIndex,
-                    bypassCache: bypassCache
-                )
-                guard !Task.isCancelled else { return }
-                transcription = result
-                groupedSentences = TranscriptSentence.group(result.segments, offset: chapterStart)
-            } catch is CancellationError {
-                return
-            } catch {
-                guard !Task.isCancelled else { return }
-                errorMessage = error.localizedDescription
-                showingError = true
-            }
-        }
-    }
-    
-    /// Refresh means "transcribe again", so it has to skip the cache the first run wrote.
-    private func refreshTranscription() {
-        transcription = nil
-        groupedSentences = []
-        translatedText = ""
-        showingTranslation = false
-        startTranscription(bypassCache: true)
-    }
-    
 }
 
 #Preview {

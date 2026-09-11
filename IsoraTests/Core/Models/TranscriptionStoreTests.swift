@@ -14,13 +14,27 @@ struct TranscriptionStoreTests {
             AudiobookModel.self,
             BookmarkModel.self,
             ChapterModel.self,
-            ChapterTranscriptionModel.self
+            ChapterTranscriptionModel.self,
+            TranscriptWindowModel.self
         ])
         let container = try ModelContainer(
             for: schema,
             configurations: [ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)]
         )
         return (TranscriptionStore(modelContainer: container), container)
+    }
+
+    private func request(_ bookID: UUID, track: Int = 0, start: Double = 0, end: Double = 600) -> TranscriptionRequest {
+        TranscriptionRequest(
+            audiobookID: bookID,
+            url: URL(fileURLWithPath: "/tmp/book.m4b"),
+            trackIndex: track,
+            start: start,
+            end: end,
+            trackStart: 0,
+            title: nil,
+            language: nil
+        )
     }
 
     @MainActor
@@ -42,14 +56,14 @@ struct TranscriptionStoreTests {
                 TranscriptionSegment(text: "Once", start: 0, end: 0.5),
                 TranscriptionSegment(text: " upon", start: 0.5, end: 0.9)
             ],
-            language: "en-US"
+            language: "en"
         )
 
-        await store.save(result, audiobookID: bookID, chapterIndex: 3, engine: "SpeechAnalyzer")
-        let cached = await store.cachedResult(audiobookID: bookID, chapterIndex: 3)
+        await store.save(result, for: request(bookID, track: Int(3)), engine: "SpeechAnalyzer")
+        let cached = await store.cachedResult(for: request(bookID, track: Int(3)), language: "en")
 
         #expect(cached?.text == "Once upon a time")
-        #expect(cached?.language == "en-US")
+        #expect(cached?.language == "en")
         #expect(cached?.segments == result.segments)
     }
 
@@ -61,11 +75,11 @@ struct TranscriptionStoreTests {
 
         await store.save(
             TranscriptionResult(text: "chapter one", segments: [], language: "en"),
-            audiobookID: bookID, chapterIndex: 0, engine: "SpeechAnalyzer"
+            for: request(bookID, track: Int(0)), engine: "SpeechAnalyzer"
         )
 
-        #expect(await store.cachedResult(audiobookID: bookID, chapterIndex: 1) == nil)
-        #expect(await store.cachedResult(audiobookID: UUID(), chapterIndex: 0) == nil)
+        #expect(await store.cachedResult(for: request(bookID, track: Int(1)), language: "en") == nil)
+        #expect(await store.cachedResult(for: request(UUID(), track: Int(0)), language: "en") == nil)
     }
 
     @Test("Transcribing a chapter again replaces the old transcript rather than duplicating it")
@@ -76,20 +90,20 @@ struct TranscriptionStoreTests {
 
         await store.save(
             TranscriptionResult(text: "first pass", segments: [], language: "en"),
-            audiobookID: bookID, chapterIndex: 2, engine: "SpeechAnalyzer"
+            for: request(bookID, track: Int(2)), engine: "SpeechAnalyzer"
         )
         await store.save(
-            TranscriptionResult(text: "second pass", segments: [], language: "fr"),
-            audiobookID: bookID, chapterIndex: 2, engine: "SpeechAnalyzer"
+            TranscriptionResult(text: "second pass", segments: [], language: "en"),
+            for: request(bookID, track: Int(2)), engine: "SpeechAnalyzer"
         )
 
-        #expect(await store.cachedResult(audiobookID: bookID, chapterIndex: 2)?.text == "second pass")
+        #expect(await store.cachedResult(for: request(bookID, track: Int(2)), language: "en")?.text == "second pass")
 
         // Exactly one row, so the cache cannot grow every time a chapter is re-run.
         // Counted inside the main actor: a PersistentModel cannot cross out of it, which is
         // the whole reason the store hands back values instead of rows.
         let rowCount = try await MainActor.run {
-            try container.mainContext.fetchCount(FetchDescriptor<ChapterTranscriptionModel>())
+            try container.mainContext.fetchCount(FetchDescriptor<TranscriptWindowModel>())
         }
         #expect(rowCount == 1)
     }
@@ -101,10 +115,10 @@ struct TranscriptionStoreTests {
 
         await store.save(
             TranscriptionResult(text: "nowhere", segments: [], language: "en"),
-            audiobookID: unknown, chapterIndex: 0, engine: "SpeechAnalyzer"
+            for: request(unknown, track: Int(0)), engine: "SpeechAnalyzer"
         )
 
-        #expect(await store.cachedResult(audiobookID: unknown, chapterIndex: 0) == nil)
+        #expect(await store.cachedResult(for: request(unknown, track: Int(0)), language: "en") == nil)
     }
 
     @Test("Chapters of the same book are cached independently")
@@ -113,15 +127,15 @@ struct TranscriptionStoreTests {
         let bookID = UUID()
         try await insertBook(container, id: bookID)
 
-        for chapter in Int16(0)..<3 {
+        for chapter in 0..<3 {
             await store.save(
                 TranscriptionResult(text: "chapter \(chapter)", segments: [], language: "en"),
-                audiobookID: bookID, chapterIndex: chapter, engine: "SpeechAnalyzer"
+                for: request(bookID, track: Int(chapter)), engine: "SpeechAnalyzer"
             )
         }
 
-        for chapter in Int16(0)..<3 {
-            #expect(await store.cachedResult(audiobookID: bookID, chapterIndex: chapter)?.text
+        for chapter in 0..<3 {
+            #expect(await store.cachedResult(for: request(bookID, track: Int(chapter)), language: "en")?.text
                     == "chapter \(chapter)")
         }
     }

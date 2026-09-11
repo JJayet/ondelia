@@ -29,12 +29,26 @@ enum IsoraSchemaV2: VersionedSchema {
     }
 }
 
+/// Version 3 adds windowed transcripts as a new entity. Only additions are possible here: the
+/// model classes are shared between versions, so changing one would give two versions the same
+/// checksum and SwiftData refuses to open the store.
+enum IsoraSchemaV3: VersionedSchema {
+    static var versionIdentifier: Schema.Version { Schema.Version(3, 0, 0) }
+
+    static var models: [any PersistentModel.Type] {
+        IsoraSchemaV2.models + [TranscriptWindowModel.self]
+    }
+}
+
 /// The schema every store (phone, watch, tests) is built from.
-typealias IsoraCurrentSchema = IsoraSchemaV2
+typealias IsoraCurrentSchema = IsoraSchemaV3
 
 enum IsoraMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [IsoraSchemaV1.self, IsoraSchemaV2.self] }
+    static var schemas: [any VersionedSchema.Type] { [IsoraSchemaV1.self, IsoraSchemaV2.self, IsoraSchemaV3.self] }
     static var stages: [MigrationStage] {
-        [.lightweight(fromVersion: IsoraSchemaV1.self, toVersion: IsoraSchemaV2.self)]
+        [
+            .lightweight(fromVersion: IsoraSchemaV1.self, toVersion: IsoraSchemaV2.self),
+            .lightweight(fromVersion: IsoraSchemaV2.self, toVersion: IsoraSchemaV3.self)
+        ]
     }
 }

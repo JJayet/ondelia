@@ -156,7 +156,12 @@ final class AudiobookManager {
             try? FileManager.default.removeItem(at: fileURL)
         }
         
-        // Delete from Core Data
+        // Delete from Core Data. Transcript windows have no relationship to cascade through.
+        let bookID = audiobook.id
+        let windows = try? swiftDataController.context.fetch(
+            FetchDescriptor<TranscriptWindowModel>(predicate: #Predicate { $0.audiobookID == bookID })
+        )
+        for window in windows ?? [] { swiftDataController.context.delete(window) }
         swiftDataController.context.delete(audiobook)
         swiftDataController.save()
         fetchAudiobooks()

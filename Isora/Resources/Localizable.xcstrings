@@ -1649,6 +1649,17 @@
         }
       }
     },
+    "Downloading language model…" : {
+      "comment" : "Transcription loader: the speech model is being fetched",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement du modèle de langue…"
+          }
+        }
+      }
+    },
     "Early Bird" : {
       "localizations" : {
         "fr" : {
@@ -1768,6 +1779,17 @@
         }
       }
     },
+    "From file or device" : {
+      "comment" : "Transcription language: default option",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Selon le fichier ou l’appareil"
+          }
+        }
+      }
+    },
     "From the collection" : {
       "comment" : "Play queue: book a collection plays next",
       "localizations" : {
@@ -1797,17 +1819,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commencer"
-          }
-        }
-      }
-    },
-    "GitHub" : {
-      "comment" : "GitHub link label",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "GitHub"
           }
         }
       }
@@ -2858,17 +2869,6 @@
         }
       }
     },
-    "Original" : {
-      "comment" : "Original text option",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Original"
-          }
-        }
-      }
-    },
     "Other files" : {
       "comment" : "Storage row: library files no book uses",
       "localizations" : {
@@ -3631,6 +3631,17 @@
         }
       }
     },
+    "Search languages" : {
+      "comment" : "Transcription language: search field",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher une langue"
+          }
+        }
+      }
+    },
     "Search your audiobooks" : {
       "comment" : "Search empty title",
       "localizations" : {
@@ -3814,17 +3825,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher la liste"
-          }
-        }
-      }
-    },
-    "Show Original" : {
-      "comment" : "Transcription: stop showing the translation",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Afficher l’original"
           }
         }
       }
@@ -4456,35 +4456,13 @@
         }
       }
     },
-    "Translate" : {
-      "comment" : "Transcription: translate the text",
+    "Transcription language" : {
+      "comment" : "Transcription language picker title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Traduire"
-          }
-        }
-      }
-    },
-    "Translated" : {
-      "comment" : "Translated text option",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Traduit"
-          }
-        }
-      }
-    },
-    "Translation failed: %@" : {
-      "comment" : "Translation error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de la traduction : %@"
+            "value" : "Langue de transcription"
           }
         }
       }
@@ -4617,17 +4595,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Version"
-          }
-        }
-      }
-    },
-    "View" : {
-      "comment" : "View picker label",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Affichage"
           }
         }
       }

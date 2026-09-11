@@ -15,19 +15,44 @@ final class SpeechTranscriptionManager {
     static let shared = SpeechTranscriptionManager()
 
     var isTranscribing = false
+    var isDownloadingModel = false
+    /// Share of the window in flight that has been recognised, 0 to 1.
     var transcriptionProgress: Double = 0
+    /// What has been recognised so far of the request in flight, so the view can show the text
+    /// before the window finishes. Nil between jobs and for cache hits.
+    private(set) var live: LiveTranscript?
+    /// The language the last request was, or is being, recognised in.
+    private(set) var resolvedLocale: Locale?
+
+    struct LiveTranscript {
+        let request: TranscriptionRequest
+        var text = ""
+        var segments: [TranscriptionSegment] = []
+    }
 
     private let swiftDataController = SwiftDataController.shared
     private var transcriptionStore: TranscriptionStore?
+    /// The one analysis running. Owned here rather than by the view: a view task that was
+    /// cancelled could still be unwinding while its replacement started, and its exit reset
+    /// state that by then belonged to the new job.
+    private var current: Task<TranscriptionResult, Error>?
 
     private init() {}
 
     // MARK: - Locales
 
-    /// The locale to recognise a file in: the language the file itself declares, else the
-    /// device language. Nil when the device supports neither.
-    private static func resolvedLocale(for url: URL) async -> Locale? {
-        for candidate in [await declaredLocale(for: url), Locale.current].compactMap({ $0 }) {
+    /// Resolves the default independently of any saved override or active transcription job.
+    static func defaultLocale(for url: URL) async -> Locale? {
+        let hasAccess = url.startAccessingSecurityScopedResource()
+        defer { if hasAccess { url.stopAccessingSecurityScopedResource() } }
+        return await resolvedLocale(for: url, preferred: nil)
+    }
+
+    /// The locale to recognise a file in: the reader's choice for the book, else the language
+    /// the file itself declares, else the device language. Nil when none is supported.
+    private static func resolvedLocale(for url: URL, preferred: String?) async -> Locale? {
+        let chosen = preferred.map { Locale(identifier: $0) }
+        for candidate in [chosen, await declaredLocale(for: url), Locale.current].compactMap({ $0 }) {
             if let supported = await SpeechTranscriber.supportedLocale(equivalentTo: candidate) {
                 return supported
             }
@@ -47,12 +72,13 @@ final class SpeechTranscriptionManager {
         return Locale(identifier: alpha2)
     }
 
-    /// Downloads the language asset when the device does not have it yet. The transcription
-    /// loader stays up meanwhile, so the download needs no progress of its own.
+    /// Downloads the language asset when the device does not have it yet.
     private func installAssets(for transcriber: SpeechTranscriber) async throws {
         guard let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) else {
             return
         }
+        isDownloadingModel = true
+        defer { isDownloadingModel = false }
         try await request.downloadAndInstall()
     }
 
@@ -67,105 +93,111 @@ final class SpeechTranscriptionManager {
         return store
     }
 
-    /// The transcript for the chapter being heard, as spoken. Translation is the caller's job:
-    /// caching a translation under a row that claims to hold the original made "Original" show
-    /// translated text and pinned the result to whatever language was selected at the time.
+    /// The transcript of one window, from the cache when it has one. Cancelling the caller
+    /// cancels the analysis; starting another request cancels the one in flight.
     /// - Parameter bypassCache: re-transcribes and overwrites the cached row.
-    func transcribeCurrentChapter(
-        for audiobook: AudiobookModel,
-        chapterIndex: Int,
-        bypassCache: Bool = false
-    ) async throws -> TranscriptionResult {
+    func transcribe(_ request: TranscriptionRequest, bypassCache: Bool = false) async throws -> TranscriptionResult {
+        current?.cancel()
+        // Let the old job finish unwinding, so its `defer`s cannot clear this job's state.
+        _ = try? await current?.value
+
+        let job = Task { try await run(request, bypassCache: bypassCache) }
+        current = job
+        defer { if current == job { current = nil } }
+        return try await withTaskCancellationHandler {
+            try await job.value
+        } onCancel: {
+            job.cancel()
+        }
+    }
+
+    func cancel() {
+        current?.cancel()
+    }
+
+    private func run(_ request: TranscriptionRequest, bypassCache: Bool) async throws -> TranscriptionResult {
         isTranscribing = true
         // Every exit, thrown ones included: a throw used to leave the loader up for good, with
         // refresh disabled behind it.
-        defer { isTranscribing = false }
-
-        // The same timeline the player uses, so the index here means the file being heard —
-        // and a single-file book, which has no manifest to read, resolves to its one track.
-        guard let url = audiobook.resolvedFileURL else {
-            throw TranscriptionError.chapterNotFound
-        }
-        let tracks = await AudiobookPlayer.makeTracks(at: url, fallbackDuration: audiobook.duration)
-        guard tracks.indices.contains(chapterIndex) else {
-            throw TranscriptionError.chapterNotFound
+        defer {
+            isTranscribing = false
+            transcriptionProgress = 0
         }
 
-        let audiobookID = audiobook.id
-        let chapter = Int16(chapterIndex)
-
-        if !bypassCache,
-           let cached = await store()?.cachedResult(audiobookID: audiobookID, chapterIndex: chapter) {
-            Log.transcription.debug("📖 SpeechTranscriptionManager: Using cached transcription")
-            return cached
-        }
-
-        let result = try await transcribeAudioFile(
-            tracks[chapterIndex].url,
-            for: audiobook,
-            chapterIndex: chapterIndex
-        )
-        await store()?.save(result, audiobookID: audiobookID, chapterIndex: chapter, engine: "SpeechAnalyzer")
-        return result
-    }
-
-    private func transcribeAudioFile(
-        _ audioURL: URL,
-        for audiobook: AudiobookModel,
-        chapterIndex: Int
-    ) async throws -> TranscriptionResult {
+        let audioURL = request.url
         // Access first: reading the file's language tag opens it just like the analyzer does.
         let hasAccess = audioURL.startAccessingSecurityScopedResource()
         defer { if hasAccess { audioURL.stopAccessingSecurityScopedResource() } }
 
-        guard SpeechTranscriber.isAvailable, let locale = await Self.resolvedLocale(for: audioURL) else {
+        // The language is part of the cache key, so it is settled before the cache is read:
+        // a transcript in one language must never answer for another.
+        guard SpeechTranscriber.isAvailable,
+              let locale = await Self.resolvedLocale(for: audioURL, preferred: request.language) else {
             throw TranscriptionError.recognizerUnavailable
         }
+        resolvedLocale = locale
         Log.transcription.debug("🌍 SpeechTranscriptionManager: Recognising in \(locale.identifier)")
 
+        if !bypassCache, let cached = await store()?.cachedResult(for: request, language: locale.identifier) {
+            Log.transcription.debug("📖 SpeechTranscriptionManager: Using cached transcription")
+            return cached
+        }
+
+        let result = try await transcribeWindow(request, locale: locale)
+        await store()?.save(result, for: request, engine: "SpeechAnalyzer")
+        return result
+    }
+
+    private func transcribeWindow(_ request: TranscriptionRequest, locale: Locale) async throws -> TranscriptionResult {
+        let audioURL = request.url
         let transcriber = Self.makeTranscriber(locale: locale)
         try await installAssets(for: transcriber)
+        guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber]) else {
+            throw TranscriptionError.recognizerUnavailable
+        }
 
-        Log.transcription.debug("🎤 SpeechTranscriptionManager: Starting transcription for chapter \(chapterIndex)")
+        Log.transcription.debug("🎤 SpeechTranscriptionManager: Transcribing track \(request.trackIndex) \(request.start)-\(request.end)s")
 
         transcriptionProgress = 0
-        defer { transcriptionProgress = 0 }
+        live = LiveTranscript(request: request)
+        defer { live = nil }
+        let windowLength = max(request.end - request.start, 1)
 
         do {
-            let file = try AVAudioFile(forReading: audioURL)
-            let totalSeconds = Double(file.length) / file.fileFormat.sampleRate
-
             // Results must be consumed while analysis runs, so start collecting first.
             let collector = Task { [weak self] in
                 var text = ""
-                var timings: [(text: String, start: Double, end: Double)] = []
+                var segments: [TranscriptionSegment] = []
                 for try await result in transcriber.results {
                     let attributed = result.text
                     text += String(attributed.characters)
-                    timings.append(contentsOf: Self.timings(in: attributed))
+                    segments += Self.makeSegments(Self.timings(in: attributed))
                     let reached = result.range.end.seconds
-                    if totalSeconds > 0, reached.isFinite {
-                        self?.transcriptionProgress = min(reached / totalSeconds, 1)
+                    if reached.isFinite {
+                        self?.transcriptionProgress = min(max((reached - request.start) / windowLength, 0), 1)
                     }
+                    self?.live = LiveTranscript(request: request, text: text, segments: segments)
                 }
-                return (text, timings)
+                return (text, segments)
             }
             // The collector awaits `transcriber.results` until the analyzer finishes. If setup
             // or finalisation throws below, nothing else ends that stream, so cancel it on every
             // exit; after a normal completion the task is already done and this is a no-op.
             defer { collector.cancel() }
 
-            let analyzer = try await SpeechAnalyzer(inputAudioFile: file, modules: [transcriber])
+            let analyzer = SpeechAnalyzer(modules: [transcriber])
+            let input = AudioWindowSequence(url: audioURL, start: request.start, end: request.end, format: format)
             // Closing the view cancels the task; without this the analyzer would run the whole
-            // file to its end before the cancellation is noticed.
+            // window to its end before the cancellation is noticed.
             try await withTaskCancellationHandler {
+                try await analyzer.start(inputSequence: input)
                 try await analyzer.finalizeAndFinishThroughEndOfInput()
             } onCancel: {
                 Task { await analyzer.cancelAndFinishNow() }
             }
 
-            let (text, timings) = try await collector.value
-            let segments = Self.makeSegments(timings)
+            let (text, segments) = try await collector.value
+            try Task.checkCancellation()
 
             transcriptionProgress = 1
             Log.transcription.debug("✅ SpeechTranscriptionManager: Transcription completed")
@@ -175,6 +207,8 @@ final class SpeechTranscriptionManager {
                 segments: segments,
                 language: locale.identifier
             )
+        } catch is CancellationError {
+            throw CancellationError()
         } catch {
             Log.transcription.error("❌ SpeechTranscriptionManager: Transcription error: \(error)")
             throw TranscriptionError.transcriptionFailed(error)
@@ -233,6 +267,7 @@ struct TranscriptionSegment: Codable, Equatable, Sendable {
 enum TranscriptionError: Error, LocalizedError {
     case chapterNotFound
     case recognizerUnavailable
+    case audioUnreadable
     case transcriptionFailed(Error)
     case assetInstallationFailed
 
@@ -240,7 +275,7 @@ enum TranscriptionError: Error, LocalizedError {
         switch self {
         case .recognizerUnavailable:
             return NSLocalizedString("Speech recognizer unavailable", comment: "Transcription error")
-        case .chapterNotFound:
+        case .chapterNotFound, .audioUnreadable:
             return NSLocalizedString("Chapter file not found", comment: "Transcription error")
         case .transcriptionFailed(let error):
             return String(
@@ -255,4 +290,3 @@ enum TranscriptionError: Error, LocalizedError {
         }
     }
 }
-
