@@ -1,0 +1,43 @@
+Isora/Features/Library/LibraryView.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 157-159
+Isora/App/IsoraApp.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 21-25
+Isora/Features/Library/CollectionDetailView.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 2,26
+Isora/App/AppTips.swift
+  s_1497dc4ebf2da3::t_a76a77284cc829 17,37,59
+  s_1497dc4ebf2da3::t_89206657ab23d0 1-16,18-36,38-58,60-62,64,67-68,70-71,75-80,82-109
+  s_1497dc4ebf2da3::t_9d410449a91e4c 63,65-66,69,72-74
+  s_1497dc4ebf2da3::t_88b33d18700048 81
+Isora/Features/Player/PlayerView+Layout.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 2
+  s_1497dc4ebf2da3::t_9d410449a91e4c 32-33,43-52
+  s_1497dc4ebf2da3::t_8f2ceb19868fef 53-54
+Isora/Features/Library/LibraryView+Content.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 2,57-61,127-128
+  s_1497dc4ebf2da3::t_4ef6900b369cdb 129
+Isora/Features/Settings/WatchSettingsSection.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 2,11
+Isora/Features/Player/PlayerView.swift
+  s_1497dc4ebf2da3::t_9d410449a91e4c 63-64
+  s_1497dc4ebf2da3::t_e746d272da8b56 2,61
+  s_1497dc4ebf2da3::t_69daf9ff776966 62
+IsoraUITests/PlayerChipsUITests.swift
+  s_1497dc4ebf2da3::t_61f909d2a88250 1-27
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "66fe2696b2db4e72f0b6fd1a3d5eeca960ff1146",
+  "prompts": {},
+  "sessions": {
+    "s_1497dc4ebf2da3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec3d80e1-2b6a-4fbb-99d1-e08ba140610b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
