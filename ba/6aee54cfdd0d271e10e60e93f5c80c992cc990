@@ -1,0 +1,35 @@
+Isora/Features/Onboarding/OnboardingView.swift
+  s_1497dc4ebf2da3::t_d13cde85235a6e 44
+  s_1497dc4ebf2da3::t_98398cb5f41ce0 85,98
+  s_1497dc4ebf2da3::t_c5d258d8eb046d 1-43,45-84,86-97,99-135
+Isora/App/MainTabView.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 14,30-37
+Isora/Resources/Localizable.xcstrings
+  s_1497dc4ebf2da3::t_9d410449a91e4c 635-636,641-645,723-724,729,1749-1750,1755,2839-2840,2845,3832-3833,3838,3933,4107-4108,4113,4118-4119,4124
+  s_1497dc4ebf2da3::t_72a7638f53c5ed 324-334,591-601,637-640,725-728,730-733,811-821,1075-1085,1223-1233,1377-1387,1399-1409,1751-1754,1756-1766,1768-1770,1793-1803,1849,2106-2116,2161-2171,2194-2204,2348-2358,2795-2805,2817-2827,2841-2844,2846-2849,2894-2904,2936-2946,3015-3025,3080-3090,3113-3123,3179-3189,3212-3222,3416-3426,3689-3699,3744-3754,3788-3798,3834-3837,3839-3842,3854-3864,4020-4030,4109-4112,4114-4117,4120-4123,4125-4128,4382-4392,4536-4546,4646-4656,4678-4699,4733-4754
+  s_1497dc4ebf2da3::t_65bad28ac2efbb 768,1767
+Isora/Features/Settings/SettingsView.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 25-26
+Isora/Features/Settings/SettingsView+Sections.swift
+  s_1497dc4ebf2da3::t_e746d272da8b56 323-343
+Isora/Features/Onboarding/OnboardingPages.swift
+  s_1497dc4ebf2da3::t_98398cb5f41ce0 14,35,88,146
+  s_1497dc4ebf2da3::t_8a86a52a045931 1-13,15-34,36-87,89-145,147-161,163-176
+  s_1497dc4ebf2da3::t_72a7638f53c5ed 162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ba6aee54cfdd0d271e10e60e93f5c80c992cc990",
+  "prompts": {},
+  "sessions": {
+    "s_1497dc4ebf2da3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec3d80e1-2b6a-4fbb-99d1-e08ba140610b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
