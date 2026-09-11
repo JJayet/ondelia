@@ -1,12 +1,34 @@
 import SwiftUI
 
 struct ContinueReadingCardView: View {
-    let audiobook: AudiobookModel
+    let entry: ContinueReadingEntry
     let onTap: () -> Void
 
+    private var audiobook: AudiobookModel { entry.book }
+
+    private var group: CollectionGroup? {
+        if case .collection(let group, _) = entry { return group }
+        return nil
+    }
+
+    private var title: String {
+        group?.name ?? audiobook.title ?? AudiobookModel.unknownTitle
+    }
+
+    /// A collection card names the volume being read; a book card names the chapter.
+    private var subtitle: String? {
+        if group != nil { return audiobook.title ?? AudiobookModel.unknownTitle }
+        return chapterTitle
+    }
+
     private var progressPercentage: Double {
+        if let group { return group.progressFraction }
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
+    }
+
+    private var remaining: TimeInterval {
+        group?.remaining ?? max(audiobook.duration - audiobook.currentPosition, 0)
     }
 
     /// The chapter the position falls in, so the card says where the book was left rather than
@@ -28,13 +50,20 @@ struct ContinueReadingCardView: View {
                 CoverArtView(audiobook: audiobook, size: 84)
 
                 VStack(alignment: .leading, spacing: 8) {
-                    Text(audiobook.title ?? AudiobookModel.unknownTitle)
-                        .font(.system(size: 15, weight: .semibold))
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
+                    HStack(spacing: 6) {
+                        if group?.isSeries == true {
+                            Image(systemName: "books.vertical.fill")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundStyle(.tint)
+                        }
+                        Text(title)
+                            .font(.system(size: 15, weight: .semibold))
+                            .lineLimit(2)
+                            .multilineTextAlignment(.leading)
+                    }
 
-                    if let chapterTitle {
-                        Text(chapterTitle)
+                    if let subtitle {
+                        Text(subtitle)
                             .font(.system(size: 12.5))
                             .foregroundStyle(.secondary)
                             .lineLimit(1)
@@ -46,7 +75,7 @@ struct ContinueReadingCardView: View {
                     Text(
                         String(
                             format: NSLocalizedString("%@ left", comment: "Remaining listening time"),
-                            max(audiobook.duration - audiobook.currentPosition, 0).hoursMinutesFormatted
+                            remaining.hoursMinutesFormatted
                         )
                     )
                     .font(.system(size: 11.5))

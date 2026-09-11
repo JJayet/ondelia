@@ -17,8 +17,8 @@ extension LibraryView {
     var listModeContent: some View {
         List {
             // Continue Reading Section
-            if !continueReadingBooks.isEmpty {
-                ContinueReadingSection(books: continueReadingBooks, headerPadding: 0, rowPadding: 4) { playAndPresent($0) }
+            if !continueReading.isEmpty {
+                ContinueReadingSection(entries: continueReading, headerPadding: 0, rowPadding: 4) { playAndPresent($0) }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -91,8 +91,8 @@ extension LibraryView {
         ScrollView {
             LazyVStack(spacing: 24) {
                 // Continue Reading Section
-                if !continueReadingBooks.isEmpty {
-                    ContinueReadingSection(books: continueReadingBooks, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
+                if !continueReading.isEmpty {
+                    ContinueReadingSection(entries: continueReading, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
                 }
 
                 // Play queue

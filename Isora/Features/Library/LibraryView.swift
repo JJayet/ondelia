@@ -105,12 +105,12 @@ struct LibraryView: View {
         playAndPresent(audiobook)
     }
 
-    var continueReadingBooks: [AudiobookModel] {
-        audiobookManager.audiobooks
-            .filter { $0.currentPosition > 0 && !$0.isFinished }
-            .sorted { $0.lastPlayed > $1.lastPlayed }
-            .prefix(3)
-            .map { $0 }
+    var continueReading: [ContinueReadingEntry] {
+        ContinueReadingEntry.build(
+            books: audiobookManager.audiobooks,
+            collections: audiobookManager.collections,
+            orderedBooks: audiobookManager.orderedBooks(in:)
+        )
     }
 
     // MARK: - Import Handler (delegates to manager's queue w/ progress)
