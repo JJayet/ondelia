@@ -34,13 +34,11 @@ extension PlayerView {
                 }
             }
 
+            // Opens the whole queue rather than starting the book: one tap used to abandon the
+            // book playing, with no way to see or reorder what came after.
             if let next = nextQueuedBook {
                 Button {
-                    withHapticFeedback {
-                        audioManager.loadAudiobook(next)
-                        audioManager.startPlaybackAfterOpeningBook()
-                        PlayQueue.shared.remove(next)
-                    }
+                    withHapticFeedback { showingQueue = true }
                 } label: {
                     nextBookRow(next)
                 }

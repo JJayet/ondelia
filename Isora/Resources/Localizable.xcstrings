@@ -1647,6 +1647,17 @@
         }
       }
     },
+    "From the collection" : {
+      "comment" : "Play queue: book a collection plays next",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Depuis la collection"
+          }
+        }
+      }
+    },
     "Genres" : {
       "comment" : "Statistics card",
       "localizations" : {
@@ -2550,6 +2561,17 @@
         }
       }
     },
+    "Nothing queued" : {
+      "comment" : "Play queue: empty state",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien dans la file d'attente"
+          }
+        }
+      }
+    },
     "Nothing yet" : {
       "comment" : "Statistics: empty list",
       "localizations" : {
@@ -2721,6 +2743,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Lire un livre audio"
+          }
+        }
+      }
+    },
+    "Play Queue" : {
+      "comment" : "Play queue sheet title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "File d'attente"
           }
         }
       }

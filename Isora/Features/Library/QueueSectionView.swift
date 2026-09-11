@@ -2,8 +2,8 @@ import SwiftUI
 
 /// "Up Next" header + the vertical stack of queued books, for the library screen.
 ///
-/// Reordering lives in the context menu rather than a drag: rows sit in the library's
-/// `LazyVStack`, which has no `onMove`.
+/// Reordering lives in the context menu and in the `PlayQueueView` sheet rather than a drag:
+/// rows sit in the library's `LazyVStack`, which has no `onMove`.
 struct QueueSectionView: View {
     let books: [AudiobookModel]
     /// Horizontal padding applied to the header and rows (`nil` = system default).
@@ -11,11 +11,26 @@ struct QueueSectionView: View {
     let onSelect: (AudiobookModel) -> Void
 
     @ScaledMetric(relativeTo: .subheadline) private var coverSize: CGFloat = 44
+    @State private var showingQueue = false
 
     var body: some View {
         if !books.isEmpty {
             VStack(alignment: .leading, spacing: 12) {
-                SectionLabel(NSLocalizedString("Up Next", comment: "Section title for the play queue"))
+                HStack {
+                    SectionLabel(NSLocalizedString("Up Next", comment: "Section title for the play queue"))
+                    Button {
+                        withHapticFeedback { showingQueue = true }
+                    } label: {
+                        Image(systemName: "list.bullet")
+                            .font(.system(size: 13, weight: .semibold))
+                            .foregroundStyle(.tint)
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(NSLocalizedString("Play Queue", comment: "Play queue sheet title"))
+                }
+                .sheet(isPresented: $showingQueue) {
+                    PlayQueueView(chained: nil, onPlay: onSelect)
+                }
 
                 ForEach(Array(books.enumerated()), id: \.element.id) { index, audiobook in
                     Button {
