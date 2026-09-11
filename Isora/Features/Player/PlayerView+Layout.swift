@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 import UIKit
 
 extension PlayerView {
@@ -28,6 +29,8 @@ extension PlayerView {
 
                 chipRow.padding(.top, 12)
 
+                playerTips.padding(.top, 12)
+
                 upNextSection.padding(.top, 22)
 
                 Spacer(minLength: 16)
@@ -35,6 +38,18 @@ extension PlayerView {
             .padding(.horizontal, 16)
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.6), value: audiobook.id)
+    }
+
+    // MARK: - Tips
+    //
+    // Inline, not popovers: a popover anchored on a chip sat on top of it and ate its taps.
+    // TipKit shows at most one of these at a time, so the slot never stacks.
+    @ViewBuilder
+    var playerTips: some View {
+        TipView(ChaptersTip())
+        TipView(SleepTimerTip())
+        TipView(TranscriptTip())
+        TipView(QueueTip())
     }
 
     // MARK: - Header

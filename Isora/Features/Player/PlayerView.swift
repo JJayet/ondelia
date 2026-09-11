@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 import UIKit
 
 struct PlayerView: View {
@@ -57,6 +58,10 @@ struct PlayerView: View {
         }
         .onAppear {
             audioManager.loadAudiobook(openedBook)
+            Task { await AppTips.playerOpened.donate() }
+        }
+        .onChange(of: nextQueuedBook?.id, initial: true) { _, id in
+            QueueTip.hasNext = id != nil
         }
         .sheet(isPresented: $showingBookmarks) {
             BookmarksView(

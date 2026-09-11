@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 /// What the paired watch is holding, and the one button that empties it. Absent entirely when
 /// no watch is paired.
@@ -7,6 +8,7 @@ struct WatchSettingsSection: View {
 
     var body: some View {
         if sync.isPaired && sync.isWatchAppInstalled {
+            TipView(WatchTip())
             SettingsSection(title: String(localized: "Apple Watch")) {
                 if held.isEmpty {
                     SettingsRow(title: String(localized: "Nothing on the watch"))

@@ -154,6 +154,9 @@ struct LibraryView: View {
         }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
         .navigationDestination(item: $collectionForDetail) { collectionDetail($0) }
+        .onChange(of: audiobookManager.audiobooks.count, initial: true) { _, count in
+            LongPressBookTip.bookCount = count
+        }
         .onAppear {
             // Fetch audiobooks when the view first appears
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {

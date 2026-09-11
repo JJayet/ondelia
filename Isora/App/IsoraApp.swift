@@ -18,7 +18,11 @@ struct IsoraApp: App {
     private let globalAudioManager = GlobalAudioManager.shared
     @State private var playbackCommandCoordinator = PlaybackCommandCoordinator()
     @Environment(\.scenePhase) private var scenePhase
-    
+
+    init() {
+        AppTips.configure()
+    }
+
     var body: some Scene {
         WindowGroup {
             // Show a loading view only during initial SwiftData loading

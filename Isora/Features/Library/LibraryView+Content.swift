@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 // MARK: - List / Grid content
 extension LibraryView {
@@ -52,6 +53,11 @@ extension LibraryView {
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
             }
+
+            TipView(LongPressBookTip())
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
+                .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
 
             // Header with filters
             LibraryHeaderView(
@@ -117,6 +123,9 @@ extension LibraryView {
                         SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
                             .padding(.horizontal)
                     }
+
+                    TipView(LongPressBookTip())
+                        .padding(.horizontal)
 
                     // Header with filters
                     LibraryHeaderView(

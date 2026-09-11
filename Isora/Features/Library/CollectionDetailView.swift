@@ -1,4 +1,5 @@
 import SwiftUI
+import TipKit
 
 /// A collection on its own screen: fanned covers, the totals, one progress bar per book, the
 /// resume button, the back-to-back toggle, then the books in the collection's order.
@@ -22,6 +23,7 @@ struct CollectionDetailView: View {
         ScrollView {
             VStack(spacing: 14) {
                 hero
+                TipView(AutoContinueTip())
                 progressCard
                 booksSection
             }
