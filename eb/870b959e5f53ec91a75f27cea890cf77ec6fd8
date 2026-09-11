@@ -1,0 +1,79 @@
+Isora/Features/Player/TranscriptionLoader.swift
+  s_9826cd83e511cb::t_2da4464bd2ea7b 4-7,25-39
+Isora/Core/Managers/AudiobookManager.swift
+  s_9826cd83e511cb::t_db50071374213d 159-164
+Isora/Core/Models/SwiftData/DatabaseBackupService.swift
+  s_9826cd83e511cb::t_db50071374213d 147-148
+Isora/Core/Models/SwiftData/TranscriptionStore.swift
+  s_9826cd83e511cb::t_aa7fc68d4f3fae 49
+  s_9826cd83e511cb::t_939e7facaa404f 16-18,33,35-37,73,84
+  s_9826cd83e511cb::t_9eaf0a7540a785 4,6,34,40,44,57-58,67,74-77,82-83,90,93-97,99-103
+  s_9826cd83e511cb::t_db50071374213d 27,42-43,54-56,59,61-62,78,80-81,91-92,98
+  s_9826cd83e511cb::t_69285ac6aa010a 104
+Isora/Features/Player/TranscriptionView.swift
+  s_9826cd83e511cb::t_9736675efd23bd 61
+  s_9826cd83e511cb::t_fd719bd0360ad8 8-10,15-25,29,35,48-53,56-58,63-64,67-71,73,82-87,89-99,133,143,156-168,171-173,177-181,186-189,192-197,199-205,209-214,216-218,220-222,225-231,233-240,245,247,254,256
+  s_9826cd83e511cb::t_939e7facaa404f 34,36-45,135-136,138,148,150,174-176,182-185,190-191
+  s_7800327ca0b63a::t_3cb8798f44a0b5 149,198,206-208,219
+  s_9826cd83e511cb::t_f4d87e10b96630 59
+IsoraTests/Core/Models/TranscriptionStoreTests.swift
+  s_9826cd83e511cb::t_871aac66217752 78,93,97,118,130,133,137
+  s_9826cd83e511cb::t_fe08b769a35794 96
+  s_9826cd83e511cb::t_ad8cc9f7196fcf 63,81-82,100,121,138
+  s_9826cd83e511cb::t_e8a50f68afed75 106
+  s_9826cd83e511cb::t_db50071374213d 17-18
+  s_9826cd83e511cb::t_939e7facaa404f 35-36,59,66
+  s_9826cd83e511cb::t_2da4464bd2ea7b 27-34,37-39,62
+Isora/Core/Models/SwiftData/IsoraSchema.swift
+  s_9826cd83e511cb::t_db50071374213d 32-34,38-40
+  s_9826cd83e511cb::t_d1071b67397746 35-37,41-42,44,47,49-52
+Isora/Resources/Localizable.xcstrings
+  s_9826cd83e511cb::t_939e7facaa404f 1782-1792,3634-3644,4459-4460,4465
+  s_9826cd83e511cb::t_2da4464bd2ea7b 1652-1662
+Isora/Core/Models/SwiftData/TranscriptWindowModel.swift
+  s_9826cd83e511cb::t_db50071374213d 1-44
+IsoraTests/Core/Services/TranscriptionRequestTests.swift
+  s_9826cd83e511cb::t_2da4464bd2ea7b 1-71
+Isora.xcodeproj/project.pbxproj
+  s_9826cd83e511cb::t_3a078bffc0283e 152
+Isora/Core/Services/SpeechTranscriptionManager.swift
+  s_9826cd83e511cb::t_939e7facaa404f 24-25,51-55,132-135,138,141-152
+  s_9826cd83e511cb::t_d1071b67397746 18-19,21-23,26-31,35-38,75,80-81,96-97,99-110,112,114-116,118-124,127,155-157,159,162-164,170,174,176-177,179,181,188-189,191,193,199-200,210-211,270,278
+  s_7800327ca0b63a::t_3cb8798f44a0b5 44-49
+  s_9826cd83e511cb::t_460b4aabdc4101 50
+Isora/Core/Services/AudioWindowSequence.swift
+  s_9826cd83e511cb::t_58745b86af37ec 53,66
+  s_9826cd83e511cb::t_2c8b7d45754faf 1-31,33-44,54-65,67-82,86-87,89-91,93,95-100
+  s_9826cd83e511cb::t_9683a7598a3350 32,45-52
+  s_9826cd83e511cb::t_b4ff81d87efb66 83-85,88,92,94
+Isora/Core/Services/TranscriptionRequest.swift
+  s_9826cd83e511cb::t_939e7facaa404f 21-23,36-37,71-72,74-90
+  s_9826cd83e511cb::t_4a355aa9a3f7a9 1-20,24-35,38-70,73,91-92
+Isora/Features/Player/TranscriptionLanguagePicker.swift
+  s_9826cd83e511cb::t_939e7facaa404f 1-7,10-15,17-29,31-53,61-88
+  s_7800327ca0b63a::t_3cb8798f44a0b5 8-9,16,30,54-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "eb870b959e5f53ec91a75f27cea890cf77ec6fd8",
+  "prompts": {},
+  "sessions": {
+    "s_7800327ca0b63a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09209-b370-76d1-8f1a-07442d59237f",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_9826cd83e511cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592f7b1d-f7af-497d-a539-6ebd468ced63",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
