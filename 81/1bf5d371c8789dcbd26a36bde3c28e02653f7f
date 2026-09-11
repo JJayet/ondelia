@@ -1,0 +1,25 @@
+Isora/Resources/Localizable.xcstrings
+  s_1497dc4ebf2da3::t_9f417ba1e018b1 1650-1660,2564-2574,2750-2760
+Isora/Features/Player/PlayQueueView.swift
+  s_1497dc4ebf2da3::t_a3e5ee5decca11 1-80
+Isora/Features/Player/PlayerView+UpNext.swift
+  s_1497dc4ebf2da3::t_be7bb09fd68a8e 37-38,41
+Isora/Features/Library/QueueSectionView.swift
+  s_1497dc4ebf2da3::t_2832b271b76490 5-6,14,19-33
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "811bf5d371c8789dcbd26a36bde3c28e02653f7f",
+  "prompts": {},
+  "sessions": {
+    "s_1497dc4ebf2da3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec3d80e1-2b6a-4fbb-99d1-e08ba140610b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
