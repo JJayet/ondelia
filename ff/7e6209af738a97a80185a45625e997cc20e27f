@@ -1,0 +1,40 @@
+Isora/Core/Services/AudiobookPlayer.swift
+  s_1497dc4ebf2da3::t_b375074eb62222 114-117
+Isora/Core/Managers/GlobalAudioManager+AudioSession.swift
+  s_1497dc4ebf2da3::t_b375074eb62222 27-31,51,56-59
+  s_1497dc4ebf2da3::t_93d004707b266d 52-54
+  s_1497dc4ebf2da3::t_e2caa9a226a306 10-14,16-21,34,43,46,55,61
+  s_1497dc4ebf2da3::t_c18bc0b6d0a8b5 60,62
+Isora/Features/Library/ContinueReadingSection.swift
+  s_1497dc4ebf2da3::t_62c06846502a47 63-73,75
+Isora/Core/Managers/GlobalAudioManager.swift
+  s_1497dc4ebf2da3::t_e2caa9a226a306 95-96
+Isora/Features/Library/ContinueReadingCardView.swift
+  s_1497dc4ebf2da3::t_62c06846502a47 5-6,89-90
+.gitignore
+  s_9826cd83e511cb::t_1a4ddeb3c4a3a2 29-31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ff7e6209af738a97a80185a45625e997cc20e27f",
+  "prompts": {},
+  "sessions": {
+    "s_1497dc4ebf2da3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec3d80e1-2b6a-4fbb-99d1-e08ba140610b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_9826cd83e511cb": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "592f7b1d-f7af-497d-a539-6ebd468ced63",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
