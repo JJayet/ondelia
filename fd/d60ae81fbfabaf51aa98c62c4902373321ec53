@@ -1,0 +1,27 @@
+Isora/Features/Library/LibraryView+Content.swift
+  s_1497dc4ebf2da3::t_ce067d713379ed 20-21,94-95
+Isora/Features/Library/LibraryView.swift
+  s_1497dc4ebf2da3::t_ce067d713379ed 108-113
+Isora/Features/Library/ContinueReadingCardView.swift
+  s_1497dc4ebf2da3::t_9874decb805738 4,7-23,25,30-33,53-63,65-66,78
+IsoraTests/Features/Library/ContinueReadingEntryTests.swift
+  s_1497dc4ebf2da3::t_2ff0370f1e8cd7 1-58
+Isora/Features/Library/ContinueReadingSection.swift
+  s_1497dc4ebf2da3::t_6bf7ad48a8927f 3-48,51,65-66
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "fdd60ae81fbfabaf51aa98c62c4902373321ec53",
+  "prompts": {},
+  "sessions": {
+    "s_1497dc4ebf2da3": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ec3d80e1-2b6a-4fbb-99d1-e08ba140610b",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
