@@ -1,0 +1,35 @@
+Ondelia.xcodeproj/xcshareddata/xcschemes/Ondelia.xcscheme
+  s_7800327ca0b63a::t_50c67d11c4a931 1-105
+scripts/screenshots.sh
+  s_7800327ca0b63a::t_50c67d11c4a931 39,56,59
+WATCH_PLAN.md
+  s_7800327ca0b63a::t_50c67d11c4a931 67,73,123
+AGENTS.md
+  s_7800327ca0b63a::t_50c67d11c4a931 5-6,9-12,19-23,35,37
+  s_7800327ca0b63a::t_00d74263083157 14-15
+  s_7800327ca0b63a::t_948bfde9dd8082 13
+TODO.md
+  s_7800327ca0b63a::t_50c67d11c4a931 9
+.github/workflows/ci.yml
+  s_7800327ca0b63a::t_50c67d11c4a931 1,34,41-42,58-59
+MISSING_FEATURES.md
+  s_7800327ca0b63a::t_50c67d11c4a931 90-105
+Ondelia.xcodeproj/project.pbxproj
+  s_7800327ca0b63a::t_50c67d11c4a931 1-1489
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ca8e95a80fbcfa20e4fe1009a3adda865f14b1c1",
+  "prompts": {},
+  "sessions": {
+    "s_7800327ca0b63a": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a09209-b370-76d1-8f1a-07442d59237f",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
