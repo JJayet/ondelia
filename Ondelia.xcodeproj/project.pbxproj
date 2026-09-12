@@ -10,11 +10,11 @@
 		F10305092E62B31B0085F8D4 /* ZIPFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = F11938C42E60A52D003F868D /* ZIPFoundation */; };
 		F140E5FF304DE9D0004492CC /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F140E600304DE9D0004492CC /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
-		F140E60F304DE9D1004492CC /* IsoraWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F140E5FE304DE9D0004492CC /* IsoraWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F140E60F304DE9D1004492CC /* OndeliaWatchWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F140E5FE304DE9D0004492CC /* OndeliaWatchWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F140E7A0304DEA0000000010 /* OndeliaWatch Watch App.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = F140E5D3304DE9B7004492CC /* OndeliaWatch Watch App.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F1A887002E66445100718F1B /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A886FF2E66445100718F1B /* WidgetKit.framework */; };
 		F1A887022E66445100718F1B /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F1A887012E66445100718F1B /* SwiftUI.framework */; };
-		F1A887132E66445200718F1B /* IsoraWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F1A886FD2E66445100718F1B /* IsoraWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		F1A887132E66445200718F1B /* OndeliaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = F1A886FD2E66445100718F1B /* OndeliaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,49 +23,49 @@
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F132899F2E4DBA6B004EC064;
-			remoteInfo = Isora;
+			remoteInfo = Ondelia;
 		};
 		F13289BC2E4DBA6D004EC064 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F132899F2E4DBA6B004EC064;
-			remoteInfo = Isora;
+			remoteInfo = Ondelia;
 		};
 		F140E5E0304DE9B8004492CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
-			remoteInfo = "IsoraWatch Watch App";
+			remoteInfo = "OndeliaWatch Watch App";
 		};
 		F140E5EA304DE9B8004492CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
-			remoteInfo = "IsoraWatch Watch App";
+			remoteInfo = "OndeliaWatch Watch App";
 		};
 		F140E60D304DE9D1004492CC /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F140E5FD304DE9D0004492CC;
-			remoteInfo = IsoraWatchWidgetExtension;
+			remoteInfo = OndeliaWatchWidgetExtension;
 		};
 		F140E7A0304DEA0000000011 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F140E5D2304DE9B7004492CC;
-			remoteInfo = "IsoraWatch Watch App";
+			remoteInfo = "OndeliaWatch Watch App";
 		};
 		F1A887112E66445200718F1B /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = F13289982E4DBA6B004EC064 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = F1A886FC2E66445100718F1B;
-			remoteInfo = IsoraWidgetExtension;
+			remoteInfo = OndeliaWidgetExtension;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -76,7 +76,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				F140E60F304DE9D1004492CC /* IsoraWatchWidgetExtension.appex in Embed Foundation Extensions */,
+				F140E60F304DE9D1004492CC /* OndeliaWatchWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -87,7 +87,7 @@
 			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
 			dstSubfolderSpec = 16;
 			files = (
-				F140E7A0304DEA0000000010 /* IsoraWatch Watch App.app in Embed Watch Content */,
+				F140E7A0304DEA0000000010 /* OndeliaWatch Watch App.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -98,7 +98,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 13;
 			files = (
-				F1A887132E66445200718F1B /* IsoraWidgetExtension.appex in Embed Foundation Extensions */,
+				F1A887132E66445200718F1B /* OndeliaWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -106,37 +106,37 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		F13289A02E4DBA6B004EC064 /* Isora.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Isora.app; sourceTree = BUILT_PRODUCTS_DIR; };
-		F13289B12E4DBA6D004EC064 /* IsoraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IsoraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F13289BB2E4DBA6D004EC064 /* IsoraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = IsoraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "IsoraWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F140E5DF304DE9B8004492CC /* IsoraWatch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "IsoraWatch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F140E5E9304DE9B8004492CC /* IsoraWatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "IsoraWatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		F140E5FE304DE9D0004492CC /* IsoraWatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IsoraWatchWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		F1A886FD2E66445100718F1B /* IsoraWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = IsoraWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F13289A02E4DBA6B004EC064 /* Ondelia.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ondelia.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F13289B12E4DBA6D004EC064 /* OndeliaTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OndeliaTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F13289BB2E4DBA6D004EC064 /* OndeliaUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = OndeliaUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		F140E5D3304DE9B7004492CC /* OndeliaWatch Watch App.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "OndeliaWatch Watch App.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F140E5DF304DE9B8004492CC /* OndeliaWatch Watch AppTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "OndeliaWatch Watch AppTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F140E5E9304DE9B8004492CC /* OndeliaWatch Watch AppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "OndeliaWatch Watch AppUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
+		F140E5FE304DE9D0004492CC /* OndeliaWatchWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OndeliaWatchWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		F1A886FD2E66445100718F1B /* OndeliaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = OndeliaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1A886FF2E66445100718F1B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		F1A887012E66445100718F1B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
-		F1A8871A2E6644BA00718F1B /* IsoraWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = IsoraWidgetExtension.entitlements; sourceTree = "<group>"; };
+		F1A8871A2E6644BA00718F1B /* OndeliaWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OndeliaWidgetExtension.entitlements; sourceTree = "<group>"; };
 		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F1F056362E65D0B300C6E809 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		F13E2CE82E5F994200A4C166 /* Exceptions for "Isora" folder in "Isora" target */ = {
+		F13E2CE82E5F994200A4C166 /* Exceptions for "Ondelia" folder in "Ondelia" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Resources/Info.plist,
 			);
-			target = F132899F2E4DBA6B004EC064 /* Isora */;
+			target = F132899F2E4DBA6B004EC064 /* Ondelia */;
 		};
-		F140E610304DE9D1004492CC /* Exceptions for "IsoraWatchWidget" folder in "IsoraWatchWidgetExtension" target */ = {
+		F140E610304DE9D1004492CC /* Exceptions for "OndeliaWatchWidget" folder in "OndeliaWatchWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */;
+			target = F140E5FD304DE9D0004492CC /* OndeliaWatchWidgetExtension */;
 		};
-		F140E7A0304DEA0000000001 /* Exceptions for "Isora" folder in "IsoraWatch Watch App" target */ = {
+		F140E7A0304DEA0000000001 /* Exceptions for "Ondelia" folder in "OndeliaWatch Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Models/HardcoverLink.swift,
@@ -160,9 +160,9 @@
 				Shared/TimeFormatting.swift,
 				Shared/WatchSync/SyncModels.swift,
 			);
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			target = F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */;
 		};
-		F140E7A0304DEA0000000002 /* Exceptions for "Isora" folder in "IsoraWatchWidgetExtension" target */ = {
+		F140E7A0304DEA0000000002 /* Exceptions for "Ondelia" folder in "OndeliaWatchWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Models/HardcoverLink.swift,
@@ -175,23 +175,23 @@
 				Shared/NowPlayingSharedStore.swift,
 				Shared/TimeFormatting.swift,
 			);
-			target = F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */;
+			target = F140E5FD304DE9D0004492CC /* OndeliaWatchWidgetExtension */;
 		};
-		F140E7A0304DEA0000000003 /* Exceptions for "IsoraWatch Watch App" folder in "IsoraWatch Watch App" target */ = {
+		F140E7A0304DEA0000000003 /* Exceptions for "OndeliaWatch Watch App" folder in "OndeliaWatch Watch App" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			target = F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */;
 		};
-		F1A887172E66445200718F1B /* Exceptions for "IsoraWidget" folder in "IsoraWidgetExtension" target */ = {
+		F1A887172E66445200718F1B /* Exceptions for "OndeliaWidget" folder in "OndeliaWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
 			);
-			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
+			target = F1A886FC2E66445100718F1B /* OndeliaWidgetExtension */;
 		};
-		F1A887202E66496A00718F1B /* Exceptions for "Isora" folder in "IsoraWidgetExtension" target */ = {
+		F1A887202E66496A00718F1B /* Exceptions for "Ondelia" folder in "OndeliaWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Core/Models/HardcoverLink.swift,
@@ -204,64 +204,64 @@
 				Shared/NowPlayingSharedStore.swift,
 				Shared/TimeFormatting.swift,
 			);
-			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
+			target = F1A886FC2E66445100718F1B /* OndeliaWidgetExtension */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		F13289A22E4DBA6B004EC064 /* Isora */ = {
+		F13289A22E4DBA6B004EC064 /* Ondelia */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				F13E2CE82E5F994200A4C166 /* Exceptions for "Isora" folder in "Isora" target */,
-				F1A887202E66496A00718F1B /* Exceptions for "Isora" folder in "IsoraWidgetExtension" target */,
-				F140E7A0304DEA0000000001 /* Exceptions for "Isora" folder in "IsoraWatch Watch App" target */,
-				F140E7A0304DEA0000000002 /* Exceptions for "Isora" folder in "IsoraWatchWidgetExtension" target */,
+				F13E2CE82E5F994200A4C166 /* Exceptions for "Ondelia" folder in "Ondelia" target */,
+				F1A887202E66496A00718F1B /* Exceptions for "Ondelia" folder in "OndeliaWidgetExtension" target */,
+				F140E7A0304DEA0000000001 /* Exceptions for "Ondelia" folder in "OndeliaWatch Watch App" target */,
+				F140E7A0304DEA0000000002 /* Exceptions for "Ondelia" folder in "OndeliaWatchWidgetExtension" target */,
 			);
-			path = Isora;
+			path = Ondelia;
 			sourceTree = "<group>";
 		};
-		F13289B42E4DBA6D004EC064 /* IsoraTests */ = {
+		F13289B42E4DBA6D004EC064 /* OndeliaTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = IsoraTests;
+			path = OndeliaTests;
 			sourceTree = "<group>";
 		};
-		F13289BE2E4DBA6D004EC064 /* IsoraUITests */ = {
+		F13289BE2E4DBA6D004EC064 /* OndeliaUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = IsoraUITests;
+			path = OndeliaUITests;
 			sourceTree = "<group>";
 		};
-		F140E5D4304DE9B7004492CC /* IsoraWatch Watch App */ = {
+		F140E5D4304DE9B7004492CC /* OndeliaWatch Watch App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				F140E7A0304DEA0000000003 /* Exceptions for "IsoraWatch Watch App" folder in "IsoraWatch Watch App" target */,
+				F140E7A0304DEA0000000003 /* Exceptions for "OndeliaWatch Watch App" folder in "OndeliaWatch Watch App" target */,
 			);
-			path = "IsoraWatch Watch App";
+			path = "OndeliaWatch Watch App";
 			sourceTree = "<group>";
 		};
-		F140E5E2304DE9B8004492CC /* IsoraWatch Watch AppTests */ = {
+		F140E5E2304DE9B8004492CC /* OndeliaWatch Watch AppTests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "IsoraWatch Watch AppTests";
+			path = "OndeliaWatch Watch AppTests";
 			sourceTree = "<group>";
 		};
-		F140E5EC304DE9B8004492CC /* IsoraWatch Watch AppUITests */ = {
+		F140E5EC304DE9B8004492CC /* OndeliaWatch Watch AppUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			path = "IsoraWatch Watch AppUITests";
+			path = "OndeliaWatch Watch AppUITests";
 			sourceTree = "<group>";
 		};
-		F140E601304DE9D0004492CC /* IsoraWatchWidget */ = {
+		F140E601304DE9D0004492CC /* OndeliaWatchWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				F140E610304DE9D1004492CC /* Exceptions for "IsoraWatchWidget" folder in "IsoraWatchWidgetExtension" target */,
+				F140E610304DE9D1004492CC /* Exceptions for "OndeliaWatchWidget" folder in "OndeliaWatchWidgetExtension" target */,
 			);
-			path = IsoraWatchWidget;
+			path = OndeliaWatchWidget;
 			sourceTree = "<group>";
 		};
-		F1A887032E66445100718F1B /* IsoraWidget */ = {
+		F1A887032E66445100718F1B /* OndeliaWidget */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				F1A887172E66445200718F1B /* Exceptions for "IsoraWidget" folder in "IsoraWidgetExtension" target */,
+				F1A887172E66445200718F1B /* Exceptions for "OndeliaWidget" folder in "OndeliaWidgetExtension" target */,
 			);
-			path = IsoraWidget;
+			path = OndeliaWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -334,16 +334,16 @@
 		F13289972E4DBA6B004EC064 = {
 			isa = PBXGroup;
 			children = (
-				F1A8871A2E6644BA00718F1B /* IsoraWidgetExtension.entitlements */,
-				F13289A22E4DBA6B004EC064 /* Isora */,
-				F13289B42E4DBA6D004EC064 /* IsoraTests */,
-				F13289BE2E4DBA6D004EC064 /* IsoraUITests */,
+				F1A8871A2E6644BA00718F1B /* OndeliaWidgetExtension.entitlements */,
+				F13289A22E4DBA6B004EC064 /* Ondelia */,
+				F13289B42E4DBA6D004EC064 /* OndeliaTests */,
+				F13289BE2E4DBA6D004EC064 /* OndeliaUITests */,
 				F1C0NF1G0000000000000003 /* Config */,
-				F1A887032E66445100718F1B /* IsoraWidget */,
-				F140E5D4304DE9B7004492CC /* IsoraWatch Watch App */,
-				F140E5E2304DE9B8004492CC /* IsoraWatch Watch AppTests */,
-				F140E5EC304DE9B8004492CC /* IsoraWatch Watch AppUITests */,
-				F140E601304DE9D0004492CC /* IsoraWatchWidget */,
+				F1A887032E66445100718F1B /* OndeliaWidget */,
+				F140E5D4304DE9B7004492CC /* OndeliaWatch Watch App */,
+				F140E5E2304DE9B8004492CC /* OndeliaWatch Watch AppTests */,
+				F140E5EC304DE9B8004492CC /* OndeliaWatch Watch AppUITests */,
+				F140E601304DE9D0004492CC /* OndeliaWatchWidget */,
 				F1A886FE2E66445100718F1B /* Frameworks */,
 				F13289A12E4DBA6B004EC064 /* Products */,
 			);
@@ -352,14 +352,14 @@
 		F13289A12E4DBA6B004EC064 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				F13289A02E4DBA6B004EC064 /* Isora.app */,
-				F13289B12E4DBA6D004EC064 /* IsoraTests.xctest */,
-				F13289BB2E4DBA6D004EC064 /* IsoraUITests.xctest */,
-				F1A886FD2E66445100718F1B /* IsoraWidgetExtension.appex */,
-				F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */,
-				F140E5DF304DE9B8004492CC /* IsoraWatch Watch AppTests.xctest */,
-				F140E5E9304DE9B8004492CC /* IsoraWatch Watch AppUITests.xctest */,
-				F140E5FE304DE9D0004492CC /* IsoraWatchWidgetExtension.appex */,
+				F13289A02E4DBA6B004EC064 /* Ondelia.app */,
+				F13289B12E4DBA6D004EC064 /* OndeliaTests.xctest */,
+				F13289BB2E4DBA6D004EC064 /* OndeliaUITests.xctest */,
+				F1A886FD2E66445100718F1B /* OndeliaWidgetExtension.appex */,
+				F140E5D3304DE9B7004492CC /* OndeliaWatch Watch App.app */,
+				F140E5DF304DE9B8004492CC /* OndeliaWatch Watch AppTests.xctest */,
+				F140E5E9304DE9B8004492CC /* OndeliaWatch Watch AppUITests.xctest */,
+				F140E5FE304DE9D0004492CC /* OndeliaWatchWidgetExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -385,9 +385,9 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		F132899F2E4DBA6B004EC064 /* Isora */ = {
+		F132899F2E4DBA6B004EC064 /* Ondelia */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "Isora" */;
+			buildConfigurationList = F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "Ondelia" */;
 			buildPhases = (
 				F132899C2E4DBA6B004EC064 /* Sources */,
 				F132899D2E4DBA6B004EC064 /* Frameworks */,
@@ -402,19 +402,19 @@
 				F140E7A0304DEA0000000012 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F13289A22E4DBA6B004EC064 /* Isora */,
+				F13289A22E4DBA6B004EC064 /* Ondelia */,
 			);
-			name = Isora;
+			name = Ondelia;
 			packageProductDependencies = (
 				F11938C42E60A52D003F868D /* ZIPFoundation */,
 			);
-			productName = Isora;
-			productReference = F13289A02E4DBA6B004EC064 /* Isora.app */;
+			productName = Ondelia;
+			productReference = F13289A02E4DBA6B004EC064 /* Ondelia.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F13289B02E4DBA6D004EC064 /* IsoraTests */ = {
+		F13289B02E4DBA6D004EC064 /* OndeliaTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "IsoraTests" */;
+			buildConfigurationList = F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "OndeliaTests" */;
 			buildPhases = (
 				F13289AD2E4DBA6D004EC064 /* Sources */,
 				F13289AE2E4DBA6D004EC064 /* Frameworks */,
@@ -426,18 +426,18 @@
 				F13289B32E4DBA6D004EC064 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F13289B42E4DBA6D004EC064 /* IsoraTests */,
+				F13289B42E4DBA6D004EC064 /* OndeliaTests */,
 			);
-			name = IsoraTests;
+			name = OndeliaTests;
 			packageProductDependencies = (
 			);
-			productName = IsoraTests;
-			productReference = F13289B12E4DBA6D004EC064 /* IsoraTests.xctest */;
+			productName = OndeliaTests;
+			productReference = F13289B12E4DBA6D004EC064 /* OndeliaTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		F13289BA2E4DBA6D004EC064 /* IsoraUITests */ = {
+		F13289BA2E4DBA6D004EC064 /* OndeliaUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "IsoraUITests" */;
+			buildConfigurationList = F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "OndeliaUITests" */;
 			buildPhases = (
 				F13289B72E4DBA6D004EC064 /* Sources */,
 				F13289B82E4DBA6D004EC064 /* Frameworks */,
@@ -449,18 +449,18 @@
 				F13289BD2E4DBA6D004EC064 /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F13289BE2E4DBA6D004EC064 /* IsoraUITests */,
+				F13289BE2E4DBA6D004EC064 /* OndeliaUITests */,
 			);
-			name = IsoraUITests;
+			name = OndeliaUITests;
 			packageProductDependencies = (
 			);
-			productName = IsoraUITests;
-			productReference = F13289BB2E4DBA6D004EC064 /* IsoraUITests.xctest */;
+			productName = OndeliaUITests;
+			productReference = F13289BB2E4DBA6D004EC064 /* OndeliaUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */ = {
+		F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F140E5F7304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch App" */;
+			buildConfigurationList = F140E5F7304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch App" */;
 			buildPhases = (
 				F140E5CF304DE9B7004492CC /* Sources */,
 				F140E5D0304DE9B7004492CC /* Frameworks */,
@@ -473,18 +473,18 @@
 				F140E60E304DE9D1004492CC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F140E5D4304DE9B7004492CC /* IsoraWatch Watch App */,
+				F140E5D4304DE9B7004492CC /* OndeliaWatch Watch App */,
 			);
-			name = "IsoraWatch Watch App";
+			name = "OndeliaWatch Watch App";
 			packageProductDependencies = (
 			);
-			productName = "IsoraWatch Watch App";
-			productReference = F140E5D3304DE9B7004492CC /* IsoraWatch Watch App.app */;
+			productName = "OndeliaWatch Watch App";
+			productReference = F140E5D3304DE9B7004492CC /* OndeliaWatch Watch App.app */;
 			productType = "com.apple.product-type.application";
 		};
-		F140E5DE304DE9B8004492CC /* IsoraWatch Watch AppTests */ = {
+		F140E5DE304DE9B8004492CC /* OndeliaWatch Watch AppTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F140E5F8304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch AppTests" */;
+			buildConfigurationList = F140E5F8304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch AppTests" */;
 			buildPhases = (
 				F140E5DB304DE9B8004492CC /* Sources */,
 				F140E5DC304DE9B8004492CC /* Frameworks */,
@@ -496,18 +496,18 @@
 				F140E5E1304DE9B8004492CC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F140E5E2304DE9B8004492CC /* IsoraWatch Watch AppTests */,
+				F140E5E2304DE9B8004492CC /* OndeliaWatch Watch AppTests */,
 			);
-			name = "IsoraWatch Watch AppTests";
+			name = "OndeliaWatch Watch AppTests";
 			packageProductDependencies = (
 			);
-			productName = "IsoraWatch Watch AppTests";
-			productReference = F140E5DF304DE9B8004492CC /* IsoraWatch Watch AppTests.xctest */;
+			productName = "OndeliaWatch Watch AppTests";
+			productReference = F140E5DF304DE9B8004492CC /* OndeliaWatch Watch AppTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
-		F140E5E8304DE9B8004492CC /* IsoraWatch Watch AppUITests */ = {
+		F140E5E8304DE9B8004492CC /* OndeliaWatch Watch AppUITests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F140E5F9304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch AppUITests" */;
+			buildConfigurationList = F140E5F9304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch AppUITests" */;
 			buildPhases = (
 				F140E5E5304DE9B8004492CC /* Sources */,
 				F140E5E6304DE9B8004492CC /* Frameworks */,
@@ -519,18 +519,18 @@
 				F140E5EB304DE9B8004492CC /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
-				F140E5EC304DE9B8004492CC /* IsoraWatch Watch AppUITests */,
+				F140E5EC304DE9B8004492CC /* OndeliaWatch Watch AppUITests */,
 			);
-			name = "IsoraWatch Watch AppUITests";
+			name = "OndeliaWatch Watch AppUITests";
 			packageProductDependencies = (
 			);
-			productName = "IsoraWatch Watch AppUITests";
-			productReference = F140E5E9304DE9B8004492CC /* IsoraWatch Watch AppUITests.xctest */;
+			productName = "OndeliaWatch Watch AppUITests";
+			productReference = F140E5E9304DE9B8004492CC /* OndeliaWatch Watch AppUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */ = {
+		F140E5FD304DE9D0004492CC /* OndeliaWatchWidgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F140E611304DE9D1004492CC /* Build configuration list for PBXNativeTarget "IsoraWatchWidgetExtension" */;
+			buildConfigurationList = F140E611304DE9D1004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatchWidgetExtension" */;
 			buildPhases = (
 				F140E5FA304DE9D0004492CC /* Sources */,
 				F140E5FB304DE9D0004492CC /* Frameworks */,
@@ -541,18 +541,18 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F140E601304DE9D0004492CC /* IsoraWatchWidget */,
+				F140E601304DE9D0004492CC /* OndeliaWatchWidget */,
 			);
-			name = IsoraWatchWidgetExtension;
+			name = OndeliaWatchWidgetExtension;
 			packageProductDependencies = (
 			);
-			productName = IsoraWatchWidgetExtension;
-			productReference = F140E5FE304DE9D0004492CC /* IsoraWatchWidgetExtension.appex */;
+			productName = OndeliaWatchWidgetExtension;
+			productReference = F140E5FE304DE9D0004492CC /* OndeliaWatchWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
-		F1A886FC2E66445100718F1B /* IsoraWidgetExtension */ = {
+		F1A886FC2E66445100718F1B /* OndeliaWidgetExtension */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "IsoraWidgetExtension" */;
+			buildConfigurationList = F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "OndeliaWidgetExtension" */;
 			buildPhases = (
 				F1A886F92E66445100718F1B /* Sources */,
 				F1A886FA2E66445100718F1B /* Frameworks */,
@@ -563,13 +563,13 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				F1A887032E66445100718F1B /* IsoraWidget */,
+				F1A887032E66445100718F1B /* OndeliaWidget */,
 			);
-			name = IsoraWidgetExtension;
+			name = OndeliaWidgetExtension;
 			packageProductDependencies = (
 			);
-			productName = IsoraWidgetExtension;
-			productReference = F1A886FD2E66445100718F1B /* IsoraWidgetExtension.appex */;
+			productName = OndeliaWidgetExtension;
+			productReference = F1A886FD2E66445100718F1B /* OndeliaWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
@@ -612,7 +612,7 @@
 					};
 				};
 			};
-			buildConfigurationList = F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "Isora" */;
+			buildConfigurationList = F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "Ondelia" */;
 			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
@@ -630,14 +630,14 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				F132899F2E4DBA6B004EC064 /* Isora */,
-				F13289B02E4DBA6D004EC064 /* IsoraTests */,
-				F13289BA2E4DBA6D004EC064 /* IsoraUITests */,
-				F1A886FC2E66445100718F1B /* IsoraWidgetExtension */,
-				F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */,
-				F140E5DE304DE9B8004492CC /* IsoraWatch Watch AppTests */,
-				F140E5E8304DE9B8004492CC /* IsoraWatch Watch AppUITests */,
-				F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */,
+				F132899F2E4DBA6B004EC064 /* Ondelia */,
+				F13289B02E4DBA6D004EC064 /* OndeliaTests */,
+				F13289BA2E4DBA6D004EC064 /* OndeliaUITests */,
+				F1A886FC2E66445100718F1B /* OndeliaWidgetExtension */,
+				F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */,
+				F140E5DE304DE9B8004492CC /* OndeliaWatch Watch AppTests */,
+				F140E5E8304DE9B8004492CC /* OndeliaWatch Watch AppUITests */,
+				F140E5FD304DE9D0004492CC /* OndeliaWatchWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -763,37 +763,37 @@
 /* Begin PBXTargetDependency section */
 		F13289B32E4DBA6D004EC064 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F132899F2E4DBA6B004EC064 /* Isora */;
+			target = F132899F2E4DBA6B004EC064 /* Ondelia */;
 			targetProxy = F13289B22E4DBA6D004EC064 /* PBXContainerItemProxy */;
 		};
 		F13289BD2E4DBA6D004EC064 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F132899F2E4DBA6B004EC064 /* Isora */;
+			target = F132899F2E4DBA6B004EC064 /* Ondelia */;
 			targetProxy = F13289BC2E4DBA6D004EC064 /* PBXContainerItemProxy */;
 		};
 		F140E5E1304DE9B8004492CC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			target = F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */;
 			targetProxy = F140E5E0304DE9B8004492CC /* PBXContainerItemProxy */;
 		};
 		F140E5EB304DE9B8004492CC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			target = F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */;
 			targetProxy = F140E5EA304DE9B8004492CC /* PBXContainerItemProxy */;
 		};
 		F140E60E304DE9D1004492CC /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F140E5FD304DE9D0004492CC /* IsoraWatchWidgetExtension */;
+			target = F140E5FD304DE9D0004492CC /* OndeliaWatchWidgetExtension */;
 			targetProxy = F140E60D304DE9D1004492CC /* PBXContainerItemProxy */;
 		};
 		F140E7A0304DEA0000000012 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F140E5D2304DE9B7004492CC /* IsoraWatch Watch App */;
+			target = F140E5D2304DE9B7004492CC /* OndeliaWatch Watch App */;
 			targetProxy = F140E7A0304DEA0000000011 /* PBXContainerItemProxy */;
 		};
 		F1A887122E66445200718F1B /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = F1A886FC2E66445100718F1B /* IsoraWidgetExtension */;
+			target = F1A886FC2E66445100718F1B /* OndeliaWidgetExtension */;
 			targetProxy = F1A887112E66445200718F1B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -802,10 +802,11 @@
 		F13289C52E4DBA6D004EC064 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = Isora;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = Night;
 				ASSETCATALOG_COMPILER_APPICON_NAME = Day;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Isora/Resources/Isora.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ondelia/Resources/Isora.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -814,7 +815,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Isora/Resources/Info.plist;
+				INFOPLIST_FILE = Ondelia/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
@@ -840,10 +841,11 @@
 		F13289C62E4DBA6D004EC064 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = Isora;
 				ASSETCATALOG_COMPILER_ALTERNATE_APPICON_NAMES = Night;
 				ASSETCATALOG_COMPILER_APPICON_NAME = Day;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = Isora/Resources/Isora.entitlements;
+				CODE_SIGN_ENTITLEMENTS = Ondelia/Resources/Isora.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -852,7 +854,7 @@
 				ENABLE_PREVIEWS = YES;
 				ENABLE_USER_SELECTED_FILES = readonly;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Isora/Resources/Info.plist;
+				INFOPLIST_FILE = Ondelia/Resources/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
@@ -1005,6 +1007,7 @@
 		F13289CA2E4DBA6D004EC064 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraTests;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1016,13 +1019,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Isora.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Isora";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ondelia.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ondelia";
 			};
 			name = Debug;
 		};
 		F13289CB2E4DBA6D004EC064 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraTests;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1034,13 +1038,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Isora.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Isora";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ondelia.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Ondelia";
 			};
 			name = Release;
 		};
 		F13289CD2E4DBA6D004EC064 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraUITests;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1050,13 +1055,14 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Isora;
+				TEST_TARGET_NAME = Ondelia;
 			};
 			name = Debug;
 		};
 		F13289CE2E4DBA6D004EC064 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraUITests;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1066,22 +1072,23 @@
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				TEST_TARGET_NAME = Isora;
+				TEST_TARGET_NAME = Ondelia;
 			};
 			name = Release;
 		};
 		F140E5F1304DE9B8004492CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				ASSETCATALOG_COMPILER_APPICON_NAME = Day;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "IsoraWatch Watch App/IsoraWatch.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "OndeliaWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "IsoraWatch Watch App/Info.plist";
+				INFOPLIST_FILE = "OndeliaWatch Watch App/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.jayet.Isora;
@@ -1106,15 +1113,16 @@
 		F140E5F2304DE9B8004492CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				ASSETCATALOG_COMPILER_APPICON_NAME = Day;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
-				CODE_SIGN_ENTITLEMENTS = "IsoraWatch Watch App/IsoraWatch.entitlements";
+				CODE_SIGN_ENTITLEMENTS = "OndeliaWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = "IsoraWatch Watch App/Info.plist";
+				INFOPLIST_FILE = "OndeliaWatch Watch App/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = io.jayet.Isora;
@@ -1139,6 +1147,7 @@
 		F140E5F3304DE9B8004492CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1154,7 +1163,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IsoraWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IsoraWatch Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OndeliaWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OndeliaWatch Watch App";
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -1162,6 +1171,7 @@
 		F140E5F4304DE9B8004492CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
@@ -1177,7 +1187,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/IsoraWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/IsoraWatch Watch App";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/OndeliaWatch Watch App.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/OndeliaWatch Watch App";
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -1185,6 +1195,7 @@
 		F140E5F5304DE9B8004492CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
@@ -1199,7 +1210,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "IsoraWatch Watch App";
+				TEST_TARGET_NAME = "OndeliaWatch Watch App";
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Debug;
@@ -1207,6 +1218,7 @@
 		F140E5F6304DE9B8004492CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
@@ -1221,7 +1233,7 @@
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 4;
-				TEST_TARGET_NAME = "IsoraWatch Watch App";
+				TEST_TARGET_NAME = "OndeliaWatch Watch App";
 				WATCHOS_DEPLOYMENT_TARGET = 26.0;
 			};
 			name = Release;
@@ -1229,14 +1241,15 @@
 		F140E612304DE9D1004492CC /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = IsoraWatchWidget/IsoraWatchWidget.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OndeliaWatchWidget/IsoraWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IsoraWatchWidget/Info.plist;
+				INFOPLIST_FILE = OndeliaWatchWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1263,14 +1276,15 @@
 		F140E613304DE9D1004492CC /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = IsoraWatchWidget/IsoraWatchWidget.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OndeliaWatchWidget/IsoraWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IsoraWatchWidget/Info.plist;
+				INFOPLIST_FILE = OndeliaWatchWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1297,15 +1311,16 @@
 		F1A887152E66445200718F1B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = IsoraWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OndeliaWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IsoraWidget/Info.plist;
+				INFOPLIST_FILE = OndeliaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1332,15 +1347,16 @@
 		F1A887162E66445200718F1B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
-				CODE_SIGN_ENTITLEMENTS = IsoraWidgetExtension.entitlements;
+				CODE_SIGN_ENTITLEMENTS = OndeliaWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = IsoraWidget/Info.plist;
+				INFOPLIST_FILE = OndeliaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Ondelia;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -1367,7 +1383,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "Isora" */ = {
+		F132899B2E4DBA6B004EC064 /* Build configuration list for PBXProject "Ondelia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F13289C72E4DBA6D004EC064 /* Debug */,
@@ -1376,7 +1392,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "Isora" */ = {
+		F13289C42E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "Ondelia" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F13289C52E4DBA6D004EC064 /* Debug */,
@@ -1385,7 +1401,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "IsoraTests" */ = {
+		F13289C92E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "OndeliaTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F13289CA2E4DBA6D004EC064 /* Debug */,
@@ -1394,7 +1410,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "IsoraUITests" */ = {
+		F13289CC2E4DBA6D004EC064 /* Build configuration list for PBXNativeTarget "OndeliaUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F13289CD2E4DBA6D004EC064 /* Debug */,
@@ -1403,7 +1419,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F140E5F7304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch App" */ = {
+		F140E5F7304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch App" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F140E5F1304DE9B8004492CC /* Debug */,
@@ -1412,7 +1428,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F140E5F8304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch AppTests" */ = {
+		F140E5F8304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch AppTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F140E5F3304DE9B8004492CC /* Debug */,
@@ -1421,7 +1437,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F140E5F9304DE9B8004492CC /* Build configuration list for PBXNativeTarget "IsoraWatch Watch AppUITests" */ = {
+		F140E5F9304DE9B8004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatch Watch AppUITests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F140E5F5304DE9B8004492CC /* Debug */,
@@ -1430,7 +1446,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F140E611304DE9D1004492CC /* Build configuration list for PBXNativeTarget "IsoraWatchWidgetExtension" */ = {
+		F140E611304DE9D1004492CC /* Build configuration list for PBXNativeTarget "OndeliaWatchWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F140E612304DE9D1004492CC /* Debug */,
@@ -1439,7 +1455,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "IsoraWidgetExtension" */ = {
+		F1A887142E66445200718F1B /* Build configuration list for PBXNativeTarget "OndeliaWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				F1A887152E66445200718F1B /* Debug */,

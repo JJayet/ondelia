@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
-               BuildableName = "Isora.app"
-               BlueprintName = "Isora"
-               ReferencedContainer = "container:Isora.xcodeproj">
+               BuildableName = "Ondelia.app"
+               BlueprintName = "Ondelia"
+               ReferencedContainer = "container:Ondelia.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F13289B02E4DBA6D004EC064"
-               BuildableName = "IsoraTests.xctest"
-               BlueprintName = "IsoraTests"
-               ReferencedContainer = "container:Isora.xcodeproj">
+               BuildableName = "OndeliaTests.xctest"
+               BlueprintName = "OndeliaTests"
+               ReferencedContainer = "container:Ondelia.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "F13289BA2E4DBA6D004EC064"
-               BuildableName = "IsoraUITests.xctest"
-               BlueprintName = "IsoraUITests"
-               ReferencedContainer = "container:Isora.xcodeproj">
+               BuildableName = "OndeliaUITests.xctest"
+               BlueprintName = "OndeliaUITests"
+               ReferencedContainer = "container:Ondelia.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -69,13 +69,13 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
-            BuildableName = "Isora.app"
-            BlueprintName = "Isora"
-            ReferencedContainer = "container:Isora.xcodeproj">
+            BuildableName = "Ondelia.app"
+            BlueprintName = "Ondelia"
+            ReferencedContainer = "container:Ondelia.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <StoreKitConfigurationFileReference
-         identifier = "../../Isora/Ondelia.storekit">
+         identifier = "../../Ondelia/Ondelia.storekit">
       </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
@@ -89,9 +89,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "F132899F2E4DBA6B004EC064"
-            BuildableName = "Isora.app"
-            BlueprintName = "Isora"
-            ReferencedContainer = "container:Isora.xcodeproj">
+            BuildableName = "Ondelia.app"
+            BlueprintName = "Ondelia"
+            ReferencedContainer = "container:Ondelia.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -1,4 +1,4 @@
-name: Isora CI
+name: Ondelia CI
 
 on:
   push:
@@ -31,15 +31,15 @@ jobs:
           path: |
             DerivedData/SourcePackages
             ~/Library/Caches/org.swift.swiftpm
-          key: ${{ runner.os }}-spm-${{ hashFiles('Isora.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
+          key: ${{ runner.os }}-spm-${{ hashFiles('Ondelia.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved') }}
           restore-keys: ${{ runner.os }}-spm-
 
       - name: Build application and test targets
         run: |
           set -o pipefail
           xcodebuild build-for-testing \
-            -project Isora.xcodeproj \
-            -scheme Isora \
+            -project Ondelia.xcodeproj \
+            -scheme Ondelia \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
@@ -55,8 +55,8 @@ jobs:
         run: |
           set -o pipefail
           xcodebuild test-without-building \
-            -project Isora.xcodeproj \
-            -scheme Isora \
+            -project Ondelia.xcodeproj \
+            -scheme Ondelia \
             -destination 'platform=iOS Simulator,name=iPhone 17' \
             -derivedDataPath DerivedData \
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \

@@ -64,13 +64,13 @@ WatchAudioExporter (AVAssetReader → AVAssetWriter, AAC 64 kbps mono, one chapt
 
 ### New files
 
-**Shared (both targets), `Isora/Shared/WatchSync/`**
+**Shared (both targets), `Ondelia/Shared/WatchSync/`**
 
 - `SyncModels.swift` — `Codable` value types: `LibrarySnapshot`, `BookSummary`, `ChapterSummary`,
   `SyncEvent` (enum), `RemoteCommand` (enum), `FileTransferKind` (cover / chapter) with the
   metadata keys used on `transferFile`. Pure Foundation, unit-tested for round-trip.
 
-**iOS, `Isora/Core/Services/Watch/`**
+**iOS, `Ondelia/Core/Services/Watch/`**
 
 - `WatchSyncService.swift` — `WCSessionDelegate`. Builds `LibrarySnapshot` from
   `AudiobookManager.audiobooks` (three books: content on the watch first, then most recent
@@ -120,7 +120,7 @@ WatchAudioExporter (AVAssetReader → AVAssetWriter, AAC 64 kbps mono, one chapt
     "160 Mo utilisés · Vider".
   - `WatchChaptersView`, `SleepTimerPickerView` (off / 10 / 15 / 25 / 45 min / fin du chapitre),
     `SpeedPickerView` (0.8 … 2.0).
-- `IsoraWatchWidget/` (WidgetKit extension on the watch): `accessoryCircular` (68 % du chapitre),
+- `OndeliaWatchWidget/` (WidgetKit extension on the watch): `accessoryCircular` (68 % du chapitre),
   `accessoryRectangular` (title · ch. 14 · 17 h 09), `accessoryCorner` (Reprendre). Reads
   `NowPlayingSharedStore` from the watch app group. Tap → `isora://resume`.
 
