@@ -1,0 +1,14 @@
+Ondelia.xcodeproj/project.pbxproj
+  h_59e29111fad4d9 812,831,851,870,1013,1016,1032,1035,1050,1052,1067,1069,1087,1099,1121,1133,1153,1156,1177,1180,1200,1203,1223,1226,1249,1261,1284,1296,1320,1331,1356,1367
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "88aef3c1b58661529c91690dacbae075da28283b",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
