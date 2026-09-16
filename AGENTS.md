@@ -2,22 +2,25 @@
 
 ## Project Structure & Module Organization
 
-- App entry: `Isora/App` (`IsoraApp.swift`, `MainTabView.swift`).
-- Core logic: `Isora/Core`
+- App entry: `Ondelia/App` (`IsoraApp.swift`, `MainTabView.swift`).
+- Core logic: `Ondelia/Core`
   - Managers, Services, Models, SwiftData models. Shared singletons (`GlobalAudioManager`,
     `AudiobookManager`, `ThemeManager`) are read directly by the views that need them.
-- Features: `Isora/Features/*` (e.g., `Player`, `Library`, `Settings`). Views end with `View`.
-- Shared UI/utilities: `Isora/Shared` (e.g., `AccessibilityIdentifiers.swift`).
-- Assets & config: `Isora/Resources` (colors, `Info.plist`, entitlements, `Localizable.xcstrings` String Catalog).
-- Tests: `IsoraTests` (unit/integration) and `IsoraUITests` (UI).
+- Features: `Ondelia/Features/*` (e.g., `Player`, `Library`, `Settings`). Views end with `View`.
+- Shared UI/utilities: `Ondelia/Shared` (e.g., `AccessibilityIdentifiers.swift`).
+- Assets & config: `Ondelia/Resources` (colors, `Info.plist`, entitlements, `Localizable.xcstrings` String Catalog).
+- Tests: `OndeliaTests` (unit/integration) and `OndeliaUITests` (UI).
+
+- The Xcode project, schemes, targets, and products use Ondelia. Internal Swift module names
+  (including `Isora` for test imports), bundle IDs, and storage IDs remain stable for compatibility.
 
 ## Build, Test, and Development Commands
 
-- Build clean: `xcodebuild clean -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Build for testing: `xcodebuild build-for-testing -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Unit tests only: `xcodebuild test-without-building -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:IsoraTests`
-- All tests (when UI tests compile): `xcodebuild test -project Isora.xcodeproj -scheme Isora -destination 'platform=iOS Simulator,name=iPhone 17'`
-- Open in Xcode: `open Isora.xcodeproj` and run the `Isora` scheme.
+- Build clean: `xcodebuild clean -project Ondelia.xcodeproj -scheme Ondelia -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Build for testing: `xcodebuild build-for-testing -project Ondelia.xcodeproj -scheme Ondelia -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Unit tests only: `xcodebuild test-without-building -project Ondelia.xcodeproj -scheme Ondelia -destination 'platform=iOS Simulator,name=iPhone 17' -only-testing:OndeliaTests`
+- All tests (when UI tests compile): `xcodebuild test -project Ondelia.xcodeproj -scheme Ondelia -destination 'platform=iOS Simulator,name=iPhone 17'`
+- Open in Xcode: `open Ondelia.xcodeproj` and run the `Ondelia` scheme.
 
 ## Coding Style & Naming Conventions
 
@@ -29,9 +32,9 @@
 
 ## Testing Guidelines
 
-- Framework: Swift Testing (`@Test` / `#expect`) for unit tests in `IsoraTests`; XCTest for UI tests in `IsoraUITests`. File names end with `Tests.swift` and mirror source paths.
+- Framework: Swift Testing (`@Test` / `#expect`) for unit tests in `OndeliaTests`; XCTest for UI tests in `OndeliaUITests`. File names end with `Tests.swift` and mirror source paths.
 - Prioritize coverage of Core and Player.
-- UI tests: live under `IsoraUITests`. Prefer `AccessibilityIdentifiers` for queries.
+- UI tests: live under `OndeliaUITests`. Prefer `AccessibilityIdentifiers` for queries.
 - Run focused tests with `-only-testing:` (see commands above).
 
 ## Commit & Pull Request Guidelines

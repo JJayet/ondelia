@@ -36,7 +36,7 @@ shoot() {
     echo "▶ $device · $lang"
     # TEST_RUNNER_ variables reach the test process only from the environment, not as arguments.
     TEST_RUNNER_SCREENSHOT_LANGUAGE="$lang" TEST_RUNNER_SCREENSHOT_DARK="$DARK" \
-    xcodebuild test -project Isora.xcodeproj -scheme "$scheme" \
+    xcodebuild test -project Ondelia.xcodeproj -scheme "$scheme" \
       -destination "id=$udid" -only-testing:"$test" \
       -resultBundlePath "$result" -parallel-testing-enabled NO -quiet
 
@@ -53,9 +53,9 @@ shoot() {
 }
 
 for device in ${(s:|:)DEVICES}; do
-  shoot "$device" Isora IsoraUITests/ScreenshotUITests io.jayet.Isora
+  shoot "$device" Ondelia OndeliaUITests/ScreenshotUITests io.jayet.Isora
 done
 for device in ${(s:|:)WATCH_DEVICES}; do
-  shoot "$device" "IsoraWatch Watch App" "IsoraWatch Watch AppUITests/WatchScreenshotUITests" io.jayet.Isora.watchkitapp
+  shoot "$device" "OndeliaWatch Watch App" "OndeliaWatch Watch AppUITests/WatchScreenshotUITests" io.jayet.Isora.watchkitapp
 done
 echo "done: $OUT"

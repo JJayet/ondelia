@@ -6,7 +6,7 @@ Verification performed after the pass below:
 
 - `xcodebuild build` (app + widget extension): passed, 0 errors, 0 warnings.
 - `xcodebuild build-for-testing` (app, unit and UI test targets): passed, 0 errors, 0 warnings.
-- Unit suite `IsoraTests`: 105 tests in 20 suites, all passed.
+- Unit suite `OndeliaTests`: 105 tests in 20 suites, all passed.
 - UI suite: still not run (known broken, being consolidated into `AudiobookUITestCase.swift`).
 
 Sections 1, 2, 3 and 4 are done except for the items listed under **Deliberately not done**.
