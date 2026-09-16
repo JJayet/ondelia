@@ -45,7 +45,8 @@ extension HardcoverAPI {
         let search: Results
 
         struct Results: Decodable {
-            let results: Hits
+            /// Null, with no `errors`, when Hardcover's search backend is down.
+            let results: Hits?
 
             struct Hits: Decodable {
                 let hits: [Hit]

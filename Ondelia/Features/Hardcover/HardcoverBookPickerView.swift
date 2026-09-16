@@ -111,6 +111,7 @@ struct HardcoverBookPickerView: View {
         } catch {
             guard !Task.isCancelled else { return }
             errorMessage = error.localizedDescription
+            Log.hardcover.error("Search failed: \(error.localizedDescription)")
         }
         isSearching = false
     }
