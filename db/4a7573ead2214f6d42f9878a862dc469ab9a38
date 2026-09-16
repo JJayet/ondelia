@@ -1,0 +1,19 @@
+Ondelia.xcodeproj/project.pbxproj
+  s_3dfd8b62817dda::t_cb19b279ffd25a 831,871,1017,1036,1053,1070,1100,1134,1157,1181,1204,1227,1262,1297,1332,1368
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "db4a7573ead2214f6d42f9878a862dc469ab9a38",
+  "prompts": {},
+  "sessions": {
+    "s_3dfd8b62817dda": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "5d61ddcc-7039-4c08-a65f-7017828860bd",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
