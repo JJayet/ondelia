@@ -12,12 +12,15 @@ enum HardcoverAPI {
         case http(Int)
         case graphQL(String)
         case noData
+        /// `search.results` came back null with no error attached: Hardcover's search backend
+        /// is down, which has happened; nothing the reader can fix.
+        case searchUnavailable
 
         var errorDescription: String? {
             switch self {
             case .http(401), .http(403):
                 return NSLocalizedString(
-                    "Hardcover rejected the access token. Check it in Settings.",
+                    "Hardcover rejected the sign-in. Sign in again in Settings.",
                     comment: "Hardcover authentication failure"
                 )
             case .http(let code):
@@ -34,6 +37,11 @@ enum HardcoverAPI {
                 return NSLocalizedString(
                     "Hardcover returned no results.",
                     comment: "Hardcover empty response"
+                )
+            case .searchUnavailable:
+                return NSLocalizedString(
+                    "Hardcover search is unavailable right now. Try again later.",
+                    comment: "Hardcover search backend down"
                 )
             }
         }
@@ -60,15 +68,43 @@ enum HardcoverAPI {
 
         let (data, response) = try await URLSession.shared.data(for: request)
         if let http = response as? HTTPURLResponse, !(200...299).contains(http.statusCode) {
+            Log.hardcover.error("GraphQL returned \(http.statusCode, privacy: .public): \(String(decoding: data.prefix(500), as: UTF8.self), privacy: .public)")
+            // A 401/403 body says why — an expired token, or the scope the query is missing —
+            // which is worth more on screen than the bare status code.
+            if let rejection = try? JSONDecoder().decode(Rejection.self, from: data),
+               let reason = rejection.errorDescription ?? rejection.error {
+                let scope = rejection.scope.map { " (\($0))" } ?? ""
+                throw Failure.graphQL(reason + scope)
+            }
             throw Failure.http(http.statusCode)
         }
 
-        let envelope = try JSONDecoder().decode(Envelope<T>.self, from: data)
+        let envelope: Envelope<T>
+        do {
+            envelope = try JSONDecoder().decode(Envelope<T>.self, from: data)
+        } catch {
+            // Catalogue data, not the reader's: the body is safe to log, and it is the only way
+            // to see which key Hardcover renamed.
+            Log.hardcover.error("Could not decode \(String(describing: T.self), privacy: .public): \(String(describing: error), privacy: .public)\nBody: \(String(decoding: data.prefix(1500), as: UTF8.self), privacy: .public)")
+            throw error
+        }
         if let message = envelope.errors?.first?.message {
             throw Failure.graphQL(message)
         }
         guard let payload = envelope.data else { throw Failure.noData }
         return payload
+    }
+
+    /// `{ error, error_description, scope }` — what Hardcover sends with a 401 or 403.
+    private struct Rejection: Decodable {
+        let error: String?
+        let errorDescription: String?
+        let scope: String?
+
+        enum CodingKeys: String, CodingKey {
+            case error, scope
+            case errorDescription = "error_description"
+        }
     }
 
     private struct Envelope<T: Decodable>: Decodable {
@@ -92,7 +128,11 @@ extension HardcoverAPI {
             token: token,
             as: SearchResponse.self
         )
-        return response.search.results.hits.map(\.document)
+        guard let results = response.search.results else {
+            Log.hardcover.error("Search returned results=null with no errors")
+            throw Failure.searchUnavailable
+        }
+        return results.hits.map(\.document)
     }
 
     /// Adds the book to the reader's shelf at `status`, returning the shelf row's id.

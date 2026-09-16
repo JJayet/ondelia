@@ -12,7 +12,8 @@ extension HardcoverService {
     /// Called on every progress write — every five seconds while a book plays — so the cheap
     /// guards come first and both halves below decide for themselves whether to say anything.
     func syncProgress(for audiobook: AudiobookModel) async {
-        guard let token, audiobook.hardcover != nil, !syncing.contains(audiobook.id) else { return }
+        guard audiobook.hardcover != nil, !syncing.contains(audiobook.id),
+              let token = await validToken() else { return }
 
         syncing.insert(audiobook.id)
         defer { syncing.remove(audiobook.id) }

@@ -8,9 +8,8 @@ struct HardcoverSettingsView: View {
     @AppStorage(HardcoverService.Defaults.autoAddWantToRead) private var autoAddWantToRead = true
     @AppStorage(HardcoverService.Defaults.readingThreshold) private var readingThreshold = 1.0
 
-    /// The token is held in the keychain, so the field keeps its own copy while editing.
-    @State private var token = ""
-    @FocusState private var tokenFocused: Bool
+    /// Mirrors `service.isLinked`, which is not observable: re-read after signing in or out.
+    @State private var isLinked = false
     @State private var isRefreshing = false
     /// What the last refresh found, for the row's footer.
     @State private var lastResult: (books: Int, inSeries: Int)?
@@ -18,30 +17,25 @@ struct HardcoverSettingsView: View {
     var body: some View {
         List {
             Section {
-                TextField(
-                    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXV…",
-                    text: $token,
-                    axis: .vertical
-                )
-                .lineLimit(1...3)
-                .textInputAutocapitalization(.never)
-                .autocorrectionDisabled()
-                .focused($tokenFocused)
-                .font(.footnote.monospaced())
-                .accessibilityLabel(NSLocalizedString(
-                    "Hardcover access token",
-                    comment: "Accessibility label for the Hardcover token field"
-                ))
-                .onChange(of: token) { _, newValue in
-                    service.token = newValue
+                if isLinked {
+                    Label(
+                        NSLocalizedString("Connected to Hardcover", comment: "Hardcover account row when signed in"),
+                        systemImage: "checkmark.circle.fill"
+                    )
+                    .foregroundStyle(Color.primaryText)
+                } else {
+                    HardcoverSignInButton { isLinked = service.isLinked }
+                        .foregroundStyle(Color.primaryText)
                 }
             } header: {
-                Text(NSLocalizedString("Access Token", comment: "Hardcover settings section: token"))
+                Text(NSLocalizedString("Account", comment: "Hardcover settings section: account"))
             } footer: {
-                Text(NSLocalizedString(
-                    "Create a token at hardcover.app under Settings → API and paste the key here. \"Bearer\" is added for you.",
-                    comment: "Hardcover token section footer"
-                ))
+                if !isLinked {
+                    Text(NSLocalizedString(
+                        "Sign in to track what you listen to on your Hardcover profile and find series.",
+                        comment: "Hardcover account section footer"
+                    ))
+                }
             }
 
             Section {
@@ -95,7 +89,7 @@ struct HardcoverSettingsView: View {
                 ))
             }
 
-            if !token.isEmpty {
+            if isLinked {
                 Section {
                     Button {
                         withHapticFeedback {}
@@ -140,12 +134,13 @@ struct HardcoverSettingsView: View {
 
                 Section {
                     Button(role: .destructive) {
-                        withHapticFeedback {
-                            token = ""
-                            tokenFocused = false
+                        withHapticFeedback {}
+                        Task {
+                            await service.signOut()
+                            isLinked = service.isLinked
                         }
                     } label: {
-                        Text(NSLocalizedString("Remove Token", comment: "Hardcover unlink button"))
+                        Text(NSLocalizedString("Sign Out", comment: "Hardcover sign-out button"))
                             .frame(maxWidth: .infinity)
                     }
                 }
@@ -155,7 +150,7 @@ struct HardcoverSettingsView: View {
         .navigationBarTitleDisplayMode(.inline)
         .scrollContentBackground(.hidden)
         .background(TintedBackground(intensity: 0.6))
-        .onAppear { token = service.token ?? "" }
+        .onAppear { isLinked = service.isLinked }
     }
 }
 

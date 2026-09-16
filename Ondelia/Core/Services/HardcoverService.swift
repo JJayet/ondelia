@@ -18,6 +18,12 @@ final class HardcoverService {
     }
 
     private static let tokenKey = "hardcover.token"
+    private static let refreshTokenKey = "hardcover.refreshToken"
+    private static let expiryKey = "hardcover.tokenExpiry"
+
+    /// The refresh in flight, so two syncs that both find the token expired share one request
+    /// instead of racing Hardcover with two refresh-token uses.
+    private var refreshing: Task<String?, Never>?
 
     /// Books with a status push in flight. Progress ticks every five seconds, so without this
     /// the tick that crosses the threshold and the next one both insert a shelf row.
@@ -34,22 +40,73 @@ final class HardcoverService {
 
     private init() {}
 
-    // MARK: - Settings
+    // MARK: - Account
 
-    /// The bare key. A pasted "Bearer …" loses its scheme here; `HardcoverAPI` puts it back
-    /// on every request, so the reader only ever pastes the key itself.
-    var token: String? {
+    /// The stored access token, as it is. A token pasted by hand before the OAuth flow existed
+    /// lives under the same key with no refresh token, and keeps working until signed out.
+    private(set) var token: String? {
         get { Keychain.get(Self.tokenKey) }
-        set {
-            var value = newValue?.trimmingCharacters(in: .whitespacesAndNewlines)
-            if let v = value, v.lowercased().hasPrefix("bearer ") {
-                value = String(v.dropFirst(7)).trimmingCharacters(in: .whitespaces)
-            }
-            Keychain.set(value, for: Self.tokenKey)
-        }
+        set { Keychain.set(newValue, for: Self.tokenKey) }
     }
 
     var isLinked: Bool { token?.isEmpty == false }
+
+    /// Finishes the OAuth flow: checks the callback against `request` and stores the tokens.
+    func signIn(callback: URL, for request: HardcoverAuth.Request) async throws {
+        store(try await HardcoverAuth.exchange(callback: callback, for: request))
+    }
+
+    /// Drops the account. The refresh token is revoked at Hardcover, which invalidates the
+    /// access token with it; the links on the books stay, they are just no longer synced.
+    func signOut() async {
+        if let refresh = Keychain.get(Self.refreshTokenKey) {
+            await HardcoverAuth.revoke(refresh)
+        } else if let token {
+            await HardcoverAuth.revoke(token)
+        }
+        token = nil
+        Keychain.set(nil, for: Self.refreshTokenKey)
+        Keychain.set(nil, for: Self.expiryKey)
+    }
+
+    /// The access token, refreshed first when it is about to expire. Nil when signed out, or
+    /// when the refresh fails — a sync then quietly skips its turn rather than sending a
+    /// request Hardcover will reject.
+    func validToken() async -> String? {
+        guard let token else { return nil }
+        guard let refresh = Keychain.get(Self.refreshTokenKey),
+              let expiry = Keychain.get(Self.expiryKey).flatMap(TimeInterval.init),
+              expiry - Date().timeIntervalSince1970 < 60
+        else { return token }
+
+        if let refreshing { return await refreshing.value }
+        let task = Task<String?, Never> {
+            do {
+                let tokens = try await HardcoverAuth.refresh(refresh)
+                store(tokens)
+                return tokens.accessToken
+            } catch {
+                Log.hardcover.error("Failed to refresh the Hardcover token: \(error.localizedDescription)")
+                return nil
+            }
+        }
+        refreshing = task
+        defer { refreshing = nil }
+        return await task.value
+    }
+
+    private func store(_ tokens: HardcoverAuth.Tokens) {
+        token = tokens.accessToken
+        // A rotated refresh token replaces the old one; a reply without one keeps it.
+        if let refresh = tokens.refreshToken {
+            Keychain.set(refresh, for: Self.refreshTokenKey)
+        }
+        if let lifetime = tokens.expiresIn {
+            Keychain.set(String(Date().timeIntervalSince1970 + lifetime), for: Self.expiryKey)
+        } else {
+            Keychain.set(nil, for: Self.expiryKey)
+        }
+    }
 
     var autoMatchEnabled: Bool {
         UserDefaults.standard.bool(forKey: Defaults.autoMatch)
@@ -67,7 +124,8 @@ final class HardcoverService {
     // MARK: - Search
 
     func search(_ query: String, perPage: Int = 10) async throws -> [HardcoverAPI.SearchHit] {
-        guard let token else { return [] }
+        // Signed out, or the refresh failed: say so, rather than showing "No Matches".
+        guard let token = await validToken() else { throw HardcoverAPI.Failure.http(401) }
         return try await HardcoverAPI.search(query, perPage: perPage, token: token)
     }
 
@@ -102,7 +160,8 @@ final class HardcoverService {
     /// not leave a stranger's book sitting on the reader's profile.
     func link(_ book: HardcoverLink?, to audiobook: AudiobookModel) async {
         guard let book else {
-            if let previous = audiobook.hardcover, let userBookID = previous.userBookID, let token {
+            if let previous = audiobook.hardcover, let userBookID = previous.userBookID,
+               let token = await validToken() {
                 do {
                     try await HardcoverAPI.removeFromShelf(userBookID: userBookID, token: token)
                 } catch {
@@ -115,7 +174,7 @@ final class HardcoverService {
         }
 
         var link = book
-        if autoAddWantToRead, let token, link.status < .wantToRead {
+        if autoAddWantToRead, link.status < .wantToRead, let token = await validToken() {
             do {
                 link.userBookID = try await HardcoverAPI.setStatus(
                     bookID: link.id, status: .wantToRead, token: token
@@ -139,7 +198,7 @@ final class HardcoverService {
     /// link: the description does not change, and the screen should not wait on the network
     /// every time it is pushed.
     func refreshDetails(for audiobook: AudiobookModel, force: Bool = false) async {
-        guard let token, let link = audiobook.hardcover else { return }
+        guard let link = audiobook.hardcover, let token = await validToken() else { return }
         guard force || link.detailsChecked != true || link.releaseDateChecked != true else { return }
 
         do {
@@ -168,7 +227,7 @@ final class HardcoverService {
     /// skipped without touching the network. Pass `force` to re-ask Hardcover for a book that
     /// came back standalone.
     func refreshSeries(for audiobook: AudiobookModel, force: Bool = false) async {
-        guard let token, let link = audiobook.hardcover else { return }
+        guard let link = audiobook.hardcover, let token = await validToken() else { return }
         guard force || link.seriesChecked != true else { return }
 
         do {
@@ -192,7 +251,7 @@ final class HardcoverService {
 
     /// Every series Hardcover lists the linked book in, featured first. For the picker.
     func seriesOptions(for audiobook: AudiobookModel) async -> [HardcoverAPI.SeriesRef] {
-        guard let token, let link = audiobook.hardcover else { return [] }
+        guard let link = audiobook.hardcover, let token = await validToken() else { return [] }
         do {
             return try await HardcoverAPI.seriesOptions(bookID: link.id, token: token)
         } catch {
@@ -257,7 +316,7 @@ final class HardcoverService {
     /// Cached: the catalogue only changes when Hardcover gains a volume, which is not often
     /// enough to pay for a request on every library read.
     func refreshCatalog(seriesID: Int, force: Bool = false) async {
-        guard let token else { return }
+        guard let token = await validToken() else { return }
         guard force || SeriesCatalog.volumes(for: seriesID).isEmpty else { return }
 
         do {

@@ -76,7 +76,7 @@ struct OnboardingImportPage: View {
 struct OnboardingConnectPage: View {
     private let hardcover = HardcoverService.shared
     private let watch = WatchSyncService.shared
-    @State private var token = ""
+    @State private var hardcoverLinked = HardcoverService.shared.isLinked
     @AppStorage(SwiftDataController.iCloudSyncKey) private var iCloudSync = true
 
     var body: some View {
@@ -105,15 +105,20 @@ struct OnboardingConnectPage: View {
                     OnboardingFeatureRow(
                         systemImage: "books.vertical.circle",
                         title: NSLocalizedString("Hardcover", comment: "Hardcover integration"),
-                        detail: NSLocalizedString("Paste an access token from hardcover.app to track what you listen to and find series.", comment: "Onboarding: Hardcover detail")
+                        detail: NSLocalizedString("Sign in to track what you listen to and find series.", comment: "Onboarding: Hardcover detail")
                     )
-                    TextField(NSLocalizedString("Access token", comment: "Onboarding: Hardcover token placeholder"), text: $token)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .font(.footnote.monospaced())
-                        .padding(10)
-                        .background(.quaternary, in: RoundedRectangle(cornerRadius: 10))
-                        .onChange(of: token) { _, value in hardcover.token = value }
+                    if hardcoverLinked {
+                        Label(
+                            NSLocalizedString("Connected to Hardcover", comment: "Hardcover account row when signed in"),
+                            systemImage: "checkmark.circle.fill"
+                        )
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.green)
+                    } else {
+                        HardcoverSignInButton { hardcoverLinked = hardcover.isLinked }
+                            .font(.system(size: 15, weight: .semibold))
+                            .buttonStyle(.glass)
+                    }
                 }
                 .padding(16)
 
@@ -132,7 +137,6 @@ struct OnboardingConnectPage: View {
             Spacer()
             Spacer()
         }
-        .onAppear { token = hardcover.token ?? "" }
     }
 }
 
