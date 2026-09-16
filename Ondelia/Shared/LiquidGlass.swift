@@ -183,14 +183,16 @@ struct SectionLabel: View {
 struct ProgressLine: View {
     let value: Double
     var height: CGFloat = 4
-    var color: Color = .accentColor
+    /// nil follows the view's tint, which is the theme's accent. `Color.accentColor` does
+    /// not: it reads the asset catalogue, not `.tint()`.
+    var color: Color?
 
     var body: some View {
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
                 Capsule().fill(.quaternary)
                 Capsule()
-                    .fill(color)
+                    .fill(color.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.tint))
                     .frame(width: geometry.size.width * min(max(value, 0), 1))
             }
         }

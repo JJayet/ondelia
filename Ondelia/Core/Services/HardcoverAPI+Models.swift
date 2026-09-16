@@ -102,7 +102,7 @@ extension HardcoverAPI {
     }
 
     /// Where one book sits in one series.
-    struct SeriesRef: Hashable, Sendable {
+    struct SeriesRef: Hashable, Sendable, Identifiable {
         let id: Int
         let name: String
         let position: Double?

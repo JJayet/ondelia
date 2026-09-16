@@ -12,6 +12,8 @@ struct BookDetailView: View {
     @State private var showingChapters = false
     @State private var showingBookmarks = false
     @State private var fileBytes: Int64?
+    @State var seriesOptions: [HardcoverAPI.SeriesRef] = []
+    @State var showingSeriesPicker = false
 
     private var chapters: [ChapterModel] { audiobook.sortedChapters }
 
@@ -165,12 +167,25 @@ struct BookDetailView: View {
             }
 
             if let link = audiobook.hardcover {
-                DetailChip(
-                    text: [link.seriesName, link.volumeBadge].compactMap { $0 }.joined(separator: " ")
-                        .ifEmpty("Hardcover"),
-                    icon: "checkmark",
-                    tint: .green
-                )
+                // Tapping asks Hardcover which series the book is in, and offers a choice when
+                // there are several: a shared universe or an omnibus can put it in the wrong one.
+                Button {
+                    Task { await openSeriesPicker() }
+                } label: {
+                    DetailChip(
+                        text: [link.seriesName, link.volumeBadge].compactMap { $0 }.joined(separator: " ")
+                            .ifEmpty("Hardcover"),
+                        icon: "checkmark",
+                        tint: .green
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint(NSLocalizedString("Choose the series", comment: "Hardcover chip hint"))
+                .confirmationDialog(
+                    NSLocalizedString("Series", comment: "Series picker title"),
+                    isPresented: $showingSeriesPicker,
+                    titleVisibility: .visible
+                ) { seriesPickerButtons }
             }
         }
         .frame(maxWidth: .infinity)

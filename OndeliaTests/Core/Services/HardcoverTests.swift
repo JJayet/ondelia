@@ -72,6 +72,17 @@ struct HardcoverTests {
         #expect(entry.position == expected)
     }
 
+    @Test("The series already on the link wins while Hardcover lists it, else the featured one")
+    func choosesSeries() {
+        let featured = HardcoverAPI.SeriesRef(id: 1, name: "Red Rising Saga", position: 4)
+        let universe = HardcoverAPI.SeriesRef(id: 2, name: "Red Rising Universe", position: 7)
+        let options = [featured, universe]
+        #expect(HardcoverService.choose(from: options, keeping: nil) == featured)
+        #expect(HardcoverService.choose(from: options, keeping: 2) == universe)
+        #expect(HardcoverService.choose(from: options, keeping: 99) == featured)
+        #expect(HardcoverService.choose(from: [], keeping: 2) == nil)
+    }
+
     @Test("A standalone book decodes as no series at all")
     func decodesStandaloneBook() throws {
         let json = #"{"books": [{"book_series": []}]}"#

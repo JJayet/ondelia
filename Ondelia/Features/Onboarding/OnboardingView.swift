@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The first-launch welcome: four pages whose one job is to get a book into the library.
+/// The first-launch welcome: six pages that get a book into the library and set the options
+/// worth choosing before the first listen.
 /// Deeper features are left to the in-context tips (`AppTips`), where they are remembered.
 struct OnboardingView: View {
     static let completedKey = "onboarding.completed"
@@ -15,7 +16,7 @@ struct OnboardingView: View {
     @State private var page = 0
     @State private var showingImporter = false
     @State private var importedCount = 0
-    private let pageCount = 4
+    private let pageCount = 6
 
     var body: some View {
         ZStack {
@@ -37,8 +38,10 @@ struct OnboardingView: View {
                 TabView(selection: $page) {
                     OnboardingWelcomePage().tag(0)
                     OnboardingImportPage(importedCount: importedCount) { showingImporter = true }.tag(1)
-                    OnboardingConnectPage().tag(2)
-                    OnboardingReadyPage().tag(3)
+                    OnboardingLookPage().tag(2)
+                    OnboardingPlaybackPage().tag(3)
+                    OnboardingConnectPage().tag(4)
+                    OnboardingReadyPage().tag(5)
                 }
                 .tabViewStyle(.page(indexDisplayMode: .always))
                 .indexViewStyle(.page(backgroundDisplayMode: .always))

@@ -77,6 +77,21 @@ struct CollectionGroupTests {
         #expect(manager.collections.isEmpty)
     }
 
+    @Test("A series collection goes when its last book does, and comes back with the next")
+    func seriesCollectionFollowsItsBooks() {
+        UserDefaults.standard.removeObject(forKey: AudiobookManager.autoSeriesCollectionsKey)
+        let dune = book("Dune", series: "Dune", position: 1, seriesID: 7)
+        let manager = manager(with: [dune])
+        #expect(manager.collections.count == 1)
+
+        manager.deleteAudiobook(dune)
+        #expect(manager.collections.isEmpty)
+
+        manager.swiftDataController.context.insert(book("Dune Messiah", series: "Dune", position: 2, seriesID: 7))
+        manager.fetchAudiobooks()
+        #expect(manager.collections.map(\.name) == ["Dune"])
+    }
+
     @Test("Hand-made collections: a book can be in several, and leaves them when deleted")
     func manualCollections() {
         UserDefaults.standard.removeObject(forKey: AudiobookManager.autoSeriesCollectionsKey)

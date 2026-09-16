@@ -107,11 +107,13 @@ extension HardcoverAPI {
         return response.insertUserBook.id
     }
 
-    /// The series a book belongs to, or nil when Hardcover has it as a standalone.
+    /// Every series a book belongs to — empty when Hardcover has it as a standalone. A book can
+    /// sit in several (a shared universe, an omnibus); the one Hardcover features comes first,
+    /// compilations last.
     ///
     /// Search does not carry series, so this is a second request — made once per link, not per
     /// library read: the answer is stored on the link.
-    static func series(bookID: Int, token: String) async throws -> SeriesRef? {
+    static func seriesOptions(bookID: Int, token: String) async throws -> [SeriesRef] {
         let document = bookSeriesQuery
         let response = try await execute(
             query: document,
@@ -119,10 +121,9 @@ extension HardcoverAPI {
             token: token,
             as: BookSeriesResponse.self
         )
-        // A book can sit in several series (an omnibus, a shared universe). The first is the
-        // one Hardcover shows on the book page, and grouping needs exactly one.
-        guard let entry = response.books.first?.bookSeries.first else { return nil }
-        return SeriesRef(id: entry.series.id, name: entry.series.name, position: entry.position)
+        return (response.books.first?.bookSeries ?? []).map {
+            SeriesRef(id: $0.series.id, name: $0.series.name, position: $0.position)
+        }
     }
 
     /// What Hardcover knows about one book: its description, and the tags readers have put on

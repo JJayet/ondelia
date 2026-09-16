@@ -203,3 +203,13 @@ struct AddBookmarkView: View {
 #Preview("With bookmarks") {
     BookmarksView(audiobook: PreviewContent.audiobookFinished(), globalAudioManager: GlobalAudioManager.shared)
 }
+
+#Preview("Bookmarks") {
+    NavigationStack {
+        BookmarksView(
+            audiobook: PreviewContent.audiobookFinished(),
+            globalAudioManager: GlobalAudioManager.shared
+        )
+    }
+}
+

@@ -36,9 +36,17 @@ final class HardcoverService {
 
     // MARK: - Settings
 
+    /// The bare key. A pasted "Bearer …" loses its scheme here; `HardcoverAPI` puts it back
+    /// on every request, so the reader only ever pastes the key itself.
     var token: String? {
         get { Keychain.get(Self.tokenKey) }
-        set { Keychain.set(newValue?.trimmingCharacters(in: .whitespacesAndNewlines), for: Self.tokenKey) }
+        set {
+            var value = newValue?.trimmingCharacters(in: .whitespacesAndNewlines)
+            if let v = value, v.lowercased().hasPrefix("bearer ") {
+                value = String(v.dropFirst(7)).trimmingCharacters(in: .whitespaces)
+            }
+            Keychain.set(value, for: Self.tokenKey)
+        }
     }
 
     var isLinked: Bool { token?.isEmpty == false }
@@ -164,21 +172,50 @@ final class HardcoverService {
         guard force || link.seriesChecked != true else { return }
 
         do {
-            let series = try await HardcoverAPI.series(bookID: link.id, token: token)
+            let options = try await HardcoverAPI.seriesOptions(bookID: link.id, token: token)
             // Re-read: an await let the book be unlinked or relinked while the request was out.
-            guard var current = audiobook.hardcover, current.id == link.id else { return }
-            current.seriesID = series?.id
-            current.seriesName = series?.name
-            current.seriesPosition = series?.position
-            current.seriesChecked = true
-            audiobook.hardcover = current
-            save()
-            AudiobookManager.shared.reconcileSeriesCollections()
-
+            guard let current = audiobook.hardcover, current.id == link.id else { return }
+            let series = Self.choose(from: options, keeping: current.seriesID)
+            apply(series, to: audiobook)
             if let series { await refreshCatalog(seriesID: series.id, force: force) }
         } catch {
             Log.hardcover.error("Failed to read series: \(error.localizedDescription)")
         }
+    }
+
+    /// The series already on the link when Hardcover still lists it — a hand pick, or last
+    /// time's answer — else the featured one (first in `options`). No stored flag for the pick:
+    /// `HardcoverLink` is flattened into the store's entity, so a new field changes the schema.
+    nonisolated static func choose(from options: [HardcoverAPI.SeriesRef], keeping seriesID: Int?) -> HardcoverAPI.SeriesRef? {
+        options.first { $0.id == seriesID } ?? options.first
+    }
+
+    /// Every series Hardcover lists the linked book in, featured first. For the picker.
+    func seriesOptions(for audiobook: AudiobookModel) async -> [HardcoverAPI.SeriesRef] {
+        guard let token, let link = audiobook.hardcover else { return [] }
+        do {
+            return try await HardcoverAPI.seriesOptions(bookID: link.id, token: token)
+        } catch {
+            Log.hardcover.error("Failed to read series: \(error.localizedDescription)")
+            return []
+        }
+    }
+
+    /// The listener's pick among a book's series. Kept across refreshes while Hardcover lists it.
+    func setSeries(_ series: HardcoverAPI.SeriesRef, for audiobook: AudiobookModel) async {
+        apply(series, to: audiobook)
+        await refreshCatalog(seriesID: series.id)
+    }
+
+    private func apply(_ series: HardcoverAPI.SeriesRef?, to audiobook: AudiobookModel) {
+        guard var current = audiobook.hardcover else { return }
+        current.seriesID = series?.id
+        current.seriesName = series?.name
+        current.seriesPosition = series?.position
+        current.seriesChecked = true
+        audiobook.hardcover = current
+        save()
+        AudiobookManager.shared.reconcileSeriesCollections()
     }
 
     /// Everything Hardcover knows, for every linked book — what Settings' "Refresh metadata"

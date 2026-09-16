@@ -176,7 +176,7 @@ struct CollectionDetailView: View {
             VStack(spacing: 6) {
                 HStack(spacing: gap) {
                     ForEach(books, id: \.id) { book in
-                        ProgressLine(value: book.progressFraction, height: 6, color: book.isFinished ? .green : .accentColor)
+                        ProgressLine(value: book.progressFraction, height: 6, color: book.isFinished ? .green : nil)
                             .frame(width: max(available * book.duration / total, 6), height: 6)
                     }
                 }
@@ -197,8 +197,10 @@ struct CollectionDetailView: View {
 
     // MARK: - Helpers
 
+    /// Hardcover's volume badge in a series; the row's position in a hand-made collection,
+    /// where a badge from some other series would mean nothing.
     func volumeLabel(_ book: AudiobookModel, index: Int) -> String {
-        book.hardcover?.volumeBadge ?? "#\(index + 1)"
+        (group.isSeries ? book.hardcover?.volumeBadge : nil) ?? "#\(index + 1)"
     }
 
     /// "Resume #1 · ch. 14", or "Play #1" for a book not started.

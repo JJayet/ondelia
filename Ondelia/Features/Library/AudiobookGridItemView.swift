@@ -47,7 +47,7 @@ struct AudiobookGridItemView: View {
                             ProgressLine(
                                 value: progressPercentage,
                                 height: 3,
-                                color: audiobook.isFinished ? .green : .accentColor
+                                color: audiobook.isFinished ? .green : nil
                             )
                         }
                     }

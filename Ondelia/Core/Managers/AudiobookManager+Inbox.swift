@@ -26,13 +26,14 @@ extension AudiobookManager {
         Log.library.debug("📥 AudiobookManager: Found \(waiting.count) file(s) in the Inbox")
         for url in waiting { inboxHandedOff.insert(url.lastPathComponent) }
 
-        handleImportRequest(urls: waiting) {
+        handleImportRequest(urls: waiting) { [weak self] in
             // The copies in the library are the ones that count; the Inbox is a drop box, and
             // leaving files there imports them again on the next launch.
             Task { @MainActor [weak self] in
+                guard let self = self else { return }
                 for url in waiting {
                     try? FileManager.default.removeItem(at: url)
-                    self?.inboxHandedOff.remove(url.lastPathComponent)
+                    self.inboxHandedOff.remove(url.lastPathComponent)
                 }
             }
         }

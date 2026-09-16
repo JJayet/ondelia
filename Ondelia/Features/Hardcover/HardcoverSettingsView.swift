@@ -19,7 +19,7 @@ struct HardcoverSettingsView: View {
         List {
             Section {
                 TextField(
-                    "Bearer eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXV…",
+                    "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXV…",
                     text: $token,
                     axis: .vertical
                 )
@@ -39,7 +39,7 @@ struct HardcoverSettingsView: View {
                 Text(NSLocalizedString("Access Token", comment: "Hardcover settings section: token"))
             } footer: {
                 Text(NSLocalizedString(
-                    "Create a token at hardcover.app under Settings → API, then paste it here.",
+                    "Create a token at hardcover.app under Settings → API and paste the key here. \"Bearer\" is added for you.",
                     comment: "Hardcover token section footer"
                 ))
             }

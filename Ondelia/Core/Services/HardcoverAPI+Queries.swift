@@ -24,7 +24,7 @@ extension HardcoverAPI {
     static let bookSeriesQuery = """
         query BookSeries($id: Int!) {
           books(where: {id: {_eq: $id}}, limit: 1) {
-            book_series {
+            book_series(order_by: [{featured: desc}, {compilation: asc}, {position: asc}]) {
               position
               series {
                 id

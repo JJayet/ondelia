@@ -47,6 +47,13 @@ extension AudiobookManager {
 
         var changed = false
         let declined = declinedSeries
+        // A series collection with no linked book left — the last one deleted or unlinked —
+        // goes too. Not declined: the next book of the series brings it straight back.
+        for collection in collections where collection.isSeries {
+            guard let seriesID = collection.hardcoverSeriesID, bySeries[seriesID] == nil else { continue }
+            swiftDataController.context.delete(collection)
+            changed = true
+        }
         for (seriesID, series) in bySeries {
             let ordered = series.books.sorted(by: CollectionGroup.inReadingOrder).map(\.id)
             if let existing = collections.first(where: { $0.hardcoverSeriesID == seriesID }) {

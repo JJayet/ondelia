@@ -28,6 +28,8 @@ struct NowPlayingWidgetView: View {
             ExtraLargeNowPlayingView(entry: entry)
         case .accessoryCircular, .accessoryRectangular, .accessoryInline:
             SmallNowPlayingView(entry: entry)
+        case .systemExtraLargePortrait:
+            ExtraLargeNowPlayingView(entry: entry)
         @unknown default:
             SmallNowPlayingView(entry: entry)
         }
