@@ -1,0 +1,32 @@
+Ondelia/Features/Onboarding/OnboardingPages+Options.swift
+  s_456f97f4e56884::t_439b31a5b1c0eb 16-41,45-49
+  s_456f97f4e56884::t_419327fe63d36a 50
+OndeliaUITests/OnboardingLayoutUITests.swift
+  s_456f97f4e56884::t_b25845739016e0 1-51
+Ondelia/Features/Onboarding/OnboardingView.swift
+  s_73f3a25e261b36::t_d42d39f1b7f9ad 32,37,40-47,49-53,69,73-74,93,99,101,103,106,110-111,133-135,137-138,149-210
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "cfb0df06d0397c169356bf1e89e5184b80f85cf2",
+  "prompts": {},
+  "sessions": {
+    "s_456f97f4e56884": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c56a-8526-7053-b3d3-a4a6f1653e29",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_73f3a25e261b36": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c56b-aeda-7381-af97-90dde9dbe2e7",
+        "model": "unknown"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
