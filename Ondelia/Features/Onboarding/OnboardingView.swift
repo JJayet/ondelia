@@ -29,22 +29,28 @@ struct OnboardingView: View {
                         withHapticFeedback { onFinish() }
                     }
                     .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(.primary.opacity(0.75))
                     .opacity(page == pageCount - 1 ? 0 : 1)
                 }
                 .padding(.horizontal, 20)
                 .padding(.top, 8)
+                .frame(maxWidth: 620)
 
                 TabView(selection: $page) {
-                    OnboardingWelcomePage().tag(0)
-                    OnboardingImportPage(importedCount: importedCount) { showingImporter = true }.tag(1)
-                    OnboardingLookPage().tag(2)
-                    OnboardingPlaybackPage().tag(3)
-                    OnboardingConnectPage().tag(4)
-                    OnboardingReadyPage().tag(5)
+                    OnboardingPage { OnboardingWelcomePage() }.tag(0)
+                    OnboardingPage {
+                        OnboardingImportPage(importedCount: importedCount) { showingImporter = true }
+                    }.tag(1)
+                    OnboardingPage { OnboardingLookPage() }.tag(2)
+                    OnboardingPage { OnboardingPlaybackPage() }.tag(3)
+                    OnboardingPage { OnboardingConnectPage() }.tag(4)
+                    OnboardingPage { OnboardingReadyPage() }.tag(5)
                 }
-                .tabViewStyle(.page(indexDisplayMode: .always))
-                .indexViewStyle(.page(backgroundDisplayMode: .always))
+                .tabViewStyle(.page(indexDisplayMode: .never))
+
+                OnboardingPageControl(page: $page, count: pageCount)
+                    .frame(height: 32)
+                    .padding(.vertical, 4)
 
                 Button {
                     withHapticFeedback {
@@ -60,11 +66,12 @@ struct OnboardingView: View {
                         : NSLocalizedString("Continue", comment: "Onboarding: next page button"))
                         .font(.system(size: 17, weight: .semibold))
                         .frame(maxWidth: .infinity)
-                        .frame(height: 52)
+                        .frame(minHeight: 52)
                 }
                 .buttonStyle(.glassProminent)
                 .padding(.horizontal, 24)
-                .padding(.bottom, 24)
+                .padding(.bottom, 16)
+                .frame(maxWidth: 620)
             }
         }
         .sheet(isPresented: $showingImporter) {
@@ -83,24 +90,25 @@ struct OnboardingView: View {
 
 /// A big symbol, a title and a line of body, the shape every page starts from.
 struct OnboardingHeader: View {
+    @Environment(\.onboardingCompactHeader) private var compactHeader
     let systemImage: String
     let title: String
     let text: String
 
     var body: some View {
-        VStack(spacing: 18) {
+        VStack(spacing: compactHeader ? 10 : 18) {
             Image(systemName: systemImage)
-                .font(.system(size: 64, weight: .medium))
+                .font(.system(size: compactHeader ? 36 : 64, weight: .medium))
                 .foregroundStyle(.tint)
-                .frame(height: 80)
+                .frame(height: compactHeader ? 44 : 80)
 
             Text(title)
-                .font(.system(size: 30, weight: .bold))
+                .font(.system(.largeTitle, design: .default, weight: .bold))
                 .multilineTextAlignment(.center)
 
             Text(text)
-                .font(.system(size: 16))
-                .foregroundStyle(.secondary)
+                .font(.body)
+                .foregroundStyle(.primary.opacity(0.75))
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
         }
@@ -122,10 +130,12 @@ struct OnboardingFeatureRow: View {
                 .frame(width: 30)
 
             VStack(alignment: .leading, spacing: 3) {
-                Text(title).font(.system(size: 15, weight: .semibold))
+                Text(title)
+                    .font(.headline)
+                    .fixedSize(horizontal: false, vertical: true)
                 Text(detail)
-                    .font(.system(size: 13.5))
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary.opacity(0.75))
                     .fixedSize(horizontal: false, vertical: true)
             }
             Spacer(minLength: 0)
@@ -135,4 +145,66 @@ struct OnboardingFeatureRow: View {
 
 #Preview("Onboarding") {
     OnboardingView {}
+}
+
+
+private struct OnboardingCompactHeaderKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+private extension EnvironmentValues {
+    var onboardingCompactHeader: Bool {
+        get { self[OnboardingCompactHeaderKey.self] }
+        set { self[OnboardingCompactHeaderKey.self] = newValue }
+    }
+}
+
+/// Each page owns its vertical scrolling; navigation never covers its content.
+private struct OnboardingPage<Content: View>: View {
+    @ViewBuilder let content: Content
+
+    var body: some View {
+        GeometryReader { geometry in
+            ScrollView {
+                content
+                    .environment(\.onboardingCompactHeader, geometry.size.height < 650)
+                    .frame(maxWidth: 620)
+                    .padding(.vertical, 20)
+                    .frame(maxWidth: .infinity)
+                    .frame(minHeight: geometry.size.height)
+            }
+        }
+    }
+}
+
+/// Native pagination keeps VoiceOver's localized page announcements and adjustable navigation.
+private struct OnboardingPageControl: UIViewRepresentable {
+    @Binding var page: Int
+    let count: Int
+
+    func makeCoordinator() -> Coordinator { Coordinator(page: $page) }
+
+    func makeUIView(context: Context) -> UIPageControl {
+        let control = UIPageControl()
+        control.addTarget(context.coordinator, action: #selector(Coordinator.changed(_:)), for: .valueChanged)
+        return control
+    }
+
+    func updateUIView(_ control: UIPageControl, context: Context) {
+        context.coordinator.page = $page
+        control.numberOfPages = count
+        control.currentPage = page
+        control.currentPageIndicatorTintColor = .label
+        control.pageIndicatorTintColor = .tertiaryLabel
+    }
+
+    final class Coordinator: NSObject {
+        var page: Binding<Int>
+
+        init(page: Binding<Int>) { self.page = page }
+
+        @objc func changed(_ control: UIPageControl) {
+            withAnimation { page.wrappedValue = control.currentPage }
+        }
+    }
 }

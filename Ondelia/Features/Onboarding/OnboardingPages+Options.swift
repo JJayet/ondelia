@@ -13,11 +13,40 @@ struct OnboardingOptionRow<Control: View>: View {
     @ViewBuilder let control: Control
 
     var body: some View {
-        HStack(spacing: 12) {
-            OnboardingFeatureRow(systemImage: systemImage, title: title, detail: detail)
-            control
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: systemImage)
+                .font(.system(size: 20, weight: .medium))
+                .foregroundStyle(.tint)
+                .frame(width: 30, height: 28)
+
+            VStack(alignment: .leading, spacing: 6) {
+                ViewThatFits(in: .horizontal) {
+                    HStack(spacing: 12) {
+                        Text(title).font(.headline).fixedSize()
+                        Spacer(minLength: 0)
+                        optionControl
+                    }
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(title)
+                            .font(.headline)
+                            .fixedSize(horizontal: false, vertical: true)
+                        optionControl
+                    }
+                }
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.primary.opacity(0.75))
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
         }
         .padding(16)
+    }
+
+    private var optionControl: some View {
+        control
+            .fixedSize()
+            .accessibilityLabel(Text(title))
     }
 }
 
@@ -28,7 +57,6 @@ struct OnboardingLookPage: View {
 
     var body: some View {
         VStack(spacing: 28) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "paintpalette.fill",
                 title: NSLocalizedString("Make it yours", comment: "Onboarding: appearance title"),
@@ -84,8 +112,6 @@ struct OnboardingLookPage: View {
             }
             .glassCard(cornerRadius: 22)
             .padding(.horizontal, 24)
-            Spacer()
-            Spacer()
         }
     }
 }
@@ -97,7 +123,6 @@ struct OnboardingPlaybackPage: View {
 
     var body: some View {
         VStack(spacing: 28) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "slider.horizontal.3",
                 title: NSLocalizedString("How you listen", comment: "Onboarding: playback title"),
@@ -154,8 +179,6 @@ struct OnboardingPlaybackPage: View {
             }
             .glassCard(cornerRadius: 22)
             .padding(.horizontal, 24)
-            Spacer()
-            Spacer()
         }
     }
 

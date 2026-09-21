@@ -7,7 +7,6 @@ struct OnboardingWelcomePage: View {
 
     var body: some View {
         VStack(spacing: 32) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "headphones.circle.fill",
                 title: String(format: NSLocalizedString("Welcome to %@", comment: "Onboarding: welcome title, %@ is the app name"), appName),
@@ -16,8 +15,6 @@ struct OnboardingWelcomePage: View {
                     comment: "Onboarding: welcome body"
                 )
             )
-            Spacer()
-            Spacer()
         }
     }
 }
@@ -28,7 +25,6 @@ struct OnboardingImportPage: View {
 
     var body: some View {
         VStack(spacing: 28) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "square.and.arrow.down.fill",
                 title: NSLocalizedString("Bring your books", comment: "Onboarding: import title"),
@@ -67,8 +63,6 @@ struct OnboardingImportPage: View {
                 .padding(.horizontal, 6)
             }
             .buttonStyle(.glass)
-            Spacer()
-            Spacer()
         }
     }
 }
@@ -81,7 +75,6 @@ struct OnboardingConnectPage: View {
 
     var body: some View {
         VStack(spacing: 28) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "link.circle.fill",
                 title: NSLocalizedString("Connect, if you like", comment: "Onboarding: integrations title"),
@@ -134,8 +127,6 @@ struct OnboardingConnectPage: View {
             }
             .glassCard(cornerRadius: 22)
             .padding(.horizontal, 24)
-            Spacer()
-            Spacer()
         }
     }
 }
@@ -143,7 +134,6 @@ struct OnboardingConnectPage: View {
 struct OnboardingReadyPage: View {
     var body: some View {
         VStack(spacing: 28) {
-            Spacer()
             OnboardingHeader(
                 systemImage: "checkmark.circle.fill",
                 title: NSLocalizedString("You're set", comment: "Onboarding: ready title"),
@@ -173,8 +163,6 @@ struct OnboardingReadyPage: View {
                 )
             }
             .padding(.horizontal, 32)
-            Spacer()
-            Spacer()
         }
     }
 }
