@@ -1,0 +1,23 @@
+Ondelia/Core/Services/TranscriptionRequest.swift
+  s_3fff718166d55e::t_edc6a6fe5f68c3 84-93
+Ondelia/Features/Player/TranscriptionView.swift
+  s_3fff718166d55e::t_00e7189a8633dd 150-152,215-217
+  s_3fff718166d55e::t_edc6a6fe5f68c3 128-129,134,148-149,153,156-161
+  s_3fff718166d55e::t_8b150225a9ed23 162
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "95eefcdba3eff8c7225fc01bda4cbbf8511a7522",
+  "prompts": {},
+  "sessions": {
+    "s_3fff718166d55e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "467cc8e5-1960-4810-b89b-66aa79fd35b9",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
