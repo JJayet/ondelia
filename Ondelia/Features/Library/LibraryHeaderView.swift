@@ -6,8 +6,7 @@ struct LibraryHeaderView: View {
     @Binding var filterOption: LibraryView.FilterOption
     @Binding var gridColumns: Int
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-
-    private static let gridColumnChoices = [2, 3, 4]
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     var body: some View {
         HStack(spacing: 9) {
@@ -44,8 +43,8 @@ struct LibraryHeaderView: View {
             Spacer(minLength: 0)
 
             Menu {
-                Section(NSLocalizedString("Books per row", comment: "Grid density menu title")) {
-                    ForEach(Self.gridColumnChoices, id: \.self) { count in
+                Section(NSLocalizedString("Grid density", comment: "Grid density menu title")) {
+                    ForEach(LibraryView.gridDensityChoices, id: \.self) { count in
                         Button {
                             withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                                 gridColumns = count
@@ -53,7 +52,7 @@ struct LibraryHeaderView: View {
                             }
                         } label: {
                             HStack {
-                                Text(verbatim: "\(count)")
+                                Text(LibraryView.gridDensityName(count))
                                 if gridColumns == count {
                                     Image(systemName: "checkmark")
                                 }
@@ -70,16 +69,17 @@ struct LibraryHeaderView: View {
             } primaryAction: {
                 withHapticFeedback {
                     withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
-                        viewMode = viewMode == .list ? .grid : .list
+                        viewMode = viewMode.next(wide: horizontalSizeClass == .regular)
                     }
                 }
             }
             .accessibilityLabel(
-                viewMode == .list
-                    ? NSLocalizedString("Show Grid", comment: "Switch library to grid")
-                    : NSLocalizedString("Show List", comment: "Switch library to list")
+                String(
+                    format: NSLocalizedString("Show %@", comment: "Switch library view; argument is the mode name"),
+                    viewMode.next(wide: horizontalSizeClass == .regular).displayName
+                )
             )
-            .accessibilityValue(viewMode == .grid ? Text(verbatim: "\(gridColumns)") : Text(verbatim: ""))
+            .accessibilityValue(viewMode == .grid ? Text(LibraryView.gridDensityName(gridColumns)) : Text(verbatim: ""))
             .accessibilityIdentifier(AccessibilityIdentifiers.Library.viewModeToggle)
         }
     }

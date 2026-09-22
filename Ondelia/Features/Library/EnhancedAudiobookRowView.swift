@@ -30,10 +30,15 @@ struct EnhancedAudiobookRowView: View {
                         ProgressLine(value: progressPercentage)
                     }
 
-                    Text(status)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 5) {
+                        Text(status)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                        if audiobook.hardcover != nil {
+                            HardcoverLinkMark()
+                        }
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
 
@@ -88,5 +93,17 @@ struct EnhancedAudiobookRowView: View {
             author,
             audiobook.duration.hoursMinutesFormatted
         )
+    }
+}
+
+/// The small chain glyph on a book linked to Hardcover: quiet, inline with the meta line.
+struct HardcoverLinkMark: View {
+    var size: CGFloat = 10
+
+    var body: some View {
+        Image(systemName: "link")
+            .font(.system(size: size, weight: .semibold))
+            .foregroundStyle(.tertiary)
+            .accessibilityLabel(NSLocalizedString("Linked to Hardcover", comment: "Book is linked to a Hardcover entry"))
     }
 }

@@ -58,6 +58,30 @@ enum PlaybackCommands {
         audio.resumePlayback()
     }
 
+    /// One step up or down the player's speed list, clamped at the ends.
+    static func stepSpeed(by step: Int) {
+        let audio = GlobalAudioManager.shared
+        let choices = PlaybackSpeed.choices
+        let current = audio.getPlaybackRate()
+        let index = choices.firstIndex { abs($0 - current) < 0.01 } ?? choices.firstIndex { $0 > current } ?? 0
+        audio.setPlaybackRate(choices[min(max(index + step, 0), choices.count - 1)])
+    }
+
+    /// A bookmark at the playhead, named by its time. Shared by CarPlay and the keyboard.
+    static func addBookmark() {
+        let audio = GlobalAudioManager.shared
+        guard let book = audio.currentAudiobook else { return }
+        let time = audio.getCurrentTime()
+        AudiobookManager.shared.createBookmark(
+            for: book,
+            at: time,
+            title: String(
+                format: NSLocalizedString("Bookmark at %@", comment: "Default bookmark title with time"),
+                time.clockFormatted
+            )
+        )
+    }
+
     static func perform(_ command: PlaybackCommand) async {
         guard await loadedBook() != nil else { return }
         let audio = GlobalAudioManager.shared

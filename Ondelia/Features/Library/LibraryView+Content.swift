@@ -21,7 +21,7 @@ extension LibraryView {
         List {
             // Continue Reading Section
             if !continueReading.isEmpty {
-                ContinueReadingSection(entries: continueReading, headerPadding: 0, rowPadding: 4) { playAndPresent($0) }
+                ContinueReadingSection(entries: continueReading, headerPadding: 0, rowPadding: 4, wide: isWide) { playAndPresent($0) }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
@@ -35,18 +35,25 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
-            // Collections: Hardcover series and hand-made ones
-            if !collectionGroups.isEmpty {
-                SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+            // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
+            if isWide, !collectionGroups.isEmpty {
+                collectionsRow
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
-            }
-            ForEach(collectionGroups) { group in
-                collectionCard(group)
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
+            } else {
+                if !collectionGroups.isEmpty {
+                    SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
+                }
+                ForEach(collectionGroups) { group in
+                    collectionCard(group)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                }
             }
 
             if !audiobookManager.audiobooks.isEmpty {
@@ -65,7 +72,7 @@ extension LibraryView {
             LibraryHeaderView(
                 viewMode: $viewMode,
                 sortOption: $sortOption,
-                filterOption: $filterOption,
+                filterOption: filterBinding,
                 gridColumns: $gridColumns
             )
             .listRowBackground(Color.clear)
@@ -100,7 +107,7 @@ extension LibraryView {
             LazyVStack(spacing: 24) {
                 // Continue Reading Section
                 if !continueReading.isEmpty {
-                    ContinueReadingSection(entries: continueReading, headerPadding: nil, rowPadding: nil) { playAndPresent($0) }
+                    ContinueReadingSection(entries: continueReading, headerPadding: nil, rowPadding: nil, wide: isWide) { playAndPresent($0) }
                 }
 
                 // Play queue
@@ -108,8 +115,10 @@ extension LibraryView {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
-                // Collections: Hardcover series and hand-made ones
-                if !collectionGroups.isEmpty {
+                // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
+                if isWide, !collectionGroups.isEmpty {
+                    collectionsRow.padding(.horizontal)
+                } else if !collectionGroups.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
                         SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         ForEach(collectionGroups) { group in
@@ -133,7 +142,7 @@ extension LibraryView {
                     LibraryHeaderView(
                         viewMode: $viewMode,
                         sortOption: $sortOption,
-                        filterOption: $filterOption,
+                        filterOption: filterBinding,
                         gridColumns: $gridColumns
                     )
                     .padding(.horizontal)
@@ -189,14 +198,19 @@ extension LibraryView {
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             // No full swipe: the gesture used to delete the book, its progress and its
             // bookmarks with nothing to confirm and nothing to undo.
+            // No swipes on the Mac at all: a trackpad swipe left the row pushed aside under
+            // two tall blocks, and the right-click menu already holds every action.
             .swipeActions(edge: .trailing, allowsFullSwipe: false) {
-                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                    withHapticFeedback { activeAlert = .confirmDelete(audiobook) }
+                if !Self.onMac {
+                    Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                        withHapticFeedback { activeAlert = .confirmDelete(audiobook) }
+                    }
+                    // The app-wide accent tint wins over the destructive role's red without this.
+                    .tint(.red)
                 }
-                // The app-wide accent tint wins over the destructive role's red without this.
-                .tint(.red)
             }
             .swipeActions(edge: .leading) {
+                if !Self.onMac {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                     withHapticFeedback {
                         withAnimation(.easeInOut(duration: 0.3)) {
@@ -218,9 +232,12 @@ extension LibraryView {
                     }
                 }
                 .tint(.blue)
+                }
             }
             .contextMenu {
                 BookActionsMenu(audiobook: audiobook, actions: bookActions)
             }
     }
+
+    static let onMac = ProcessInfo.processInfo.isiOSAppOnMac
 }

@@ -23,7 +23,8 @@ final class ThemeManager {
         Task { self.loadSettings() }
     }
     
-    private func loadSettings() {
+    /// Also re-run when iCloud brings new values: the properties above are cached copies.
+    func loadSettings() {
         let theme: AppTheme
         let accent: AccentColor
         // Load from UserDefaults on background queue

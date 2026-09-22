@@ -6,6 +6,9 @@ struct LibraryView: View {
     // State is internal (not private) so the content extensions in
     // LibraryView+Content.swift can drive it.
     let audiobookManager: AudiobookManager
+    /// Set by the sidebar's "In Progress" entry: the shelf shows only these, whatever the
+    /// filter chip says.
+    var fixedFilter: FilterOption?
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
     @State var audiobookForImagePicker: AudiobookModel?
@@ -28,30 +31,46 @@ struct LibraryView: View {
     @AppStorage("library.sortOption") var sortOption: SortOption = .lastPlayed
     @AppStorage("library.filterOption") var filterOption: FilterOption = .all
     @AppStorage(CollectionGroup.showMissingKey) var showMissingSeriesBooks = true
-    /// Books per row in grid mode: 2, 3 or 4.
+    /// Grid density, kept as the cover size it stood for at phone width: 2, 3 or 4 covers per
+    /// 300 pt. Wider windows fit more, so the user picks a density, not a count.
     @AppStorage("library.gridColumns") var gridColumns = 2
+
+    static let gridDensityChoices = [2, 3, 4]
+
+    /// "Spacious", "Medium", "Compact" for the stored 2, 3, 4.
+    static func gridDensityName(_ columns: Int) -> String {
+        switch columns {
+        case ...2: return NSLocalizedString("Spacious", comment: "Grid density: largest covers")
+        case 3: return NSLocalizedString("Medium", comment: "Grid density: medium covers")
+        default: return NSLocalizedString("Compact", comment: "Grid density: smallest covers")
+        }
+    }
     @State var showingImporter = false
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
     @State var selecting = false
     @State var selectedIDs: Set<UUID> = []
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
     // Dependency injection initializer to enable previews/tests to control state
-    init(audiobookManager: AudiobookManager) {
+    init(audiobookManager: AudiobookManager, fixedFilter: FilterOption? = nil, collection: CollectionModel? = nil) {
         self.audiobookManager = audiobookManager
+        self.fixedFilter = fixedFilter
+        // A sidebar collection entry lands on the collection, with the shelf behind it.
+        _collectionForDetail = State(initialValue: collection)
     }
 
-    // Default initializer creates the manager on the main actor
     @MainActor
-    init() {
-        self.init(audiobookManager: AudiobookManager.shared)
+    init(fixedFilter: FilterOption? = nil, collection: CollectionModel? = nil) {
+        self.init(audiobookManager: AudiobookManager.shared, fixedFilter: fixedFilter, collection: collection)
     }
+
 
     var filteredAudiobooks: [AudiobookModel] {
         let source = audiobookManager.audiobooks
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
-            switch filterOption {
+            switch fixedFilter ?? filterOption {
             case .all:
                 return source
             case .inProgress:
@@ -72,6 +91,15 @@ struct LibraryView: View {
             audiobooks: filteredAudiobooks,
             keepEmpty: filterOption == .all
         )
+    }
+
+    var screenTitle: String {
+        fixedFilter?.displayName ?? NSLocalizedString("Library", comment: "Library navigation title")
+    }
+
+    /// The filter chip's binding: pinned when the sidebar chose the filter.
+    var filterBinding: Binding<FilterOption> {
+        fixedFilter.map { Binding.constant($0) } ?? $filterOption
     }
 
     // MARK: - Actions
@@ -137,16 +165,21 @@ struct LibraryView: View {
     /// modifiers together were more than the type checker would solve inline.
     private var libraryContent: some View {
         VStack(spacing: 0) {
+            // Wide: the title row carries the count and the buttons, and the navigation bar
+            // goes, so nothing hovers as a band above the shelf on the Mac.
+            if isWide { wideHeader }
             // No search field here: the Search tab is the one place that searches the library.
-            if viewMode == .list {
-                listModeContent
-            } else {
-                gridModeContent
+            // The table needs the width for its columns; on a phone it reads as the list.
+            switch viewMode {
+            case .list: listModeContent
+            case .grid: gridModeContent
+            case .table: if isWide { tableModeContent } else { listModeContent }
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
-        .navigationTitle(NSLocalizedString("Library", comment: "Library navigation title"))
+        .navigationTitle(screenTitle)
         .navigationBarTitleDisplayMode(.large)
+        .toolbar(isWide ? .hidden : .visible, for: .navigationBar)
         .toolbar { libraryToolbar }
         // A swipe can delete the last book while selecting; nothing is left to select.
         .onChange(of: shelfBooks.isEmpty) { _, empty in

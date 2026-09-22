@@ -82,7 +82,7 @@ extension LibraryView {
     }
 
     @ViewBuilder
-    private var bulkMenuItems: some View {
+    var bulkMenuItems: some View {
         Button {
             selectedIDs = Set(shelfBooks.map(\.id))
         } label: {

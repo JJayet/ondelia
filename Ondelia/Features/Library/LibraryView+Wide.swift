@@ -1,0 +1,116 @@
+import SwiftUI
+
+// MARK: - Regular width (iPad landscape, Mac)
+//
+// The design's landscape shelf: collections as compact tiles on one scrolling row instead of
+// full-width bands, so the grid gets the room; and a table mode for big libraries.
+extension LibraryView {
+    var isWide: Bool { horizontalSizeClass == .regular }
+
+    /// Title, count and the toolbar's buttons on one row, in place of the navigation bar.
+    @ViewBuilder
+    var wideHeader: some View {
+        HStack(alignment: .center, spacing: 14) {
+            HStack(alignment: .firstTextBaseline, spacing: 14) {
+                Text(screenTitle)
+                    .font(.system(size: 34, weight: .bold))
+                Text(String(
+                    format: NSLocalizedString("%d books · %d on this device", comment: "Wide library subtitle"),
+                    shelfBooks.count,
+                    shelfBooks.filter { audiobookManager.hasFile($0) }.count
+                ))
+                .font(.system(size: 15))
+                .foregroundStyle(.secondary)
+            }
+
+            Spacer(minLength: 0)
+
+            if selecting {
+                Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
+                    withHapticFeedback { endSelecting() }
+                }
+                .buttonStyle(.plain)
+                .glassPill(height: 34)
+
+                Menu { bulkMenuItems } label: {
+                    Text(String(
+                        format: NSLocalizedString("%d selected", comment: "Selection count in the library toolbar"),
+                        selectedIDs.count
+                    ))
+                    .glassPill(height: 34, tinted: true)
+                }
+                .buttonStyle(.plain)
+            } else {
+                Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
+                    withHapticFeedback { selecting = true }
+                }
+                .buttonStyle(.plain)
+                .disabled(shelfBooks.isEmpty)
+                .glassPill(height: 34)
+
+                Button {
+                    showingImporter = true
+                } label: {
+                    Image(systemName: "plus")
+                        .font(.system(size: 15, weight: .bold))
+                        .frame(width: 34, height: 34)
+                        .glassEffect(.regular, in: Circle())
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(NSLocalizedString("Import Audiobook", comment: "Import button accessibility label"))
+                .accessibilityIdentifier(AccessibilityIdentifiers.Library.importButton)
+            }
+        }
+        .padding(.horizontal, 24)
+        .padding(.top, 18)
+        .padding(.bottom, 4)
+    }
+
+    @ViewBuilder
+    var collectionsRow: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 14) {
+                    ForEach(collectionGroups) { group in
+                        CollectionTileView(group: group) { collectionForDetail = group.collection }
+                    }
+                }
+            }
+            .clipped()
+        }
+    }
+
+    @ViewBuilder
+    var tableModeContent: some View {
+        VStack(spacing: 12) {
+            LibraryHeaderView(
+                viewMode: $viewMode,
+                sortOption: $sortOption,
+                filterOption: filterBinding,
+                gridColumns: $gridColumns
+            )
+            .padding(.horizontal)
+            .padding(.top, 8)
+
+            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
+                EmptyLibraryView { showingImporter = true }
+                    .padding(.horizontal)
+                Spacer()
+            } else {
+                LibraryTableView(
+                    groups: collectionGroups,
+                    uncollected: uncollectedBooks,
+                    onOpenBook: tapBook,
+                    onOpenCollection: { collectionForDetail = $0.collection }
+                )
+            }
+        }
+    }
+
+    /// The shelf minus every book a collection already lists.
+    var uncollectedBooks: [AudiobookModel] {
+        let inCollections = Set(collectionGroups.flatMap { $0.books.map(\.id) })
+        return shelfBooks.filter { !inCollections.contains($0.id) }
+    }
+}

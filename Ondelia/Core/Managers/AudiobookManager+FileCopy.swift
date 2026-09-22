@@ -232,17 +232,29 @@ extension AudiobookManager {
             writeHandle = try FileHandle(forWritingTo: to)
 
             let chunkSize = 512 * 1024 // 512 KB chunks
+            let total = (try? fm.attributesOfItem(atPath: from.path)[.size] as? Int64) ?? 0
+            var copied: Int64 = 0
+            var chunks = 0
             while true {
                 let data = try autoreleasepool {
                     try readHandle.read(upToCount: chunkSize)
                 }
                 guard let data, !data.isEmpty else { break }
                 try writeHandle?.write(contentsOf: data)
+                copied += Int64(data.count)
+                chunks += 1
+                // Every 4 MB: enough steps for a smooth bar, few enough not to flood the main actor.
+                if total > 0, chunks % 8 == 0 {
+                    let fraction = Double(copied) / Double(total)
+                    Task { @MainActor in self.importProgress = fraction }
+                }
             }
+            Task { @MainActor in self.importProgress = nil }
             try writeHandle?.synchronize()
             try readHandle.close()
             try writeHandle?.close()
         } catch {
+            Task { @MainActor in self.importProgress = nil }
             try? readHandle.close()
             try? writeHandle?.close()
             try? fm.removeItem(at: to)

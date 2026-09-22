@@ -43,19 +43,7 @@ final class CarPlayNowPlaying: NSObject, @preconcurrency CPNowPlayingTemplateObs
         audio.setPlaybackRate(next)
     }
 
-    private static func addBookmark() {
-        let audio = GlobalAudioManager.shared
-        guard let book = audio.currentAudiobook else { return }
-        let time = audio.getCurrentTime()
-        AudiobookManager.shared.createBookmark(
-            for: book,
-            at: time,
-            title: String(
-                format: NSLocalizedString("Bookmark at %@", comment: "Default bookmark title with time"),
-                time.clockFormatted
-            )
-        )
-    }
+    private static func addBookmark() { PlaybackCommands.addBookmark() }
 
     // MARK: - Chapters
 

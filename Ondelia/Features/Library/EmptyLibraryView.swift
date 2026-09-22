@@ -35,6 +35,8 @@ struct EmptyLibraryView: View {
                 withHapticFeedback { onImport() }
             }
             .buttonStyle(.glassProminent)
+            // The glass button drops the icon unless asked to keep it.
+            .labelStyle(.titleAndIcon)
         }
         .padding(32)
         .frame(maxWidth: .infinity)

@@ -27,6 +27,9 @@ final class AudiobookManager {
     var importQueueTotal: Int = 0
     var importQueueCompleted: Int = 0
     var currentImportFileName: String? = nil
+    /// Bytes copied over bytes to copy for the file being imported; nil outside the copy, which
+    /// is the only step long enough to measure.
+    var importProgress: Double? = nil
     var isLoadingLibrary = false
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?

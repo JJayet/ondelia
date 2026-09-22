@@ -53,16 +53,39 @@ struct ContinueReadingSection: View {
     let headerPadding: CGFloat?
     /// Horizontal padding applied to the scrolling card row (`nil` = system default).
     let rowPadding: CGFloat?
+    /// Regular width: one card in evidence and the others as small rows beside it, instead of
+    /// three equal cards competing (design 7a).
+    var wide = false
     let onSelect: (AudiobookModel) -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
-                .padding(.horizontal, headerPadding)
+            // The wide hero says "Resume" itself, so no section label over it.
+            if !wide {
+                SectionLabel(NSLocalizedString("Continue Reading", comment: "Section title for books in progress"))
+                    .padding(.horizontal, headerPadding)
+            }
 
             // One card takes the row, like the queue and collection cards under it; only a
             // strip of several scrolls.
-            if entries.count == 1, let entry = entries.first {
+            if wide, let first = entries.first {
+                // Capped: on a wide Mac window a hero the width of the shelf was a bar of
+                // empty glass with a play button at the far end.
+                HStack(alignment: .top, spacing: 20) {
+                    ContinueReadingHeroView(entry: first) { onSelect(first.book) }
+                        .frame(maxWidth: 760)
+                    if entries.count > 1 {
+                        VStack(spacing: 9) {
+                            ForEach(entries.dropFirst()) { entry in
+                                ContinueReadingCompactRow(entry: entry) { onSelect(entry.book) }
+                            }
+                        }
+                        .frame(width: 266)
+                    }
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, headerPadding)
+            } else if entries.count == 1, let entry = entries.first {
                 ContinueReadingCardView(entry: entry, fullWidth: true) { onSelect(entry.book) }
                     .padding(.horizontal, headerPadding)
             } else {
@@ -80,5 +103,47 @@ struct ContinueReadingSection: View {
                 .clipped()
             }
         }
+    }
+}
+
+/// The small row beside the hero card: cover, title, time left, a play mark.
+private struct ContinueReadingCompactRow: View {
+    let entry: ContinueReadingEntry
+    let onTap: () -> Void
+
+    private var title: String {
+        if case .collection(let group, _) = entry { return group.name }
+        return entry.book.title ?? AudiobookModel.unknownTitle
+    }
+
+    private var remaining: TimeInterval {
+        if case .collection(let group, _) = entry { return group.remaining }
+        return max(entry.book.duration - entry.book.currentPosition, 0)
+    }
+
+    var body: some View {
+        Button(action: onTap) {
+            HStack(spacing: 12) {
+                CoverArtView(audiobook: entry.book, size: 38, cornerRadius: 8)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 13.5, weight: .medium))
+                        .lineLimit(1)
+                    Text(String(format: NSLocalizedString("%@ left", comment: "Remaining listening time"), remaining.hoursMinutesFormatted))
+                        .font(.system(size: 11.5))
+                        .foregroundStyle(.secondary)
+                }
+                Spacer(minLength: 0)
+                Image(systemName: "play.fill")
+                    .font(.system(size: 10, weight: .bold))
+                    .frame(width: 26, height: 26)
+                    .background(.quaternary, in: Circle())
+            }
+            .padding(.horizontal, 13)
+            .frame(height: 53)
+            .contentShape(Rectangle())
+            .glassCard(cornerRadius: 14)
+        }
+        .buttonStyle(.plain)
     }
 }
