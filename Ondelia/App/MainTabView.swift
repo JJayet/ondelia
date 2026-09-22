@@ -71,23 +71,24 @@ struct MainTabView: View {
         TabView(selection: $selectedTab) {
             // No TabSection: on iPad's floating tab bar a section collapses to one entry that
             // only opens the sidebar, which hid Statistics.
+            // Sidebar only (iPad landscape, Mac): the player as a pane, design 6a. Built in
+            // regular width only: `.sidebarOnly` still surfaced the tab on the iPhone. No
+            // badge: on the floating tab bar it would be a red dot.
+            if horizontalSizeClass == .regular {
+                Tab(value: "inProgress") {
+                    NowPlayingView()
+                } label: {
+                    Label(NSLocalizedString("In Progress", comment: "Filter: books in progress"), systemImage: "play.fill")
+                }
+                .tabPlacement(.sidebarOnly)
+            }
+
             Tab(value: "library") {
                 LibraryView()
             } label: {
                 Label(NSLocalizedString("Library", comment: "Library tab title"), systemImage: "books.vertical.fill")
             }
             .accessibilityIdentifier(AccessibilityIdentifiers.TabBar.libraryTab)
-
-            // Sidebar only (iPad landscape, Mac): the shelf filtered to what is being heard.
-            // Badges there read as counts; on the tab bar they would be red dots, so none on
-            // the tabs above.
-            Tab(value: "inProgress") {
-                LibraryView(fixedFilter: .inProgress)
-            } label: {
-                Label(NSLocalizedString("In Progress", comment: "Filter: books in progress"), systemImage: "play.fill")
-            }
-            .badge(audiobookManager.audiobooks.filter { $0.currentPosition > 0 && !$0.isFinished }.count)
-            .tabPlacement(.sidebarOnly)
 
             Tab(value: "statistics") {
                 StatisticsView(statistics: statistics)
@@ -114,6 +115,7 @@ struct MainTabView: View {
             }
 
             // One sidebar entry per collection, opening straight onto it.
+            if horizontalSizeClass == .regular {
             TabSection(NSLocalizedString("Collections", comment: "Section title for collections")) {
                 ForEach(audiobookManager.collections, id: \.id) { collection in
                     Tab(value: "collection:\(collection.id.uuidString)") {
@@ -125,6 +127,7 @@ struct MainTabView: View {
                 }
             }
             .tabPlacement(.sidebarOnly)
+            }
         }
         .tabViewStyle(.sidebarAdaptable)
         .tabBarMinimizeBehavior(.onScrollDown)
@@ -173,6 +176,14 @@ struct MainTabView: View {
             .ignoresSafeArea()
         }
         .environment(\.playerRouter, playerRouter)
+        // Regular width shows the player as the Now Playing pane instead of a cover.
+        .onChange(of: horizontalSizeClass, initial: true) { _, sizeClass in
+            playerRouter.showPane = sizeClass == .regular ? { selectedTab = "inProgress" } : nil
+            if sizeClass == .regular, playerRouter.presented != nil {
+                playerRouter.presented = nil
+                selectedTab = "inProgress"
+            }
+        }
         .fullScreenCover(item: $playerRouter.presented) { presentation in
             // The zoom flies the mini player across the screen; Reduce Motion gets the plain
             // cover instead.

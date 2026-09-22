@@ -6,9 +6,6 @@ struct LibraryView: View {
     // State is internal (not private) so the content extensions in
     // LibraryView+Content.swift can drive it.
     let audiobookManager: AudiobookManager
-    /// Set by the sidebar's "In Progress" entry: the shelf shows only these, whatever the
-    /// filter chip says.
-    var fixedFilter: FilterOption?
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
     @State var audiobookForImagePicker: AudiobookModel?
@@ -53,16 +50,15 @@ struct LibraryView: View {
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     // Dependency injection initializer to enable previews/tests to control state
-    init(audiobookManager: AudiobookManager, fixedFilter: FilterOption? = nil, collection: CollectionModel? = nil) {
+    init(audiobookManager: AudiobookManager, collection: CollectionModel? = nil) {
         self.audiobookManager = audiobookManager
-        self.fixedFilter = fixedFilter
         // A sidebar collection entry lands on the collection, with the shelf behind it.
         _collectionForDetail = State(initialValue: collection)
     }
 
     @MainActor
-    init(fixedFilter: FilterOption? = nil, collection: CollectionModel? = nil) {
-        self.init(audiobookManager: AudiobookManager.shared, fixedFilter: fixedFilter, collection: collection)
+    init(collection: CollectionModel? = nil) {
+        self.init(audiobookManager: AudiobookManager.shared, collection: collection)
     }
 
 
@@ -70,7 +66,7 @@ struct LibraryView: View {
         let source = audiobookManager.audiobooks
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
-            switch fixedFilter ?? filterOption {
+            switch filterOption {
             case .all:
                 return source
             case .inProgress:
@@ -93,14 +89,7 @@ struct LibraryView: View {
         )
     }
 
-    var screenTitle: String {
-        fixedFilter?.displayName ?? NSLocalizedString("Library", comment: "Library navigation title")
-    }
-
-    /// The filter chip's binding: pinned when the sidebar chose the filter.
-    var filterBinding: Binding<FilterOption> {
-        fixedFilter.map { Binding.constant($0) } ?? $filterOption
-    }
+    var screenTitle: String { NSLocalizedString("Library", comment: "Library navigation title") }
 
     // MARK: - Actions
     func playAndPresent(_ audiobook: AudiobookModel) {

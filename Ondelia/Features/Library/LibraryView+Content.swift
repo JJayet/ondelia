@@ -72,7 +72,7 @@ extension LibraryView {
             LibraryHeaderView(
                 viewMode: $viewMode,
                 sortOption: $sortOption,
-                filterOption: filterBinding,
+                filterOption: $filterOption,
                 gridColumns: $gridColumns
             )
             .listRowBackground(Color.clear)
@@ -142,7 +142,7 @@ extension LibraryView {
                     LibraryHeaderView(
                         viewMode: $viewMode,
                         sortOption: $sortOption,
-                        filterOption: filterBinding,
+                        filterOption: $filterOption,
                         gridColumns: $gridColumns
                     )
                     .padding(.horizontal)

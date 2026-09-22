@@ -316,6 +316,17 @@
         }
       }
     },
+    "%d books · %d on this device" : {
+      "comment" : "Wide library subtitle",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres · %d sur cet appareil"
+          }
+        }
+      }
+    },
     "%d books in your library belong to this series on Hardcover. Group them into a collection?" : {
       "comment" : "Series collection offer message",
       "localizations" : {
@@ -2231,6 +2242,17 @@
         }
       }
     },
+    "in progress · -%@" : {
+      "comment" : "Chapter table: playing row, time left in the chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en cours · -%@"
+          }
+        }
+      }
+    },
     "in progress · %@ left" : {
       "comment" : "Remaining listening time",
       "localizations" : {
@@ -2385,6 +2407,17 @@
         }
       }
     },
+    "Linked to Hardcover" : {
+      "comment" : "Book is linked to a Hardcover entry",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lié à Hardcover"
+          }
+        }
+      }
+    },
     "List" : {
       "comment" : "List view mode",
       "localizations" : {
@@ -2408,7 +2441,7 @@
       }
     },
     "Listened" : {
-      "comment" : "Snapshot tile",
+      "comment" : "Chapter already heard\nSnapshot tile",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3787,6 +3820,17 @@
         }
       }
     },
+    "Resume" : {
+      "comment" : "Wide shelf: eyebrow over the book to pick up",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Reprendre"
+          }
+        }
+      }
+    },
     "Resume %@" : {
       "comment" : "Collection: resume a volume",
       "localizations" : {
@@ -4050,7 +4094,7 @@
       }
     },
     "Series" : {
-      "comment" : "Collection detail header: a Hardcover series\nSeries picker title",
+      "comment" : "Collection detail header: a Hardcover series\nCollection kind: Hardcover series\nSeries picker title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4133,17 +4177,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Afficher : %@"
-          }
-        }
-      }
-    },
-    "Show all" : {
-      "comment" : "Player: open the full chapter list",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Tout afficher"
           }
         }
       }
@@ -5039,6 +5072,17 @@
         }
       }
     },
+    "Volume %d" : {
+      "comment" : "Position in a series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tome %d"
+          }
+        }
+      }
+    },
     "Volumes" : {
       "comment" : "Collection detail: series books section",
       "localizations" : {
@@ -5203,35 +5247,24 @@
         }
       }
     },
-    "%d books · %d on this device" : {
-      "comment" : "Wide library subtitle",
+    "Nothing playing" : {
+      "comment" : "Now Playing pane: no book loaded",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "%d livres · %d sur cet appareil"
+            "value" : "Rien en cours"
           }
         }
       }
     },
-    "Resume" : {
-      "comment" : "Wide shelf: eyebrow over the book to pick up",
+    "Pick a book in the library to start listening." : {
+      "comment" : "Now Playing pane: hint when no book is loaded",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Reprendre"
-          }
-        }
-      }
-    },
-    "Linked to Hardcover" : {
-      "comment" : "Book is linked to a Hardcover entry",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lié à Hardcover"
+            "value" : "Choisissez un livre dans la bibliothèque pour commencer l’écoute."
           }
         }
       }

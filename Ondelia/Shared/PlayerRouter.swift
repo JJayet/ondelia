@@ -10,9 +10,17 @@ final class PlayerRouter {
 
     // Present by stable ID to avoid SwiftUI sheet re-present loops when the model mutates
     var presented: PlayerPresentation?
-    
+
+    /// Set by the tab view in regular width: the player is the Now Playing pane there, so
+    /// presenting means selecting that tab rather than covering the screen.
+    var showPane: (() -> Void)?
+
     func present(_ audiobook: AudiobookModel) {
-        presented = PlayerPresentation(id: audiobook.id)
+        if let showPane {
+            showPane()
+        } else {
+            presented = PlayerPresentation(id: audiobook.id)
+        }
     }
 }
 
