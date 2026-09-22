@@ -1,0 +1,61 @@
+Ondelia/Features/Player/PlayerView+Wide.swift
+  s_3fff718166d55e::t_3218d27d6b66ad 206-210,213-215
+  s_3fff718166d55e::t_2cf2895d7a4b8e 101-103,106-110
+  s_3fff718166d55e::t_ef2a9daf615944 190-192
+  s_3fff718166d55e::t_22ac7dfb387520 4,6-7,11-12,19-44,46,48,79-100,104-105,111,113-114,120-121,124,129-173,193-198,224-231,234,241-378
+  s_3fff718166d55e::t_0a806eeb0591bd 122-123
+  s_3fff718166d55e::t_d3d22da98675cc 59-68,70-75
+  s_3fff718166d55e::t_79f88994400090 211-212,216
+  s_3fff718166d55e::t_92b9a53313db01 112
+Ondelia/App/MainTabView.swift
+  s_3fff718166d55e::t_d3d22da98675cc 74-85,179,186
+  s_3fff718166d55e::t_6aaae08d5beaee 118,130
+  s_3fff718166d55e::t_daad454919dce8 180-185
+Ondelia/Features/Player/ChaptersListView.swift
+  s_3fff718166d55e::t_6aaae08d5beaee 101
+Ondelia/Features/Player/PlayerView+Layout.swift
+  s_3fff718166d55e::t_6aaae08d5beaee 26-27,72,109-117,180
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_3fff718166d55e::t_d3d22da98675cc 75,145
+Ondelia/Features/Player/PlayerView+Controls.swift
+  s_3fff718166d55e::t_6aaae08d5beaee 11,13,29,55,71
+  s_3fff718166d55e::t_d3d22da98675cc 205,207,245-278
+  s_3fff718166d55e::t_1e7c728862cfe9 279-280
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_3fff718166d55e::t_d3d22da98675cc 90
+Ondelia/Features/Library/LibraryView.swift
+  s_3fff718166d55e::t_d3d22da98675cc 53,60-61,69,92
+Ondelia/Resources/Localizable.xcstrings
+  s_3fff718166d55e::t_d3d22da98675cc 5250-5251,5256,5261-5262,5267
+  s_3fff718166d55e::t_6aaae08d5beaee 321-324,2245-2255,2410-2420,2444,3823-3833,4097,5075-5081
+  s_3fff718166d55e::t_553db831384ac0 319-320,325-329,5082-5085
+Ondelia/Shared/PlayerRouter.swift
+  s_3fff718166d55e::t_daad454919dce8 13-17,19-23
+Ondelia/Features/Player/PlayerView.swift
+  s_3fff718166d55e::t_79f88994400090 63-65
+  s_3fff718166d55e::t_d3d22da98675cc 9-11
+Ondelia/Features/Player/NowPlayingView.swift
+  s_3fff718166d55e::t_bb1d139a3b876b 1-31
+Ondelia/Shared/MiniPlayerBar+Wide.swift
+  s_3fff718166d55e::t_6b942e44d5416d 1-123
+Ondelia/Shared/MiniPlayerBar.swift
+  s_3fff718166d55e::t_c92a068fb0285f 14-17,25-28
+Ondelia.xcodeproj/project.pbxproj
+  s_3fff718166d55e::t_0e991e38494847 831,871,1017,1036,1053,1070,1100,1134,1157,1181,1204,1227,1262,1297,1332,1368
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "19729297307e91220c2d2e8f5b772d22ca996837",
+  "prompts": {},
+  "sessions": {
+    "s_3fff718166d55e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "467cc8e5-1960-4810-b89b-66aa79fd35b9",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
