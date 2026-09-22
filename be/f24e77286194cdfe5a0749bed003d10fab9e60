@@ -1,0 +1,85 @@
+Ondelia/Features/Library/ContinueReadingSection.swift
+  s_3fff718166d55e::t_7f13f6596f1ed1 72-73,76,85
+  s_3fff718166d55e::t_22a0bde414deb3 56-58,63-67,71,74-75,77-84,86-88,108-148
+  s_3fff718166d55e::t_1fdd3849da26d2 149
+Ondelia/Features/Library/AudiobookGridItemView.swift
+  s_3fff718166d55e::t_991dbc294763fb 61-69
+Ondelia/App/MainTabView.swift
+  s_3fff718166d55e::t_adfa7e175ec444 138-145,161-162,167-174
+  s_3fff718166d55e::t_d04012a87b4a26 4,17,131-137,241-250,261-264
+  s_3fff718166d55e::t_13b94c29387b83 14
+  s_3fff718166d55e::t_543fa66032554c 257
+  s_3fff718166d55e::t_8be5c64fd290ea 164-166
+  s_3fff718166d55e::t_c38b99c0e18db8 72-73
+  s_3fff718166d55e::t_7183dfed7f2a75 251-253,255,258-260
+  s_3fff718166d55e::t_00a152bcb89a67 10,12,74,81-92,99,109,115-127,146-160,163,190,200,208,214,228
+  s_3fff718166d55e::t_d8fd88abb500e8 254,256
+  s_3fff718166d55e::t_e5e5fad13554c9 265-266
+Ondelia/App/PlaybackCommands.swift
+  s_3fff718166d55e::t_4f66dd6f5901c3 61-84
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_3fff718166d55e::t_00a152bcb89a67 24,38-40,43-56,75,110,118-121,145
+  s_3fff718166d55e::t_5446f10a9669b9 201-202,204-209,213,235,241-242
+Ondelia/Features/Library/LibraryView+Selection.swift
+  s_3fff718166d55e::t_00a152bcb89a67 85
+Ondelia/Core/Managers/AudiobookManager+FileCopy.swift
+  s_3fff718166d55e::t_280b691078a144 235-237,244-250,252
+  s_3fff718166d55e::t_b2624d6069aeb4 257
+Ondelia/Resources/Isora.entitlements
+  s_3fff718166d55e::t_3033a02358495e 17-18
+Ondelia/Resources/Localizable.xcstrings
+  s_3fff718166d55e::t_4beac36c426914 366-368,1814-1817,2153-2156,3231-3234,4320-4322
+  s_3fff718166d55e::t_00a152bcb89a67 5205-5215,5241
+  s_3fff718166d55e::t_22a0bde414deb3 5216-5226
+  s_3fff718166d55e::t_340448f725cf66 363-365,369-371,1812-1813,1818,2031-2041,2151-2152,2157,3229-3230,3235,4317-4319,4323-4324
+  s_3fff718166d55e::t_a2cba8f96d1562 18,21,1341,1373-1383,1725-1731,1965-1971,2454-2464,2553-2563,3143-3153,4129-4130,4135,4140-4141,4146,4350-4360,4492-4498
+  s_3fff718166d55e::t_79fbe0b457ea84 1732-1735,1819-1822,1972-1975,2158-2161,3236-3239,4325-4327,4499-4502,5227-5237
+  s_3fff718166d55e::t_229763a65daa8e 19-20,331,372-373,664,3319
+Ondelia/Features/Library/EmptyLibraryView.swift
+  s_3fff718166d55e::t_b6ef64ded98e41 38-39
+Ondelia/Features/Settings/SettingsView+Sections.swift
+  s_3fff718166d55e::t_7e408e9e1fa2cc 64-67,69-78
+  s_3fff718166d55e::t_325f051f3be097 84,86-87
+Ondelia/App/IsoraApp.swift
+  s_3fff718166d55e::t_3e981848bc81b5 108-109,111
+  s_3fff718166d55e::t_70d3825a584811 24
+Ondelia/Features/Library/LibraryView.swift
+  s_3fff718166d55e::t_325f051f3be097 34-35,37-47
+  s_3fff718166d55e::t_00a152bcb89a67 9-11,54,56,58-60,64-65,68,73,96-104,168-170,172-176,180,182
+Ondelia/Features/Library/LibraryHeaderView.swift
+  s_3fff718166d55e::t_325f051f3be097 46-47,55,72,77-80,82
+  s_3fff718166d55e::t_6767cbb2f97a65 9
+Ondelia/Features/Library/BookDetailView.swift
+  s_3fff718166d55e::t_79fbe0b457ea84 143-152
+Ondelia/Core/Managers/ThemeManager.swift
+  s_3fff718166d55e::t_9ef0751f6fb8db 26-27
+Ondelia/Features/Player/PlayerView+Layout.swift
+  s_3fff718166d55e::t_99318dbcba6937 25-26
+Ondelia/Core/Managers/AudiobookManager.swift
+  s_3fff718166d55e::t_280b691078a144 30-32
+Ondelia/Features/Library/EnhancedAudiobookRowView.swift
+  s_3fff718166d55e::t_79fbe0b457ea84 33-41,98-107
+  s_3fff718166d55e::t_e2aa30ee4e18bd 108-109
+Ondelia/Features/Library/ImportingIndicatorView.swift
+  s_3fff718166d55e::t_280b691078a144 27-37
+Ondelia/Features/Library/LibraryView+Options.swift
+  s_3fff718166d55e::t_74a74edf171918 7-8,14,22-31
+Ondelia/Core/Services/CarPlay/CarPlayNowPlaying.swift
+  s_3fff718166d55e::t_2d0909f25bb457 46
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "bef24e77286194cdfe5a0749bed003d10fab9e60",
+  "prompts": {},
+  "sessions": {
+    "s_3fff718166d55e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "467cc8e5-1960-4810-b89b-66aa79fd35b9",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
