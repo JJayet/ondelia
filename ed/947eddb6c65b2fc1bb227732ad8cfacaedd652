@@ -1,0 +1,36 @@
+Ondelia/App/PlaybackMenuCommands.swift
+  s_3fff718166d55e::t_1c8fe65f5c2714 1-58
+Ondelia/Features/Library/CollectionTileView.swift
+  s_3fff718166d55e::t_5e599cf96b8a4c 1-45
+Ondelia/Core/Services/SettingsSync.swift
+  s_3fff718166d55e::t_d7c5727203206c 1-87
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_3fff718166d55e::t_071c6c53c9bb94 1-9,11,70-89,91-116
+  s_3fff718166d55e::t_00a152bcb89a67 10,12,25-69,90
+  s_3fff718166d55e::t_fc9fe278887454 13-24
+Ondelia/Features/Library/LibraryTableView.swift
+  s_3fff718166d55e::t_1baa7bcb71a913 1-27,30-49,51-56,61-62,64-77,85-151
+  s_3fff718166d55e::t_79fbe0b457ea84 57-60
+  s_3fff718166d55e::t_a2cba8f96d1562 28-29,50,63,78-84
+Ondelia/Features/Player/PlayerView+Wide.swift
+  s_3fff718166d55e::t_bad7eda5eb6579 1-116
+Ondelia/Features/Library/ContinueReadingHeroView.swift
+  s_3fff718166d55e::t_2d99758df580bd 1-15,23-27,31-49,61-88,90-92
+  s_3fff718166d55e::t_7f13f6596f1ed1 16-22,28-30,50-60,89
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ed947eddb6c65b2fc1bb227732ad8cfacaedd652",
+  "prompts": {},
+  "sessions": {
+    "s_3fff718166d55e": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "467cc8e5-1960-4810-b89b-66aa79fd35b9",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
