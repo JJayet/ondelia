@@ -1,0 +1,34 @@
+Ondelia/Core/Managers/ThemeManager.swift
+  s_0a0ca878f2712b::t_1716114440063c 28-29,60-61,63-67
+  s_0a0ca878f2712b::t_97bef64ca7061d 30-31
+scripts/screenshots.sh
+  h_59e29111fad4d9 11-12
+  s_0a0ca878f2712b::t_70f90fd90110fc 48-49
+OndeliaUITests/AudiobookUITestCase.swift
+  s_0a0ca878f2712b::t_ad2628040aad19 25-26,32
+  s_0a0ca878f2712b::t_af263a4709ee62 48-55
+OndeliaUITests/ScreenshotUITests.swift
+  s_0a0ca878f2712b::t_af263a4709ee62 33-42
+  s_0a0ca878f2712b::t_a8380fe365b59c 15-20
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "60ccb21c85a7f110728f842c1c40b68b25b7c173",
+  "prompts": {},
+  "humans": {
+    "h_59e29111fad4d9": {
+      "author": "Jonathan Jayet <github@jayet.io>"
+    }
+  },
+  "sessions": {
+    "s_0a0ca878f2712b": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d49a0ca5-0558-49e8-a6da-47352f467a93",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
