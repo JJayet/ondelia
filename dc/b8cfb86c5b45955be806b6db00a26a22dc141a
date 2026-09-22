@@ -1,0 +1,47 @@
+TODO.md
+  s_23ab200960ffd0::t_576db2483e9689 28-29,53-106,110-116,154-155,161-167
+  s_456f97f4e56884::t_3f845c793c5579 107-109,127-153,156-160
+  s_23ab200960ffd0::t_45404e19aa05ed 117-126
+Ondelia/Features/Player/PlayerView.swift
+  s_23ab200960ffd0::t_ec7860991a2d13 42
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_23ab200960ffd0::t_ec7860991a2d13 16-17,152-154,156-157
+Ondelia/Features/Statistics/StatisticsView.swift
+  s_23ab200960ffd0::t_07fbd7b42774a1 33-34
+Ondelia/Features/Library/CollectionDetailView.swift
+  s_23ab200960ffd0::t_9bd66e433b499f 32-33
+Ondelia/Features/Settings/SettingsView.swift
+  s_23ab200960ffd0::t_ec7860991a2d13 44-46
+Ondelia/Features/Library/BookDetailView.swift
+  s_23ab200960ffd0::t_07fbd7b42774a1 39-40
+Ondelia/Features/Library/ContinueReadingSection.swift
+  s_23ab200960ffd0::t_c56b5950e2a4eb 77-78
+  s_23ab200960ffd0::t_235e3f5e10af5c 79-80
+Ondelia/Features/Player/PlayerView+Layout.swift
+  s_23ab200960ffd0::t_ec7860991a2d13 24-33,35,37,39-40,47-57
+  s_23ab200960ffd0::t_1716be4ff8f2f1 58-59
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dcb8cfb86c5b45955be806b6db00a26a22dc141a",
+  "prompts": {},
+  "sessions": {
+    "s_23ab200960ffd0": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "ca3c3ded-1c14-463b-9c59-57aec2b65f38",
+        "model": "claude-fable-5-1"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_456f97f4e56884": {
+      "agent_id": {
+        "tool": "codex",
+        "id": "01a0c56a-8526-7053-b3d3-a4a6f1653e29",
+        "model": "gpt-6-astra"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
