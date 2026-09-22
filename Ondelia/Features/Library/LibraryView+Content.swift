@@ -13,6 +13,8 @@ extension LibraryView {
         PlayQueue.shared.books(in: audiobookManager.audiobooks)
     }
 
+    var gridSpacing: CGFloat { gridColumns >= 4 ? 10 : 16 }
+
     // Extracted to help the type-checker
     @ViewBuilder
     var listModeContent: some View {
@@ -147,12 +149,12 @@ extension LibraryView {
                                     .padding(.horizontal)
                             }
 
+                            // The preference sets the density at phone width; a wider window
+                            // (iPad, Split View, iPhone Duo open) keeps that cover size and fits
+                            // more columns, so the grid follows the space rather than the idiom.
                             LazyVGrid(
-                                columns: Array(
-                                    repeating: GridItem(.flexible(), spacing: gridColumns >= 4 ? 10 : 16),
-                                    count: gridColumns
-                                ),
-                                spacing: gridColumns >= 4 ? 10 : 16
+                                columns: [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: gridSpacing)],
+                                spacing: gridSpacing
                             ) {
                                 ForEach(shelfBooks, id: \.id) { audiobook in
                                     AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { tapBook(audiobook) }

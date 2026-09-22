@@ -29,6 +29,8 @@ struct CollectionDetailView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 30)
+            .frame(maxWidth: 640)
+            .frame(maxWidth: .infinity)
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: group.books.first), intensity: 1))
         .scrollContentBackground(.hidden)

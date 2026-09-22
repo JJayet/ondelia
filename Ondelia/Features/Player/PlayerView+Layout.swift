@@ -21,23 +21,40 @@ extension PlayerView {
             VStack(spacing: 0) {
                 headerControls
 
-                titleBlock.padding(.top, 18)
+                if horizontalSizeClass == .regular {
+                    // Wide window (iPad, Split View, iPhone Duo open): the title sits beside
+                    // the controls instead of above them, so neither stretches across the room.
+                    HStack(alignment: .center, spacing: 40) {
+                        titleBlock
+                        controlColumn.frame(maxWidth: 560)
+                    }
+                    .frame(maxHeight: .infinity)
+                } else {
+                    titleBlock.padding(.top, 18)
 
-                Spacer(minLength: 16)
+                    Spacer(minLength: 16)
 
-                controlPanel
+                    controlColumn
 
-                chipRow.padding(.top, 12)
-
-                playerTips.padding(.top, 12)
-
-                upNextSection.padding(.top, 22)
-
-                Spacer(minLength: 16)
+                    Spacer(minLength: 16)
+                }
             }
             .padding(.horizontal, 16)
         }
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.6), value: audiobook.id)
+    }
+
+    /// Everything you can touch, stacked: panel, chips, tips, up next.
+    var controlColumn: some View {
+        VStack(spacing: 0) {
+            controlPanel
+
+            chipRow.padding(.top, 12)
+
+            playerTips.padding(.top, 12)
+
+            upNextSection.padding(.top, 22)
+        }
     }
 
     // MARK: - Tips

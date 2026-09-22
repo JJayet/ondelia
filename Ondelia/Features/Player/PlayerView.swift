@@ -39,6 +39,7 @@ struct PlayerView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.playerRouter) var playerRouter
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.horizontalSizeClass) var horizontalSizeClass
 
     var coverImage: UIImage? {
         CoverImageCache.image(for: audiobook)

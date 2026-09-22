@@ -74,6 +74,10 @@ struct ContinueReadingSection: View {
                     }
                     .padding(.horizontal, rowPadding)
                 }
+                // A horizontal scroll view spreads into the side safe areas by default; on
+                // iPhone Duo closed those hold the vertical toolbar, so the cards would slide
+                // under the "+" button. Clipped back to the safe width instead.
+                .clipped()
             }
         }
     }

@@ -41,6 +41,9 @@ struct SettingsView: View {
                 }
                 .padding(.horizontal, 16)
                 .padding(.bottom, 24)
+                // One column everywhere; a wide window centres it instead of stretching rows.
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
             }
             .navigationTitle(NSLocalizedString("Settings", comment: "Settings view title"))
             .navigationBarTitleDisplayMode(.large)

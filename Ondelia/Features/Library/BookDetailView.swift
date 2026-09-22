@@ -36,6 +36,8 @@ struct BookDetailView: View {
                 .padding(.horizontal, 16)
                 .padding(.top, 18)
                 .padding(.bottom, 30)
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: audiobook), intensity: 1))

@@ -30,6 +30,8 @@ struct StatisticsView: View {
                     )
                 }
                 .padding(16)
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
             }
             .background(TintedBackground(intensity: 0.7))
             .scrollContentBackground(.hidden)
