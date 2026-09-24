@@ -21,6 +21,7 @@ struct IsoraApp: App {
 
     init() {
         AppTips.configure()
+        SettingsSync.start()
     }
 
     var body: some Scene {
@@ -104,8 +105,10 @@ struct IsoraApp: App {
                     }
             }
         }
+        // Hardware keyboard on iPad, menu bar on Mac.
+        .commands { PlaybackMenuCommands() }
     }
-    
+
     private func handleAppWillResignActive() {
         // Save current playback position when app goes to background. The manager owns the same
         // write on a timer, so this only shortens the window, and it shares the guard that keeps

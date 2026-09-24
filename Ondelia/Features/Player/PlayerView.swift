@@ -6,6 +6,9 @@ struct PlayerView: View {
     /// The book this screen was opened on. Playback can move past it — the end of a book rolls
     /// into the next one — so the screen follows whatever the engine holds, not this.
     let openedBook: AudiobookModel
+    /// Shown as the Now Playing pane beside the sidebar: the tab accessory is the transport and
+    /// there is nothing to close, so the bottom bar and the close button stay out.
+    var embedded = false
 
     var audiobook: AudiobookModel { audioManager.currentAudiobook ?? openedBook }
 
@@ -57,6 +60,9 @@ struct PlayerView: View {
         GeometryReader { geometry in
             fullPlayerView(geometry: geometry)
         }
+        // The room is the blurred cover under a black gradient whatever the theme, so the
+        // player's type is always light-on-dark; in the light theme `.secondary` vanished.
+        .environment(\.colorScheme, .dark)
         .onAppear {
             audioManager.loadAudiobook(openedBook)
             Task { await AppTips.playerOpened.donate() }

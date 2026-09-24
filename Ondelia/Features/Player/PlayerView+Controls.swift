@@ -8,8 +8,9 @@ extension PlayerView {
     // Chapter skips stay as bare glyphs at the edges — the mock drops them, but nothing else
     // on this screen moves a chapter at a time.
     @ViewBuilder
-    var playbackControls: some View {
+    func playbackControls(chapterSkips: Bool = true) -> some View {
         HStack(spacing: 0) {
+            if chapterSkips {
             Button {
                 withHapticFeedback { audioManager.skipToPreviousChapter() }
             } label: {
@@ -25,6 +26,7 @@ extension PlayerView {
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.previousChapterButton)
 
             Spacer(minLength: 8)
+            }
 
             Button {
                 withHapticFeedback { audioManager.skipBackward(themeManager.skipBackInterval.seconds) }
@@ -50,6 +52,7 @@ extension PlayerView {
             .accessibilityLabel(NSLocalizedString("Skip Forward", comment: "Skip forward accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.skipForwardButton)
 
+            if chapterSkips {
             Spacer(minLength: 8)
 
             Button {
@@ -65,6 +68,7 @@ extension PlayerView {
             .disabled(chapters.isEmpty)
             .accessibilityLabel(NSLocalizedString("Next Chapter", comment: "Next chapter accessibility label"))
             .accessibilityIdentifier(AccessibilityIdentifiers.Player.nextChapterButton)
+            }
         }
     }
 
@@ -198,37 +202,9 @@ extension PlayerView {
         .glassPill(height: 44, tinted: tinted)
     }
 
-    /// Shared by the moon chip and the running-timer row under "Up next".
+    /// Shared by the moon chip, the running-timer row under "Up next" and the wide accessory.
     @ViewBuilder
-    var sleepTimerMenuItems: some View {
-            Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(300) }
-            }
-            Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(600) }
-            }
-            Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(900) }
-            }
-            Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(1800) }
-            }
-            Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(2700) }
-            }
-            Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
-                withHapticFeedback { audioManager.setSleepTimer(3600) }
-            }
-            Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
-                withHapticFeedback { audioManager.setSleepTimerEndOfChapter() }
-            }
-            if sleepTimeRemaining > 0 {
-                Button(
-                    NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
-                    role: .destructive
-                ) { withHapticFeedback { audioManager.cancelSleepTimer() } }
-            }
-    }
+    var sleepTimerMenuItems: some View { SleepTimerMenuItems() }
 
     // MARK: - Speed Button Helper
     @ViewBuilder
@@ -264,5 +240,41 @@ extension PlayerView {
             total,
             percentage
         )
+    }
+}
+
+/// The sleep timer's choices, the same list wherever a moon is tapped.
+struct SleepTimerMenuItems: View {
+    private let audioManager = GlobalAudioManager.shared
+    private var sleepTimeRemaining: TimeInterval { audioManager.sleepTimeRemaining }
+
+    var body: some View {
+            Button(NSLocalizedString("5 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(300) }
+            }
+            Button(NSLocalizedString("10 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(600) }
+            }
+            Button(NSLocalizedString("15 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(900) }
+            }
+            Button(NSLocalizedString("30 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(1800) }
+            }
+            Button(NSLocalizedString("45 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(2700) }
+            }
+            Button(NSLocalizedString("60 minutes", comment: "Sleep timer duration option")) {
+                withHapticFeedback { audioManager.setSleepTimer(3600) }
+            }
+            Button(NSLocalizedString("End of chapter", comment: "Sleep timer option: stop at end of current chapter")) {
+                withHapticFeedback { audioManager.setSleepTimerEndOfChapter() }
+            }
+            if sleepTimeRemaining > 0 {
+                Button(
+                    NSLocalizedString("Cancel timer", comment: "Sleep timer cancel action"),
+                    role: .destructive
+                ) { withHapticFeedback { audioManager.cancelSleepTimer() } }
+            }
     }
 }

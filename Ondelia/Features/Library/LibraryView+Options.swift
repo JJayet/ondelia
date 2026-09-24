@@ -4,11 +4,14 @@ extension LibraryView {
     enum ViewMode: String, CaseIterable {
         case list = "list"
         case grid = "grid"
+        /// Regular width only: sortable columns, collections folded (design 7b).
+        case table = "table"
 
         var displayName: String {
             switch self {
             case .list: return NSLocalizedString("List", comment: "List view mode")
             case .grid: return NSLocalizedString("Grid", comment: "Grid view mode")
+            case .table: return NSLocalizedString("Table", comment: "Table view mode")
             }
         }
 
@@ -16,6 +19,16 @@ extension LibraryView {
             switch self {
             case .list: return "list.bullet"
             case .grid: return "square.grid.2x2"
+            case .table: return "tablecells"
+            }
+        }
+
+        /// What the toggle goes to: list → grid → (table, when wide) → list.
+        func next(wide: Bool) -> ViewMode {
+            switch self {
+            case .list: return .grid
+            case .grid: return wide ? .table : .list
+            case .table: return .list
             }
         }
     }

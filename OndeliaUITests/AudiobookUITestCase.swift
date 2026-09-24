@@ -22,14 +22,14 @@ class AudiobookUITestCase: XCTestCase {
     /// Language the app runs in. Fixed so tab labels are known, overridable for screenshots.
     var language: String { "en" }
 
-    // iPad's top tab strip exposes the identifiers; iPhone's tab bar exposes only localized
-    // labels, so there the lookup falls back to position.
+    // iPad exposes the identifiers (buttons in the top strip, cells in the landscape sidebar);
+    // iPhone's tab bar exposes only localized labels, so there the lookup falls back to position.
     var libraryTab: XCUIElement { tab(AccessibilityIdentifiers.TabBar.libraryTab, index: 0) }
     var statisticsTab: XCUIElement { tab("tab_bar_statistics", index: 1) }
     var settingsTab: XCUIElement { tab(AccessibilityIdentifiers.TabBar.settingsTab, index: 2) }
 
     private func tab(_ identifier: String, index: Int) -> XCUIElement {
-        let byIdentifier = app.buttons[identifier].firstMatch
+        let byIdentifier = app.descendants(matching: .any)[identifier].firstMatch
         return byIdentifier.exists ? byIdentifier : app.tabBars.buttons.element(boundBy: index)
     }
 
@@ -45,7 +45,14 @@ class AudiobookUITestCase: XCTestCase {
         let resumeButton = app.buttons[AccessibilityIdentifiers.Library.resumeButton]
         guard resumeButton.waitForExistence(timeout: timeout) else { return false }
         resumeButton.tap()
-        return app.buttons[AccessibilityIdentifiers.Player.playPauseButton].waitForExistence(timeout: timeout)
+        return playPauseButton.waitForExistence(timeout: timeout)
+    }
+
+    /// The player's play/pause. In regular width the player is the Now Playing pane and its
+    /// transport is the tab accessory bar, which carries the mini player's identifier.
+    var playPauseButton: XCUIElement {
+        let full = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
+        return full.exists ? full : app.buttons[AccessibilityIdentifiers.MiniPlayer.playPauseButton]
     }
 
     override func setUp() async throws {
@@ -107,7 +114,6 @@ class AudiobookUITestCase: XCTestCase {
         )
         resumeButton.tap()
 
-        let playPauseButton = app.buttons[AccessibilityIdentifiers.Player.playPauseButton]
         XCTAssertTrue(
             playPauseButton.waitForExistence(timeout: 5),
             "Player should load after tapping an audiobook"

@@ -58,10 +58,15 @@ struct AudiobookGridItemView: View {
                     .multilineTextAlignment(.leading)
 
                 if columns < 4 {
-                    Text(meta)
-                        .font(.system(size: metaFontSize))
-                        .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                    HStack(spacing: 4) {
+                        Text(meta)
+                            .font(.system(size: metaFontSize))
+                            .foregroundStyle(.secondary)
+                            .lineLimit(1)
+                        if audiobook.hardcover != nil {
+                            HardcoverLinkMark(size: metaFontSize - 1)
+                        }
+                    }
                 }
             }
             .frame(maxWidth: .infinity, alignment: .leading)

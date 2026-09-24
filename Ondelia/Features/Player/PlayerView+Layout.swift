@@ -19,17 +19,12 @@ extension PlayerView {
                 .transition(.opacity)
 
             VStack(spacing: 0) {
-                headerControls
-
                 if horizontalSizeClass == .regular {
-                    // Wide window (iPad, Split View, iPhone Duo open): the title sits beside
-                    // the controls instead of above them, so neither stretches across the room.
-                    HStack(alignment: .center, spacing: 40) {
-                        titleBlock
-                        controlColumn.frame(maxWidth: 560)
-                    }
-                    .frame(maxHeight: .infinity)
+                    // Wide window (iPad, Mac, iPhone Duo open): see PlayerView+Wide.swift.
+                    wideLayout
                 } else {
+                    headerControls
+
                     titleBlock.padding(.top, 18)
 
                     Spacer(minLength: 16)
@@ -74,12 +69,7 @@ extension PlayerView {
     var headerControls: some View {
         HStack {
             Button {
-                // Dismiss overlay by clearing router's presented
-                if let router = playerRouter {
-                    withHapticFeedback { router.presented = nil }
-                } else {
-                    withHapticFeedback { dismiss() }
-                }
+                withHapticFeedback { closePlayer() }
             } label: {
                 Image(systemName: "chevron.down")
                     .font(.system(size: 15, weight: .semibold))
@@ -114,6 +104,15 @@ extension PlayerView {
             Color.clear.frame(width: 38, height: 38)
         }
         .padding(.top, 12)
+    }
+
+    /// Clears the router's presentation, or dismisses when there is no router (previews).
+    func closePlayer() {
+        if let router = playerRouter {
+            router.presented = nil
+        } else {
+            dismiss()
+        }
     }
 
     /// "CHAPTER 14 / 42", or the book's own name when it has no chapters to count.
@@ -178,7 +177,7 @@ extension PlayerView {
                 onSeek: { audioManager.seek(to: $0) }
             )
 
-            playbackControls.padding(.top, 22)
+            playbackControls().padding(.top, 22)
         }
         .padding(.horizontal, 20)
         .padding(.vertical, 22)

@@ -98,7 +98,7 @@ struct ChapterRowView: View {
 }
 
 /// Three bars breathing at different rates — the "this one is playing" mark in the design.
-private struct PlayingBars: View {
+struct PlayingBars: View {
     @State private var animating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 

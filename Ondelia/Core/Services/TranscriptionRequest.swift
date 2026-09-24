@@ -81,6 +81,16 @@ struct TranscriptionRequest: Hashable, Sendable {
         UserDefaults.standard.string(forKey: "transcription.language.\(audiobookID.uuidString)")
     }
 
+    /// Whether the language question was put to the user for this book. Its own flag, so
+    /// keeping the default leaves the stored language nil and the cache keys unchanged.
+    static func languageAsked(for audiobookID: UUID) -> Bool {
+        UserDefaults.standard.bool(forKey: "transcription.languageAsked.\(audiobookID.uuidString)")
+    }
+
+    static func markLanguageAsked(for audiobookID: UUID) {
+        UserDefaults.standard.set(true, forKey: "transcription.languageAsked.\(audiobookID.uuidString)")
+    }
+
     static func storeLanguage(_ language: String?, for audiobookID: UUID) {
         let key = "transcription.language.\(audiobookID.uuidString)"
         if let language {

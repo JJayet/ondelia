@@ -12,6 +12,12 @@ final class ScreenshotUITests: AudiobookUITestCase {
         return arguments
     }
 
+    /// App Store iPad shots are landscape: the sidebar layout is the point of the pane.
+    override func setUp() async throws {
+        if UIDevice.current.userInterfaceIdiom == .pad { XCUIDevice.shared.orientation = .landscapeLeft }
+        try await super.setUp()
+    }
+
     func testCaptureScreens() throws {
         libraryTab.tap()
         XCTAssertTrue(audiobookRows.firstMatch.waitForExistence(timeout: 10))
@@ -24,11 +30,16 @@ final class ScreenshotUITests: AudiobookUITestCase {
         XCTAssertTrue(openPlayerFromDetail())
         snap("03-player")
 
-        app.buttons[AccessibilityIdentifiers.Player.chaptersButton].tap()
-        snap("04-chapters")
-        // The sheet's Done is its only bar button, whatever the language calls it.
-        app.navigationBars.buttons.firstMatch.tap()
-        app.buttons[AccessibilityIdentifiers.Player.closeButton].tap()
+        // Regular width lists the chapters in the player itself and has no close button:
+        // the player is the Now Playing pane, and the sidebar tabs stay reachable.
+        let chaptersButton = app.buttons[AccessibilityIdentifiers.Player.chaptersButton]
+        if chaptersButton.exists {
+            chaptersButton.tap()
+            snap("04-chapters")
+            // The sheet's Done is its only bar button, whatever the language calls it.
+            app.navigationBars.buttons.firstMatch.tap()
+            app.buttons[AccessibilityIdentifiers.Player.closeButton].tap()
+        }
         XCTAssertTrue(statisticsTab.waitForExistence(timeout: 5))
 
         statisticsTab.tap()

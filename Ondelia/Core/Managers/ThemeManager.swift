@@ -23,23 +23,12 @@ final class ThemeManager {
         Task { self.loadSettings() }
     }
     
-    private func loadSettings() {
-        let theme: AppTheme
-        let accent: AccentColor
-        // Load from UserDefaults on background queue
-        if let themeRawValue = UserDefaults.standard.object(forKey: "selectedTheme") as? Int,
-           let loadedTheme = AppTheme(rawValue: themeRawValue) {
-            theme = loadedTheme
-        } else {
-            theme = .system
-        }
-        
-        if let accentRawValue = UserDefaults.standard.object(forKey: "accentColor") as? Int,
-           let loadedAccent = AccentColor(rawValue: accentRawValue) {
-            accent = loadedAccent
-        } else {
-            accent = .blue
-        }
+    /// Also re-run when iCloud brings new values: the properties above are cached copies.
+    func loadSettings() {
+        // `integer(forKey:)`, not `object as? Int`: a launch argument such as `-selectedTheme 2`
+        // (the dark screenshots) lands in the defaults as a string.
+        let theme = Self.storedInt("selectedTheme").flatMap(AppTheme.init) ?? .system
+        let accent = Self.storedInt("accentColor").flatMap(AccentColor.init) ?? .blue
         
         let storedGlobalSpeed = UserDefaults.standard.object(forKey: "globalSpeed") as? Double
         // `bool(forKey:)` reads an absent key as false, which would ship the feature off.
@@ -68,9 +57,14 @@ final class ThemeManager {
         UserDefaults.standard.set(color.rawValue, forKey: "accentColor")
     }
     
-    private static func loadSkipInterval(key: String) -> SkipInterval {
+    /// The stored integer, or nil when the key is absent (`integer(forKey:)` alone says 0).
+    private static func storedInt(_ key: String) -> Int? {
         let defaults = UserDefaults.standard
-        let raw = (defaults.object(forKey: key) ?? defaults.object(forKey: "skipInterval")) as? Int
+        return defaults.object(forKey: key) == nil ? nil : defaults.integer(forKey: key)
+    }
+
+    private static func loadSkipInterval(key: String) -> SkipInterval {
+        let raw = storedInt(key) ?? storedInt("skipInterval")
         return raw.flatMap(SkipInterval.init) ?? .fifteen
     }
 

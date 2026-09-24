@@ -125,13 +125,13 @@ struct TranscriptionView: View {
             .navigationTitle(chapterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                // Plain: the bar already draws glass around its items, and a second capsule
+                // on Done sat over the neighbouring buttons.
                 ToolbarItem(placement: .confirmationAction) {
                     Button(NSLocalizedString("Done", comment: "Done button")) { withHapticFeedback { dismiss() } }
-                        .glassEffect()
-                        .background(Color.glassTint, in: Capsule())
                 }
 
-                ToolbarItem(placement: .topBarTrailing) {
+                ToolbarItemGroup(placement: .topBarLeading) {
                     Button(action: { withHapticFeedback { showingLanguagePicker = true } }) {
                         Image(systemName: "globe")
                     }
@@ -145,8 +145,20 @@ struct TranscriptionView: View {
                 }
             }
         }
-        .sheet(isPresented: $showingLanguagePicker) {
+        .sheet(isPresented: $showingLanguagePicker, onDismiss: {
+            TranscriptionRequest.markLanguageAsked(for: audiobook.id)
+            // Picking a language re-keyed the request already; keeping the default did not,
+            // so kick the load that waited on the answer.
+            loadKey.generation += 1
+        }) {
             TranscriptionLanguagePicker(audioURL: request?.url, selection: languageOverride)
+        }
+        // First transcript of a book: ask which language it is in, with the guess from the file
+        // preselected, rather than recognising an English book as French for a whole chapter.
+        // Once the file is known, so the picker can name the guess.
+        .onChange(of: request?.url, initial: true) { _, url in
+            guard url != nil, !TranscriptionRequest.languageAsked(for: audiobook.id) else { return }
+            showingLanguagePicker = true
         }
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
             Button(NSLocalizedString("OK", comment: "OK button")) { withHapticFeedback {} }
@@ -200,6 +212,9 @@ struct TranscriptionView: View {
         groupedSentences = []
         failed = false
         guard let request = key.request else { return }
+        // Not before the language question is answered: a chapter recognised in the wrong
+        // language is a chapter recognised twice. The picker's dismissal restarts this load.
+        guard TranscriptionRequest.languageAsked(for: audiobook.id) else { return }
 
         do {
             let result = try await transcriptionManager.transcribe(request, bypassCache: key.bypassCache)

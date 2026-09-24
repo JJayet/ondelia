@@ -24,6 +24,17 @@ struct ImportingIndicatorView: View {
                         .font(.caption2)
                         .foregroundStyle(Color.secondaryText)
                 }
+                // Determinate while the file copies, the one step long enough to measure;
+                // indeterminate for the metadata and chapter reads around it.
+                if let progress = manager.importProgress {
+                    ProgressLine(value: progress, height: 3)
+                        .padding(.top, 4)
+                } else {
+                    ProgressView()
+                        .progressViewStyle(.linear)
+                        .controlSize(.mini)
+                        .padding(.top, 4)
+                }
             }
             Spacer()
         }

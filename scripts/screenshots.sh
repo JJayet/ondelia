@@ -8,8 +8,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-DEVICES=${DEVICES-"iPhone 17 Pro Max|iPad Pro 13-inch (M5)"}
-WATCH_DEVICES=${WATCH_DEVICES-"Apple Watch Series 11 (46mm)|Apple Watch Ultra 3 (49mm)"}
+DEVICES=${DEVICES-"iPhone 18 Pro Max|iPad Pro 13-inch (M5)"}
+WATCH_DEVICES=${WATCH_DEVICES-"Apple Watch Series 11 (46mm)|Apple Watch Ultra 4 (49mm)"}
 LANGS=${LANGS:-"en fr"}
 DARK=${DARK:-0}
 OUT=Screenshots
@@ -45,6 +45,8 @@ shoot() {
     jq -r '.. | objects | select(has("exportedFileName")) | "\(.exportedFileName)\t\(.suggestedHumanReadableName)"' "$WORK/export/manifest.json" |
       while IFS=$'\t' read -r file human; do
         mv "$WORK/export/$file" "$dest/${human%%_*}.png"
+        # iPad shoots landscape, but XCUIScreen saves the pixels portrait, rotated a quarter turn.
+        [[ $device == iPad* ]] && sips -r 270 "$dest/${human%%_*}.png" >/dev/null
       done
     rm -rf "$WORK/export"
     ls "$dest"

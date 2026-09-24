@@ -140,6 +140,16 @@ struct BookDetailView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
             }
+
+            if audiobook.hardcover != nil {
+                HStack(spacing: 5) {
+                    HardcoverLinkMark(size: 11)
+                    Text(NSLocalizedString("Linked to Hardcover", comment: "Book is linked to a Hardcover entry"))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.tertiary)
+                }
+                .padding(.top, 2)
+            }
         }
     }
 

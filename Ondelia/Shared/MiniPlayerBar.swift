@@ -11,8 +11,10 @@ struct MiniPlayerBar: View {
     @Environment(\.tabViewBottomAccessoryPlacement) private var placement
     private var isInline: Bool { placement == .inline }
 
-    private var book: AudiobookModel? { audio.currentAudiobook }
-    private var isPlaying: Bool { audio.playbackState == .playing }
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    var book: AudiobookModel? { audio.currentAudiobook }
+    var isPlaying: Bool { audio.playbackState == .playing }
 
     var body: some View {
         // The accessory exists twice — expanded above the tab bar and inline inside it — and
@@ -20,6 +22,10 @@ struct MiniPlayerBar: View {
         // the hidden inline copy: the player shrank into the bottom-left corner.
         if isInline {
             bar
+        } else if horizontalSizeClass == .regular {
+            // Regular width: the accessory is the pane's transport (MiniPlayerBar+Wide.swift),
+            // and the player opens as a tab rather than flying out of here.
+            wideBar
         } else {
             bar.matchedTransitionSource(id: "MINIPLAYER", in: namespace)
         }
