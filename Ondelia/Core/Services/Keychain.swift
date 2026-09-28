@@ -11,7 +11,9 @@ enum Keychain {
         [
             kSecClass as String: kSecClassGenericPassword,
             kSecAttrService as String: "io.jayet.Isora",
-            kSecAttrAccount as String: key
+            kSecAttrAccount as String: key,
+            // Reads and deletes match either kind, so a key can move between the two.
+            kSecAttrSynchronizable as String: kSecAttrSynchronizableAny
         ]
     }
 
@@ -27,17 +29,21 @@ enum Keychain {
     }
 
     /// Writes `value`, or removes the item when it is nil or empty.
-    static func set(_ value: String?, for key: String) {
+    ///
+    /// `synchronizable` puts it in iCloud Keychain, so the user's other devices get it too, and
+    /// removing it there removes it everywhere.
+    static func set(_ value: String?, for key: String, synchronizable: Bool = false) {
         SecItemDelete(query(key) as CFDictionary)
         guard let value, !value.isEmpty, let data = value.data(using: .utf8) else { return }
 
         var item = query(key)
+        item[kSecAttrSynchronizable as String] = synchronizable
         item[kSecValueData as String] = data
         // Background syncs run with the device locked, so `WhenUnlocked` would fail there.
         item[kSecAttrAccessible as String] = kSecAttrAccessibleAfterFirstUnlock
         let status = SecItemAdd(item as CFDictionary, nil)
         if status != errSecSuccess {
-            // Never the value: this is the Hardcover token.
+            // Never the value: it is an API token.
             Log.hardcover.error("Keychain write failed for \(key, privacy: .public), OSStatus \(status, privacy: .public)")
         }
     }

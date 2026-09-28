@@ -143,6 +143,7 @@
 				Core/Models/SwiftData/AudiobookModel.swift,
 				"Core/Models/SwiftData/AudiobookModel+Display.swift",
 				"Core/Models/SwiftData/AudiobookModel+Paths.swift",
+				Core/Models/SwiftData/AudiobookShelfLinkModel.swift,
 				Core/Models/SwiftData/BookmarkModel.swift,
 				Core/Models/SwiftData/ChapterModel.swift,
 				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
@@ -819,6 +820,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Ondelia connects to your AudiobookShelf server on your local network to download books.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you choose cover images for your audiobooks.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -859,6 +861,7 @@
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.entertainment";
 				INFOPLIST_KEY_LSSupportsOpeningDocumentsInPlace = YES;
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Ondelia connects to your AudiobookShelf server on your local network to download books.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "This app needs access to your photo library to let you choose cover images for your audiobooks.";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;

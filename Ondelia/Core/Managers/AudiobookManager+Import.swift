@@ -3,6 +3,8 @@ import SwiftData
 import UIKit
 
 extension AudiobookManager {
+    typealias ImportedHandler = @MainActor ([AudiobookModel]) -> Void
+
     // MARK: - Import Operations
     /// Queues an import, and runs it when the library is ready and no other import is in flight.
     ///
@@ -10,16 +12,24 @@ extension AudiobookManager {
     /// progress counters all describe *the* running import, so a second run starting mid-flight
     /// resets them under the first — which is exactly how the merge offer went missing: whichever
     /// run finished second found `pendingMergeTitle` already consumed and silently offered nothing.
+    ///
+    /// `onImported` receives the books the import ended with — after a merge, the merged one —
+    /// including books it skipped because the library already held them.
     @MainActor
-    func handleImportRequest(urls: [URL], completion: (@Sendable () -> Void)? = nil) {
+    func handleImportRequest(
+        urls: [URL],
+        completion: (@Sendable () -> Void)? = nil,
+        onImported: ImportedHandler? = nil
+    ) {
         guard swiftDataController.isLoaded, !isLoadingLibrary, !isImportRunning else {
             Log.library.debug("📚 AudiobookManager: Busy, queueing import of \(urls.count) item(s)")
-            pendingImports.append((urls: urls, completion: completion))
+            pendingImports.append((urls: urls, completion: completion, onImported: onImported))
             drainPendingImportsWhenIdle()
             return
         }
 
         isImportRunning = true
+        self.onImported = onImported
         importQueueTotal = urls.count
         importQueueCompleted = 0
         isImporting = true
@@ -98,7 +108,7 @@ extension AudiobookManager {
 
         Log.library.debug("📚 AudiobookManager: \(self.pendingImports.count) import(s) queued, starting the next")
         let next = pendingImports.removeFirst()
-        handleImportRequest(urls: next.urls, completion: next.completion)
+        handleImportRequest(urls: next.urls, completion: next.completion, onImported: next.onImported)
     }
 
     nonisolated func importZIPAudiobook(from zipURL: URL) async {

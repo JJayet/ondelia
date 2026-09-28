@@ -43,6 +43,7 @@ struct LibraryView: View {
         }
     }
     @State var showingImporter = false
+    @State var showingAudiobookShelf = false
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
     @State var selecting = false
@@ -138,8 +139,10 @@ struct LibraryView: View {
     @ToolbarContentBuilder
     var importToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
+            ImportMenu {
                 showingImporter = true
+            } onAudiobookShelf: {
+                showingAudiobookShelf = true
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 15, weight: .bold))
@@ -201,6 +204,7 @@ struct LibraryView: View {
             }
             .ignoresSafeArea()
         }
+        .sheet(isPresented: $showingAudiobookShelf) { AudiobookShelfSheet() }
         .refreshable {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()

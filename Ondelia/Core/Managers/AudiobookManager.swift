@@ -34,7 +34,9 @@ final class AudiobookManager {
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?)] = []
+    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?, onImported: ImportedHandler?)] = []
+    /// Told which books the running import produced, once its merge offer has been answered.
+    var onImported: ImportedHandler?
     /// True from the moment an import starts until its merge offer has been answered.
     /// Imports run one at a time; see `handleImportRequest`.
     var isImportRunning = false
@@ -159,12 +161,17 @@ final class AudiobookManager {
             try? FileManager.default.removeItem(at: fileURL)
         }
         
-        // Delete from Core Data. Transcript windows have no relationship to cascade through.
+        // Delete from Core Data. Transcript windows and AudiobookShelf links have no
+        // relationship to cascade through.
         let bookID = audiobook.id
         let windows = try? swiftDataController.context.fetch(
             FetchDescriptor<TranscriptWindowModel>(predicate: #Predicate { $0.audiobookID == bookID })
         )
         for window in windows ?? [] { swiftDataController.context.delete(window) }
+        let links = try? swiftDataController.context.fetch(
+            FetchDescriptor<AudiobookShelfLinkModel>(predicate: #Predicate { $0.audiobookID == bookID })
+        )
+        for link in links ?? [] { swiftDataController.context.delete(link) }
         swiftDataController.context.delete(audiobook)
         swiftDataController.save()
         fetchAudiobooks()

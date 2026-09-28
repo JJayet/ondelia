@@ -48,8 +48,10 @@ extension LibraryView {
                 .disabled(shelfBooks.isEmpty)
                 .glassPill(height: 34)
 
-                Button {
+                ImportMenu {
                     showingImporter = true
+                } onAudiobookShelf: {
+                    showingAudiobookShelf = true
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 15, weight: .bold))
@@ -93,11 +95,22 @@ extension LibraryView {
             .padding(.horizontal)
             .padding(.top, 8)
 
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                EmptyLibraryView { showingImporter = true }
+            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+                && AudiobookShelfService.shared.downloads.isEmpty {
+                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
                     .padding(.horizontal)
                 Spacer()
             } else {
+                // The list and grid show these rows too; the table has no row slot for them.
+                if !AudiobookShelfService.shared.downloads.isEmpty {
+                    DownloadingIndicatorView()
+                        .padding(.horizontal)
+                }
+                if audiobookManager.isImporting {
+                    ImportingIndicatorView(manager: audiobookManager)
+                        .padding(.horizontal)
+                }
+
                 LibraryTableView(
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,

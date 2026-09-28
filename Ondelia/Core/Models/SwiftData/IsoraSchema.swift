@@ -40,15 +40,28 @@ enum IsoraSchemaV3: VersionedSchema {
     }
 }
 
+/// Version 4 adds the link from a book to the AudiobookShelf item it was downloaded from, as a
+/// new entity for the same reason.
+enum IsoraSchemaV4: VersionedSchema {
+    static var versionIdentifier: Schema.Version { Schema.Version(4, 0, 0) }
+
+    static var models: [any PersistentModel.Type] {
+        IsoraSchemaV3.models + [AudiobookShelfLinkModel.self]
+    }
+}
+
 /// The schema every store (phone, watch, tests) is built from.
-typealias IsoraCurrentSchema = IsoraSchemaV3
+typealias IsoraCurrentSchema = IsoraSchemaV4
 
 enum IsoraMigrationPlan: SchemaMigrationPlan {
-    static var schemas: [any VersionedSchema.Type] { [IsoraSchemaV1.self, IsoraSchemaV2.self, IsoraSchemaV3.self] }
+    static var schemas: [any VersionedSchema.Type] {
+        [IsoraSchemaV1.self, IsoraSchemaV2.self, IsoraSchemaV3.self, IsoraSchemaV4.self]
+    }
     static var stages: [MigrationStage] {
         [
             .lightweight(fromVersion: IsoraSchemaV1.self, toVersion: IsoraSchemaV2.self),
-            .lightweight(fromVersion: IsoraSchemaV2.self, toVersion: IsoraSchemaV3.self)
+            .lightweight(fromVersion: IsoraSchemaV2.self, toVersion: IsoraSchemaV3.self),
+            .lightweight(fromVersion: IsoraSchemaV3.self, toVersion: IsoraSchemaV4.self)
         ]
     }
 }

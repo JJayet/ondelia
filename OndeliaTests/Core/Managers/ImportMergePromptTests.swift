@@ -101,4 +101,25 @@ struct ImportMergePromptTests {
         manager.handleImportRequest(urls: [folder])
         #expect(await wait(for: manager), "no prompt; batch=\(manager.importBatch.count) title=\(String(describing: manager.pendingMergeTitle))")
     }
+
+    @Test("The merge answer hands the merged book, not its parts, to onImported")
+    func onImportedGetsMergedBook() async throws {
+        // What AudiobookShelf tags with the server item id: tagging the parts would leave the
+        // book that stays in the library untagged.
+        let folder = try makeBook(files: ["01.mp3", "02.mp3"])
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        var received: [AudiobookModel]?
+        manager.handleImportRequest(
+            urls: ["01.mp3", "02.mp3"].map { folder.appendingPathComponent($0) },
+            onImported: { books in received = books }
+        )
+        #expect(await wait(for: manager))
+        #expect(received == nil, "reported before the merge was answered")
+
+        manager.mergePrompt?.respond(true)
+        for _ in 0..<80 where received == nil { try? await Task.sleep(nanoseconds: 100_000_000) }
+        #expect(received?.count == 1)
+        #expect(manager.onImported == nil)
+    }
 }

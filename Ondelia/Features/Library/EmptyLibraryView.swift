@@ -2,6 +2,8 @@ import SwiftUI
 
 struct EmptyLibraryView: View {
     let onImport: () -> Void
+    /// Offered only once signed in to AudiobookShelf.
+    var onAudiobookShelf: (() -> Void)?
 
     var body: some View {
         VStack(spacing: 24) {
@@ -37,6 +39,17 @@ struct EmptyLibraryView: View {
             .buttonStyle(.glassProminent)
             // The glass button drops the icon unless asked to keep it.
             .labelStyle(.titleAndIcon)
+
+            if let onAudiobookShelf, AudiobookShelfService.shared.isSignedIn {
+                Button(
+                    NSLocalizedString("Browse AudiobookShelf", comment: "Empty library: open the AudiobookShelf server"),
+                    systemImage: "server.rack"
+                ) {
+                    withHapticFeedback { onAudiobookShelf() }
+                }
+                .buttonStyle(.glass)
+                .labelStyle(.titleAndIcon)
+            }
         }
         .padding(32)
         .frame(maxWidth: .infinity)

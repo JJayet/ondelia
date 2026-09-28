@@ -97,6 +97,8 @@ extension AudiobookManager {
     @MainActor
     func finishImportRun(matching imported: [AudiobookModel] = []) {
         isImportRunning = false
+        onImported?(imported)
+        onImported = nil
         // No-op unless Hardcover auto-match is switched on and a token is saved.
         Task { await HardcoverService.shared.autoMatch(imported) }
         processPendingImports()

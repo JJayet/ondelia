@@ -35,6 +35,24 @@
         }
       }
     },
+    "NSLocalNetworkUsageDescription" : {
+      "comment" : "Privacy - Local Network Usage Description",
+      "extractionState" : "extracted_with_value",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Ondelia connects to your AudiobookShelf server on your local network to download books."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "needs_review",
+            "value" : "Ondelia se connecte à votre serveur AudiobookShelf sur votre réseau local pour télécharger des livres."
+          }
+        }
+      }
+    },
     "NSPhotoLibraryUsageDescription" : {
       "comment" : "Privacy - Photo Library Usage Description",
       "extractionState" : "extracted_with_value",

@@ -80,12 +80,20 @@ extension LibraryView {
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
             // Library Items
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                EmptyLibraryView { showingImporter = true }
+            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+                && AudiobookShelfService.shared.downloads.isEmpty {
+                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
             } else {
+                if !AudiobookShelfService.shared.downloads.isEmpty {
+                    DownloadingIndicatorView()
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
+                }
+
                 if audiobookManager.isImporting {
                     ImportingIndicatorView(manager: audiobookManager)
                         .listRowBackground(Color.clear)
@@ -148,11 +156,17 @@ extension LibraryView {
                     .padding(.horizontal)
 
                     // Content
-                    if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                        EmptyLibraryView { showingImporter = true }
+                    if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+                        && AudiobookShelfService.shared.downloads.isEmpty {
+                        EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {
+                            if !AudiobookShelfService.shared.downloads.isEmpty {
+                                DownloadingIndicatorView()
+                                    .padding(.horizontal)
+                            }
+
                             if audiobookManager.isImporting {
                                 ImportingIndicatorView(manager: audiobookManager)
                                     .padding(.horizontal)
