@@ -1,0 +1,110 @@
+Ondelia/Core/Services/AudiobookShelfAPI.swift
+  s_22e9fdada08a96::t_59e4e69bed483d 159-165,172,183,186-188,195-197,199-200,203-209
+  s_22e9fdada08a96::t_46186791d3a092 151-158,190,201
+  s_22e9fdada08a96::t_23efef7c8abc74 1-150,191-194,202,210,212,214-249
+  s_22e9fdada08a96::t_c5af8060363652 166-171,173-182,184-185,189,198,211,213
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_22e9fdada08a96::t_45e2b436cd9b04 85,161
+  s_22e9fdada08a96::t_c1a9072fb3ae45 83-84,90-96,159,165-169
+  s_22e9fdada08a96::t_ec585635af3539 160
+Ondelia/Core/Managers/AudiobookManager+Import.swift
+  s_22e9fdada08a96::t_e102cd993983ba 6-7,15-17,19-23,26,32,111
+Ondelia/Core/Models/SwiftData/AudiobookShelfLinkModel.swift
+  s_22e9fdada08a96::t_0faa4a25088319 1-20
+Ondelia.xcodeproj/project.pbxproj
+  s_22e9fdada08a96::t_5515f36599628d 146
+  s_22e9fdada08a96::t_4a5be5008c45c0 823,864
+OndeliaTests/Core/Models/SchemaMigrationTests.swift
+  s_22e9fdada08a96::t_545f5479377172 4,28-33,44-45,48-81
+  s_22e9fdada08a96::t_5317d050cf0a2f 46-47
+  s_22e9fdada08a96::t_ac8bdec500d8b3 34-43
+Ondelia/Features/Settings/SettingsView+Sections.swift
+  s_22e9fdada08a96::t_a9c636a9d3173f 279-292
+Ondelia/Core/Models/SwiftData/IsoraSchema.swift
+  s_22e9fdada08a96::t_0faa4a25088319 43-52,54,57-59,63-64
+Ondelia/Core/Services/AudiobookShelfDownloader.swift
+  s_22e9fdada08a96::t_78c82516bd4723 7-8,21-31,39,52,64
+  s_22e9fdada08a96::t_606df883fb6701 1-2,4-6,9-11,16-17,19-20,32-38,40-51,53-54,56-63,65-75
+  s_22e9fdada08a96::t_c5af8060363652 55
+  s_22e9fdada08a96::t_434440e9c8b222 3,12-15,18
+Ondelia/Core/Managers/AudiobookManager+ImportBatch.swift
+  s_22e9fdada08a96::t_e102cd993983ba 100-101
+Ondelia/Resources/InfoPlist.xcstrings
+  s_22e9fdada08a96::t_5d7bd52e21c7e9 46,52-55
+  s_22e9fdada08a96::t_d85d8468056011 43-45
+  s_22e9fdada08a96::t_86c959e38aeaff 47-51
+Ondelia/Core/Services/Keychain.swift
+  s_22e9fdada08a96::t_ec81a9a359243d 14-16,32-35,40
+  s_22e9fdada08a96::t_16254035a1e73a 46
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_22e9fdada08a96::t_45e2b436cd9b04 51,53-54,100
+  s_22e9fdada08a96::t_66fd8cef0dd908 98-99,104-113
+OndeliaTests/Core/Services/AudiobookShelfAPITests.swift
+  s_22e9fdada08a96::t_59e4e69bed483d 65-66,75-76,78
+  s_22e9fdada08a96::t_39c968e501953b 52-64,68-72,74,83-91
+  s_22e9fdada08a96::t_bd58af8db0c82e 67,73
+  s_22e9fdada08a96::t_b834a3b34c1261 77,79-82
+  s_22e9fdada08a96::t_5515f36599628d 92-101
+  s_22e9fdada08a96::t_66b1e39787be27 1-51,102
+Ondelia/Features/Library/ImportMenu.swift
+  s_22e9fdada08a96::t_15bb0c8c37b8f7 1-48
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_22e9fdada08a96::t_ec81a9a359243d 42-46,55,85-93,106,109,112-114,118
+  s_22e9fdada08a96::t_2727202cd3780b 22,24-33,35,47-52,54,64-66,70,76-83,122-125,128-132,134-140,144-153,155-160,192-196
+  s_22e9fdada08a96::t_c5af8060363652 36-37,59,61,154,166,170-172,178,180-181,189
+  s_22e9fdada08a96::t_0faa4a25088319 173-177,182-188,190-191
+  s_22e9fdada08a96::t_ac527558df95e2 3
+  s_22e9fdada08a96::t_59e4e69bed483d 56-58,60,62-63,161-165,167-169
+  s_22e9fdada08a96::t_fbe714e53df1e6 1-2,4-21,34,38-41,53,84,94-105,107-108,110-111,115-117,119-121,179,197-198
+  s_22e9fdada08a96::t_78c82516bd4723 23,67-69,71-75,126-127,133,141-143
+Ondelia/Features/Library/DownloadingIndicatorView.swift
+  s_22e9fdada08a96::t_17c8e295335b64 1-68
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_22e9fdada08a96::t_863cb5ac01c8d6 1-135
+Ondelia/Features/AudiobookShelf/AudiobookShelfLibraryView.swift
+  s_22e9fdada08a96::t_73433049d5b087 217-219
+  s_22e9fdada08a96::t_a9c636a9d3173f 80
+  s_22e9fdada08a96::t_a6dec1c31f614f 1-19,22-23,25-79,81-145,147-177,187-198,231,235-263
+  s_22e9fdada08a96::t_de7c65907343f8 178-185,199-216,220-230,232-234
+  s_22e9fdada08a96::t_bd58af8db0c82e 20-21
+  s_22e9fdada08a96::t_c5af8060363652 24,146,186
+OndeliaTests/Core/Managers/ImportMergePromptTests.swift
+  s_22e9fdada08a96::t_80cd9a7c2cf26a 104-112,117-124
+  s_22e9fdada08a96::t_e2e8751c6b82f7 113-116
+Ondelia/Core/Services/SettingsSync.swift
+  s_22e9fdada08a96::t_ec81a9a359243d 17-20
+Ondelia/Resources/Localizable.xcstrings
+  s_22e9fdada08a96::t_5515f36599628d 4-14
+  s_22e9fdada08a96::t_39c968e501953b 37-47,5328-5330
+  s_22e9fdada08a96::t_5d7bd52e21c7e9 3204-3207,3422-3425
+  s_22e9fdada08a96::t_8bdf552c497f13 909-931,1174-1184,1532,1597-1607,1806-1838,1850-1860,2459,2972-2982,2994-3004,3094,3202-3203,3208-3212,3378-3388,3420-3421,3426-3430,4123,4331-4352,4419-4429,4452-4462,4475,4849-4859,4937-4947,5321-5327,5331
+  s_22e9fdada08a96::t_53e76d16769d27 15-36
+  s_22e9fdada08a96::t_ba170a6f6e830e 708,906-908,5520
+Ondelia/App/AppDelegate.swift
+  s_22e9fdada08a96::t_de7c65907343f8 4-5,15-36
+Ondelia/Core/Managers/AudiobookManager.swift
+  s_22e9fdada08a96::t_0faa4a25088319 164-165,171-174
+  s_22e9fdada08a96::t_e102cd993983ba 37-39
+Ondelia/App/IsoraApp.swift
+  s_22e9fdada08a96::t_ec81a9a359243d 125-126
+Ondelia/Features/Library/LibraryView.swift
+  s_22e9fdada08a96::t_45e2b436cd9b04 46,142,144-145,207
+Ondelia/Features/Library/EmptyLibraryView.swift
+  s_22e9fdada08a96::t_45e2b436cd9b04 5-6,42-52
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "01c505e440a745bd34f8bb47c08cf96e6c108a3a",
+  "prompts": {},
+  "sessions": {
+    "s_22e9fdada08a96": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "916eec0b-7049-4dbe-99f5-6729c554c1b8",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
