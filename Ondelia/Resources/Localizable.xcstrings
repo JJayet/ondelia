@@ -1,46 +1,24 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
-    "Downloading..." : {
-      "comment" : "AudiobookShelf download status in the library",
+    "Download All" : {
+      "comment" : "AudiobookShelf: download every book of a series or author",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Téléchargement…"
+            "value" : "Tout télécharger"
           }
         }
       }
     },
-    "Files" : {
-      "comment" : "Import menu: pick files from the Files app",
+    "\"%@\" contains no audio that can be imported." : {
+      "comment" : "ZIP import failure: the archive has no usable audio, %@ is its name",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Fichiers"
-          }
-        }
-      }
-    },
-    "Browse AudiobookShelf" : {
-      "comment" : "Empty library: open the AudiobookShelf server",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Parcourir AudiobookShelf"
-          }
-        }
-      }
-    },
-    "Cancel Download" : {
-      "comment" : "AudiobookShelf: cancel download button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Annuler le téléchargement"
+            "value" : "« %@ » ne contient aucun audio importable."
           }
         }
       }
@@ -350,7 +328,7 @@
       }
     },
     "%d books" : {
-      "comment" : "CarPlay collection row: number of books\nNumber of books in a collection",
+      "comment" : "AudiobookShelf: number of books in a series or by an author\nCarPlay collection row: number of books\nNumber of books in a collection",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -940,6 +918,17 @@
         }
       }
     },
+    "Authors" : {
+      "comment" : "AudiobookShelf shelf tab: authors",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auteurs"
+          }
+        }
+      }
+    },
     "Auto Sleep Timer" : {
       "comment" : "Start the last used sleep timer on every play",
       "localizations" : {
@@ -1062,6 +1051,17 @@
         }
       }
     },
+    "Book %@" : {
+      "comment" : "AudiobookShelf: position in a series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tome %@"
+          }
+        }
+      }
+    },
     "Book opening delay" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1129,7 +1129,7 @@
       }
     },
     "Books" : {
-      "comment" : "Collection detail: books section",
+      "comment" : "AudiobookShelf shelf tab: books\nCollection detail: books section",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1171,8 +1171,20 @@
         }
       }
     },
+    "Browse AudiobookShelf" : {
+      "comment" : "Empty library: open the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Parcourir AudiobookShelf"
+          }
+        }
+      }
+    },
     "Browse Library" : {
       "comment" : "AudiobookShelf: open the server library",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1211,6 +1223,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Annuler"
+          }
+        }
+      }
+    },
+    "Cancel Download" : {
+      "comment" : "AudiobookShelf: cancel download button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Annuler le téléchargement"
           }
         }
       }
@@ -1386,7 +1409,7 @@
       }
     },
     "Clear" : {
-      "comment" : "Clear filters short label",
+      "comment" : "Clear filters short label\nClear the search field",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1827,6 +1850,7 @@
     },
     "Downloaded" : {
       "comment" : "AudiobookShelf: item downloaded",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1849,6 +1873,7 @@
     },
     "Downloaded books are imported into your library and play offline." : {
       "comment" : "AudiobookShelf browse section footer",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1865,6 +1890,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Téléchargement du modèle de langue…"
+          }
+        }
+      }
+    },
+    "Downloading..." : {
+      "comment" : "AudiobookShelf download status in the library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargement…"
           }
         }
       }
@@ -1974,6 +2010,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Le plus rapide"
+          }
+        }
+      }
+    },
+    "Files" : {
+      "comment" : "Import menu: pick files from the Files app",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fichiers"
           }
         }
       }
@@ -2971,6 +3018,7 @@
     },
     "No Book Libraries" : {
       "comment" : "AudiobookShelf: server has no book library",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3294,6 +3342,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Sur la montre"
+          }
+        }
+      }
+    },
+    "On This Device" : {
+      "comment" : "Library source: books on this device",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur cet appareil"
           }
         }
       }
@@ -4120,7 +4179,7 @@
       }
     },
     "Search" : {
-      "comment" : "AudiobookShelf search field\nSearch book\nSearch view title",
+      "comment" : "Search book\nSearch view title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4181,6 +4240,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rechercher une langue"
+          }
+        }
+      }
+    },
+    "Search the server" : {
+      "comment" : "AudiobookShelf shelf search field",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rechercher sur le serveur"
           }
         }
       }
@@ -4379,6 +4449,35 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Partagez un fichier vers l'app, ou envoyez-le par AirDrop depuis un Mac."
+          }
+        }
+      }
+    },
+    "shelf.tab.series" : {
+      "comment" : "AudiobookShelf shelf tab: series",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Series"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries"
+          }
+        }
+      }
+    },
+    "Show" : {
+      "comment" : "AudiobookShelf shelf tab picker",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher"
           }
         }
       }
@@ -4611,6 +4710,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Trier par"
+          }
+        }
+      }
+    },
+    "Source" : {
+      "comment" : "Library source picker",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Source"
           }
         }
       }
@@ -4967,6 +5077,17 @@
         }
       }
     },
+    "This server has no book library." : {
+      "comment" : "AudiobookShelf: server has no book library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce serveur n’a aucune bibliothèque de livres."
+          }
+        }
+      }
+    },
     "This Week" : {
       "comment" : "Snapshot tile",
       "localizations" : {
@@ -5198,7 +5319,7 @@
       }
     },
     "Try Again" : {
-      "comment" : "Retry SwiftData startup button",
+      "comment" : "Retry SwiftData startup button\nRetry loading button",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5511,6 +5632,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Votre progression et vos signets n'ont peut-être pas été enregistrés.\n%@"
+          }
+        }
+      }
+    },
+    "Your server's books are in Library, under AudiobookShelf. Tap one to download it; downloaded books play offline." : {
+      "comment" : "AudiobookShelf settings: where the server books are",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres de votre serveur sont dans Bibliothèque, sous AudiobookShelf. Touchez-en un pour le télécharger ; les livres téléchargés s’écoutent hors ligne."
           }
         }
       }

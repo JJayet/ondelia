@@ -41,17 +41,19 @@ extension LibraryView {
                 }
                 .buttonStyle(.plain)
             } else {
-                Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
-                    withHapticFeedback { selecting = true }
+                if !showsServer {
+                    Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
+                        withHapticFeedback { selecting = true }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(shelfBooks.isEmpty)
+                    .glassPill(height: 34)
                 }
-                .buttonStyle(.plain)
-                .disabled(shelfBooks.isEmpty)
-                .glassPill(height: 34)
 
                 ImportMenu {
                     showingImporter = true
                 } onAudiobookShelf: {
-                    showingAudiobookShelf = true
+                    source = .audiobookShelf
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 15, weight: .bold))
@@ -97,7 +99,7 @@ extension LibraryView {
 
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
-                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
+                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                     .padding(.horizontal)
                 Spacer()
             } else {

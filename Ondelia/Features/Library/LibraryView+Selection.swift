@@ -71,11 +71,14 @@ extension LibraryView {
                 }
             }
         } else {
-            ToolbarItem(placement: .topBarLeading) {
-                Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
-                    withHapticFeedback { selecting = true }
+            // Selecting acts on library books; the server shelf has none to act on.
+            if !showsServer {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
+                        withHapticFeedback { selecting = true }
+                    }
+                    .disabled(shelfBooks.isEmpty)
                 }
-                .disabled(shelfBooks.isEmpty)
             }
             importToolbarItem
         }

@@ -21,6 +21,8 @@ final class AudiobookShelfService {
 
     struct DownloadProgress: Equatable {
         var title = ""
+        /// Not kept across a relaunch: the task description carries the title only.
+        var author: String?
         var received: Int64 = 0
         /// Nil when the server did not say, which is the usual case for a zipped folder.
         var expected: Int64?
@@ -33,9 +35,9 @@ final class AudiobookShelfService {
 
     /// Items being downloaded, by AudiobookShelf id.
     private(set) var downloads: [String: DownloadProgress] = [:]
-    /// Items downloaded and queued for import this session, so the row can say so before the
-    /// import has finished; after that, `itemsInLibrary` knows.
-    private(set) var downloaded: Set<String> = []
+    /// Items downloaded and waiting for, or going through, their import; after that,
+    /// `libraryBooks` knows them.
+    private(set) var importing: Set<String> = []
     /// The last download failure, for the browsing view to show.
     var downloadError: String?
 
@@ -124,7 +126,7 @@ final class AudiobookShelfService {
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: item.id)
         )
         task.taskDescription = AudiobookShelfDownloader.describe(id: item.id, title: item.title)
-        downloads[item.id] = DownloadProgress(title: item.title)
+        downloads[item.id] = DownloadProgress(title: item.title, author: item.author)
         task.resume()
     }
 
@@ -148,11 +150,10 @@ final class AudiobookShelfService {
     }
 
     func downloadFinished(id: String, result: Result<URL, any Error>) {
-        downloads[id] = nil
+        let finished = downloads.removeValue(forKey: id)
         switch result {
         case .success(let file):
-            importDownload(file, item: id)
-            downloaded.insert(id)
+            importDownload(file, item: id, title: finished?.title, author: finished?.author)
         case .failure(let error as URLError) where error.code == .cancelled:
             break
         case .failure(let error):
@@ -163,8 +164,12 @@ final class AudiobookShelfService {
 
     /// Queues the import and deletes the download's folder once it has run, whatever the
     /// outcome: a file the importer rejected would be rejected again at every launch.
-    private func importDownload(_ file: URL, item: String) {
+    ///
+    /// The server's title and author replace what the files say: AudiobookShelf is where the
+    /// reader curates them, and a file without tags is otherwise named after its folder.
+    private func importDownload(_ file: URL, item: String, title: String? = nil, author: String? = nil) {
         let folder = file.deletingLastPathComponent()
+        importing.insert(item)
         AudiobookManager.shared.handleImportRequest(urls: [file]) {
             try? FileManager.default.removeItem(at: folder)
         } onImported: { books in
@@ -175,20 +180,39 @@ final class AudiobookShelfService {
             for book in books where !linked.contains(book.id) {
                 context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item))
             }
+            // One book per item is the normal case. An item the importer split into several
+            // books keeps their own titles rather than all taking the item's.
+            if books.count == 1, let book = books.first {
+                if let title, !title.isEmpty { book.title = title }
+                if let author, !author.isEmpty { book.author = author }
+            }
             SwiftDataController.shared.save()
+            self.linksVersion += 1
+            self.importing.remove(item)
         }
     }
+
+    /// Bumped whenever links are written: a SwiftData fetch is not observable, so views reading
+    /// `libraryBooks` would otherwise miss the link a finished import adds.
+    private var linksVersion = 0
 
     private static func links() -> [AudiobookShelfLinkModel] {
         guard SwiftDataController.shared.isLoaded else { return [] }
         return (try? SwiftDataController.shared.context.fetch(FetchDescriptor<AudiobookShelfLinkModel>())) ?? []
     }
 
-    /// Items some book still in the library was downloaded from. A link whose book was merged
-    /// away or deleted on another device is ignored rather than trusted.
-    var itemsInLibrary: Set<String> {
-        let books = Set(AudiobookManager.shared.audiobooks.map(\.id))
-        return Set(Self.links().filter { books.contains($0.audiobookID) }.map(\.itemID))
+    /// Library books by the AudiobookShelf item they were downloaded from. A link whose book
+    /// was merged away or deleted on another device is ignored rather than trusted.
+    ///
+    /// Walks the whole library: read it once per screen, not once per row.
+    var libraryBooks: [String: AudiobookModel] {
+        _ = linksVersion
+        let books = Dictionary(AudiobookManager.shared.audiobooks.map { ($0.id, $0) }) { first, _ in first }
+        var byItem: [String: AudiobookModel] = [:]
+        for link in Self.links() {
+            if let book = books[link.audiobookID] { byItem[link.itemID] = book }
+        }
+        return byItem
     }
 
     func finishBackgroundEvents() {

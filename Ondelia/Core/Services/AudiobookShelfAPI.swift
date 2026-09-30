@@ -1,7 +1,8 @@
 import Foundation
 
 /// The slice of the AudiobookShelf REST API this app speaks: sign in, list book libraries,
-/// page or search their items, and download one to import.
+/// page their items, and download one to import. Series, authors and search are in
+/// `+Browse`, the decoded types in `+Models`.
 ///
 /// Every call takes the server and token explicitly, so this stays a set of pure requests and
 /// `AudiobookShelfService` owns what is stored.
@@ -37,37 +38,6 @@ enum AudiobookShelfAPI {
                     comment: "AudiobookShelf undecodable response"
                 )
             }
-        }
-    }
-
-    struct Library: Decodable, Identifiable, Hashable {
-        let id: String
-        let name: String
-        let mediaType: String
-    }
-
-    struct Item: Decodable, Identifiable, Hashable {
-        struct Media: Decodable, Hashable {
-            struct Metadata: Decodable, Hashable {
-                struct Author: Decodable, Hashable { let name: String }
-                let title: String?
-                /// Filled by the minified item list.
-                let authorName: String?
-                /// Filled by search, which returns expanded items instead.
-                let authors: [Author]?
-            }
-            let metadata: Metadata
-            let duration: Double?
-        }
-        let id: String
-        let media: Media
-
-        var title: String { media.metadata.title ?? "" }
-
-        var author: String? {
-            if let name = media.metadata.authorName, !name.isEmpty { return name }
-            let names = media.metadata.authors?.map(\.name).joined(separator: ", ")
-            return names?.isEmpty == false ? names : nil
         }
     }
 
@@ -110,40 +80,40 @@ enum AudiobookShelfAPI {
         return try await send(request, as: Response.self).libraries.filter { $0.mediaType == "book" }
     }
 
-    static func itemsURL(server: URL, library: String, page: Int) -> URL {
-        server.appending(path: "api/libraries/\(library)/items").appending(queryItems: [
+    /// `collapseSeries` folds each series into one entry, carrying `collapsedSeries`, the way
+    /// the AudiobookShelf web client shows a big library.
+    static func itemsURL(server: URL, library: String, page: Int, collapseSeries: Bool = false) -> URL {
+        var query = [
             URLQueryItem(name: "limit", value: String(pageSize)),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "sort", value: "media.metadata.title"),
             URLQueryItem(name: "minified", value: "1")
-        ])
+        ]
+        if collapseSeries { query.append(URLQueryItem(name: "collapseseries", value: "1")) }
+        return server.appending(path: "api/libraries/\(library)/items").appending(queryItems: query)
     }
 
-    /// One page of a library, sorted by title, plus the library's total item count.
-    static func items(server: URL, token: String, library: String, page: Int) async throws -> (items: [Item], total: Int) {
+    /// One page of a library, sorted by title, plus the total number of entries.
+    static func items(
+        server: URL,
+        token: String,
+        library: String,
+        page: Int,
+        collapseSeries: Bool = false
+    ) async throws -> (items: [Item], total: Int) {
         struct Response: Decodable {
             let results: [Item]
             let total: Int
         }
-        let request = authorized(itemsURL(server: server, library: library, page: page), token: token)
-        let response = try await send(request, as: Response.self)
+        let url = itemsURL(server: server, library: library, page: page, collapseSeries: collapseSeries)
+        let response = try await send(authorized(url, token: token), as: Response.self)
         return (response.results, response.total)
     }
 
-    static func search(server: URL, token: String, library: String, query: String) async throws -> [Item] {
-        struct Response: Decodable {
-            struct Hit: Decodable { let libraryItem: Item }
-            let book: [Hit]
-        }
-        let url = server.appending(path: "api/libraries/\(library)/search")
-            .appending(queryItems: [URLQueryItem(name: "q", value: query), URLQueryItem(name: "limit", value: "25")])
-        return try await send(authorized(url, token: token), as: Response.self).book.map(\.libraryItem)
-    }
-
-    static func coverRequest(server: URL, token: String, item: String) -> URLRequest {
+    static func coverRequest(server: URL, token: String, item: String, width: Int = 300) -> URLRequest {
         authorized(
             server.appending(path: "api/items/\(item)/cover")
-                .appending(queryItems: [URLQueryItem(name: "width", value: "120")]),
+                .appending(queryItems: [URLQueryItem(name: "width", value: String(width))]),
             token: token
         )
     }
@@ -224,7 +194,7 @@ enum AudiobookShelfAPI {
 
     // MARK: - Plumbing
 
-    private static func authorized(_ url: URL, token: String) -> URLRequest {
+    static func authorized(_ url: URL, token: String) -> URLRequest {
         var request = URLRequest(url: url)
         // Header, not `?token=`: a token in the URL ends up in proxy and server access logs.
         request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
@@ -237,7 +207,7 @@ enum AudiobookShelfAPI {
         guard (200...299).contains(http.statusCode) else { throw Failure.http(http.statusCode) }
     }
 
-    private static func send<T: Decodable>(_ request: URLRequest, as type: T.Type) async throws -> T {
+    static func send<T: Decodable>(_ request: URLRequest, as type: T.Type) async throws -> T {
         let (data, response) = try await URLSession.shared.data(for: request)
         try check(response)
         do {

@@ -82,7 +82,7 @@ extension LibraryView {
             // Library Items
             if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
-                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
+                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
@@ -158,7 +158,7 @@ extension LibraryView {
                     // Content
                     if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
                         && AudiobookShelfService.shared.downloads.isEmpty {
-                        EmptyLibraryView { showingImporter = true } onAudiobookShelf: { showingAudiobookShelf = true }
+                        EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {

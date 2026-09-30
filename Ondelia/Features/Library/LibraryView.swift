@@ -43,7 +43,9 @@ struct LibraryView: View {
         }
     }
     @State var showingImporter = false
-    @State var showingAudiobookShelf = false
+    /// This device's books, or the AudiobookShelf server's. Only offered once signed in.
+    @AppStorage("library.source") var source: LibrarySource = .device
+    var showsServer: Bool { source == .audiobookShelf && AudiobookShelfService.shared.isSignedIn }
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
     @State var selecting = false
@@ -136,13 +138,25 @@ struct LibraryView: View {
         audiobookManager.handleImportRequest(urls: urls)
     }
 
+    /// "On This Device" / "AudiobookShelf", above either shelf.
+    private var sourcePicker: some View {
+        Picker(NSLocalizedString("Source", comment: "Library source picker"), selection: $source) {
+            Text(NSLocalizedString("On This Device", comment: "Library source: books on this device")).tag(LibrarySource.device)
+            Text(verbatim: "AudiobookShelf").tag(LibrarySource.audiobookShelf)
+        }
+        .pickerStyle(.segmented)
+        .padding(.horizontal, isWide ? 24 : 16)
+        .padding(.vertical, 8)
+        .onChange(of: source) { withHapticFeedback {} }
+    }
+
     @ToolbarContentBuilder
     var importToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
             ImportMenu {
                 showingImporter = true
             } onAudiobookShelf: {
-                showingAudiobookShelf = true
+                source = .audiobookShelf
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 15, weight: .bold))
@@ -160,12 +174,18 @@ struct LibraryView: View {
             // Wide: the title row carries the count and the buttons, and the navigation bar
             // goes, so nothing hovers as a band above the shelf on the Mac.
             if isWide { wideHeader }
-            // No search field here: the Search tab is the one place that searches the library.
-            // The table needs the width for its columns; on a phone it reads as the list.
-            switch viewMode {
-            case .list: listModeContent
-            case .grid: gridModeContent
-            case .table: if isWide { tableModeContent } else { listModeContent }
+            if AudiobookShelfService.shared.isSignedIn { sourcePicker }
+            if showsServer {
+                AudiobookShelfShelfView()
+            } else {
+                // No search field here: the Search tab is the one place that searches the
+                // library. The table needs the width for its columns; on a phone it reads as
+                // the list.
+                switch viewMode {
+                case .list: listModeContent
+                case .grid: gridModeContent
+                case .table: if isWide { tableModeContent } else { listModeContent }
+                }
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
@@ -197,6 +217,9 @@ struct LibraryView: View {
         NavigationStack {
             libraryContent
         }
+        // On the stack, not the shelf: screens it pushes (a series, an author) read the
+        // environment of the stack, and tapping a downloaded book there must still play it.
+        .environment(\.audiobookShelfPlay, { playAndPresent($0) })
         .sheet(isPresented: $showingImporter) {
             DocumentPickerView { urls in
                 showingImporter = false
@@ -204,7 +227,6 @@ struct LibraryView: View {
             }
             .ignoresSafeArea()
         }
-        .sheet(isPresented: $showingAudiobookShelf) { AudiobookShelfSheet() }
         .refreshable {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()

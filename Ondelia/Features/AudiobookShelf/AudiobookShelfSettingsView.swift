@@ -37,19 +37,10 @@ struct AudiobookShelfSettingsView: View {
         }
 
         Section {
-            NavigationLink {
-                AudiobookShelfLibraryView()
-            } label: {
-                Label(
-                    NSLocalizedString("Browse Library", comment: "AudiobookShelf: open the server library"),
-                    systemImage: "books.vertical"
-                )
-                .foregroundStyle(Color.primaryText)
-            }
         } footer: {
             Text(NSLocalizedString(
-                "Downloaded books are imported into your library and play offline.",
-                comment: "AudiobookShelf browse section footer"
+                "Your server's books are in Library, under AudiobookShelf. Tap one to download it; downloaded books play offline.",
+                comment: "AudiobookShelf settings: where the server books are"
             ))
         }
 
@@ -70,6 +61,8 @@ struct AudiobookShelfSettingsView: View {
                 text: $server,
                 prompt: Text(verbatim: "https://abs.example.com")
             )
+            // With a prompt, the title no longer reaches VoiceOver: only the example URL did.
+            .accessibilityLabel(NSLocalizedString("Server Address", comment: "AudiobookShelf server URL field"))
             .keyboardType(.URL)
             .textContentType(.URL)
             .textInputAutocapitalization(.never)
