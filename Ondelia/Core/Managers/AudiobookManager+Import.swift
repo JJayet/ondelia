@@ -118,7 +118,17 @@ extension AudiobookManager {
 
         // Extract and validate ZIP content
         guard let extracted = ZIPImporter.importZIPFile(from: zipURL) else {
-            await MainActor.run { }
+            // Said out loud: the import otherwise ends with no book and no word why.
+            let name = zipURL.deletingPathExtension().lastPathComponent
+            await MainActor.run {
+                importErrorMessage = String(
+                    format: NSLocalizedString(
+                        "\"%@\" contains no audio that can be imported.",
+                        comment: "ZIP import failure: the archive has no usable audio, %@ is its name"
+                    ),
+                    name
+                )
+            }
             return
         }
 
