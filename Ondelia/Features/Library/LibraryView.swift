@@ -84,6 +84,8 @@ struct LibraryView: View {
                 return source.filter { $0.isFinished }
             case .notStarted:
                 return source.filter { $0.currentPosition == 0 }
+            case .downloaded:
+                return source.filter(audiobookManager.hasFile)
             }
         }()
         return filtered.sorted { sortOption.isOrderedBefore($0, $1) }
