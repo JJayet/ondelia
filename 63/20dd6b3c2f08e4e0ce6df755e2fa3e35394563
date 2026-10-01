@@ -1,0 +1,24 @@
+docs/adr/0002-server-audiobooks-shown-not-joined.md
+  s_0fef528c759c27::t_3d5a350e7cf203 1-9
+CONTEXT.md
+  s_0fef528c759c27::t_51a1ad4f101402 30,42,142
+  s_0fef528c759c27::t_c9ba407228cb3b 25-27
+  s_0fef528c759c27::t_82a16ea2275221 22
+  s_0fef528c759c27::t_5f708acddf1b14 28
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "6320dd6b3c2f08e4e0ce6df755e2fa3e35394563",
+  "prompts": {},
+  "sessions": {
+    "s_0fef528c759c27": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c8aa2d1-91f4-4a6e-bc0f-466979a6f536",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
