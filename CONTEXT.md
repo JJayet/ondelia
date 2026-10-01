@@ -27,7 +27,7 @@ The tie between a Library audiobook and its server audiobook. It is made when a 
 _Avoid_: Relink, match
 
 **Server series**:
-A series as an AudiobookShelf server groups its server audiobooks. Once the Library holds one of its audiobooks it becomes a Collection, its members being whatever the server lists. Always qualified; bare "Series" means the Hardcover-backed Collection.
+A series as an AudiobookShelf server groups its server audiobooks. While the listener sees server audiobooks alongside the Library, every server series of the selected server library appears among the Collections; it becomes a Collection once the Library holds one of its audiobooks, its members being whatever the server lists. Always qualified; bare "Series" means the Hardcover-backed Collection.
 _Avoid_: Series (unqualified)
 
 **Streamed audiobook**:

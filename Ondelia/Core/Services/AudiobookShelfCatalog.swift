@@ -29,6 +29,9 @@ final class AudiobookShelfCatalog {
         didSet { collectionSeries = Dictionary(series.map { (Self.collectionID(forSeries: $0.id), $0) }) { first, _ in first } }
     }
     private var collectionSeries: [UUID: AudiobookShelfAPI.Series] = [:]
+
+    /// The series by name, for listing them among the Collections. Empty while not shown.
+    var seriesByName: [AudiobookShelfAPI.Series] { isActive ? series : [] }
     /// The server library `items` came from.
     private(set) var library: String?
     /// When `items` was fetched from the server, possibly by an earlier launch.

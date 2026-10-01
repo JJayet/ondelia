@@ -23,6 +23,8 @@ struct LibraryTableView: View {
     let groups: [CollectionGroup]
     let uncollected: [AudiobookModel]
     var server: [AudiobookShelfAPI.Item] = []
+    /// Server series with no Collection yet: a folder each, after the Collections.
+    var serverSeries: [AudiobookShelfAPI.Series] = []
     let onOpenBook: (AudiobookModel) -> Void
     let onOpenCollection: (CollectionGroup) -> Void
     var onOpenServer: (AudiobookShelfAPI.Item) -> Void = { _ in }
@@ -111,6 +113,21 @@ struct LibraryTableView: View {
                 book: nil,
                 group: group,
                 children: group.books.map { row(for: $0, in: group.name) }.sorted(using: sortOrder)
+            )
+        }
+        rows += serverSeries.map { series in
+            let books = series.books ?? []
+            return LibraryTableRow(
+                id: "server-series-\(series.id)",
+                title: series.name,
+                author: books.first?.author ?? "",
+                collectionName: "",
+                progress: 0,
+                duration: books.reduce(0) { $0 + ($1.media.duration ?? 0) },
+                isLocal: false,
+                book: nil,
+                group: nil,
+                children: books.map(row(for:)).sorted(using: sortOrder)
             )
         }
         if !uncollected.isEmpty || !server.isEmpty {

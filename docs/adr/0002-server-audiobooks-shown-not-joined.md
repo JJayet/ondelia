@@ -4,6 +4,7 @@ With "Show server audiobooks in Library" on, every server audiobook of the selec
 
 ## Consequences
 
-- A server series becomes a Collection once the Library holds one of its audiobooks, but its members are read live from the server rather than stored, so it can list server audiobooks that have not joined. Auto-continue onto one streams it, which makes it join.
+- Every server series is shown among the Collections, but only one the Library holds an audiobook of is stored as a Collection; the rest are drawn from the fetched catalogue and sync nowhere. A stored one's members are read live from the server rather than stored, so it can list server audiobooks that have not joined. Auto-continue onto one streams it, which makes it join.
+- The Library screen loses its "AudiobookShelf" segment while server audiobooks are shown: series browse as Collections and the Search tab searches both, so the separate shelf has nothing left to do.
 - When the server is unreachable, signed out, or the setting is off, server audiobooks vanish and so do streamed audiobooks: only audiobooks with audio on the device (and those with missing audio) are shown. Streamed audiobooks keep their records and reappear when the server returns.
 - A duplicate between an imported audiobook and a server audiobook is resolved by giving the imported one a server link, never by matching titles automatically.

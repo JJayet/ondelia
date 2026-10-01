@@ -5774,6 +5774,17 @@
           }
         }
       }
+    },
+    "The server library whose audiobooks appear in Library." : {
+      "comment" : "AudiobookShelf settings: which server library is blended in",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La bibliothèque du serveur dont les livres apparaissent dans Bibliothèque."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

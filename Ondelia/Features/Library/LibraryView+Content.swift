@@ -35,14 +35,15 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
-            // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
-            if isWide, !collectionGroups.isEmpty {
+            // Collections: Hardcover series and hand-made ones, then the server series that
+            // are not one yet. Wide: one row of tiles.
+            if isWide, hasCollections {
                 collectionsRow
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             } else {
-                if !collectionGroups.isEmpty {
+                if hasCollections {
                     SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -50,6 +51,12 @@ extension LibraryView {
                 }
                 ForEach(collectionGroups) { group in
                     collectionCard(group)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                }
+                ForEach(displayOnlySeries) { series in
+                    AudiobookShelfSeriesCard(series: series)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
@@ -82,7 +89,7 @@ extension LibraryView {
             // Library Items
             if isShelfEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
-                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
+                EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
@@ -123,15 +130,17 @@ extension LibraryView {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
-                // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
-                if isWide, !collectionGroups.isEmpty {
+                // Collections: Hardcover series and hand-made ones, then the server series that
+                // are not one yet. Wide: one row of tiles. Lazy: a server can have hundreds.
+                if isWide, hasCollections {
                     collectionsRow.padding(.horizontal)
-                } else if !collectionGroups.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
+                } else if hasCollections {
+                    LazyVStack(alignment: .leading, spacing: 12) {
                         SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         ForEach(collectionGroups) { group in
                             collectionCard(group)
                         }
+                        ForEach(displayOnlySeries) { AudiobookShelfSeriesCard(series: $0) }
                     }
                     .padding(.horizontal)
                 }
@@ -158,7 +167,7 @@ extension LibraryView {
                     // Content
                     if isShelfEmpty && !audiobookManager.isImporting
                         && AudiobookShelfService.shared.downloads.isEmpty {
-                        EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
+                        EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {

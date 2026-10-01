@@ -19,11 +19,27 @@ extension LibraryView {
         LibraryEntry.merged(shelfBooks, shelfServerItems, by: sortOption)
     }
 
+    /// Server series with no Collection of their own yet, by name: drawn from the catalogue
+    /// after the Collections, never stored (ADR 0002). One gets a Collection when one of its
+    /// books joins the Library. Only where server audiobooks themselves are listed.
+    var displayOnlySeries: [AudiobookShelfAPI.Series] {
+        guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
+        let stored = Set(audiobookManager.collections.map(\.id))
+        return catalog.seriesByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(forSeries: $0.id)) }
+    }
+
+    var hasCollections: Bool { !collectionGroups.isEmpty || !displayOnlySeries.isEmpty }
+
     /// No book at all, of the Library's or the server's: the empty state's cue.
     var isShelfEmpty: Bool {
         // Once active, a server book is either unjoined or a visible Library book: no need to
         // filter the whole catalogue to know.
         visibleAudiobooks.isEmpty && (!catalog.isActive || catalog.items.isEmpty)
+    }
+
+    /// The empty state's way to the server shelf; none while there is no shelf.
+    var openServerShelf: (() -> Void)? {
+        blendsServer ? nil : { source = .audiobookShelf }
     }
 
     /// What the catalogue depends on: the switch, the account, and the server library, which
@@ -33,13 +49,11 @@ extension LibraryView {
         return "\(blendsServer) \(service.server?.absoluteString ?? "") \(service.token != nil) \(source)"
     }
 
-    /// "On This Device" / "AudiobookShelf", above either shelf. "Library" while server
-    /// audiobooks are shown beside it, since it no longer means this device only.
+    /// "On This Device" / "AudiobookShelf", above either shelf. Gone while server audiobooks
+    /// are shown beside the Library's: it is all one Library then (ADR 0002).
     var sourcePicker: some View {
         Picker(NSLocalizedString("Source", comment: "Library source picker"), selection: $source) {
-            Text(catalog.isActive
-                ? NSLocalizedString("Library", comment: "Library navigation title")
-                : NSLocalizedString("On This Device", comment: "Library source: books on this device"))
+            Text(NSLocalizedString("On This Device", comment: "Library source: books on this device"))
                 .tag(LibrarySource.device)
             Text(verbatim: "AudiobookShelf").tag(LibrarySource.audiobookShelf)
         }

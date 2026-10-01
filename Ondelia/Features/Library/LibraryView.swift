@@ -46,7 +46,7 @@ struct LibraryView: View {
     @State var showingImporter = false
     /// This device's books, or the AudiobookShelf server's. Only offered once signed in.
     @AppStorage("library.source") var source: LibrarySource = .device
-    var showsServer: Bool { source == .audiobookShelf && AudiobookShelfService.shared.isSignedIn }
+    var showsServer: Bool { source == .audiobookShelf && AudiobookShelfService.shared.isSignedIn && !blendsServer }
     /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
     /// redraws the shelf.
     @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
@@ -171,18 +171,21 @@ struct LibraryView: View {
             // Wide: the title row carries the count and the buttons, and the navigation bar
             // goes, so nothing hovers as a band above the shelf on the Mac.
             if isWide { wideHeader }
-            if AudiobookShelfService.shared.isSignedIn { sourcePicker }
+            if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
             if showsServer {
                 AudiobookShelfShelfView()
             } else {
                 // No search field here: the Search tab is the one place that searches the
                 // library. The table needs the width for its columns; on a phone it reads as
                 // the list.
-                switch viewMode {
-                case .list: listModeContent
-                case .grid: gridModeContent
-                case .table: if isWide { tableModeContent } else { listModeContent }
+                Group {
+                    switch viewMode {
+                    case .list: listModeContent
+                    case .grid: gridModeContent
+                    case .table: if isWide { tableModeContent } else { listModeContent }
+                    }
                 }
+                .serverSeriesDestinations(library: catalog.library ?? "")
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))

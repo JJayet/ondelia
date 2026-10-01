@@ -84,6 +84,7 @@ extension LibraryView {
                     ForEach(collectionGroups) { group in
                         CollectionTileView(group: group) { collectionForDetail = group.collection }
                     }
+                    ForEach(displayOnlySeries) { AudiobookShelfSeriesTile(series: $0) }
                 }
             }
             .clipped()
@@ -104,7 +105,7 @@ extension LibraryView {
 
             if isShelfEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
-                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
+                EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                     .padding(.horizontal)
                 Spacer()
             } else {
@@ -122,6 +123,7 @@ extension LibraryView {
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,
                     server: shelfServerItems,
+                    serverSeries: displayOnlySeries,
                     onOpenBook: tapBook,
                     onOpenCollection: { collectionForDetail = $0.collection },
                     onOpenServer: { AudiobookShelfService.shared.play($0, local: nil) { playAndPresent($0) } }
