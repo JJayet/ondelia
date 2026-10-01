@@ -130,10 +130,32 @@ final class SwiftDataController {
             isStoredInMemoryOnly: inMemory,
             cloudKitDatabase: cloudKit
         )
-        return try ModelContainer(
+        do {
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: IsoraMigrationPlan.self,
+                configurations: [modelConfiguration]
+            )
+        } catch where !inMemory {
+            Log.store.error("❌ SwiftData: store refused (\(error)), repairing")
+            try Self.repairUnversionedStore(at: modelConfiguration.url)
+            return try ModelContainer(
+                for: schema,
+                migrationPlan: IsoraMigrationPlan.self,
+                configurations: [modelConfiguration]
+            )
+        }
+    }
+
+    /// Brings a store that was opened with an unversioned partial schema back to the current
+    /// entities, so the migration plan recognises it again. Backup validation used to do that to
+    /// every backup; restoring one then left a library that would not open. Entities the partial
+    /// schema dropped come back empty.
+    static func repairUnversionedStore(at url: URL) throws {
+        let schema = Schema(IsoraCurrentSchema.models)
+        _ = try ModelContainer(
             for: schema,
-            migrationPlan: IsoraMigrationPlan.self,
-            configurations: [modelConfiguration]
+            configurations: [ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)]
         )
     }
 }

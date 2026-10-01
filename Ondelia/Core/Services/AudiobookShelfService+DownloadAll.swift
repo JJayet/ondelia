@@ -22,7 +22,10 @@ extension AudiobookShelfService {
             for item in missing(from: items) { download(item) }
         } catch {
             Log.library.error("AudiobookShelf download-all failed: \(error.localizedDescription)")
-            downloadError = error.localizedDescription
+            problem = Problem(
+                title: NSLocalizedString("Download Failed", comment: "AudiobookShelf download error title"),
+                message: error.localizedDescription
+            )
         }
     }
 

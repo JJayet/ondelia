@@ -79,4 +79,54 @@ struct SchemaMigrationTests {
         container.mainContext.insert(AudiobookShelfLinkModel(audiobookID: id, itemID: "li_a"))
         try container.mainContext.save()
     }
+
+    @Test("A store migrated to an unversioned partial schema is repaired and opens with the plan")
+    func unversionedStoreIsRepaired() throws {
+        let url = URL.temporaryDirectory.appending(path: "\(UUID().uuidString).store")
+        defer {
+            for suffix in ["", "-shm", "-wal"] {
+                try? FileManager.default.removeItem(at: URL(fileURLWithPath: url.path + suffix))
+            }
+        }
+        let schema = Schema(versionedSchema: IsoraCurrentSchema.self)
+        let id = UUID()
+        do {
+            let container = try ModelContainer(
+                for: schema,
+                migrationPlan: IsoraMigrationPlan.self,
+                configurations: [ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)]
+            )
+            container.mainContext.insert(AudiobookModel(id: id, title: "Dune"))
+            try container.mainContext.save()
+        }
+        // What the old backup validation did to every backup.
+        do {
+            let partial = Schema([
+                AudiobookModel.self,
+                BookmarkModel.self,
+                ChapterModel.self,
+                ChapterTranscriptionModel.self,
+                TranscriptWindowModel.self
+            ])
+            _ = try ModelContainer(
+                for: partial,
+                configurations: [ModelConfiguration(schema: partial, url: url, cloudKitDatabase: .none)]
+            )
+        }
+        let configuration = ModelConfiguration(schema: schema, url: url, cloudKitDatabase: .none)
+        #expect(throws: (any Error).self) {
+            _ = try ModelContainer(for: schema, migrationPlan: IsoraMigrationPlan.self, configurations: [configuration])
+        }
+
+        try SwiftDataController.repairUnversionedStore(at: url)
+
+        let container = try ModelContainer(
+            for: schema,
+            migrationPlan: IsoraMigrationPlan.self,
+            configurations: [configuration]
+        )
+        #expect(try container.mainContext.fetch(FetchDescriptor<AudiobookModel>()).map(\.id) == [id])
+        container.mainContext.insert(CollectionModel(name: "Sci-fi"))
+        try container.mainContext.save()
+    }
 }

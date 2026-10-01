@@ -94,8 +94,16 @@ final class GlobalAudioManager {
             guard let self else { return }
             await self.activateAudioSession()
             guard !Task.isCancelled else { return }
+            // The server's position first, when it is newer: `finishLoad` seeks to the stored one.
+            await AudiobookShelfService.shared.pullProgress(for: audiobook)
+            guard !Task.isCancelled else { return }
             let newPlayer = AudiobookPlayer()
-            let loaded = await newPlayer.load(audiobook)
+            // A linked book with no file here plays from the server.
+            let loaded = if let streamed = await AudiobookShelfService.shared.streamTracks(for: audiobook) {
+                newPlayer.load(tracks: streamed)
+            } else {
+                await newPlayer.load(audiobook)
+            }
             guard !Task.isCancelled else {
                 newPlayer.tearDown()
                 return

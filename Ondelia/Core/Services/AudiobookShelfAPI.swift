@@ -9,6 +9,8 @@ import Foundation
 enum AudiobookShelfAPI {
     enum Failure: LocalizedError {
         case invalidServer
+        /// The login itself was refused. Any later 401 is a token the server no longer takes.
+        case badCredentials
         case http(Int)
         case unexpectedResponse
 
@@ -19,10 +21,15 @@ enum AudiobookShelfAPI {
                     "That server address is not valid.",
                     comment: "AudiobookShelf: malformed server URL"
                 )
-            case .http(401), .http(403):
+            case .badCredentials:
                 return NSLocalizedString(
                     "AudiobookShelf rejected the sign-in. Check your username and password.",
                     comment: "AudiobookShelf authentication failure"
+                )
+            case .http(401), .http(403):
+                return NSLocalizedString(
+                    "The server no longer accepts this sign-in. Sign out and sign in again in Settings.",
+                    comment: "AudiobookShelf: saved token refused"
                 )
             case .http(let code):
                 return String(
@@ -70,7 +77,11 @@ enum AudiobookShelfAPI {
             struct User: Decodable { let token: String }
             let user: User
         }
-        return try await send(request, as: Response.self).user.token
+        do {
+            return try await send(request, as: Response.self).user.token
+        } catch Failure.http(401) {
+            throw Failure.badCredentials
+        }
     }
 
     /// Book libraries only: podcast libraries hold episodes, which this app does not import.
@@ -202,7 +213,7 @@ enum AudiobookShelfAPI {
         return request
     }
 
-    private static func check(_ response: URLResponse) throws {
+    static func check(_ response: URLResponse) throws {
         guard let http = response as? HTTPURLResponse else { throw Failure.unexpectedResponse }
         guard (200...299).contains(http.statusCode) else { throw Failure.http(http.statusCode) }
     }

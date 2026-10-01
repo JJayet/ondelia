@@ -38,14 +38,26 @@ final class AudiobookShelfService {
     /// Items downloaded and waiting for, or going through, their import; after that,
     /// `libraryBooks` knows them.
     private(set) var importing: Set<String> = []
-    /// The last download failure, for the browsing view to show.
-    var downloadError: String?
+    struct Problem: Equatable {
+        let title: String
+        let message: String
+    }
+
+    /// The last download or streaming failure, for the shelf to show.
+    var problem: Problem?
 
     /// Mirrors of the keychain and defaults, so views observing `isSignedIn` update. Another
     /// device's sign-in arrives through iCloud Keychain and `SettingsSync`; `reload` picks it up.
     private(set) var token: String?
     private(set) var server: URL?
     private(set) var username: String?
+
+    /// What was last pushed per book, and the pushes in flight. In memory only: forgetting them
+    /// costs one redundant request after a launch.
+    var pushedProgress: [UUID: PushedProgress] = [:]
+    var pushingProgress: Set<UUID> = []
+    /// Items whose library entry is being made for streaming.
+    var preparingStreams: Set<String> = []
 
     /// Created at launch, not on first use: a relaunch for finished background downloads only
     /// delivers them once a session with the same identifier exists again.
@@ -121,12 +133,16 @@ final class AudiobookShelfService {
     }
 
     func download(_ item: AudiobookShelfAPI.Item) {
-        guard let server, let token, downloads[item.id] == nil else { return }
+        download(id: item.id, title: item.title, author: item.author)
+    }
+
+    func download(id: String, title: String, author: String?) {
+        guard let server, let token, downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
-            with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: item.id)
+            with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
-        task.taskDescription = AudiobookShelfDownloader.describe(id: item.id, title: item.title)
-        downloads[item.id] = DownloadProgress(title: item.title, author: item.author)
+        task.taskDescription = AudiobookShelfDownloader.describe(id: id, title: title)
+        downloads[id] = DownloadProgress(title: title, author: author)
         task.resume()
     }
 
@@ -158,7 +174,10 @@ final class AudiobookShelfService {
             break
         case .failure(let error):
             Log.library.error("AudiobookShelf download failed: \(error.localizedDescription)")
-            downloadError = error.localizedDescription
+            problem = Problem(
+                title: NSLocalizedString("Download Failed", comment: "AudiobookShelf download error title"),
+                message: error.localizedDescription
+            )
         }
     }
 
@@ -172,10 +191,18 @@ final class AudiobookShelfService {
         importing.insert(item)
         AudiobookManager.shared.handleImportRequest(urls: [file]) {
             try? FileManager.default.removeItem(at: folder)
-        } onImported: { books in
+        } onImported: { imported in
+            let context = SwiftDataController.shared.context
+            var books = imported
+            // A book already streamed keeps its entry, and with it the listener's position.
+            if books.count == 1, let book = books.first,
+               let streamed = self.libraryBooks[item], streamed.id != book.id,
+               !AudiobookManager.shared.hasFile(streamed) {
+                Self.adopt(book, into: streamed, context: context)
+                books = [streamed]
+            }
             // Remembered on the book, so the browser can say it is in the library on every
             // device and after a relaunch.
-            let context = SwiftDataController.shared.context
             let linked = Set(Self.links().filter { $0.itemID == item }.map(\.audiobookID))
             for book in books where !linked.contains(book.id) {
                 context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item))
@@ -187,10 +214,13 @@ final class AudiobookShelfService {
                 if let author, !author.isEmpty { book.author = author }
             }
             SwiftDataController.shared.save()
-            self.linksVersion += 1
+            self.linksDidChange()
             self.importing.remove(item)
+            AudiobookManager.shared.fetchAudiobooks()
         }
     }
+
+    func linksDidChange() { linksVersion += 1 }
 
     /// Bumped whenever links are written: a SwiftData fetch is not observable, so views reading
     /// `libraryBooks` would otherwise miss the link a finished import adds.

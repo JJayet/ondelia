@@ -220,6 +220,20 @@ struct LibraryView: View {
         // On the stack, not the shelf: screens it pushes (a series, an author) read the
         // environment of the stack, and tapping a downloaded book there must still play it.
         .environment(\.audiobookShelfPlay, { playAndPresent($0) })
+        // Here rather than on the server shelf: a stream started from a book's detail screen
+        // can fail too. On the stack, apart from the screen's own alert slot.
+        .alert(
+            AudiobookShelfService.shared.problem?.title ?? "",
+            isPresented: Binding(
+                get: { AudiobookShelfService.shared.problem != nil },
+                set: { if !$0 { AudiobookShelfService.shared.problem = nil } }
+            ),
+            presenting: AudiobookShelfService.shared.problem
+        ) { _ in
+            Button(NSLocalizedString("OK", comment: "OK button"), role: .cancel) {}
+        } message: { problem in
+            Text(problem.message)
+        }
         .sheet(isPresented: $showingImporter) {
             DocumentPickerView { urls in
                 showingImporter = false

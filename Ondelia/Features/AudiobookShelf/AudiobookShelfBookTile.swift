@@ -38,9 +38,9 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
 /// One server book on the shelf, drawn like `AudiobookGridItemView`: the cover, the cloud badge
 /// the library puts on books that are not on this device, and the title.
 ///
-/// Tapping plays the book when it is on the device, and downloads it otherwise. A book known
-/// to the library whose file is missing here (it came from another device through iCloud)
-/// downloads too; the import then puts the file back under the existing book.
+/// Tapping plays the book, from the device when it is there and streamed from the server
+/// otherwise; a long press downloads it. A downloaded book keeps the entry it was streamed
+/// under, with its position.
 struct AudiobookShelfBookTile: View {
     let item: AudiobookShelfAPI.Item
     var columns = 2
@@ -122,12 +122,17 @@ struct AudiobookShelfBookTile: View {
         return isOnDevice ? "" : NSLocalizedString("Not on this device", comment: "Missing audio badge")
     }
 
+    /// Plays the book: from the device when it is there, streamed otherwise. A server book
+    /// seen for the first time gets its library entry on the way.
     private func tap() {
         withHapticFeedback {
-            if isOnDevice, let localBook {
+            if let localBook {
                 play?(localBook)
-            } else if service.downloads[item.id] == nil, !service.importing.contains(item.id) {
-                service.download(item)
+                return
+            }
+            Task {
+                guard let book = await service.streamingBook(for: item) else { return }
+                play?(book)
             }
         }
     }

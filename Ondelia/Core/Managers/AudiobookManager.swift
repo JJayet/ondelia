@@ -64,7 +64,7 @@ final class AudiobookManager {
     
     func markAsFinished(_ audiobook: AudiobookModel) {
         setFinished(audiobook)
-        syncToHardcover(audiobook)
+        syncProgress(audiobook)
     }
 
     /// The only writer of `isFinished = true`: the first flip is a completion in the log, and
@@ -92,14 +92,15 @@ final class AudiobookManager {
         }
         
         swiftDataController.save()
-        syncToHardcover(audiobook)
+        syncProgress(audiobook)
     }
 
-    /// Pushes the reading status to Hardcover. One call site per place that moves a book's
-    /// progress or finished flag; the service itself is a no-op when the book is not linked,
-    /// when nothing crossed a shelf boundary, or when no token is saved.
-    func syncToHardcover(_ audiobook: AudiobookModel) {
+    /// Pushes the reading status to Hardcover and the position to AudiobookShelf. One call site
+    /// per place that moves a book's progress or finished flag; each service is a no-op when
+    /// the book is not linked to it, when nothing moved enough, or when signed out.
+    func syncProgress(_ audiobook: AudiobookModel) {
         Task { await HardcoverService.shared.syncProgress(for: audiobook) }
+        AudiobookShelfService.shared.pushProgress(for: audiobook)
     }
     
     @MainActor
@@ -194,7 +195,7 @@ final class AudiobookManager {
         audiobook.currentPosition = audiobook.duration // Set to end
         audiobook.positionUpdatedAt = Date()
         swiftDataController.save()
-        syncToHardcover(audiobook)
+        syncProgress(audiobook)
         fetchAudiobooks()
         
         Log.library.debug("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
@@ -204,6 +205,7 @@ final class AudiobookManager {
     func markAsUnread(_ audiobook: AudiobookModel) {
         audiobook.isFinished = false
         swiftDataController.save()
+        syncProgress(audiobook)
         fetchAudiobooks()
         
         Log.library.debug("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")

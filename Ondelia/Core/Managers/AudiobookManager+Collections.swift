@@ -171,13 +171,13 @@ extension AudiobookManager {
         return CollectionGroup.sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort)
     }
 
-    /// What plays after `book` ends: the next unfinished, present book of the first collection
+    /// What plays after `book` ends: the next unfinished, playable book of the first collection
     /// that holds it and chains its books. Nil when nothing does.
     func nextBook(after book: AudiobookModel) -> AudiobookModel? {
         for collection in collections where collection.autoContinue && collection.bookIDs.contains(book.id) {
             let ordered = orderedBooks(in: collection)
             guard let index = ordered.firstIndex(where: { $0.id == book.id }) else { continue }
-            if let next = ordered.dropFirst(index + 1).first(where: { !$0.isFinished && hasFile($0) }) {
+            if let next = ordered.dropFirst(index + 1).first(where: { !$0.isFinished && isPlayable($0) }) {
                 return next
             }
         }

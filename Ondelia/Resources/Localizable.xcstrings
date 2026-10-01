@@ -1,6 +1,39 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "The server no longer accepts this sign-in. Sign out and sign in again in Settings." : {
+      "comment" : "AudiobookShelf: saved token refused",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le serveur n’accepte plus cette connexion. Déconnectez-vous puis reconnectez-vous dans Réglages."
+          }
+        }
+      }
+    },
+    "Couldn't Play" : {
+      "comment" : "AudiobookShelf: streaming failed title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lecture impossible"
+          }
+        }
+      }
+    },
+    "Streaming" : {
+      "comment" : "Player: the book plays from the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En streaming"
+          }
+        }
+      }
+    },
     "Download All" : {
       "comment" : "AudiobookShelf: download every book of a series or author",
       "localizations" : {

@@ -71,14 +71,6 @@ struct AudiobookShelfShelfView: View {
         .refreshable {
             shelves = library.map(AudiobookShelfShelves.init(library:))
         }
-        .alert(
-            NSLocalizedString("Download Failed", comment: "AudiobookShelf download error title"),
-            isPresented: Binding(get: { service.downloadError != nil }, set: { if !$0 { service.downloadError = nil } })
-        ) {
-            Button(NSLocalizedString("OK", comment: "OK button"), role: .cancel) {}
-        } message: {
-            Text(service.downloadError ?? "")
-        }
     }
 
     private var controls: some View {

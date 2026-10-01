@@ -71,6 +71,11 @@ extension AudiobookManager {
     }
     
     /// Whether the audio this entry names is on disk right now.
+    /// On this device, or streamable from AudiobookShelf.
+    func isPlayable(_ audiobook: AudiobookModel) -> Bool {
+        hasFile(audiobook) || AudiobookShelfService.shared.canStream(audiobook)
+    }
+
     func hasFile(_ audiobook: AudiobookModel) -> Bool {
         guard let fileURL = audiobook.resolvedFileURL else { return false }
         return FileManager.default.fileExists(atPath: fileURL.path)
