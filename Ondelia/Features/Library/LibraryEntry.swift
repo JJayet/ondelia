@@ -17,14 +17,18 @@ enum LibraryEntry: Identifiable {
         if case .book(let book) = self { book } else { nil }
     }
 
-    private var title: String {
+    var narrator: String {
+        if case .book(let book) = self { book.narrator ?? "" } else { "" }
+    }
+
+    var title: String {
         switch self {
         case .book(let book): book.title ?? ""
         case .server(let item): item.title
         }
     }
 
-    private var author: String {
+    var author: String {
         switch self {
         case .book(let book): book.author ?? ""
         case .server(let item): item.author ?? ""

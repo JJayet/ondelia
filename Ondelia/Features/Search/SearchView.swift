@@ -4,19 +4,23 @@ import UIKit
 struct SearchView: View {
     @Binding var query: String
     private let audiobookManager = AudiobookManager.shared
+    private let catalog = AudiobookShelfCatalog.shared
+    /// Redraws the results when server audiobooks are switched on or off.
+    @AppStorage(AudiobookShelfCatalog.enabledKey) private var blendsServer = false
     @Environment(\.playerRouter) private var playerRouter
     @State private var debouncedQuery: String = ""
     @State private var searchTask: Task<Void, Never>? = nil
     @State private var filter: Filter = .all
     @State private var sort: Sort = .relevance
 
-    private var results: [AudiobookModel] {
+    /// Library books and, when shown beside them, server audiobooks not in the Library
+    /// (ADR 0002). Server audiobooks have never been played, so they count as not started.
+    private var results: [LibraryEntry] {
         let q = normalize(debouncedQuery)
         guard !q.isEmpty else { return [] }
 
-        var items = audiobookManager.audiobooks
-        // Filter facet
-        items = items.filter { book in
+        let linked = AudiobookShelfService.shared.libraryBooks
+        let books: [AudiobookModel] = catalog.visible(audiobookManager.audiobooks, linked: linked).filter { book in
             switch filter {
             case .all: return true
             case .inProgress: return book.currentPosition > 0 && !book.isFinished
@@ -24,20 +28,18 @@ struct SearchView: View {
             case .notStarted: return book.currentPosition == 0
             }
         }
+        let server = filter == .all || filter == .notStarted ? catalog.unjoined(linked: linked) : []
 
         // Query match
-        items = items.filter { book in
-            let t = normalize(book.title ?? "")
-            let a = normalize(book.author ?? "")
-            let n = normalize(book.narrator ?? "")
-            return t.contains(q) || a.contains(q) || n.contains(q)
+        var items = (books.map(LibraryEntry.book) + server.map(LibraryEntry.server)).filter { entry in
+            normalize(entry.title).contains(q) || normalize(entry.author).contains(q) || normalize(entry.narrator).contains(q)
         }
 
         // Relevance weight
-        func weight(for book: AudiobookModel) -> Int {
-            let t = normalize(book.title ?? "")
-            let a = normalize(book.author ?? "")
-            let n = normalize(book.narrator ?? "")
+        func weight(for entry: LibraryEntry) -> Int {
+            let t = normalize(entry.title)
+            let a = normalize(entry.author)
+            let n = normalize(entry.narrator)
             var w = 0
             if t == q { w += 100 }
             if a == q { w += 80 }
@@ -47,21 +49,19 @@ struct SearchView: View {
             return w
         }
 
+        func book(_ entry: LibraryEntry) -> AudiobookModel? { entry.book }
         switch sort {
         case .relevance:
             items.sort { weight(for: $0) > weight(for: $1) }
         case .recent:
-            items.sort { $0.lastPlayed > $1.lastPlayed }
+            // Never played: server audiobooks last.
+            items.sort { (book($0)?.lastPlayed ?? .distantPast) > (book($1)?.lastPlayed ?? .distantPast) }
         case .title:
-            items.sort { ($0.title ?? "") < ($1.title ?? "") }
+            items.sort { $0.title < $1.title }
         case .author:
-            items.sort { ($0.author ?? "") < ($1.author ?? "") }
+            items.sort { $0.author < $1.author }
         case .progress:
-            items.sort {
-                let p0 = (($0.duration > 0) ? $0.currentPosition / $0.duration : 0)
-                let p1 = (($1.duration > 0) ? $1.currentPosition / $1.duration : 0)
-                return p0 > p1
-            }
+            items.sort { (book($0)?.progressFraction ?? 0) > (book($1)?.progressFraction ?? 0) }
         }
 
         return items
@@ -107,29 +107,11 @@ struct SearchView: View {
                         .listRowSeparator(.hidden)
                     }
                 } else {
-                    ForEach(results, id: \.id) { book in
-                        SearchResultRow(audiobook: book, query: debouncedQuery)
-                            .contentShape(Rectangle())
-                            .onTapGesture {
-                                withHapticFeedback(.medium) {
-                                    let audio = GlobalAudioManager.shared
-                                    audio.loadAudiobook(book)
-                                    audio.startPlayback()
-                                    playerRouter?.present(book)
-                                }
-                            }
-                            .swipeActions(edge: .leading) {
-                                Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
-                                    withHapticFeedback {
-                                        ListenerState.shared.apply(book.isFinished ? .unfinish : .finish, to: book, from: .listener)
-                                    }
-                                }.tint(book.isFinished ? .orange : .green)
-                            }
-                            .swipeActions(edge: .trailing) {
-                                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                                    withHapticFeedback { audiobookManager.deleteAudiobook(book) }
-                                }
-                            }
+                    ForEach(results) { entry in
+                        switch entry {
+                        case .book(let book): bookRow(book)
+                        case .server(let item): serverRow(item)
+                        }
                     }
                 }
             }
@@ -141,6 +123,10 @@ struct SearchView: View {
                     audiobookManager.fetchAudiobooks()
                 }
             }
+            // The Library screen usually fetched the catalogue already; not when Search came first.
+            .task(id: blendsServer) {
+                if catalog.status == .idle { await catalog.refresh() }
+            }
             .onChange(of: query) { _, newValue in
                 searchTask?.cancel()
                 searchTask = Task { @MainActor in
@@ -149,6 +135,45 @@ struct SearchView: View {
                 }
             }
         }
+    }
+
+    private func bookRow(_ book: AudiobookModel) -> some View {
+        SearchResultRow(entry: .book(book), query: debouncedQuery)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withHapticFeedback(.medium) { present(book) }
+            }
+            .swipeActions(edge: .leading) {
+                Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
+                    withHapticFeedback {
+                        ListenerState.shared.apply(book.isFinished ? .unfinish : .finish, to: book, from: .listener)
+                    }
+                }.tint(book.isFinished ? .orange : .green)
+            }
+            .swipeActions(edge: .trailing) {
+                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                    withHapticFeedback { audiobookManager.deleteAudiobook(book) }
+                }
+            }
+    }
+
+    /// Tapping streams it, which makes it join the Library; a long press downloads it.
+    private func serverRow(_ item: AudiobookShelfAPI.Item) -> some View {
+        SearchResultRow(entry: .server(item), query: debouncedQuery)
+            .contentShape(Rectangle())
+            .onTapGesture {
+                withHapticFeedback(.medium) {
+                    AudiobookShelfService.shared.play(item, local: nil) { present($0) }
+                }
+            }
+            .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false) }
+    }
+
+    private func present(_ book: AudiobookModel) {
+        let audio = GlobalAudioManager.shared
+        audio.loadAudiobook(book)
+        audio.startPlayback()
+        playerRouter?.present(book)
     }
 
     private var header: some View {
