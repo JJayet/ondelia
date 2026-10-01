@@ -57,6 +57,10 @@ extension AudiobookShelfAPI {
         let id: String
         let media: Media
         let collapsedSeries: CollapsedSeries?
+        /// When the server got the book, in milliseconds since 1970.
+        var addedAt: Double?
+
+        var dateAdded: Date { Date(timeIntervalSince1970: (addedAt ?? 0) / 1000) }
 
         var title: String { media.metadata.title ?? "" }
 

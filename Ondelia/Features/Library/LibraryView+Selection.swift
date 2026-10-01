@@ -80,6 +80,9 @@ extension LibraryView {
                     .disabled(shelfBooks.isEmpty)
                 }
             }
+            if catalog.isUnreachable {
+                ToolbarItem(placement: .topBarTrailing) { serverUnreachableButton }
+            }
             importToolbarItem
         }
     }

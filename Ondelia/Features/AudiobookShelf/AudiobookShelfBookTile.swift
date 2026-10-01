@@ -81,21 +81,7 @@ struct AudiobookShelfBookTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .contextMenu {
-            if service.downloads[item.id] != nil {
-                Button(role: .destructive) {
-                    service.cancelDownload(id: item.id)
-                } label: {
-                    Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
-                }
-            } else if !isOnDevice {
-                Button {
-                    service.download(item)
-                } label: {
-                    Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
-                }
-            }
-        }
+        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: isOnDevice) }
         .accessibilityValue(accessibilityState)
     }
 
@@ -122,18 +108,45 @@ struct AudiobookShelfBookTile: View {
         return isOnDevice ? "" : NSLocalizedString("Not on this device", comment: "Missing audio badge")
     }
 
-    /// Plays the book: from the device when it is there, streamed otherwise. A server book
-    /// seen for the first time gets its library entry on the way.
     private func tap() {
-        withHapticFeedback {
-            if let localBook {
-                play?(localBook)
-                return
+        withHapticFeedback { service.play(item, local: localBook, with: play) }
+    }
+}
+
+/// Download, or cancel the download, of a server book: the long-press menu of its tile and row.
+struct AudiobookShelfItemMenu: View {
+    let item: AudiobookShelfAPI.Item
+    let isOnDevice: Bool
+    private let service = AudiobookShelfService.shared
+
+    var body: some View {
+        if service.downloads[item.id] != nil {
+            Button(role: .destructive) {
+                service.cancelDownload(id: item.id)
+            } label: {
+                Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
             }
-            Task {
-                guard let book = await service.streamingBook(for: item) else { return }
-                play?(book)
+        } else if !isOnDevice {
+            Button {
+                service.download(item)
+            } label: {
+                Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
             }
+        }
+    }
+}
+
+extension AudiobookShelfService {
+    /// Plays a server book: its Library entry when it has one, streamed otherwise. A server
+    /// book seen for the first time joins the Library on the way.
+    func play(_ item: AudiobookShelfAPI.Item, local: AudiobookModel?, with play: (@MainActor (AudiobookModel) -> Void)?) {
+        if let local {
+            play?(local)
+            return
+        }
+        Task {
+            guard let book = await streamingBook(for: item) else { return }
+            play?(book)
         }
     }
 }

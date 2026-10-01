@@ -46,6 +46,10 @@ struct LibraryView: View {
     /// This device's books, or the AudiobookShelf server's. Only offered once signed in.
     @AppStorage("library.source") var source: LibrarySource = .device
     var showsServer: Bool { source == .audiobookShelf && AudiobookShelfService.shared.isSignedIn }
+    /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
+    /// redraws the shelf.
+    @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
+    let catalog = AudiobookShelfCatalog.shared
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
     @State var selecting = false
@@ -66,7 +70,7 @@ struct LibraryView: View {
 
 
     var filteredAudiobooks: [AudiobookModel] {
-        let source = audiobookManager.audiobooks
+        let source = visibleAudiobooks
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
             switch filterOption {
@@ -127,7 +131,7 @@ struct LibraryView: View {
 
     var continueReading: [ContinueReadingEntry] {
         ContinueReadingEntry.build(
-            books: audiobookManager.audiobooks,
+            books: visibleAudiobooks,
             collections: audiobookManager.collections,
             orderedBooks: audiobookManager.orderedBooks(in:)
         )
@@ -136,18 +140,6 @@ struct LibraryView: View {
     // MARK: - Import Handler (delegates to manager's queue w/ progress)
     private func handleImport(urls: [URL]) {
         audiobookManager.handleImportRequest(urls: urls)
-    }
-
-    /// "On This Device" / "AudiobookShelf", above either shelf.
-    private var sourcePicker: some View {
-        Picker(NSLocalizedString("Source", comment: "Library source picker"), selection: $source) {
-            Text(NSLocalizedString("On This Device", comment: "Library source: books on this device")).tag(LibrarySource.device)
-            Text(verbatim: "AudiobookShelf").tag(LibrarySource.audiobookShelf)
-        }
-        .pickerStyle(.segmented)
-        .padding(.horizontal, isWide ? 24 : 16)
-        .padding(.vertical, 8)
-        .onChange(of: source) { withHapticFeedback {} }
     }
 
     @ToolbarContentBuilder
@@ -208,6 +200,9 @@ struct LibraryView: View {
                 audiobookManager.fetchAudiobooks()
             }
         }
+        // Rerun whenever what the catalogue depends on changes: the switch, the account, the
+        // server library picked on the AudiobookShelf shelf.
+        .task(id: catalogKey) { await catalog.refresh() }
         // Backfill: links made before the series lookup existed have no series on them. Each
         // book is asked about once — `seriesChecked` keeps this from running again.
         .task { await HardcoverService.shared.refreshSeries(for: audiobookManager.audiobooks) }
@@ -245,6 +240,7 @@ struct LibraryView: View {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()
             }
+            await catalog.refresh()
         }
         .sheet(item: $audiobookForImagePicker) { audiobook in
             ImagePickerView(audiobook: audiobook) { image in

@@ -50,6 +50,11 @@ extension LibraryView {
                     .glassPill(height: 34)
                 }
 
+                serverUnreachableButton
+                    .buttonStyle(.plain)
+                    .frame(width: 34, height: 34)
+                    .glassEffect(.regular, in: Circle())
+
                 ImportMenu {
                     showingImporter = true
                 } onAudiobookShelf: {
@@ -97,7 +102,7 @@ extension LibraryView {
             .padding(.horizontal)
             .padding(.top, 8)
 
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+            if isShelfEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
                 EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                     .padding(.horizontal)
@@ -116,8 +121,10 @@ extension LibraryView {
                 LibraryTableView(
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,
+                    server: shelfServerItems,
                     onOpenBook: tapBook,
-                    onOpenCollection: { collectionForDetail = $0.collection }
+                    onOpenCollection: { collectionForDetail = $0.collection },
+                    onOpenServer: { AudiobookShelfService.shared.play($0, local: nil) { playAndPresent($0) } }
                 )
             }
         }

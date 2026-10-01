@@ -10,7 +10,7 @@ extension LibraryView {
 
     /// Books stacked to play next, in queue order.
     var queuedBooks: [AudiobookModel] {
-        PlayQueue.shared.books(in: audiobookManager.audiobooks)
+        PlayQueue.shared.books(in: visibleAudiobooks)
     }
 
     var gridSpacing: CGFloat { gridColumns >= 4 ? 10 : 16 }
@@ -56,7 +56,7 @@ extension LibraryView {
                 }
             }
 
-            if !audiobookManager.audiobooks.isEmpty {
+            if !isShelfEmpty {
                 SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -80,7 +80,7 @@ extension LibraryView {
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
             // Library Items
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+            if isShelfEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
                 EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                     .listRowBackground(Color.clear)
@@ -101,7 +101,7 @@ extension LibraryView {
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 }
 
-                ForEach(shelfBooks, id: \.id, content: libraryRow)
+                ForEach(shelfEntries, content: listRow)
             }
         }
         .listStyle(PlainListStyle())
@@ -138,7 +138,7 @@ extension LibraryView {
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {
-                    if !audiobookManager.audiobooks.isEmpty {
+                    if !isShelfEmpty {
                         SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
                             .padding(.horizontal)
                     }
@@ -156,7 +156,7 @@ extension LibraryView {
                     .padding(.horizontal)
 
                     // Content
-                    if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+                    if isShelfEmpty && !audiobookManager.isImporting
                         && AudiobookShelfService.shared.downloads.isEmpty {
                         EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
                         .padding(.horizontal)
@@ -179,14 +179,7 @@ extension LibraryView {
                                 columns: [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: gridSpacing)],
                                 spacing: gridSpacing
                             ) {
-                                ForEach(shelfBooks, id: \.id) { audiobook in
-                                    AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { tapBook(audiobook) }
-                                    .overlay(alignment: .topTrailing) { selectionBadge(for: audiobook) }
-                                    .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
-                                    .contextMenu {
-                                        BookActionsMenu(audiobook: audiobook, actions: bookActions)
-                                    }
-                                }
+                                ForEach(shelfEntries, content: gridCell)
                             }
                             .padding(.horizontal)
                         }

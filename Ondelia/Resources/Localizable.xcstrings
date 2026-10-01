@@ -5679,6 +5679,61 @@
           }
         }
       }
+    },
+    "Show server audiobooks in Library" : {
+      "comment" : "AudiobookShelf setting: blend server books into the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher les livres du serveur dans la bibliothèque"
+          }
+        }
+      }
+    },
+    "Every book of your server library appears in Library, Search and Collections. Tap one to stream it; long-press to download it." : {
+      "comment" : "AudiobookShelf settings footer, server books shown in the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque livre de votre bibliothèque serveur apparaît dans Bibliothèque, Recherche et Collections. Touchez-en un pour l’écouter en streaming ; appuyez longuement pour le télécharger."
+          }
+        }
+      }
+    },
+    "Server unreachable" : {
+      "comment" : "AudiobookShelf server did not answer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serveur injoignable"
+          }
+        }
+      }
+    },
+    "Tries again" : {
+      "comment" : "Retry reaching the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessaie"
+          }
+        }
+      }
+    },
+    "On the server" : {
+      "comment" : "Server audiobook not in the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur le serveur"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
