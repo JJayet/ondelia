@@ -210,10 +210,16 @@ extension AudiobookManager {
         fetchCollections()
     }
 
-    /// Called when a book leaves the library, so no collection keeps pointing at it.
+    /// Called when a book leaves the library, so no collection keeps pointing at it. A server
+    /// series Collection goes with its last member: the listener removed it here, so this is
+    /// not a sync batch arriving half done (see `reconcileServerSeriesCollections`).
     func removeFromAllCollections(bookID: UUID) {
+        let serverSeries = AudiobookShelfCatalog.shared.seriesByCollection
         for collection in collections where collection.bookIDs.contains(bookID) {
             collection.bookIDs.removeAll { $0 == bookID }
+            if collection.bookIDs.isEmpty, serverSeries[collection.id] != nil {
+                swiftDataController.context.delete(collection)
+            }
         }
     }
 }

@@ -15,9 +15,11 @@ extension AudiobookManager {
     /// Library holds a book of, its Library members kept in series order. The rest of its
     /// members are not stored; `CollectionGroup` reads them from the catalogue.
     ///
-    /// Only with the catalogue fetched, since that is the only time it is the whole truth. A
-    /// series whose last Library book left goes; a series gone from the server keeps its
-    /// Collection, as a hand-made one would be kept.
+    /// Only ever adds. iCloud brings another device's records in batches, in no set order: a
+    /// Collection can land before the server links of its books, and this runs after every
+    /// batch. Deleting a Collection, or dropping a member, that looked unlinked at that moment
+    /// deleted it on every device. A member goes when its book leaves the Library, and the
+    /// Collection with its last member (`removeFromAllCollections`).
     func reconcileServerSeriesCollections() {
         let catalog = AudiobookShelfCatalog.shared
         guard swiftDataController.isLoaded, catalog.isActive, catalog.status == .ready else { return }
@@ -28,21 +30,12 @@ extension AudiobookManager {
         for series in catalog.series {
             let id = AudiobookShelfCatalog.collectionID(forSeries: series.id)
             let members = (series.books ?? []).compactMap { linked[$0.id]?.id }
-            let existing = collections.first { $0.id == id }
-            if members.isEmpty {
-                if let existing {
-                    swiftDataController.context.delete(existing)
-                    changed = true
-                }
-                continue
-            }
-            if let existing {
+            guard !members.isEmpty else { continue }
+            if let existing = collections.first(where: { $0.id == id }) {
                 if existing.name != series.name { existing.name = series.name; changed = true }
-                // Same rule as a Hardcover series: the listener's order, new volumes on the end.
-                let present = Set(members)
-                var ids = existing.bookIDs.filter { present.contains($0) }
-                ids += members.filter { !ids.contains($0) }
-                if existing.bookIDs != ids { existing.bookIDs = ids; changed = true }
+                // The listener's order, new volumes on the end.
+                let added = members.filter { !existing.bookIDs.contains($0) }
+                if !added.isEmpty { existing.bookIDs += added; changed = true }
             } else if !declined.contains(id.uuidString) {
                 swiftDataController.context.insert(CollectionModel(id: id, name: series.name, bookIDs: members))
                 changed = true
