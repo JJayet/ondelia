@@ -57,6 +57,7 @@ extension AudiobookManager {
             self.isLoadingLibrary = false
             fetchCollections()
             reconcileSeriesCollections()
+            reconcileServerSeriesCollections()
             SpotlightIndex.reindex(valid.map {
                 (id: $0.id, title: $0.title ?? AudiobookModel.unknownTitle, author: $0.author ?? AudiobookModel.unknownAuthor)
             })

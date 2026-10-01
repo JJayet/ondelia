@@ -9,19 +9,32 @@ extension AudiobookShelfAPI {
         server: URL,
         token: String,
         library: String,
-        page: Int
+        page: Int,
+        limit: Int = seriesPageSize
     ) async throws -> (items: [Series], total: Int) {
         struct Response: Decodable {
             let results: [Series]
             let total: Int
         }
         let url = server.appending(path: "api/libraries/\(library)/series").appending(queryItems: [
-            URLQueryItem(name: "limit", value: String(seriesPageSize)),
+            URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "sort", value: "name")
         ])
         let response = try await send(authorized(url, token: token), as: Response.self)
         return (response.results, response.total)
+    }
+
+    /// Every series of a library, each with its books in series order.
+    static func allSeries(server: URL, token: String, library: String) async throws -> [Series] {
+        var all: [Series] = []
+        var page = 0
+        while true {
+            let (series, total) = try await self.series(server: server, token: token, library: library, page: page, limit: 200)
+            all += series
+            guard !series.isEmpty, all.count < total else { return all }
+            page += 1
+        }
     }
 
     /// The query for a library's items in one series.

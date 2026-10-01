@@ -171,14 +171,28 @@ extension AudiobookManager {
         return CollectionGroup.sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort)
     }
 
-    /// What plays after `book` ends: the next unfinished, playable book of the first collection
-    /// that holds it and chains its books. Nil when nothing does.
+    /// The Library book that plays after `book` ends, for the player's Up Next.
+    ///
+    /// ponytail: nil when the next one is a server audiobook not yet in the Library, so Up Next
+    /// shows the queue's head although `nextEntry` will play that server audiobook. Teach the
+    /// Up Next row to draw a server audiobook if that misleads.
     func nextBook(after book: AudiobookModel) -> AudiobookModel? {
+        nextEntry(after: book)?.book
+    }
+
+    /// What plays after `book` ends: the next unfinished, playable book of the first collection
+    /// that holds it and chains its books — in a server series, possibly one that has not
+    /// joined yet. Nil when nothing does.
+    func nextEntry(after book: AudiobookModel) -> LibraryEntry? {
         for collection in collections where collection.autoContinue && collection.bookIDs.contains(book.id) {
+            if AudiobookShelfCatalog.shared.seriesByCollection[collection.id] != nil {
+                if let next = nextServerSeriesEntry(after: book, in: collection) { return next }
+                continue
+            }
             let ordered = orderedBooks(in: collection)
             guard let index = ordered.firstIndex(where: { $0.id == book.id }) else { continue }
             if let next = ordered.dropFirst(index + 1).first(where: { !$0.isFinished && isPlayable($0) }) {
-                return next
+                return .book(next)
             }
         }
         return nil
@@ -196,6 +210,9 @@ extension AudiobookManager {
     /// reconcile would put it straight back.
     func deleteCollection(_ collection: CollectionModel) {
         if let seriesID = collection.hardcoverSeriesID { declinedSeries.insert(seriesID) }
+        // Any other Collection may be a server series one; remembering a hand-made one's id
+        // costs nothing, since no series will ever derive it.
+        else { declinedServerSeries.insert(collection.id.uuidString) }
         swiftDataController.context.delete(collection)
         swiftDataController.save()
         fetchCollections()

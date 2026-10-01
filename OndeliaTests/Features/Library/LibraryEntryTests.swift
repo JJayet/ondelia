@@ -52,3 +52,16 @@ struct LibraryEntryTests {
         #expect(titles(merged) == ["New", "s:Mid", "Old"])
     }
 }
+
+@Suite("Server series Collections")
+struct ServerSeriesCollectionTests {
+    @Test("A server series always derives the same Collection id, distinct per series")
+    func collectionID() {
+        let first = AudiobookShelfCatalog.collectionID(forSeries: "ser_1")
+        #expect(first == AudiobookShelfCatalog.collectionID(forSeries: "ser_1"))
+        #expect(first != AudiobookShelfCatalog.collectionID(forSeries: "ser_2"))
+        // Name-based: version 5, RFC 4122 variant.
+        #expect(first.uuidString.dropFirst(14).first == "5")
+        #expect("89AB".contains(first.uuidString.dropFirst(19).first ?? "x"))
+    }
+}

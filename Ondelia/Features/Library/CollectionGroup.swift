@@ -37,11 +37,14 @@ struct CollectionGroup: Identifiable {
         case owned(AudiobookModel)
         /// A volume Hardcover lists that the library does not hold.
         case missing(SeriesVolume)
+        /// A server series' book that has not joined the Library; it plays from the server.
+        case server(AudiobookShelfAPI.Item)
 
         var id: String {
             switch self {
             case .owned(let book): return book.id.uuidString
             case .missing(let volume): return "hardcover-\(volume.bookID)"
+            case .server(let item): return "server-\(item.id)"
             }
         }
 
@@ -49,14 +52,36 @@ struct CollectionGroup: Identifiable {
             switch self {
             case .owned(let book): return book.hardcover?.seriesPosition ?? .greatestFiniteMagnitude
             case .missing(let volume): return volume.position ?? .greatestFiniteMagnitude
+            case .server: return .greatestFiniteMagnitude
             }
         }
     }
 
-    /// The card's rows. A series with `showMissing` on lists Hardcover's whole catalogue, the
-    /// owned volumes resolved to the books themselves; otherwise just the books, in order.
+    /// The server series this Collection stands for, while the server's audiobooks are shown.
+    @MainActor
+    var serverSeries: AudiobookShelfAPI.Series? {
+        AudiobookShelfCatalog.shared.seriesByCollection[collection.id]
+    }
+
+    /// The card's rows. A server series lists every book the server has in it, in series
+    /// order, those in the Library resolved to the books themselves. A Hardcover series with
+    /// `showMissing` on lists Hardcover's whole catalogue the same way; otherwise just the
+    /// books, in order.
     @MainActor
     func volumes(showMissing: Bool) -> [Volume] {
+        if let serverSeries {
+            let linked = AudiobookShelfService.shared.libraryBooks
+            let shown = Dictionary(books.map { ($0.id, $0) }) { first, _ in first }
+            let members = (serverSeries.books ?? []).compactMap { item -> Volume? in
+                guard let book = linked[item.id] else { return .server(item) }
+                return shown[book.id].map(Volume.owned)
+            }
+            // A Library book the listener added by hand that the server does not list.
+            let listed = Set(members.compactMap { volume -> UUID? in
+                if case .owned(let book) = volume { book.id } else { nil }
+            })
+            return members + books.filter { !listed.contains($0.id) }.map(Volume.owned)
+        }
         guard showMissing, let seriesID else { return books.map(Volume.owned) }
         let catalogue = SeriesCatalog.volumes(for: seriesID)
         guard !catalogue.isEmpty else { return books.map(Volume.owned) }
