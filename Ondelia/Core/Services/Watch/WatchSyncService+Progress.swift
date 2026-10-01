@@ -6,12 +6,6 @@ extension WatchSyncService {
     /// about all of them. Pause and stop flush regardless.
     private static let progressInterval: TimeInterval = 30
 
-    /// Last write wins, by the timestamp the writer stamped on it. A nil local timestamp is a
-    /// position written before the watch existed, so it loses to anything.
-    static func shouldApply(remote: Date, localUpdatedAt: Date?) -> Bool {
-        remote > (localUpdatedAt ?? .distantPast)
-    }
-
     func handle(_ event: SyncEvent) {
         switch event {
         case let .progress(bookID, position, at):
@@ -70,20 +64,8 @@ extension WatchSyncService {
     // MARK: - Applying what the watch sent
 
     private func applyRemoteProgress(bookID: UUID, position: TimeInterval, at: Date) {
-        guard let book = book(bookID),
-              Self.shouldApply(remote: at, localUpdatedAt: book.positionUpdatedAt) else { return }
-        book.currentPosition = position
-        book.positionUpdatedAt = at
-        book.lastPlayed = at
-        AudiobookManager.shared.swiftDataController.save()
-
-        // Only move the player when it is showing this book and silent: seeking under a playing
-        // listener is worse than a few seconds of drift.
-        let audio = GlobalAudioManager.shared
-        if audio.currentAudiobook?.id == bookID, !audio.isPlaying() {
-            audio.seek(to: position, rememberOrigin: false)
-        }
-        pushSnapshot()
+        guard let book = book(bookID) else { return }
+        ListenerState.shared.apply(.position(position), to: book, from: .watch, at: at)
     }
 
     private func applyRemoteBookmark(bookID: UUID, bookmark: BookmarkSummary) {
@@ -113,7 +95,7 @@ extension WatchSyncService {
 
     // MARK: - Hooks the managers call
 
-    /// `GlobalAudioManager.persistProgress` just wrote a position.
+    /// The player's tick just wrote a position; see `ListenerState.Outbound.watch`.
     func phoneDidPersistProgress(for book: AudiobookModel) {
         guard Date().timeIntervalSince(lastProgressSentAt) >= Self.progressInterval else { return }
         flushProgress(for: book)

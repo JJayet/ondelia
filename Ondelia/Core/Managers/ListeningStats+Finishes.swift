@@ -2,7 +2,22 @@ import Foundation
 
 // MARK: - Completed books
 extension ListeningStats {
-    var finishes: [ListeningSessionModel] { sessions.filter(\.finishedBook) }
+    /// Two Finishes of one audiobook this close together are one completion recorded twice:
+    /// two devices each logged it before CloudKit merged their logs.
+    static let sameFinishWindow: TimeInterval = 24 * 3600
+
+    /// Every Finish once, the earliest of each same-completion pair kept. The log itself stays
+    /// append-only.
+    var finishes: [ListeningSessionModel] {
+        var kept: [ListeningSessionModel] = []
+        for finish in sessions.filter(\.finishedBook).sorted(by: { $0.startedAt < $1.startedAt }) {
+            let repeated = kept.contains {
+                $0.bookID == finish.bookID && finish.startedAt.timeIntervalSince($0.startedAt) < Self.sameFinishWindow
+            }
+            if !repeated { kept.append(finish) }
+        }
+        return kept
+    }
 
     var booksCompleted: Int { finishes.count }
 

@@ -162,7 +162,7 @@ final class GlobalAudioManager {
         // Decided before the book can be deleted below, which would take it out of its collections.
         let chained = currentAudiobook.flatMap { library.nextBook(after: $0) }
         if let audiobook = currentAudiobook {
-            library.markAsFinished(audiobook)
+            ListenerState.shared.apply(.finish, to: audiobook, from: .player)
             // Deleting unloads this player; the next book below still starts.
             if UserDefaults.standard.bool(forKey: Self.deleteOnCompletionKey) {
                 library.deleteAudiobook(audiobook)

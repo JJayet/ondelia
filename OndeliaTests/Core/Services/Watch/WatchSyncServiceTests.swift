@@ -81,24 +81,4 @@ struct WatchSyncServiceTests {
     func emptyLibrary() {
         #expect(WatchSyncService.selectBooks(from: [], onWatch: []).isEmpty)
     }
-
-    // MARK: - Last write wins
-
-    @Test("A newer remote write wins")
-    func newerRemoteWins() {
-        let local = Date(timeIntervalSince1970: 1_000)
-        #expect(WatchSyncService.shouldApply(remote: local.addingTimeInterval(1), localUpdatedAt: local))
-    }
-
-    @Test("An older or identical remote write loses")
-    func olderRemoteLoses() {
-        let local = Date(timeIntervalSince1970: 1_000)
-        #expect(!WatchSyncService.shouldApply(remote: local.addingTimeInterval(-1), localUpdatedAt: local))
-        #expect(!WatchSyncService.shouldApply(remote: local, localUpdatedAt: local))
-    }
-
-    @Test("A position written before the watch existed loses to anything")
-    func nilLocalAlwaysLoses() {
-        #expect(WatchSyncService.shouldApply(remote: .distantPast.addingTimeInterval(1), localUpdatedAt: nil))
-    }
 }

@@ -63,6 +63,17 @@ struct ListeningStatsTests {
         #expect(stats.averageSession == TimeInterval(3600))
     }
 
+    @Test("Two Finishes of one audiobook within a day count once; a later re-listen counts again")
+    func sameFinishCountsOnce() {
+        let book = AudiobookModel(title: "Dune")
+        let stats = ListeningStats([
+            session(book, daysAgo: 30, minutes: 0, finished: true),
+            session(book, daysAgo: 30, hour: 18, minutes: 0, finished: true),
+            session(book, daysAgo: 1, minutes: 0, finished: true)
+        ], now: now, calendar: calendar)
+        #expect(stats.booksCompleted == 2)
+    }
+
     @Test("Heatmap ends today, has 7 rows per week, and marks future days")
     func heatmap() {
         let book = AudiobookModel(title: "Dune")

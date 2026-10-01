@@ -32,11 +32,7 @@ struct BookActionsMenu: View {
         }
 
         Button {
-            if audiobook.isFinished {
-                AudiobookManager.shared.markAsUnread(audiobook)
-            } else {
-                AudiobookManager.shared.markAsRead(audiobook)
-            }
+            ListenerState.shared.apply(audiobook.isFinished ? .unfinish : .finish, to: audiobook, from: .listener)
         } label: {
             if audiobook.isFinished {
                 Label(NSLocalizedString("Mark as Unread", comment: "Mark as unread"), systemImage: "circle")

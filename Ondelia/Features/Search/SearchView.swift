@@ -121,7 +121,7 @@ struct SearchView: View {
                             .swipeActions(edge: .leading) {
                                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                                     withHapticFeedback {
-                                        if book.isFinished { audiobookManager.markAsUnread(book) } else { audiobookManager.markAsRead(book) }
+                                        ListenerState.shared.apply(book.isFinished ? .unfinish : .finish, to: book, from: .listener)
                                     }
                                 }.tint(book.isFinished ? .orange : .green)
                             }

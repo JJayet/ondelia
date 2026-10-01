@@ -48,8 +48,7 @@ extension GlobalAudioManager {
         guard let audiobook = currentAudiobook, isReady, !isLoading else { return }
         // Playback can start before the store finishes loading (an App Shortcut on a cold launch).
         guard AudiobookManager.shared.swiftDataController.isLoaded else { return }
-        AudiobookManager.shared.updateProgress(for: audiobook, currentTime: getCurrentTime())
-        WatchSyncService.shared.phoneDidPersistProgress(for: audiobook)
+        ListenerState.shared.apply(.position(getCurrentTime()), to: audiobook, from: .player)
     }
 
     /// One place for "playback state changed": persist, keep the timer honest, and refresh the
