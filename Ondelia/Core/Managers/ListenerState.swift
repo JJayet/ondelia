@@ -96,7 +96,7 @@ final class ListenerState {
             // Marked by hand: the position follows, so resuming does not replay the last chapter.
             if source == .listener { setPosition(audiobook.duration, of: audiobook, at: at) }
         case .unfinish:
-            audiobook.isFinished = false
+            retractFinish(audiobook, from: source)
         case .reset:
             setPosition(0, of: audiobook, at: at)
         }

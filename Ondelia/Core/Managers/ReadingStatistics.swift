@@ -79,6 +79,22 @@ final class ReadingStatistics {
         checkMilestones()
     }
 
+    /// Takes back the most recent Finish of `book`: unflags the session it rode on, or removes
+    /// the zero-second marker, which held nothing else. Earned milestones stay earned.
+    func retractFinish(_ book: AudiobookModel) {
+        guard store.isLoaded,
+              let latest = sessions.filter({ $0.finishedBook && $0.bookID == book.id })
+                .max(by: { $0.startedAt < $1.startedAt })
+        else { return }
+        if latest.seconds > 0 {
+            latest.finishedBook = false
+        } else {
+            sessions.removeAll { $0 === latest }
+            store.context.delete(latest)
+        }
+        store.save()
+    }
+
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
         UserDefaults.standard.set(newGoal, forKey: "monthlyGoal")

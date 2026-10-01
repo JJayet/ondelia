@@ -138,12 +138,12 @@ struct ListenerStateTests {
     func serverFinishDeduplicated() {
         let book = book()
         state.apply(.finish, to: book, from: .listener)
-        state.apply(.unfinish, to: book, from: .listener)
+        state.apply(.unfinish, to: book, from: .server, at: now.addingTimeInterval(60))
         state.apply(.finish, to: book, from: .server, at: now.addingTimeInterval(3600))
         #expect(book.isFinished == true)
         #expect(finishCount == 1)
 
-        state.apply(.unfinish, to: book, from: .listener)
+        state.apply(.unfinish, to: book, from: .server, at: now.addingTimeInterval(7200))
         state.apply(.finish, to: book, from: .server, at: now.addingTimeInterval(3 * 86_400))
         #expect(finishCount == 2)
     }
@@ -157,6 +157,53 @@ struct ListenerStateTests {
         #expect(book.positionUpdatedAt == now)
         #expect(book.isFinished == true)
         #expect(controller.context.hasChanges == false)
+    }
+
+    @Test("Unmarking retracts the most recent Finish, and only that one")
+    func unfinishRetractsLatestFinish() throws {
+        let book = book()
+        // Finished, then a re-listen started elsewhere and finished here.
+        state.apply(.finish, to: book, from: .listener)
+        state.apply(.unfinish, to: book, from: .server, at: now.addingTimeInterval(60))
+        state.apply(.finish, to: book, from: .player)
+        #expect(finishCount == 2)
+
+        state.apply(.unfinish, to: book, from: .listener)
+        #expect(finishCount == 1)
+        // A zero-second marker has nothing else in it, so it goes; the log keeps the rest.
+        #expect(try controller.context.fetch(FetchDescriptor<ListeningSessionModel>()).count == 1)
+        #expect(book.isFinished == false)
+    }
+
+    @Test("Retracting a Finish made during a listening session keeps the session's time")
+    func retractKeepsListeningTime() throws {
+        let book = book()
+        statistics.addListeningTime(600, for: book, at: now)
+        state.apply(.position(3590), to: book, from: .player)
+        #expect(finishCount == 1)
+
+        state.apply(.unfinish, to: book, from: .listener)
+        #expect(finishCount == 0)
+        let sessions = try controller.context.fetch(FetchDescriptor<ListeningSessionModel>())
+        #expect(sessions.map(\.seconds) == [600])
+    }
+
+    @Test("Unmarking an audiobook that is not Finished retracts nothing")
+    func unfinishWhenNotFinished() {
+        let other = book()
+        state.apply(.finish, to: other, from: .listener)
+        let book = book()
+        state.apply(.unfinish, to: book, from: .listener)
+        #expect(finishCount == 1)
+    }
+
+    @Test("The server reporting not finished keeps the Finish: it is a re-listen starting elsewhere")
+    func serverUnfinishKeepsFinish() {
+        let book = book()
+        state.apply(.finish, to: book, from: .listener)
+        state.apply(.unfinish, to: book, from: .server, at: now.addingTimeInterval(60))
+        #expect(book.isFinished == false)
+        #expect(finishCount == 1)
     }
 
     @Test("Unfinish clears Finished and reports the flip")

@@ -20,4 +20,13 @@ extension ListenerState {
                 && abs($0.startedAt.timeIntervalSince(date)) < ListeningStats.sameFinishWindow
         }
     }
+
+    /// Unmarking by hand takes back the Finish it undoes. AudiobookShelf reporting "not
+    /// finished" does not: that is a re-listen starting in another client, and the earlier
+    /// listen still happened.
+    func retractFinish(_ audiobook: AudiobookModel, from source: Source) {
+        guard audiobook.isFinished else { return }
+        audiobook.isFinished = false
+        if source == .listener { statistics.retractFinish(audiobook) }
+    }
 }
