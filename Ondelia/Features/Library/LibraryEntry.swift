@@ -17,6 +17,13 @@ enum LibraryEntry: Identifiable {
         if case .book(let book) = self { book } else { nil }
     }
 
+    var duration: TimeInterval {
+        switch self {
+        case .book(let book): book.duration
+        case .server(let item): item.media.duration ?? 0
+        }
+    }
+
     var narrator: String {
         if case .book(let book) = self { book.narrator ?? "" } else { "" }
     }

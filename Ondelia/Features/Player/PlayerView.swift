@@ -67,7 +67,7 @@ struct PlayerView: View {
             audioManager.loadAudiobook(openedBook)
             Task { await AppTips.playerOpened.donate() }
         }
-        .onChange(of: nextQueuedBook?.id, initial: true) { _, id in
+        .onChange(of: nextEntry?.id, initial: true) { _, id in
             QueueTip.hasNext = id != nil
         }
         .sheet(isPresented: $showingBookmarks) {
@@ -91,7 +91,7 @@ struct PlayerView: View {
             TranscriptionView(audiobook: audiobook)
         }
         .sheet(isPresented: $showingQueue) {
-            PlayQueueView(chained: audiobookManager.nextBook(after: audiobook)) { book in
+            PlayQueueView(chained: audiobookManager.nextEntry(after: audiobook)) { book in
                 audioManager.loadAudiobook(book)
                 audioManager.startPlaybackAfterOpeningBook()
                 PlayQueue.shared.remove(book)

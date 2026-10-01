@@ -171,15 +171,6 @@ extension AudiobookManager {
         return CollectionGroup.sorted(collection.bookIDs.compactMap { byID[$0] }, by: collection.sort)
     }
 
-    /// The Library book that plays after `book` ends, for the player's Up Next.
-    ///
-    /// ponytail: nil when the next one is a server audiobook not yet in the Library, so Up Next
-    /// shows the queue's head although `nextEntry` will play that server audiobook. Teach the
-    /// Up Next row to draw a server audiobook if that misleads.
-    func nextBook(after book: AudiobookModel) -> AudiobookModel? {
-        nextEntry(after: book)?.book
-    }
-
     /// What plays after `book` ends: the next unfinished, playable book of the first collection
     /// that holds it and chains its books — in a server series, possibly one that has not
     /// joined yet. Nil when nothing does.

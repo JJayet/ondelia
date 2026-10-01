@@ -167,13 +167,13 @@ struct CollectionGroupTests {
         let manager = manager(with: [one, two, three])
         let collection = manager.createCollection(name: "Trilogy", books: [one, two, three])!
 
-        #expect(manager.nextBook(after: one) == nil)
+        #expect(manager.nextEntry(after: one)?.book == nil)
         manager.setAutoContinue(true, for: collection)
         // Files are not on disk in a test, so nothing qualifies yet.
-        #expect(manager.nextBook(after: one) == nil)
+        #expect(manager.nextEntry(after: one)?.book == nil)
         three.fileURL = Bundle(for: SwiftDataController.self).bundlePath
-        #expect(manager.nextBook(after: one)?.title == "Three")
-        #expect(manager.nextBook(after: three) == nil)
+        #expect(manager.nextEntry(after: one)?.book?.title == "Three")
+        #expect(manager.nextEntry(after: three)?.book == nil)
     }
 
     @Test("Progress is weighted by length and the current book is the one in progress")
