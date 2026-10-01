@@ -1,0 +1,27 @@
+Ondelia/Core/Managers/ListenerState+Finish.swift
+  s_9a699a9541fa2c::t_38fd09af9c0cc7 23-31
+Ondelia/Core/Managers/ReadingStatistics.swift
+  s_9a699a9541fa2c::t_38fd09af9c0cc7 82-97
+OndeliaTests/Core/Managers/ListenerStateTests.swift
+  s_9a699a9541fa2c::t_b4bf1d45c32076 141,162-164,166,169-174,176-207
+  s_9a699a9541fa2c::t_936a77f9174ebd 165,167-168,175
+  s_9a699a9541fa2c::t_d7cf5cefb8fb39 146,208
+Ondelia/Core/Managers/ListenerState.swift
+  s_9a699a9541fa2c::t_8c143729038dec 99
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "08f3bc36979462944f21cd71fb1b548b14e7fdad",
+  "prompts": {},
+  "sessions": {
+    "s_9a699a9541fa2c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "a817fb27-427d-4ff4-9526-fca6ffa617cb",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
