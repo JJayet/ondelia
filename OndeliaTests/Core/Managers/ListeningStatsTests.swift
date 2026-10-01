@@ -74,6 +74,19 @@ struct ListeningStatsTests {
         #expect(stats.booksCompleted == 2)
     }
 
+    @Test("A re-listen's finish is measured from its own first session, not the first listen's")
+    func relistenFinishDuration() {
+        let book = AudiobookModel(title: "Dune")
+        let stats = ListeningStats([
+            session(book, daysAgo: 200, minutes: 60),
+            session(book, daysAgo: 190, minutes: 60, finished: true),
+            session(book, daysAgo: 8, minutes: 60),
+            session(book, daysAgo: 1, minutes: 60, finished: true)
+        ], now: now, calendar: calendar)
+        #expect(stats.finishDurations.sorted() == [TimeInterval(7 * 86_400), TimeInterval(10 * 86_400)])
+        #expect(stats.fastestFinish == TimeInterval(7 * 86_400))
+    }
+
     @Test("Heatmap ends today, has 7 rows per week, and marks future days")
     func heatmap() {
         let book = AudiobookModel(title: "Dune")
