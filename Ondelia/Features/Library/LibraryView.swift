@@ -14,6 +14,7 @@ struct LibraryView: View {
     /// The collection whose screen is pushed, if any.
     @State var collectionForDetail: CollectionModel?
     @State var audiobookForHardcover: AudiobookModel?
+    @State var audiobookForServerLink: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
     @State var collectionToRename: CollectionModel?
@@ -119,6 +120,7 @@ struct LibraryView: View {
             changeCover: { audiobookForImagePicker = $0 },
             linkHardcover: { audiobookForHardcover = $0 },
             addToCollection: { openCollectionPicker(for: [$0]) },
+            linkServer: { audiobookForServerLink = $0 },
             delete: { activeAlert = .confirmDelete($0) }
         )
     }
@@ -215,6 +217,7 @@ struct LibraryView: View {
         // On the stack, not the shelf: screens it pushes (a series, an author) read the
         // environment of the stack, and tapping a downloaded book there must still play it.
         .environment(\.audiobookShelfPlay, { playAndPresent($0) })
+        .environment(\.audiobookShelfAddToCollection, { openCollectionPicker(for: [$0]) })
         // Here rather than on the server shelf: a stream started from a book's detail screen
         // can fail too. On the stack, apart from the screen's own alert slot.
         .alert(
@@ -251,6 +254,7 @@ struct LibraryView: View {
         .sheet(item: $audiobookForHardcover) { audiobook in
             HardcoverBookPickerView(audiobook: audiobook)
         }
+        .sheet(item: $audiobookForServerLink) { AudiobookShelfLinkPickerView(audiobook: $0) }
         .sheet(isPresented: $showingCollectionPicker, onDismiss: { booksForCollectionPicker = [] }) {
             CollectionPickerView(books: booksForCollectionPicker)
         }

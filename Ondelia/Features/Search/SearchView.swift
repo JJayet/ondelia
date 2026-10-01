@@ -166,7 +166,7 @@ struct SearchView: View {
                     AudiobookShelfService.shared.play(item, local: nil) { present($0) }
                 }
             }
-            .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false) }
+            .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false, joined: false) }
     }
 
     private func present(_ book: AudiobookModel) {

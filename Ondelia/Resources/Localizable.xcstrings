@@ -5734,6 +5734,28 @@
           }
         }
       }
+    },
+    "Link to Server Audiobook…" : {
+      "comment" : "Server link menu item",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lier à un livre du serveur…"
+          }
+        }
+      }
+    },
+    "Link to Server Audiobook" : {
+      "comment" : "Server link picker title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lier à un livre du serveur"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

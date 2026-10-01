@@ -6,6 +6,7 @@ struct BookActions {
     var changeCover: (AudiobookModel) -> Void
     var linkHardcover: (AudiobookModel) -> Void
     var addToCollection: (AudiobookModel) -> Void
+    var linkServer: (AudiobookModel) -> Void
     var delete: (AudiobookModel) -> Void
 }
 
@@ -58,6 +59,15 @@ struct BookActionsMenu: View {
                 actions.linkHardcover(audiobook)
             } label: {
                 Label(NSLocalizedString("Link to Hardcover", comment: "Hardcover link menu item"), systemImage: "link")
+            }
+        }
+
+        // An imported audiobook that is also on the server: link the two so it shows once.
+        if AudiobookShelfCatalog.shared.isActive, AudiobookShelfService.shared.itemID(for: audiobook) == nil {
+            Button {
+                actions.linkServer(audiobook)
+            } label: {
+                Label(NSLocalizedString("Link to Server Audiobook…", comment: "Server link menu item"), systemImage: "link.icloud")
             }
         }
 

@@ -7,6 +7,8 @@ extension EnvironmentValues {
     @Entry var audiobookShelfLibraryBooks: [String: AudiobookModel] = [:]
     /// The server library the shelf shows, for actions that fetch more of it.
     @Entry var audiobookShelfLibrary = ""
+    /// Opens the collection picker for a book. Set by `LibraryView`, which owns the sheet.
+    @Entry var audiobookShelfAddToCollection: (@MainActor (AudiobookModel) -> Void)?
 }
 
 extension View {
@@ -81,7 +83,7 @@ struct AudiobookShelfBookTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: isOnDevice) }
+        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: isOnDevice, joined: localBook != nil) }
         .accessibilityValue(accessibilityState)
     }
 
@@ -110,44 +112,6 @@ struct AudiobookShelfBookTile: View {
 
     private func tap() {
         withHapticFeedback { service.play(item, local: localBook, with: play) }
-    }
-}
-
-/// Download, or cancel the download, of a server book: the long-press menu of its tile and row.
-struct AudiobookShelfItemMenu: View {
-    let item: AudiobookShelfAPI.Item
-    let isOnDevice: Bool
-    private let service = AudiobookShelfService.shared
-
-    var body: some View {
-        if service.downloads[item.id] != nil {
-            Button(role: .destructive) {
-                service.cancelDownload(id: item.id)
-            } label: {
-                Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
-            }
-        } else if !isOnDevice {
-            Button {
-                service.download(item)
-            } label: {
-                Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
-            }
-        }
-    }
-}
-
-extension AudiobookShelfService {
-    /// Plays a server book: its Library entry when it has one, streamed otherwise. A server
-    /// book seen for the first time joins the Library on the way.
-    func play(_ item: AudiobookShelfAPI.Item, local: AudiobookModel?, with play: (@MainActor (AudiobookModel) -> Void)?) {
-        if let local {
-            play?(local)
-            return
-        }
-        Task {
-            guard let book = await streamingBook(for: item) else { return }
-            play?(book)
-        }
     }
 }
 

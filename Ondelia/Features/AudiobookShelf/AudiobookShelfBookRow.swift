@@ -43,7 +43,7 @@ struct AudiobookShelfBookRow: View {
             .glassCard()
         }
         .buttonStyle(.plain)
-        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false) }
+        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false, joined: false) }
     }
 
     private var status: String {
