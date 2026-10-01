@@ -138,19 +138,22 @@ enum DatabaseBackupService {
     }
 
     /// A copy that cannot be opened is worse than no copy, because it looks like protection.
-    private static func validate(_ storeURL: URL) -> Bool {
-        guard FileManager.default.fileExists(atPath: storeURL.path) else { return false }
-        let schema = Schema([
-            AudiobookModel.self,
-            BookmarkModel.self,
-            ChapterModel.self,
-            ChapterTranscriptionModel.self,
-            TranscriptWindowModel.self
-        ])
-        return (try? ModelContainer(
-            for: schema,
-            configurations: [ModelConfiguration(schema: schema, url: storeURL, cloudKitDatabase: .none)]
-        )) != nil
+    ///
+    /// Read-only SQLite, not a `ModelContainer`: opening a container migrates the file to the
+    /// schema it was given. An unversioned partial schema here once dropped collections and the
+    /// listening log from every backup and left a model no migration plan version matches.
+    static func validate(_ storeURL: URL) -> Bool {
+        var database: OpaquePointer?
+        defer { sqlite3_close(database) }
+        guard sqlite3_open_v2(storeURL.path, &database, SQLITE_OPEN_READONLY, nil) == SQLITE_OK else {
+            return false
+        }
+        var statement: OpaquePointer?
+        defer { sqlite3_finalize(statement) }
+        guard sqlite3_prepare_v2(database, "PRAGMA quick_check", -1, &statement, nil) == SQLITE_OK,
+              sqlite3_step(statement) == SQLITE_ROW,
+              let result = sqlite3_column_text(statement, 0) else { return false }
+        return String(cString: result) == "ok"
     }
 
     private static func prune() {
