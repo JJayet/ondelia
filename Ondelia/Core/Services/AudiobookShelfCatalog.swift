@@ -46,8 +46,9 @@ final class AudiobookShelfCatalog {
     }
 
     /// The id of the Collection that stands for a server series: derived from the series, so
-    /// every device makes the same one and the series needs no column of its own (a column
-    /// would mean a new schema version). See `reconcileServerSeriesCollections`.
+    /// every device gives it the same id and the series needs no column of its own (a column
+    /// would mean a new schema version). Two devices can still each make a record with that
+    /// id before iCloud brings them the other's; `mergeDuplicateSeriesCollections` folds them.
     nonisolated static func collectionID(forSeries id: String) -> UUID {
         var bytes = Array(SHA256.hash(data: Data("audiobookshelf-series:\(id)".utf8)).prefix(16))
         bytes[6] = (bytes[6] & 0x0F) | 0x50 // version 5 layout, name-based

@@ -38,6 +38,7 @@ extension AudiobookManager {
     /// `collectionPrompt` instead of being created.
     func reconcileSeriesCollections() {
         guard swiftDataController.isLoaded else { return }
+        mergeDuplicateSeriesCollections()
         var bySeries: [Int: (name: String, books: [AudiobookModel])] = [:]
         for book in audiobooks {
             guard let link = book.hardcover, let seriesID = link.seriesID,

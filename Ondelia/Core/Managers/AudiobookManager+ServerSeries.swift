@@ -21,6 +21,7 @@ extension AudiobookManager {
     func reconcileServerSeriesCollections() {
         let catalog = AudiobookShelfCatalog.shared
         guard swiftDataController.isLoaded, catalog.isActive, catalog.status == .ready else { return }
+        mergeDuplicateSeriesCollections()
         let linked = AudiobookShelfService.shared.libraryBooks
         let declined = declinedServerSeries
         var changed = false
