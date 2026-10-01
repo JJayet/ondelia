@@ -17,7 +17,12 @@ final class AudiobookShelfCatalog {
         case idle, loading, ready, unreachable
     }
 
-    private(set) var items: [AudiobookShelfAPI.Item] = []
+    /// The server library's books, title order. `sorted` holds the other orders.
+    var items: [AudiobookShelfAPI.Item] { sorted.byTitle }
+    /// Each order the Library can ask for, sorted once per fetch off the main thread: sorting a
+    /// few thousand titles with `localizedStandardCompare` on every redraw is what made a big
+    /// server library feel slow.
+    private(set) var sorted = Sorted()
     private(set) var status: Status = .idle
     /// The server library's series, each with its books in series order.
     private(set) var series: [AudiobookShelfAPI.Series] = [] {
@@ -26,6 +31,14 @@ final class AudiobookShelfCatalog {
     private var collectionSeries: [UUID: AudiobookShelfAPI.Series] = [:]
     /// The server library `items` came from.
     private(set) var library: String?
+    /// When `items` was fetched from the server, possibly by an earlier launch.
+    private var fetchedAt: Date?
+    private var loadedSnapshot = false
+    private var fetching: Task<Void, Never>?
+
+    /// How long a fetch stays good. Older, the next appearance refetches in the background
+    /// while the stored copy stays on screen; pull to refresh always refetches.
+    static let maxAge: TimeInterval = 15 * 60
 
     /// The series each server series Collection stands for, by the Collection's id.
     var seriesByCollection: [UUID: AudiobookShelfAPI.Series] {
@@ -58,34 +71,133 @@ final class AudiobookShelfCatalog {
     /// The server was asked and did not answer, while the listener expects its audiobooks.
     var isUnreachable: Bool { isEnabled && service.isSignedIn && status == .unreachable }
 
-    /// Fetches the whole selected server library, or forgets it when the switch is off.
+    /// Brings the catalogue up to date, or forgets it when the switch is off or signed out.
     ///
-    /// ponytail: the whole library in memory, refetched on appear and on pull to refresh. Fine
-    /// for a few thousand minified items; add a disk cache if a big library feels slow.
-    func refresh() async {
-        guard isEnabled, let server = service.server, let token = service.token else {
-            items = []
-            series = []
-            library = nil
-            status = .idle
+    /// The last fetch is kept on disk, so a launch shows the server's audiobooks at once; the
+    /// server is asked again only when that copy is older than `maxAge`, the server library
+    /// changed, or `force` (pull to refresh). The fetch runs while the stored copy stays shown.
+    func refresh(force: Bool = false) async {
+        guard isEnabled, let server = service.server, service.token != nil else {
+            forget()
             return
         }
-        status = .loading
+        if !loadedSnapshot {
+            loadedSnapshot = true
+            await loadSnapshot(server: server)
+        }
+        let fresh = fetchedAt.map { Date().timeIntervalSince($0) < Self.maxAge } ?? false
+        let sameLibrary = library != nil && library == service.selectedLibrary
+        guard force || !fresh || !sameLibrary || status == .unreachable else { return }
+        // One fetch at a time: a second caller waits for the one already running.
+        if let fetching { return await fetching.value }
+        let task = Task { await fetch() }
+        fetching = task
+        await task.value
+        fetching = nil
+    }
+
+    private func fetch() async {
+        guard let server = service.server, let token = service.token else { return }
+        if items.isEmpty { status = .loading }
         do {
             let library = try await selectedLibrary(server: server, token: token)
             async let fetched = AudiobookShelfAPI.allItems(server: server, token: token, library: library)
             async let fetchedSeries = AudiobookShelfAPI.allSeries(server: server, token: token, library: library)
-            (items, series) = try await (fetched, fetchedSeries)
-            self.library = library
-            status = .ready
-            AudiobookManager.shared.reconcileServerSeriesCollections()
+            let snapshot = Snapshot(
+                server: server.absoluteString, library: library, fetchedAt: Date(),
+                items: try await fetched, series: try await fetchedSeries
+            )
+            await apply(snapshot)
+            let url = Self.snapshotURL
+            Task.detached(priority: .utility) {
+                try? JSONEncoder().encode(snapshot).write(to: url, options: .atomic)
+            }
         } catch is CancellationError {
-            status = items.isEmpty ? .idle : .ready
+            if status == .loading { status = .idle }
         } catch {
+            // The stored copy stays in memory for when the server answers again, but while it
+            // does not, its audiobooks are not shown: they could not play.
             Log.library.error("AudiobookShelf: catalogue unavailable: \(error.localizedDescription)")
-            items = []
-            series = []
             status = .unreachable
+        }
+    }
+
+    /// Takes a fetched or stored catalogue in, sorting it off the main thread first.
+    private func apply(_ snapshot: Snapshot) async {
+        let items = snapshot.items
+        sorted = await Task.detached(priority: .userInitiated) { Sorted(items) }.value
+        series = snapshot.series
+        library = snapshot.library
+        fetchedAt = snapshot.fetchedAt
+        status = .ready
+        AudiobookManager.shared.reconcileServerSeriesCollections()
+    }
+
+    private func loadSnapshot(server: URL) async {
+        let url = Self.snapshotURL
+        let stored = await Task.detached(priority: .userInitiated) {
+            (try? Data(contentsOf: url)).flatMap { try? JSONDecoder().decode(Snapshot.self, from: $0) }
+        }.value
+        guard let stored, stored.server == server.absoluteString else { return }
+        await apply(stored)
+    }
+
+    /// Drops the catalogue, in memory and on disk: the switch went off, or the account went.
+    func forget() {
+        fetching?.cancel()
+        fetching = nil
+        sorted = Sorted()
+        series = []
+        library = nil
+        fetchedAt = nil
+        status = .idle
+        loadedSnapshot = false
+        try? FileManager.default.removeItem(at: Self.snapshotURL)
+    }
+
+    /// Caches, not Application Support: the server has it all, so the system may purge it.
+    nonisolated static var snapshotURL: URL {
+        URL.cachesDirectory.appending(path: "AudiobookShelfCatalog.json")
+    }
+
+    /// What is stored between launches.
+    private struct Snapshot: Codable {
+        let server: String
+        let library: String
+        let fetchedAt: Date
+        let items: [AudiobookShelfAPI.Item]
+        let series: [AudiobookShelfAPI.Series]
+    }
+
+    /// The server's books in each order the Library sorts by.
+    struct Sorted: Sendable {
+        var byTitle: [AudiobookShelfAPI.Item] = []
+        var byAuthor: [AudiobookShelfAPI.Item] = []
+        var byDateAdded: [AudiobookShelfAPI.Item] = []
+
+        init() {}
+
+        nonisolated init(_ items: [AudiobookShelfAPI.Item]) {
+            func titleOrder(_ lhs: AudiobookShelfAPI.Item, _ rhs: AudiobookShelfAPI.Item) -> Bool {
+                lhs.title.localizedStandardCompare(rhs.title) == .orderedAscending
+            }
+            byTitle = items.sorted(by: titleOrder)
+            byAuthor = byTitle.sorted { lhs, rhs in
+                let names = (lhs.author ?? "").localizedStandardCompare(rhs.author ?? "")
+                return names == .orderedSame ? titleOrder(lhs, rhs) : names == .orderedAscending
+            }
+            byDateAdded = byTitle.sorted { lhs, rhs in
+                lhs.dateAdded == rhs.dateAdded ? titleOrder(lhs, rhs) : lhs.dateAdded > rhs.dateAdded
+            }
+        }
+
+        /// The order `LibraryEntry.merged` expects for `sort`.
+        func items(for sort: LibraryView.SortOption) -> [AudiobookShelfAPI.Item] {
+            switch sort {
+            case .author: byAuthor
+            case .dateAdded: byDateAdded
+            case .title, .lastPlayed, .progress: byTitle
+            }
         }
     }
 
@@ -98,10 +210,11 @@ final class AudiobookShelfCatalog {
         return first
     }
 
-    /// Server audiobooks that have not joined the Library, given its books by server item.
-    func unjoined(linked: [String: AudiobookModel]) -> [AudiobookShelfAPI.Item] {
+    /// Server audiobooks that have not joined the Library, given its books by server item, in
+    /// the order `sort` asks for.
+    func unjoined(linked: [String: AudiobookModel], sortedFor sort: LibraryView.SortOption = .title) -> [AudiobookShelfAPI.Item] {
         guard isActive else { return [] }
-        return items.filter { linked[$0.id] == nil }
+        return sorted.items(for: sort).filter { linked[$0.id] == nil }
     }
 
     /// The Library books to show. While the server is off, streamed ones are hidden: only books

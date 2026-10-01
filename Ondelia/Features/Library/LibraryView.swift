@@ -56,6 +56,7 @@ struct LibraryView: View {
     @State var selecting = false
     @State var selectedIDs: Set<UUID> = []
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager, collection: CollectionModel? = nil) {
@@ -204,7 +205,11 @@ struct LibraryView: View {
         }
         // Rerun whenever what the catalogue depends on changes: the switch, the account, the
         // server library picked on the AudiobookShelf shelf.
+        // Cheap when the stored copy is fresh: only a stale one goes back to the server.
         .task(id: catalogKey) { await catalog.refresh() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await catalog.refresh() } }
+        }
         // Backfill: links made before the series lookup existed have no series on them. Each
         // book is asked about once — `seriesChecked` keeps this from running again.
         .task { await HardcoverService.shared.refreshSeries(for: audiobookManager.audiobooks) }
@@ -243,7 +248,7 @@ struct LibraryView: View {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()
             }
-            await catalog.refresh()
+            await catalog.refresh(force: true)
         }
         .sheet(item: $audiobookForImagePicker) { audiobook in
             ImagePickerView(audiobook: audiobook) { image in

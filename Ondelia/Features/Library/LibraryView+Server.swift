@@ -11,7 +11,7 @@ extension LibraryView {
     /// been played, so they count as not started. None while selecting, which acts on books.
     var shelfServerItems: [AudiobookShelfAPI.Item] {
         guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
-        return catalog.unjoined(linked: AudiobookShelfService.shared.libraryBooks)
+        return catalog.unjoined(linked: AudiobookShelfService.shared.libraryBooks, sortedFor: sortOption)
     }
 
     /// The shelf: the Library's books with the server audiobooks woven in.
@@ -21,7 +21,9 @@ extension LibraryView {
 
     /// No book at all, of the Library's or the server's: the empty state's cue.
     var isShelfEmpty: Bool {
-        visibleAudiobooks.isEmpty && catalog.unjoined(linked: AudiobookShelfService.shared.libraryBooks).isEmpty
+        // Once active, a server book is either unjoined or a visible Library book: no need to
+        // filter the whole catalogue to know.
+        visibleAudiobooks.isEmpty && (!catalog.isActive || catalog.items.isEmpty)
     }
 
     /// What the catalogue depends on: the switch, the account, and the server library, which
@@ -53,7 +55,7 @@ extension LibraryView {
     var serverUnreachableButton: some View {
         if catalog.isUnreachable {
             Button {
-                Task { await catalog.refresh() }
+                Task { await catalog.refresh(force: true) }
             } label: {
                 Image(systemName: "icloud.slash")
                     .font(.system(size: 15, weight: .semibold))

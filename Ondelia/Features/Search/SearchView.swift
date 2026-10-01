@@ -125,7 +125,7 @@ struct SearchView: View {
             }
             // The Library screen usually fetched the catalogue already; not when Search came first.
             .task(id: blendsServer) {
-                if catalog.status == .idle { await catalog.refresh() }
+                await catalog.refresh()
             }
             .onChange(of: query) { _, newValue in
                 searchTask?.cancel()

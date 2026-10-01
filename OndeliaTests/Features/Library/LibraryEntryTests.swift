@@ -28,7 +28,7 @@ struct LibraryEntryTests {
     func byTitle() throws {
         let books = [AudiobookModel(title: "B", author: ""), AudiobookModel(title: "D", author: "")]
         let server = [try item("1", "E"), try item("2", "A"), try item("3", "C")]
-        let merged = LibraryEntry.merged(books, server, by: .title)
+        let merged = LibraryEntry.merged(books, AudiobookShelfCatalog.Sorted(server).items(for: .title), by: .title)
         #expect(titles(merged) == ["s:A", "B", "s:C", "D", "s:E"])
     }
 
@@ -36,8 +36,18 @@ struct LibraryEntryTests {
     func lastPlayed() throws {
         let books = [AudiobookModel(title: "Z", author: ""), AudiobookModel(title: "A", author: "")]
         let server = [try item("1", "Y"), try item("2", "B")]
-        let merged = LibraryEntry.merged(books, server, by: .lastPlayed)
+        let merged = LibraryEntry.merged(books, AudiobookShelfCatalog.Sorted(server).items(for: .lastPlayed), by: .lastPlayed)
         #expect(titles(merged) == ["Z", "A", "s:B", "s:Y"])
+    }
+
+    @Test("A catalogue item survives the disk cache: author, series and date")
+    func codableRoundTrip() throws {
+        let json = #"{"id":"a","addedAt":1700000000000,"media":{"metadata":{"title":"Dune","authorName":"Frank Herbert","series":{"id":"s1","name":"Dune","sequence":"1"}},"duration":3600}}"#
+        let item = try JSONDecoder().decode(AudiobookShelfAPI.Item.self, from: Data(json.utf8))
+        let back = try JSONDecoder().decode(AudiobookShelfAPI.Item.self, from: JSONEncoder().encode(item))
+        #expect(back == item)
+        #expect(back.author == "Frank Herbert")
+        #expect(back.sequence == "1")
     }
 
     @Test("By date added, the server's date places them, newest first")

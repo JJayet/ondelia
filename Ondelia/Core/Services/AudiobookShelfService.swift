@@ -130,6 +130,8 @@ final class AudiobookShelfService {
         Keychain.set(nil, for: Self.tokenKey)
         UserDefaults.standard.removeObject(forKey: Defaults.library)
         reload()
+        AudiobookShelfCatalog.shared.forget()
+        AudiobookShelfImages.forget()
     }
 
     func download(_ item: AudiobookShelfAPI.Item) {
@@ -220,6 +222,8 @@ final class AudiobookShelfService {
         }
     }
 
+    /// Also called by every library fetch: `libraryBooks` is memoised on this version, and a
+    /// fetch can drop a linked book (merged away, deleted on another device).
     func linksDidChange() { linksVersion += 1 }
 
     /// Bumped whenever links are written: a SwiftData fetch is not observable, so views reading
@@ -234,16 +238,21 @@ final class AudiobookShelfService {
     /// Library books by the AudiobookShelf item they were downloaded from. A link whose book
     /// was merged away or deleted on another device is ignored rather than trusted.
     ///
-    /// Walks the whole library: read it once per screen, not once per row.
+    /// Memoised per `linksVersion`: the Library screen reads it several times per redraw, and
+    /// each read used to fetch every link.
     var libraryBooks: [String: AudiobookModel] {
-        _ = linksVersion
+        let version = linksVersion
+        if let cached = libraryBooksCache, cached.version == version { return cached.books }
         let books = Dictionary(AudiobookManager.shared.audiobooks.map { ($0.id, $0) }) { first, _ in first }
         var byItem: [String: AudiobookModel] = [:]
         for link in Self.links() {
             if let book = books[link.audiobookID] { byItem[link.itemID] = book }
         }
+        libraryBooksCache = (version, byItem)
         return byItem
     }
+
+    @ObservationIgnored private var libraryBooksCache: (version: Int, books: [String: AudiobookModel])?
 
     func finishBackgroundEvents() {
         backgroundCompletion?()

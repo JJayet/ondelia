@@ -42,9 +42,11 @@ enum LibraryEntry: Identifiable {
         }
     }
 
-    /// `books`, already in `sort` order, with `server` woven in. Server audiobooks have never
-    /// been played, so under recently played and progress they come last, by title; the other
-    /// orders interleave them. The books keep exactly the order they came in.
+    /// `books`, already in `sort` order, with `server` woven in. `server` comes sorted too, as
+    /// `AudiobookShelfCatalog.Sorted.items(for: sort)` hands it over, so this is one linear
+    /// pass. Server audiobooks have never been played, so under recently played and progress
+    /// they come last, by title; the other orders interleave them. The books keep exactly the
+    /// order they came in.
     static func merged(
         _ books: [AudiobookModel],
         _ server: [AudiobookShelfAPI.Item],
@@ -63,7 +65,7 @@ enum LibraryEntry: Identifiable {
         case .dateAdded:
             order = { lhs, rhs in lhs.dateAdded == rhs.dateAdded ? byTitle(lhs, rhs) : lhs.dateAdded > rhs.dateAdded }
         }
-        let right = server.map(LibraryEntry.server).sorted(by: order)
+        let right = server.map(LibraryEntry.server)
         if sort == .lastPlayed || sort == .progress { return left + right }
 
         var result: [LibraryEntry] = []

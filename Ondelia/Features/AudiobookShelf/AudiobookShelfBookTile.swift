@@ -209,26 +209,52 @@ struct AudiobookShelfCover: View {
     }
 }
 
-/// Server images fetched with the bearer header (`AsyncImage` cannot set one), kept in memory
-/// so scrolling back does not fetch them again.
+/// Server images fetched with the bearer header (`AsyncImage` cannot set one). Kept in memory
+/// for scrolling back, and on disk so a relaunch does not fetch every cover of a big library
+/// again.
 @MainActor
 enum AudiobookShelfImages {
-    /// ponytail: memory only, and NSCache evicts under pressure. Add a disk cache if cold
-    /// launches on a big library feel slow.
     private static let cache = NSCache<NSString, UIImage>()
+
+    /// Caches: the server holds the originals, so the system may purge these.
+    nonisolated static var folder: URL {
+        URL.cachesDirectory.appending(path: "AudiobookShelfImages", directoryHint: .isDirectory)
+    }
+
+    nonisolated private static func file(_ key: String) -> URL {
+        folder.appending(path: AudiobookShelfAPI.safeFilename(key))
+    }
 
     static func cached(_ key: String) -> UIImage? { cache.object(forKey: key as NSString) }
 
     static func load(key: String, request: (URL, String) -> URLRequest) async -> UIImage? {
         if let hit = cached(key) { return hit }
+        let file = file(key)
+        // Off the main thread: a grid of covers decoding from disk at once stutters the scroll.
+        if let stored = await Task.detached(priority: .userInitiated, operation: {
+            (try? Data(contentsOf: file)).flatMap(UIImage.init(data:))?.preparingForDisplay()
+        }).value {
+            cache.setObject(stored, forKey: key as NSString)
+            return stored
+        }
         let service = AudiobookShelfService.shared
         guard let server = service.server, let token = service.token,
               let (data, response) = try? await URLSession.shared.data(for: request(server, token)),
               (response as? HTTPURLResponse)?.statusCode == 200,
-              let image = UIImage(data: data)
+              let image = await Task.detached(operation: { UIImage(data: data)?.preparingForDisplay() }).value
         else { return nil }
         cache.setObject(image, forKey: key as NSString)
+        Task.detached(priority: .utility) {
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try? data.write(to: file, options: .atomic)
+        }
         return image
+    }
+
+    /// Signed out: another account's covers have no business staying.
+    static func forget() {
+        cache.removeAllObjects()
+        try? FileManager.default.removeItem(at: folder)
     }
 }
 

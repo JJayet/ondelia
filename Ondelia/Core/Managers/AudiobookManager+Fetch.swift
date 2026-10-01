@@ -55,6 +55,7 @@ extension AudiobookManager {
             }
             self.audiobooks = valid
             self.isLoadingLibrary = false
+            AudiobookShelfService.shared.linksDidChange()
             fetchCollections()
             reconcileSeriesCollections()
             reconcileServerSeriesCollections()
