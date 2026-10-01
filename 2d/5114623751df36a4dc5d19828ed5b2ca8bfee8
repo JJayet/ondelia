@@ -1,0 +1,53 @@
+Ondelia/Core/Services/SettingsSync.swift
+  s_0fef528c759c27::t_7930bb762dcff5 20
+Ondelia/Features/Library/LibraryEntry.swift
+  s_0fef528c759c27::t_36fb7188f90f88 1-81
+Ondelia/Core/Services/AudiobookShelfCatalog.swift
+  s_0fef528c759c27::t_1cb212ec568b0d 1-87
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_0fef528c759c27::t_842ba7c9f40c62 13,59,83,104,141,159,182
+Ondelia/Core/Services/AudiobookShelfAPI.swift
+  s_0fef528c759c27::t_5d2d1a03a6380d 96-102,104,119-120,126,131-140
+  s_0fef528c759c27::t_9099c5d9c7d7cf 141-142
+Ondelia/Features/Library/LibraryView.swift
+  s_0fef528c759c27::t_dbadf0474d94c6 49-52,73,134,203-205,243
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_0fef528c759c27::t_7930bb762dcff5 12,41-44,46-54
+Ondelia/Features/Library/LibraryView+Selection.swift
+  s_0fef528c759c27::t_842ba7c9f40c62 83-85
+OndeliaTests/Features/Library/LibraryEntryTests.swift
+  s_0fef528c759c27::t_e305da40aba93a 1-54
+Ondelia/Features/AudiobookShelf/AudiobookShelfBookTile.swift
+  s_0fef528c759c27::t_78b4dab85ed23a 84,112-127,129-133,139-152
+  s_0fef528c759c27::t_8851d2fc81a169 153
+Ondelia/Features/AudiobookShelf/AudiobookShelfBookRow.swift
+  s_0fef528c759c27::t_34cc0d62745d55 1-64
+Ondelia/Resources/Localizable.xcstrings
+  s_0fef528c759c27::t_08db13ff03eda4 5682-5736
+Ondelia/Features/Library/LibraryView+Server.swift
+  s_0fef528c759c27::t_d5e9bf6a1e49e6 1-21,27-94
+  s_0fef528c759c27::t_842ba7c9f40c62 22-26
+Ondelia/Features/Library/LibraryTableView.swift
+  s_0fef528c759c27::t_31b9d85c672299 15-16,25,28,55-57,82-88,116,127,147-161,168-169
+  s_0fef528c759c27::t_2b0b0795dac53b 170
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_0fef528c759c27::t_842ba7c9f40c62 53-57,105,124,126-127
+Ondelia/Core/Services/AudiobookShelfAPI+Models.swift
+  s_0fef528c759c27::t_5d2d1a03a6380d 60-63
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "2d5114623751df36a4dc5d19828ed5b2ca8bfee8",
+  "prompts": {},
+  "sessions": {
+    "s_0fef528c759c27": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c8aa2d1-91f4-4a6e-bc0f-466979a6f536",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
