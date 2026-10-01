@@ -1,0 +1,50 @@
+docs/adr/0002-server-audiobooks-shown-not-joined.md
+  s_0fef528c759c27::t_a6c9242221ede2 7-8
+Ondelia/Core/Services/AudiobookShelfCatalog.swift
+  s_0fef528c759c27::t_384e99da1bd30a 32-34
+Ondelia/Features/AudiobookShelf/AudiobookShelfShelfView.swift
+  s_0fef528c759c27::t_c4b1417f3d1320 57
+Ondelia/Features/Library/ImportMenu.swift
+  s_0fef528c759c27::t_a0188463df83a0 4-5,12
+Ondelia/Features/Library/LibraryView+Server.swift
+  s_0fef528c759c27::t_384e99da1bd30a 22-32,52-53,56
+  s_0fef528c759c27::t_a0188463df83a0 40-44
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_0fef528c759c27::t_a0188463df83a0 108
+  s_0fef528c759c27::t_96b4e965888965 126
+  s_0fef528c759c27::t_faed4728cc9dd1 87
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesTile.swift
+  s_0fef528c759c27::t_c4b1417f3d1320 44-60
+  s_0fef528c759c27::t_384e99da1bd30a 1-43
+Ondelia/Resources/Localizable.xcstrings
+  s_0fef528c759c27::t_bdbe29d02d874a 5777-5787
+Ondelia/Features/Library/LibraryView.swift
+  s_0fef528c759c27::t_a0188463df83a0 49,174,181-186,188
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_0fef528c759c27::t_96b4e965888965 13-14,24,60-76,137-139
+  s_0fef528c759c27::t_cccb5a6aadc57f 140-141
+CONTEXT.md
+  s_0fef528c759c27::t_a6c9242221ede2 30
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_0fef528c759c27::t_a0188463df83a0 92,170
+  s_0fef528c759c27::t_faed4728cc9dd1 38-40,46,58-63,133-135,137-138,143
+Ondelia/Features/Library/LibraryTableView.swift
+  s_0fef528c759c27::t_96b4e965888965 26-27,118-130
+  s_0fef528c759c27::t_5bf27246c2a8f8 131-132
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8d6e1331b7100544bb40ccca833e291d629dd14d",
+  "prompts": {},
+  "sessions": {
+    "s_0fef528c759c27": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0c8aa2d1-91f4-4a6e-bc0f-466979a6f536",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
