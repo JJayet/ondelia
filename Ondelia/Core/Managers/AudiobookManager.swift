@@ -121,8 +121,8 @@ final class AudiobookManager {
             try? FileManager.default.removeItem(at: fileURL)
         }
         
-        // Delete from Core Data. Transcript windows and AudiobookShelf links have no
-        // relationship to cascade through.
+        // Delete from Core Data. Transcript windows, AudiobookShelf links and closed Hardcover
+        // reads have no relationship to cascade through.
         let bookID = audiobook.id
         let windows = try? swiftDataController.context.fetch(
             FetchDescriptor<TranscriptWindowModel>(predicate: #Predicate { $0.audiobookID == bookID })
@@ -132,6 +132,10 @@ final class AudiobookManager {
             FetchDescriptor<AudiobookShelfLinkModel>(predicate: #Predicate { $0.audiobookID == bookID })
         )
         for link in links ?? [] { swiftDataController.context.delete(link) }
+        let closedReads = try? swiftDataController.context.fetch(
+            FetchDescriptor<HardcoverClosedReadModel>(predicate: #Predicate { $0.audiobookID == bookID })
+        )
+        for read in closedReads ?? [] { swiftDataController.context.delete(read) }
         swiftDataController.context.delete(audiobook)
         swiftDataController.save()
         fetchAudiobooks()

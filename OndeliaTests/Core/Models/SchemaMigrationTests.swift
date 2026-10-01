@@ -30,7 +30,7 @@ struct SchemaMigrationTests {
     /// schema V4. Changing a model class that an earlier version lists changes its hash, and a
     /// store written by the released app then matches no version: SwiftData refuses to open it
     /// ("Cannot use staged migration with an unknown model version"). Add a new entity in a new
-    /// version instead; only then add its hash here.
+    /// version instead; only then add its hash here. `HardcoverClosedReadModel` arrived in V5.
     static let shippedEntityHashes: [String: String] = [
         "AudiobookModel": "3s9I63Vn2ai2Qal6du88xDrLoVcDqM36WmM2WN0EWVo=",
         "AudiobookShelfLinkModel": "3W0e2q0tS0NdXcvyWn5qGyL3Sttoql56O27WzJOyooc=",
@@ -38,6 +38,7 @@ struct SchemaMigrationTests {
         "ChapterModel": "rKqBj9eJlgMK3daNSzSq8FkksgVjGNHmZWbWQfmt6FQ=",
         "ChapterTranscriptionModel": "K8AI3+DzTKtnvtCSt4MbotKWks6FtKblV7vp3reTWMc=",
         "CollectionModel": "jbrLGOvFz3d6YQ/jikx55Yp+EU1SzFATltepfA5/btw=",
+        "HardcoverClosedReadModel": "YCkXNhQPiGYIH0SmnoDPQn2f5tUg7pNSczN1Fo3+MCA=",
         "ListeningSessionModel": "VfD4JzNW0cYCwa4mcueuXH3Ze83Ud5DquJ5QXWBh11U=",
         "TranscriptWindowModel": "/MPyjALvB7iE3ED8Kxrgnnx89VQJhQmZJsXso10za78="
     ]

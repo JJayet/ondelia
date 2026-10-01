@@ -5,6 +5,7 @@
 
 import Testing
 import Foundation
+import SwiftData
 @testable import Isora
 
 @Suite("Hardcover progress")
@@ -39,5 +40,38 @@ struct HardcoverProgressTests {
         let stamp = HardcoverAPI.dateStamp(date)
         #expect(stamp.count == 10)
         #expect(stamp.wholeMatch(of: /\d{4}-\d{2}-\d{2}/) != nil)
+    }
+
+    @Test("A Finish closes the open read once; listening again opens the next one")
+    func readLifecycle() {
+        let push = HardcoverService.readPush
+        // First listen: no read yet, finished or not.
+        #expect(push(false, nil, false) == .start)
+        #expect(push(true, nil, false) == .start)
+        // An open read moves, and is closed by the Finish.
+        #expect(push(false, 7, false) == .update(readID: 7))
+        #expect(push(true, 7, false) == .update(readID: 7))
+        // Closed: nothing more while Finished; a re-listen opens a new read.
+        #expect(push(true, 7, true) == .none)
+        #expect(push(false, 7, true) == .start)
+    }
+
+    @Test("A closed read is remembered per audiobook and read, and can be reopened")
+    @MainActor
+    func closedReads() {
+        // Held for the whole test: a context outlived by its container crashes on first fetch.
+        let controller = SwiftDataController.inMemory()
+        let context = controller.context
+        let book = UUID(), other = UUID()
+        HardcoverService.setClosed(true, readID: 7, of: book, in: context)
+        HardcoverService.setClosed(true, readID: 7, of: book, in: context)
+        #expect(HardcoverService.isClosed(readID: 7, of: book, in: context))
+        #expect(!HardcoverService.isClosed(readID: 8, of: book, in: context))
+        #expect(!HardcoverService.isClosed(readID: 7, of: other, in: context))
+        #expect((try? context.fetchCount(FetchDescriptor<HardcoverClosedReadModel>())) == 1)
+
+        HardcoverService.setClosed(false, readID: 7, of: book, in: context)
+        #expect(!HardcoverService.isClosed(readID: 7, of: book, in: context))
+        withExtendedLifetime(controller) {}
     }
 }

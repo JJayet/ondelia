@@ -15,8 +15,12 @@ extension ListenerState.Outbound {
         AudiobookShelfService.shared.pushProgress(for: accepted.audiobook)
     }
 
-    /// No-op unless the audiobook has a Hardcover link; throttles itself.
+    /// No-op unless the audiobook has a Hardcover link; throttles itself. Unmarking by hand
+    /// reopens the read the Finish closed, as it retracts the Finish itself.
     static let hardcover = Self(source: nil) { accepted in
+        if accepted.change == .unfinish, accepted.source == .listener {
+            HardcoverService.shared.reopenRead(for: accepted.audiobook)
+        }
         Task { await HardcoverService.shared.syncProgress(for: accepted.audiobook) }
     }
 
