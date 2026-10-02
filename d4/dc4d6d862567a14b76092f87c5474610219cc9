@@ -1,0 +1,19 @@
+Ondelia/Shared/PlayerHaptics.swift
+  s_28765eaa9b0225::t_949ea169043a74 22,24,26-27,31
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "d4dc4d6d862567a14b76092f87c5474610219cc9",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
