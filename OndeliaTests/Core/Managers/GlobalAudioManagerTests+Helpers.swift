@@ -14,9 +14,10 @@ func createTestAudiobook(isMultiFile: Bool, title: String = "Test Audiobook") ->
     AudiobookModel(title: title, author: "Test Author", duration: 3600.0)
 }
 
+/// Prefixed with a UUID so parallel or repeated runs never share a file. Callers remove it.
 func createTempAudioFile(named filename: String) -> URL {
     let tempDir = FileManager.default.temporaryDirectory
-    let fileURL = tempDir.appendingPathComponent(filename)
+    let fileURL = tempDir.appendingPathComponent("\(UUID().uuidString)-\(filename)")
     
     // Create empty file
     FileManager.default.createFile(atPath: fileURL.path, contents: Data(), attributes: nil)
@@ -24,13 +25,10 @@ func createTempAudioFile(named filename: String) -> URL {
     return fileURL
 }
 
-func createTempDirectory(named dirname: String) -> URL {
-    let tempDir = FileManager.default.temporaryDirectory
-    let dirURL = tempDir.appendingPathComponent(dirname)
-    
-    try? FileManager.default.createDirectory(at: dirURL, withIntermediateDirectories: true)
-    
-    return dirURL
+func removeTempItems(_ urls: URL...) {
+    for url in urls {
+        try? FileManager.default.removeItem(at: url)
+    }
 }
 
 /// A folder book with a manifest, so it produces a real multi-chapter timeline.
