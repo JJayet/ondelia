@@ -46,8 +46,12 @@
 ## Versioning & Changelog
 
 - Every change to `MARKETING_VERSION` (App Store version) adds a section to `CHANGELOG.md` in the
-  same commit: user-facing changes since the previous version, in English and French, ready for
-  App Store Connect's "What's New". Use the app's UI terms from `Localizable.xcstrings`.
+  same commit, in English and French, ready for App Store Connect:
+  - Promotional text (max 170 chars) highlighting the version's headline change.
+  - Subtitle (max 30 chars) and keywords (max 100 chars, comma-separated, no spaces, no words
+    already in the name or subtitle), revised for the new features.
+  - "What's New": user-facing changes since the previous version.
+  Use the app's UI terms from `Localizable.xcstrings`.
 - Build-number-only bumps (`CURRENT_PROJECT_VERSION`) update the existing section's heading.
 
 ## Security & Configuration Tips

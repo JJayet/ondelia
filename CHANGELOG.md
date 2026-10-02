@@ -1,11 +1,24 @@
 # Changelog
 
 One section per App Store version, newest first. Each section is written for listeners and is
-ready to paste into App Store Connect's "What's New", in English and French.
+ready to paste into App Store Connect, in English and French: promotional text (max 170 chars),
+subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
+or subtitle) and "What's New".
 
 ## 1.5 (1) — 2026-10-02
 
 ### English
+
+Promotional text
+New: connect your AudiobookShelf server to stream or download your books, with progress synced both ways. Still no subscription, no account, no ads.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,cue,player,chapters,offline,sleep,timer,bookmarks,carplay,watch,selfhosted,hardcover
+
+What's New
 
 AudiobookShelf
 - Connect your AudiobookShelf server: browse, download or stream its books, with listening progress synced both ways.
@@ -31,6 +44,17 @@ Fixes
 - Database backups are checked without being changed.
 
 ### Français
+
+Texte promotionnel
+Nouveau : connectez votre serveur AudiobookShelf pour écouter vos livres en streaming ou les télécharger. Toujours sans abonnement, sans compte, sans publicité.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,flac,lecteur,chapitres,hors,ligne,minuteur,sommeil,signets,montre,carplay,hardcover,écoute
+
+Nouveautés
 
 AudiobookShelf
 - Connectez votre serveur AudiobookShelf : parcourez, téléchargez ou écoutez ses livres en streaming, avec une progression synchronisée dans les deux sens.
