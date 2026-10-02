@@ -1,0 +1,23 @@
+OndeliaTests/Core/Services/AudiobookPlayerTests.swift
+  s_28765eaa9b0225::t_95ef7926513bfe 15
+OndeliaTests/Utilities/TestBundleAnchor.swift
+  s_28765eaa9b0225::t_95ef7926513bfe 1-5
+OndeliaTests/Core/Services/CUEParserTests.swift
+  s_28765eaa9b0225::t_95ef7926513bfe 7
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "1cdf6242b50475f942978d5c4a5cf3e3a6c6320a",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
