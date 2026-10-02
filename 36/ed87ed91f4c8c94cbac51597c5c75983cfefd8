@@ -1,0 +1,22 @@
+AGENTS.md
+  s_650464a7e6897c::t_6050f1a6770c42 49-54
+CHANGELOG.md
+  s_650464a7e6897c::t_262c89c41624ff 4-6,12-22,48-57
+  s_650464a7e6897c::t_22488684bc404a 58
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "36ed87ed91f4c8c94cbac51597c5c75983cfefd8",
+  "prompts": {},
+  "sessions": {
+    "s_650464a7e6897c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "4db123b3-6b89-4187-b84d-3b6d079c62a6",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
