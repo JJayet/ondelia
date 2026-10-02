@@ -1,0 +1,25 @@
+OndeliaTests/Core/Services/SettingsSyncTests.swift
+  s_28765eaa9b0225::t_27f91883a41d96 1-77
+Ondelia/Core/Managers/ReadingStatistics.swift
+  s_28765eaa9b0225::t_e4f0ebb7066504 10-18,22,51,53,107-109,114-115,129,165,174,180
+Ondelia/Core/Services/SettingsSync.swift
+  s_28765eaa9b0225::t_e4f0ebb7066504 4-9,77,103,117,136-137
+  s_28765eaa9b0225::t_6ea58dbc14f3f9 29-36,62,74-76,78-80,82-83,88-95,98,102,108-115,119-124,135
+  s_28765eaa9b0225::t_2ed476304c47f3 116,118
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "32127a20b7eb7ccbeb74bc31bf112661d9ca9dbc",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
