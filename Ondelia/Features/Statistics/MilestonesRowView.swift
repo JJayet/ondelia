@@ -27,7 +27,7 @@ struct MilestonesRowView: View {
     }
 
     private func badge(_ milestone: Milestone, progress: Int) -> some View {
-        let unlocked = progress >= milestone.target
+        let unlocked = progress >= milestone.target || statistics.hasEarned(milestone)
         return VStack(spacing: 8) {
             ZStack {
                 Circle()

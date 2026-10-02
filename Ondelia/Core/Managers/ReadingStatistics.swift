@@ -145,6 +145,11 @@ final class ReadingStatistics {
         )
     }
 
+    /// Once shown as unlocked, a badge stays lit even if its rule or the log later counts less.
+    func hasEarned(_ milestone: Milestone) -> Bool {
+        UserDefaults.standard.stringArray(forKey: "shownMilestones")?.contains(milestone.id) ?? false
+    }
+
     var unlockedMilestones: [Milestone] {
         let stats = self.stats
         return Milestone.all.filter { progress(of: $0, in: stats) >= $0.target }
