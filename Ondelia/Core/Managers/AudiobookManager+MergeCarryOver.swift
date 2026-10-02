@@ -22,17 +22,6 @@ extension AudiobookManager {
         return (position, !sources.isEmpty && sources.allSatisfy(\.isFinished))
     }
 
-    /// `ids` with every one of `sourceIDs` swapped for `mergedID`, once, in the first slot any
-    /// of them held. Unchanged when none of them is there.
-    static func replacing(_ sourceIDs: Set<UUID>, with mergedID: UUID, in ids: [UUID]) -> [UUID] {
-        var placed = false
-        return ids.compactMap { id in
-            guard sourceIDs.contains(id) || id == mergedID else { return id }
-            defer { placed = true }
-            return placed ? nil : mergedID
-        }
-    }
-
     /// Re-points the sources' bookmarks at `merged`. Done before the sources are deleted, which
     /// would otherwise cascade to them.
     func moveBookmarks(from sources: [AudiobookModel], chapters: [FolderChapter], onto merged: AudiobookModel) {
@@ -51,7 +40,7 @@ extension AudiobookManager {
         let sourceIDs = Set(sources.map(\.id))
         var changed = false
         for collection in collections {
-            let replaced = Self.replacing(sourceIDs, with: merged.id, in: collection.bookIDs)
+            let replaced = collection.bookIDs.replacingSources(sourceIDs, with: merged.id)
             guard replaced != collection.bookIDs else { continue }
             collection.bookIDs = replaced
             changed = true
@@ -61,5 +50,18 @@ extension AudiobookManager {
             fetchCollections()
         }
         PlayQueue.shared.replace(sourceIDs, with: merged.id)
+    }
+}
+
+extension Array where Element == UUID {
+    /// Every one of `sourceIDs` swapped for `mergedID`, once, in the first slot any of them
+    /// held. Unchanged when none of them is there.
+    func replacingSources(_ sourceIDs: Set<UUID>, with mergedID: UUID) -> [UUID] {
+        var placed = false
+        return compactMap { id in
+            guard sourceIDs.contains(id) || id == mergedID else { return id }
+            defer { placed = true }
+            return placed ? nil : mergedID
+        }
     }
 }

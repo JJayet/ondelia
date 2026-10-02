@@ -108,9 +108,9 @@ struct MergeAudiobooksTests {
     @Test("The merged id takes the first source's slot, once")
     func replacingKeepsTheFirstSlot() {
         let (a, b, c, merged) = (UUID(), UUID(), UUID(), UUID())
-        #expect(AudiobookManager.replacing([a, b], with: merged, in: [c, b, a]) == [c, merged])
-        #expect(AudiobookManager.replacing([a, b], with: merged, in: [b, merged, a]) == [merged])
-        #expect(AudiobookManager.replacing([a], with: merged, in: [c]) == [c])
+        #expect([c, b, a].replacingSources([a, b], with: merged) == [c, merged])
+        #expect([b, merged, a].replacingSources([a, b], with: merged) == [merged])
+        #expect([c].replacingSources([a], with: merged) == [c])
     }
 
     @Test("A single book is never merged, and nothing on disk moves")
