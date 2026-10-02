@@ -28,6 +28,49 @@ extension LibraryView {
         return catalog.seriesByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(forSeries: $0.id)) }
     }
 
+    /// The series behind the folded "Server series" row, once it is opened.
+    var shownServerSeries: [AudiobookShelfAPI.Series] { showsServerSeries ? displayOnlySeries : [] }
+
+    /// Folds the server series into one row: a server can have hundreds, which would push the
+    /// Library's own books a long scroll down. Tapping opens or closes it.
+    @ViewBuilder
+    var serverSeriesToggle: some View {
+        if !displayOnlySeries.isEmpty {
+            Button {
+                withHapticFeedback {
+                    withAnimation(.easeInOut(duration: 0.25)) { showsServerSeries.toggle() }
+                }
+            } label: {
+                HStack(spacing: 8) {
+                    Image(systemName: "books.vertical.fill")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.tint)
+                    Text(NSLocalizedString("Server series", comment: "Library: folded row of server series"))
+                        .font(.system(size: 15, weight: .semibold))
+                    Text(verbatim: "\(displayOnlySeries.count)")
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 8)
+                        .frame(height: 20)
+                        .background(.quaternary, in: Capsule())
+                    Spacer(minLength: 0)
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(.tertiary)
+                        .rotationEffect(.degrees(showsServerSeries ? 90 : 0))
+                }
+                .padding(.horizontal, 16)
+                .frame(height: 46)
+                .contentShape(Rectangle())
+                .glassCard(cornerRadius: 18)
+            }
+            .buttonStyle(.plain)
+            .accessibilityValue(showsServerSeries
+                ? NSLocalizedString("Expanded", comment: "Accessibility: folded row is open")
+                : NSLocalizedString("Collapsed", comment: "Accessibility: folded row is closed"))
+        }
+    }
+
     var hasCollections: Bool { !collectionGroups.isEmpty || !displayOnlySeries.isEmpty }
 
     /// No book at all, of the Library's or the server's: the empty state's cue.

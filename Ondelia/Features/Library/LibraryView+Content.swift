@@ -55,7 +55,11 @@ extension LibraryView {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
-                ForEach(displayOnlySeries) { series in
+                serverSeriesToggle
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                ForEach(shownServerSeries) { series in
                     AudiobookShelfSeriesCard(series: series)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -140,7 +144,8 @@ extension LibraryView {
                         ForEach(collectionGroups) { group in
                             collectionCard(group)
                         }
-                        ForEach(displayOnlySeries) { AudiobookShelfSeriesCard(series: $0) }
+                        serverSeriesToggle
+                        ForEach(shownServerSeries) { AudiobookShelfSeriesCard(series: $0) }
                     }
                     .padding(.horizontal)
                 }

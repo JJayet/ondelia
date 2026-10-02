@@ -79,12 +79,13 @@ extension LibraryView {
     var collectionsRow: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+            serverSeriesToggle
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 14) {
                     ForEach(collectionGroups) { group in
                         CollectionTileView(group: group) { collectionForDetail = group.collection }
                     }
-                    ForEach(displayOnlySeries) { AudiobookShelfSeriesTile(series: $0) }
+                    ForEach(shownServerSeries) { AudiobookShelfSeriesTile(series: $0) }
                 }
             }
             .clipped()

@@ -50,6 +50,8 @@ struct LibraryView: View {
     /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
     /// redraws the shelf.
     @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
+    /// Whether the folded "Server series" row is open. Per device, folded by default.
+    @AppStorage("library.showsServerSeries") var showsServerSeries = false
     let catalog = AudiobookShelfCatalog.shared
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.

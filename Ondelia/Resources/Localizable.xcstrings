@@ -5785,6 +5785,39 @@
           }
         }
       }
+    },
+    "Server series" : {
+      "comment" : "Library: folded row of server series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries du serveur"
+          }
+        }
+      }
+    },
+    "Expanded" : {
+      "comment" : "Accessibility: folded row is open",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Développé"
+          }
+        }
+      }
+    },
+    "Collapsed" : {
+      "comment" : "Accessibility: folded row is closed",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réduit"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
