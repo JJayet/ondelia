@@ -1,0 +1,23 @@
+OndeliaTests/Core/Managers/GlobalAudioManagerProgressTests.swift
+  s_28765eaa9b0225::t_edc93af2461b64 1-72
+OndeliaTests/Core/Managers/GlobalAudioManagerAudioSessionTests.swift
+  s_28765eaa9b0225::t_ce00e319e81ddf 20-21
+  s_28765eaa9b0225::t_7bbe3fd862d618 1-19,22-54,56-68,70-97,99-113
+  s_28765eaa9b0225::t_fae768e5a8461d 55,69,98
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "23e1e5a6e261f0aae2f83dea79aa68a4ec7a7ba8",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": null
+    }
+  }
+}
