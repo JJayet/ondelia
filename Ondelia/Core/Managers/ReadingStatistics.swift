@@ -115,7 +115,8 @@ final class ReadingStatistics {
         SettingsSync.publish(Defaults.monthlyGoal)
     }
 
-    /// Clears the log and the pre-log counters. The goal stays.
+    /// Clears the log and the pre-log counters. The goal and earned Milestones stay: earned badges
+    /// are a union across devices, so clearing them here would only see iCloud bring them back.
     func resetAll() {
         for session in sessions { store.context.delete(session) }
         sessions = []
@@ -126,7 +127,6 @@ final class ReadingStatistics {
         for key in ["totalListeningTime", "booksCompleted", "longestStreak", "currentStreak", "monthlyProgress", "lastListenDate"] {
             UserDefaults.standard.removeObject(forKey: key)
         }
-        UserDefaults.standard.set([String](), forKey: Defaults.shownMilestones)
         store.save()
     }
 

@@ -76,7 +76,7 @@ struct SettingsView: View {
                 withHapticFeedback { statistics.resetAll() }
             }
         } message: {
-            Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books and goals remain.", comment: "Reset stats confirm message"))
+            Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books, goals, and earned Milestones remain.", comment: "Reset stats confirm message"))
         }
     }
 }

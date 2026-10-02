@@ -5132,13 +5132,13 @@
         }
       }
     },
-    "This will clear your listening time, streaks, and monthly progress. Your books and goals remain." : {
+    "This will clear your listening time, streaks, and monthly progress. Your books, goals, and earned Milestones remain." : {
       "comment" : "Reset stats confirm message",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres et objectifs seront conservés."
+            "value" : "Cela effacera votre temps d'écoute, vos séries et votre progression mensuelle. Vos livres, objectifs et étapes franchies seront conservés."
           }
         }
       }
