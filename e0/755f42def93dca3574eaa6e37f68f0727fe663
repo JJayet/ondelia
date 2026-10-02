@@ -1,0 +1,21 @@
+OndeliaTests/Core/Managers/GlobalAudioManagerProgressTests.swift
+  s_28765eaa9b0225::t_edc93af2461b64 1-72
+OndeliaTests/Core/Managers/GlobalAudioManagerAudioSessionTests.swift
+  s_28765eaa9b0225::t_7bbe3fd862d618 1-112
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "e0755f42def93dca3574eaa6e37f68f0727fe663",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
