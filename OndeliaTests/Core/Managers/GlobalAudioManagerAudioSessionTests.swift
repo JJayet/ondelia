@@ -10,7 +10,7 @@ import Testing
 func loadFixtureBook(into manager: GlobalAudioManager) async throws -> AudiobookModel {
     manager.unload()
     let book = AudiobookModel(title: "Fixture", author: "Test", duration: 3600)
-    book.fileURL = try #require(Bundle(for: MockAVAudioSession.self).url(forResource: "sample", withExtension: "m4a")).path
+    book.fileURL = try #require(Bundle(for: TestBundleAnchor.self).url(forResource: "sample", withExtension: "m4a")).path
     manager.loadAudiobook(book)
     try #require(await waitUntil(timeout: 5) { manager.isReady && manager.player != nil })
     return book
