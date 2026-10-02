@@ -8,16 +8,16 @@ extension AudiobookShelfAPI {
     }
 
     /// A book's place in one series. `sequence` is free text: "1", "1.5", "Prequel".
-    struct SeriesSequence: Decodable, Hashable {
+    struct SeriesSequence: Codable, Hashable {
         let id: String
         let name: String?
         let sequence: String?
     }
 
-    struct Item: Decodable, Identifiable, Hashable {
-        struct Media: Decodable, Hashable {
-            struct Metadata: Decodable, Hashable {
-                struct Author: Decodable, Hashable { let name: String }
+    struct Item: Codable, Identifiable, Hashable {
+        struct Media: Codable, Hashable {
+            struct Metadata: Codable, Hashable {
+                struct Author: Codable, Hashable { let name: String }
                 let title: String?
                 /// Filled by the minified item list.
                 let authorName: String?
@@ -42,13 +42,23 @@ extension AudiobookShelfAPI {
                     series = (try? container.decodeIfPresent(SeriesSequence.self, forKey: .series))
                         ?? (try? container.decodeIfPresent([SeriesSequence].self, forKey: .series))?.first
                 }
+
+                /// For the catalogue's disk cache; reads back through `init(from:)`.
+                func encode(to encoder: any Encoder) throws {
+                    var container = encoder.container(keyedBy: CodingKeys.self)
+                    try container.encodeIfPresent(title, forKey: .title)
+                    try container.encodeIfPresent(authorName, forKey: .authorName)
+                    try container.encodeIfPresent(authors, forKey: .authors)
+                    try container.encodeIfPresent(seriesName, forKey: .seriesName)
+                    try container.encodeIfPresent(series, forKey: .series)
+                }
             }
             let metadata: Metadata
             let duration: Double?
         }
 
         /// Present when the list was asked to fold series: this entry stands for the series.
-        struct CollapsedSeries: Decodable, Hashable {
+        struct CollapsedSeries: Codable, Hashable {
             let id: String
             let name: String
             let numBooks: Int
@@ -57,6 +67,10 @@ extension AudiobookShelfAPI {
         let id: String
         let media: Media
         let collapsedSeries: CollapsedSeries?
+        /// When the server got the book, in milliseconds since 1970.
+        var addedAt: Double?
+
+        var dateAdded: Date { Date(timeIntervalSince1970: (addedAt ?? 0) / 1000) }
 
         var title: String { media.metadata.title ?? "" }
 
@@ -84,7 +98,7 @@ extension AudiobookShelfAPI {
         }
     }
 
-    struct Series: Decodable, Identifiable, Hashable {
+    struct Series: Codable, Identifiable, Hashable {
         let id: String
         let name: String
         /// Filled by the series list and search, in series order but without their sequence.

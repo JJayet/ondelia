@@ -54,14 +54,7 @@ struct AudiobookShelfShelfView: View {
             .padding(.bottom, 24)
         }
         .scrollContentBackground(.hidden)
-        .environment(\.audiobookShelfLibraryBooks, service.libraryBooks)
-        .environment(\.audiobookShelfLibrary, library ?? "")
-        .navigationDestination(for: AudiobookShelfRoute.self) { route in
-            switch route {
-            case .series(let series): AudiobookShelfSeriesView(series: series, library: library ?? "")
-            case .author(let author): AudiobookShelfAuthorView(author: author, library: library ?? "")
-            }
-        }
+        .serverSeriesDestinations(library: library ?? "")
         .task { await loadLibraries() }
         .task(id: query) { await search() }
         .onChange(of: library) { _, id in

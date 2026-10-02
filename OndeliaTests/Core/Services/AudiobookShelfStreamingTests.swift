@@ -27,19 +27,6 @@ struct AudiobookShelfStreamingTests {
         #expect(push(Pushed(position: 10, isFinished: false), Pushed(position: 10, isFinished: true), false))
     }
 
-    @Test("The server position wins only when newer, with a second of slack")
-    func serverIsNewer() throws {
-        let now = Date(timeIntervalSince1970: 1_000_000)
-        func remote(_ seconds: Double) throws -> AudiobookShelfAPI.MediaProgress {
-            let json = #"{"currentTime":42,"isFinished":false,"lastUpdate":\#(seconds * 1000)}"#
-            return try JSONDecoder().decode(AudiobookShelfAPI.MediaProgress.self, from: Data(json.utf8))
-        }
-        #expect(AudiobookShelfService.serverIsNewer(try remote(1_000_010), than: now))
-        #expect(!AudiobookShelfService.serverIsNewer(try remote(1_000_000.5), than: now))
-        #expect(!AudiobookShelfService.serverIsNewer(try remote(999_000), than: now))
-        #expect(AudiobookShelfService.serverIsNewer(try remote(1), than: nil))
-    }
-
     @Test("Stream addresses sit under the server's own path")
     func streamURL() throws {
         let server = try #require(URL(string: "https://host/abs"))

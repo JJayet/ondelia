@@ -31,14 +31,6 @@ extension AudiobookShelfService {
         return moved >= progressPushInterval
     }
 
-    /// Whether the server's position is newer than the one on the device. A local position
-    /// with no timestamp predates position sync and loses.
-    nonisolated static func serverIsNewer(_ remote: AudiobookShelfAPI.MediaProgress, than local: Date?) -> Bool {
-        guard let local else { return true }
-        // A second of slack: the two clocks are not the same clock.
-        return remote.updatedAt > local.addingTimeInterval(1)
-    }
-
     /// Pushes the book's position when it has moved enough. Called on every progress write.
     func pushProgress(for book: AudiobookModel) {
         guard isSignedIn, let server, let token, let item = itemID(for: book),
@@ -80,21 +72,14 @@ extension AudiobookShelfService {
             Log.library.error("AudiobookShelf: progress pull failed: \(error.localizedDescription)")
             return
         }
-        guard let remote, Self.serverIsNewer(remote, than: book.positionUpdatedAt) else { return }
-
-        book.currentPosition = remote.currentTime
-        book.positionUpdatedAt = remote.updatedAt
-        // Smart rewind measures the pause from `lastPlayed`: it was the server's listen that
-        // stopped at this position, and a book never played here would otherwise count as
-        // paused since forever and always get the longest rewind.
-        book.lastPlayed = max(book.lastPlayed, remote.updatedAt)
-        // Recorded first, so the writes below do not echo the server's own position back.
+        guard let remote,
+              ListenerState.shared.apply(.position(remote.currentTime), to: book, from: .server, at: remote.updatedAt)
+        else { return }
+        // ListenerState does not push a server change back to the server; this is what the
+        // server holds now, so the next local write is throttled against it.
         pushedProgress[book.id] = PushedProgress(position: remote.currentTime, isFinished: remote.isFinished)
-        if remote.isFinished, !book.isFinished {
-            AudiobookManager.shared.markAsFinished(book)
-        } else if !remote.isFinished, book.isFinished {
-            AudiobookManager.shared.markAsUnread(book)
+        if remote.isFinished != book.isFinished {
+            ListenerState.shared.apply(remote.isFinished ? .finish : .unfinish, to: book, from: .server, at: remote.updatedAt)
         }
-        SwiftDataController.shared.save()
     }
 }

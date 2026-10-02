@@ -10,7 +10,7 @@ extension LibraryView {
 
     /// Books stacked to play next, in queue order.
     var queuedBooks: [AudiobookModel] {
-        PlayQueue.shared.books(in: audiobookManager.audiobooks)
+        PlayQueue.shared.books(in: visibleAudiobooks)
     }
 
     var gridSpacing: CGFloat { gridColumns >= 4 ? 10 : 16 }
@@ -35,14 +35,15 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
-            // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
-            if isWide, !collectionGroups.isEmpty {
+            // Collections: Hardcover series and hand-made ones, then the server series that
+            // are not one yet. Wide: one row of tiles.
+            if isWide, hasCollections {
                 collectionsRow
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             } else {
-                if !collectionGroups.isEmpty {
+                if hasCollections {
                     SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
@@ -54,9 +55,19 @@ extension LibraryView {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
+                serverSeriesToggle
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                ForEach(shownServerSeries) { series in
+                    AudiobookShelfSeriesCard(series: series)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                }
             }
 
-            if !audiobookManager.audiobooks.isEmpty {
+            if !isShelfEmpty {
                 SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -80,9 +91,9 @@ extension LibraryView {
             .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
 
             // Library Items
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+            if isShelfEmpty && !audiobookManager.isImporting
                 && AudiobookShelfService.shared.downloads.isEmpty {
-                EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
+                EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 40, leading: 0, bottom: 40, trailing: 0))
@@ -101,7 +112,7 @@ extension LibraryView {
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 }
 
-                ForEach(shelfBooks, id: \.id, content: libraryRow)
+                ForEach(shelfEntries, content: listRow)
             }
         }
         .listStyle(PlainListStyle())
@@ -123,22 +134,25 @@ extension LibraryView {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
-                // Collections: Hardcover series and hand-made ones. Wide: one row of tiles.
-                if isWide, !collectionGroups.isEmpty {
+                // Collections: Hardcover series and hand-made ones, then the server series that
+                // are not one yet. Wide: one row of tiles. Lazy: a server can have hundreds.
+                if isWide, hasCollections {
                     collectionsRow.padding(.horizontal)
-                } else if !collectionGroups.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
+                } else if hasCollections {
+                    LazyVStack(alignment: .leading, spacing: 12) {
                         SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
                         ForEach(collectionGroups) { group in
                             collectionCard(group)
                         }
+                        serverSeriesToggle
+                        ForEach(shownServerSeries) { AudiobookShelfSeriesCard(series: $0) }
                     }
                     .padding(.horizontal)
                 }
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {
-                    if !audiobookManager.audiobooks.isEmpty {
+                    if !isShelfEmpty {
                         SectionLabel(NSLocalizedString("Library", comment: "Library navigation title"))
                             .padding(.horizontal)
                     }
@@ -156,9 +170,9 @@ extension LibraryView {
                     .padding(.horizontal)
 
                     // Content
-                    if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting
+                    if isShelfEmpty && !audiobookManager.isImporting
                         && AudiobookShelfService.shared.downloads.isEmpty {
-                        EmptyLibraryView { showingImporter = true } onAudiobookShelf: { source = .audiobookShelf }
+                        EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                         .padding(.horizontal)
                     } else {
                         VStack(spacing: 16) {
@@ -179,14 +193,7 @@ extension LibraryView {
                                 columns: [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: gridSpacing)],
                                 spacing: gridSpacing
                             ) {
-                                ForEach(shelfBooks, id: \.id) { audiobook in
-                                    AudiobookGridItemView(audiobook: audiobook, columns: gridColumns) { tapBook(audiobook) }
-                                    .overlay(alignment: .topTrailing) { selectionBadge(for: audiobook) }
-                                    .accessibilityIdentifier(AccessibilityIdentifiers.Library.audiobookCell)
-                                    .contextMenu {
-                                        BookActionsMenu(audiobook: audiobook, actions: bookActions)
-                                    }
-                                }
+                                ForEach(shelfEntries, content: gridCell)
                             }
                             .padding(.horizontal)
                         }
@@ -228,11 +235,9 @@ extension LibraryView {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                     withHapticFeedback {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            if audiobook.isFinished {
-                                audiobookManager.markAsUnread(audiobook)
-                            } else {
-                                audiobookManager.markAsRead(audiobook)
-                            }
+                            ListenerState.shared.apply(
+                                audiobook.isFinished ? .unfinish : .finish, to: audiobook, from: .listener
+                            )
                         }
                     }
                 }

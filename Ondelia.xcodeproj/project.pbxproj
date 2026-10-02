@@ -148,6 +148,7 @@
 				Core/Models/SwiftData/ChapterModel.swift,
 				Core/Models/SwiftData/ChapterTranscriptionModel.swift,
 				Core/Models/SwiftData/CollectionModel.swift,
+				Core/Models/SwiftData/HardcoverClosedReadModel.swift,
 				Core/Models/SwiftData/IsoraSchema.swift,
 				Core/Models/SwiftData/ListeningSessionModel.swift,
 				Core/Models/SwiftData/TranscriptWindowModel.swift,

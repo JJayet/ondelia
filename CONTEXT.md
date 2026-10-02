@@ -19,11 +19,15 @@ One of the libraries an AudiobookShelf server divides its audiobooks into. Alway
 _Avoid_: Library (unqualified), source
 
 **Server audiobook**:
-An audiobook on an AudiobookShelf server. It joins the Library when it is downloaded or first streamed, and stays linked to its server original.
+An audiobook on an AudiobookShelf server. It joins the Library when it is downloaded, first streamed or first acted on (added by the listener to a Collection or Up Next, bookmarked, marked finished), and stays linked to its server original. The listener can choose to see the server audiobooks of the selected server library alongside the Library; seeing one there does not make it join.
 _Avoid_: Item, server book
 
+**Server link**:
+The tie between a Library audiobook and its server audiobook. It is made when a server audiobook joins, or by the listener on an imported audiobook that is the same recording; a server audiobook with a server link is never shown twice.
+_Avoid_: Relink, match
+
 **Server series**:
-A series as an AudiobookShelf server groups its server audiobooks. Always qualified; bare "Series" means the Hardcover-backed Collection.
+A series as an AudiobookShelf server groups its server audiobooks. While the listener sees server audiobooks alongside the Library, every server series of the selected server library appears among the Collections; it becomes a Collection once the Library holds one of its audiobooks, its members being whatever the server lists. Always qualified; bare "Series" means the Hardcover-backed Collection.
 _Avoid_: Series (unqualified)
 
 **Streamed audiobook**:
@@ -35,7 +39,7 @@ A Library audiobook whose audio came from a server and is now held on this devic
 _Avoid_: Offline book
 
 **Collection**:
-A named, ordered group of Library audiobooks; an audiobook can belong to any number of them.
+A named, ordered group of Library or server audiobooks; an audiobook can belong to any number of them. Server audiobooks in a Collection stay outside the Library until they join.
 _Avoid_: Shelf, list, playlist
 
 **Series**:
@@ -135,7 +139,7 @@ One read-through recorded on Hardcover, carrying its progress and dates. Each Fi
 _Avoid_: Listen, session
 
 **Declined series**:
-A Hardcover series the listener removed as a Collection, which is never offered as a Collection again.
+A Hardcover series or server series the listener removed as a Collection, which is never offered as a Collection again.
 _Avoid_: Hidden series, ignored series
 
 ### Statistics

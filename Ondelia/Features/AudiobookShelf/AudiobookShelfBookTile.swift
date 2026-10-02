@@ -7,6 +7,8 @@ extension EnvironmentValues {
     @Entry var audiobookShelfLibraryBooks: [String: AudiobookModel] = [:]
     /// The server library the shelf shows, for actions that fetch more of it.
     @Entry var audiobookShelfLibrary = ""
+    /// Opens the collection picker for a book. Set by `LibraryView`, which owns the sheet.
+    @Entry var audiobookShelfAddToCollection: (@MainActor (AudiobookModel) -> Void)?
 }
 
 extension View {
@@ -81,21 +83,7 @@ struct AudiobookShelfBookTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .contextMenu {
-            if service.downloads[item.id] != nil {
-                Button(role: .destructive) {
-                    service.cancelDownload(id: item.id)
-                } label: {
-                    Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
-                }
-            } else if !isOnDevice {
-                Button {
-                    service.download(item)
-                } label: {
-                    Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
-                }
-            }
-        }
+        .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: isOnDevice, joined: localBook != nil) }
         .accessibilityValue(accessibilityState)
     }
 
@@ -122,19 +110,8 @@ struct AudiobookShelfBookTile: View {
         return isOnDevice ? "" : NSLocalizedString("Not on this device", comment: "Missing audio badge")
     }
 
-    /// Plays the book: from the device when it is there, streamed otherwise. A server book
-    /// seen for the first time gets its library entry on the way.
     private func tap() {
-        withHapticFeedback {
-            if let localBook {
-                play?(localBook)
-                return
-            }
-            Task {
-                guard let book = await service.streamingBook(for: item) else { return }
-                play?(book)
-            }
-        }
+        withHapticFeedback { service.play(item, local: localBook, with: play) }
     }
 }
 
@@ -232,26 +209,52 @@ struct AudiobookShelfCover: View {
     }
 }
 
-/// Server images fetched with the bearer header (`AsyncImage` cannot set one), kept in memory
-/// so scrolling back does not fetch them again.
+/// Server images fetched with the bearer header (`AsyncImage` cannot set one). Kept in memory
+/// for scrolling back, and on disk so a relaunch does not fetch every cover of a big library
+/// again.
 @MainActor
 enum AudiobookShelfImages {
-    /// ponytail: memory only, and NSCache evicts under pressure. Add a disk cache if cold
-    /// launches on a big library feel slow.
     private static let cache = NSCache<NSString, UIImage>()
+
+    /// Caches: the server holds the originals, so the system may purge these.
+    nonisolated static var folder: URL {
+        URL.cachesDirectory.appending(path: "AudiobookShelfImages", directoryHint: .isDirectory)
+    }
+
+    nonisolated private static func file(_ key: String) -> URL {
+        folder.appending(path: AudiobookShelfAPI.safeFilename(key))
+    }
 
     static func cached(_ key: String) -> UIImage? { cache.object(forKey: key as NSString) }
 
     static func load(key: String, request: (URL, String) -> URLRequest) async -> UIImage? {
         if let hit = cached(key) { return hit }
+        let file = file(key)
+        // Off the main thread: a grid of covers decoding from disk at once stutters the scroll.
+        if let stored = await Task.detached(priority: .userInitiated, operation: {
+            (try? Data(contentsOf: file)).flatMap(UIImage.init(data:))?.preparingForDisplay()
+        }).value {
+            cache.setObject(stored, forKey: key as NSString)
+            return stored
+        }
         let service = AudiobookShelfService.shared
         guard let server = service.server, let token = service.token,
               let (data, response) = try? await URLSession.shared.data(for: request(server, token)),
               (response as? HTTPURLResponse)?.statusCode == 200,
-              let image = UIImage(data: data)
+              let image = await Task.detached(operation: { UIImage(data: data)?.preparingForDisplay() }).value
         else { return nil }
         cache.setObject(image, forKey: key as NSString)
+        Task.detached(priority: .utility) {
+            try? FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
+            try? data.write(to: file, options: .atomic)
+        }
         return image
+    }
+
+    /// Signed out: another account's covers have no business staying.
+    static func forget() {
+        cache.removeAllObjects()
+        try? FileManager.default.removeItem(at: folder)
     }
 }
 

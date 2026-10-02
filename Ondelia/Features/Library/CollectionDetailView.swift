@@ -16,7 +16,11 @@ struct CollectionDetailView: View {
     private let audioManager = GlobalAudioManager.shared
 
     var group: CollectionGroup {
-        CollectionGroup(collection: collection, books: manager.orderedBooks(in: collection))
+        // Streamed books hide while the server is off, as on the shelf.
+        let books = AudiobookShelfCatalog.shared.visible(
+            manager.orderedBooks(in: collection), linked: AudiobookShelfService.shared.libraryBooks
+        )
+        return CollectionGroup(collection: collection, books: books)
     }
 
     var body: some View {

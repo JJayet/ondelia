@@ -5679,6 +5679,145 @@
           }
         }
       }
+    },
+    "Show server audiobooks in Library" : {
+      "comment" : "AudiobookShelf setting: blend server books into the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Afficher les livres du serveur dans la bibliothèque"
+          }
+        }
+      }
+    },
+    "Every book of your server library appears in Library, Search and Collections. Tap one to stream it; long-press to download it." : {
+      "comment" : "AudiobookShelf settings footer, server books shown in the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chaque livre de votre bibliothèque serveur apparaît dans Bibliothèque, Recherche et Collections. Touchez-en un pour l’écouter en streaming ; appuyez longuement pour le télécharger."
+          }
+        }
+      }
+    },
+    "Server unreachable" : {
+      "comment" : "AudiobookShelf server did not answer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Serveur injoignable"
+          }
+        }
+      }
+    },
+    "Tries again" : {
+      "comment" : "Retry reaching the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réessaie"
+          }
+        }
+      }
+    },
+    "On the server" : {
+      "comment" : "Server audiobook not in the Library",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sur le serveur"
+          }
+        }
+      }
+    },
+    "Link to Server Audiobook…" : {
+      "comment" : "Server link menu item",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lier à un livre du serveur…"
+          }
+        }
+      }
+    },
+    "Link to Server Audiobook" : {
+      "comment" : "Server link picker title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lier à un livre du serveur"
+          }
+        }
+      }
+    },
+    "filter.downloaded" : {
+      "comment" : "Filter: books with audio on this device",
+      "extractionState" : "manual",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Downloaded"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargés"
+          }
+        }
+      }
+    },
+    "The server library whose audiobooks appear in Library." : {
+      "comment" : "AudiobookShelf settings: which server library is blended in",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La bibliothèque du serveur dont les livres apparaissent dans Bibliothèque."
+          }
+        }
+      }
+    },
+    "Server series" : {
+      "comment" : "Library: folded row of server series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Séries du serveur"
+          }
+        }
+      }
+    },
+    "Expanded" : {
+      "comment" : "Accessibility: folded row is open",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Développé"
+          }
+        }
+      }
+    },
+    "Collapsed" : {
+      "comment" : "Accessibility: folded row is closed",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Réduit"
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

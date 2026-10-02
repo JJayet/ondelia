@@ -12,6 +12,8 @@ struct LibraryTableRow: Identifiable {
     let isLocal: Bool
     let book: AudiobookModel?
     let group: CollectionGroup?
+    /// A server audiobook not in the Library (ADR 0002).
+    var item: AudiobookShelfAPI.Item?
     var children: [LibraryTableRow] = []
 }
 
@@ -20,8 +22,12 @@ struct LibraryTableRow: Identifiable {
 struct LibraryTableView: View {
     let groups: [CollectionGroup]
     let uncollected: [AudiobookModel]
+    var server: [AudiobookShelfAPI.Item] = []
+    /// Server series with no Collection yet: a folder each, after the Collections.
+    var serverSeries: [AudiobookShelfAPI.Series] = []
     let onOpenBook: (AudiobookModel) -> Void
     let onOpenCollection: (CollectionGroup) -> Void
+    var onOpenServer: (AudiobookShelfAPI.Item) -> Void = { _ in }
 
     @State private var sortOrder = [KeyPathComparator(\LibraryTableRow.title)]
     @State private var selection: LibraryTableRow.ID?
@@ -48,7 +54,9 @@ struct LibraryTableView: View {
             }
             .width(min: 80, ideal: 100)
             TableColumn(Text(NSLocalizedString("Local", comment: "Table column: file is downloaded"))) { row in
-                if row.book != nil {
+                if row.item != nil {
+                    Image(systemName: "icloud").foregroundStyle(.secondary)
+                } else if row.book != nil {
                     Image(systemName: row.isLocal ? "checkmark.circle.fill" : "icloud.and.arrow.down")
                         .foregroundStyle(row.isLocal ? AnyShapeStyle(.green) : AnyShapeStyle(.secondary))
                 }
@@ -73,7 +81,13 @@ struct LibraryTableView: View {
             selection = nil
             let all = rows.flatMap { [$0] + $0.children }
             guard let row = all.first(where: { $0.id == id }) else { return }
-            if let book = row.book { onOpenBook(book) } else if let group = row.group { onOpenCollection(group) }
+            if let book = row.book {
+                onOpenBook(book)
+            } else if let item = row.item {
+                onOpenServer(item)
+            } else if let group = row.group {
+                onOpenCollection(group)
+            }
         }
     }
 
@@ -101,7 +115,22 @@ struct LibraryTableView: View {
                 children: group.books.map { row(for: $0, in: group.name) }.sorted(using: sortOrder)
             )
         }
-        if !uncollected.isEmpty {
+        rows += serverSeries.map { series in
+            let books = series.books ?? []
+            return LibraryTableRow(
+                id: "server-series-\(series.id)",
+                title: series.name,
+                author: books.first?.author ?? "",
+                collectionName: "",
+                progress: 0,
+                duration: books.reduce(0) { $0 + ($1.media.duration ?? 0) },
+                isLocal: false,
+                book: nil,
+                group: nil,
+                children: books.map(row(for:)).sorted(using: sortOrder)
+            )
+        }
+        if !uncollected.isEmpty || !server.isEmpty {
             rows.append(LibraryTableRow(
                 id: "uncollected",
                 title: NSLocalizedString("Other books", comment: "Table group: books in no collection"),
@@ -112,7 +141,7 @@ struct LibraryTableView: View {
                 isLocal: false,
                 book: nil,
                 group: nil,
-                children: uncollected.map { row(for: $0, in: "") }.sorted(using: sortOrder)
+                children: (uncollected.map { row(for: $0, in: "") } + server.map(row(for:))).sorted(using: sortOrder)
             ))
         }
         return rows
@@ -132,11 +161,29 @@ struct LibraryTableView: View {
         )
     }
 
+    private func row(for item: AudiobookShelfAPI.Item) -> LibraryTableRow {
+        LibraryTableRow(
+            id: "server-\(item.id)",
+            title: item.title,
+            author: item.author ?? "",
+            collectionName: "",
+            progress: 0,
+            duration: item.media.duration ?? 0,
+            isLocal: false,
+            book: nil,
+            group: nil,
+            item: item
+        )
+    }
+
     @ViewBuilder
     private func titleCell(_ row: LibraryTableRow) -> some View {
         HStack(spacing: 10) {
             if let book = row.book {
                 CoverArtView(audiobook: book, size: 28, cornerRadius: 6)
+                Text(row.title).lineLimit(1)
+            } else if let item = row.item {
+                AudiobookShelfCover(item: item.id, title: item.title, size: 28, cornerRadius: 6)
                 Text(row.title).lineLimit(1)
             } else {
                 Text(row.title).fontWeight(.semibold).lineLimit(1)

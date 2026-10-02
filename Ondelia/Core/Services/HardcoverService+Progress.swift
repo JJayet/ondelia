@@ -1,4 +1,5 @@
 import Foundation
+import SwiftData
 
 // MARK: - Progress sync
 //
@@ -57,8 +58,9 @@ extension HardcoverService {
     /// into a twelve-hour book reads as 8% on both.
     ///
     /// Hardcover measures seconds against an audiobook edition, so the first push looks one up
-    /// and remembers it on the link. The read row is opened once and moved after that, rather
-    /// than a new one opened per push, which would read as re-reading the book every minute.
+    /// and remembers it on the link. The read row is opened once per listen and moved after
+    /// that, rather than a new one opened per push, which would read as re-reading the book
+    /// every minute. See `readPush` for when a listen starts and ends.
     func pushProgress(for audiobook: AudiobookModel, token: String) async {
         guard var link = audiobook.hardcover,
               let userBookID = link.userBookID,
@@ -73,6 +75,10 @@ extension HardcoverService {
         guard position.isFinite else { return }
         let seconds = Int(min(max(position, 0), audiobook.duration).rounded())
 
+        let context = AudiobookManager.shared.swiftDataController.context
+        let closed = link.readID.map { Self.isClosed(readID: $0, of: audiobook.id, in: context) } ?? false
+        let action = Self.readPush(isFinished: audiobook.isFinished, readID: link.readID, closed: closed)
+        if action == .none { return }
         // A finished book always gets its push: it carries the finish date with it.
         if !audiobook.isFinished,
            let attempted = attemptedSeconds[audiobook.id],
@@ -107,31 +113,73 @@ extension HardcoverService {
         attemptedSeconds[audiobook.id] = seconds
 
         let today = HardcoverAPI.dateStamp(Date())
+        let finishedAt = audiobook.isFinished ? today : nil
         do {
-            if let readID = link.readID {
+            switch action {
+            case .none:
+                return
+            case let .update(readID):
                 try await HardcoverAPI.updateRead(
-                    id: readID,
-                    editionID: link.editionID,
-                    seconds: seconds,
-                    finishedAt: audiobook.isFinished ? today : nil,
-                    token: token
+                    id: readID, editionID: link.editionID, seconds: seconds, finishedAt: finishedAt, token: token
                 )
-            } else {
+            case .start:
                 let readID = try await HardcoverAPI.startRead(
                     userBookID: userBookID,
                     editionID: link.editionID,
                     seconds: seconds,
                     startedAt: today,
-                    finishedAt: audiobook.isFinished ? today : nil,
+                    finishedAt: finishedAt,
                     token: token
                 )
                 guard var current = audiobook.hardcover, current.id == link.id else { return }
                 current.readID = readID
                 audiobook.hardcover = current
-                save()
             }
+            guard let current = audiobook.hardcover, current.id == link.id, let readID = current.readID else { return }
+            Self.setClosed(audiobook.isFinished, readID: readID, of: audiobook.id, in: context)
+            save()
         } catch {
             Log.hardcover.error("Failed to push progress: \(error.localizedDescription)")
         }
+    }
+
+    enum ReadPush: Equatable {
+        /// The read is closed and the audiobook is still Finished: nothing to say.
+        case none
+        case start
+        case update(readID: Int)
+    }
+
+    /// What a push does to the Hardcover read. A Finish closes the open read once; listening
+    /// again after it opens the next read, so the closed one keeps its own progress and dates.
+    nonisolated static func readPush(isFinished: Bool, readID: Int?, closed: Bool) -> ReadPush {
+        guard let readID else { return .start }
+        if closed { return isFinished ? .none : .start }
+        return .update(readID: readID)
+    }
+
+    /// The listener unmarked a Finish by hand: the read it closed is open again, so the next
+    /// push moves it on rather than starting another.
+    func reopenRead(for audiobook: AudiobookModel) {
+        guard let readID = audiobook.hardcover?.readID else { return }
+        Self.setClosed(false, readID: readID, of: audiobook.id, in: AudiobookManager.shared.swiftDataController.context)
+        save()
+    }
+
+    static func isClosed(readID: Int, of audiobookID: UUID, in context: ModelContext) -> Bool {
+        ((try? context.fetchCount(closedReads(readID: readID, of: audiobookID))) ?? 0) > 0
+    }
+
+    static func setClosed(_ closed: Bool, readID: Int, of audiobookID: UUID, in context: ModelContext) {
+        let rows = (try? context.fetch(closedReads(readID: readID, of: audiobookID))) ?? []
+        if closed, rows.isEmpty {
+            context.insert(HardcoverClosedReadModel(audiobookID: audiobookID, readID: readID))
+        } else if !closed {
+            for row in rows { context.delete(row) }
+        }
+    }
+
+    private static func closedReads(readID: Int, of audiobookID: UUID) -> FetchDescriptor<HardcoverClosedReadModel> {
+        FetchDescriptor(predicate: #Predicate { $0.audiobookID == audiobookID && $0.readID == readID })
     }
 }

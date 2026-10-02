@@ -93,9 +93,15 @@ enum AudiobookShelfAPI {
 
     /// `collapseSeries` folds each series into one entry, carrying `collapsedSeries`, the way
     /// the AudiobookShelf web client shows a big library.
-    static func itemsURL(server: URL, library: String, page: Int, collapseSeries: Bool = false) -> URL {
+    static func itemsURL(
+        server: URL,
+        library: String,
+        page: Int,
+        collapseSeries: Bool = false,
+        limit: Int = pageSize
+    ) -> URL {
         var query = [
-            URLQueryItem(name: "limit", value: String(pageSize)),
+            URLQueryItem(name: "limit", value: String(limit)),
             URLQueryItem(name: "page", value: String(page)),
             URLQueryItem(name: "sort", value: "media.metadata.title"),
             URLQueryItem(name: "minified", value: "1")
@@ -110,15 +116,28 @@ enum AudiobookShelfAPI {
         token: String,
         library: String,
         page: Int,
-        collapseSeries: Bool = false
+        collapseSeries: Bool = false,
+        limit: Int = pageSize
     ) async throws -> (items: [Item], total: Int) {
         struct Response: Decodable {
             let results: [Item]
             let total: Int
         }
-        let url = itemsURL(server: server, library: library, page: page, collapseSeries: collapseSeries)
+        let url = itemsURL(server: server, library: library, page: page, collapseSeries: collapseSeries, limit: limit)
         let response = try await send(authorized(url, token: token), as: Response.self)
         return (response.results, response.total)
+    }
+
+    /// Every book of a library, series unfolded, fetched a few hundred at a time.
+    static func allItems(server: URL, token: String, library: String) async throws -> [Item] {
+        var all: [Item] = []
+        var page = 0
+        while true {
+            let (items, total) = try await self.items(server: server, token: token, library: library, page: page, limit: 500)
+            all += items
+            guard !items.isEmpty, all.count < total else { return all }
+            page += 1
+        }
     }
 
     static func coverRequest(server: URL, token: String, item: String, width: Int = 300) -> URLRequest {

@@ -33,10 +33,10 @@ extension LibraryView {
     }
 
     // ponytail: each mark/delete call refetches the library. Fine for tens of books; batch the
-    // save in AudiobookManager if someone selects hundreds.
+    // save in ListenerState if someone selects hundreds.
     func markSelected(finished: Bool) {
         for book in selectedBooks {
-            finished ? audiobookManager.markAsRead(book) : audiobookManager.markAsUnread(book)
+            ListenerState.shared.apply(finished ? .finish : .unfinish, to: book, from: .listener)
         }
         endSelecting()
     }
@@ -79,6 +79,9 @@ extension LibraryView {
                     }
                     .disabled(shelfBooks.isEmpty)
                 }
+            }
+            if catalog.isUnreachable {
+                ToolbarItem(placement: .topBarTrailing) { serverUnreachableButton }
             }
             importToolbarItem
         }

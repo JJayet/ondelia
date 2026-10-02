@@ -2,7 +2,22 @@ import Foundation
 
 // MARK: - Completed books
 extension ListeningStats {
-    var finishes: [ListeningSessionModel] { sessions.filter(\.finishedBook) }
+    /// Two Finishes of one audiobook this close together are one completion recorded twice:
+    /// two devices each logged it before CloudKit merged their logs.
+    static let sameFinishWindow: TimeInterval = 24 * 3600
+
+    /// Every Finish once, the earliest of each same-completion pair kept. The log itself stays
+    /// append-only.
+    var finishes: [ListeningSessionModel] {
+        var kept: [ListeningSessionModel] = []
+        for finish in sessions.filter(\.finishedBook).sorted(by: { $0.startedAt < $1.startedAt }) {
+            let repeated = kept.contains {
+                $0.bookID == finish.bookID && finish.startedAt.timeIntervalSince($0.startedAt) < Self.sameFinishWindow
+            }
+            if !repeated { kept.append(finish) }
+        }
+        return kept
+    }
 
     var booksCompleted: Int { finishes.count }
 
@@ -11,12 +26,17 @@ extension ListeningStats {
         return finishes.filter { calendar.component(.year, from: $0.startedAt) == year }.count
     }
 
-    /// Days from a book's first session to the one that finished it, for every finished book
-    /// that has at least one timed session.
+    /// Time from the first session of each listen to the Finish that ended it, for every Finish
+    /// with a timed session in its listen. A re-listen starts after the previous Finish of the
+    /// same audiobook, so it is not measured from the first listen months earlier.
     var finishDurations: [TimeInterval] {
-        let firstSession = timedSessionsByBook.compactMapValues { $0.map(\.startedAt).min() }
+        let sessionsByBook = timedSessionsByBook
+        var previousFinish: [UUID: Date] = [:]
         return finishes.compactMap { finish in
-            guard let first = firstSession[finish.bookID] else { return nil }
+            defer { previousFinish[finish.bookID] = finish.startedAt }
+            let after = previousFinish[finish.bookID] ?? .distantPast
+            guard let first = sessionsByBook[finish.bookID]?.map(\.startedAt).filter({ $0 > after }).min()
+            else { return nil }
             return max(finish.startedAt.timeIntervalSince(first), 0)
         }
     }

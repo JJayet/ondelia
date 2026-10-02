@@ -5,8 +5,9 @@ import SwiftUI
 /// it now.
 struct PlayQueueView: View {
     /// The book a collection names as next, if any. Shown first and not reorderable: its place
-    /// is decided by the collection, not the queue.
-    let chained: AudiobookModel?
+    /// is decided by the collection, not the queue. A server series can name one that has not
+    /// joined the Library; playing it streams it, which makes it join.
+    let chained: LibraryEntry?
     let onPlay: (AudiobookModel) -> Void
 
     private let queue = PlayQueue.shared
@@ -14,7 +15,7 @@ struct PlayQueueView: View {
     @Environment(\.dismiss) private var dismiss
 
     private var queued: [AudiobookModel] {
-        queue.books(in: library.audiobooks).filter { $0.id != chained?.id }
+        queue.books(in: library.audiobooks).filter { $0.id != chained?.book?.id }
     }
 
     var body: some View {
@@ -22,7 +23,10 @@ struct PlayQueueView: View {
             List {
                 if let chained {
                     Section(NSLocalizedString("From the collection", comment: "Play queue: book a collection plays next")) {
-                        row(chained)
+                        switch chained {
+                        case .book(let book): row(book)
+                        case .server(let item): serverRow(item)
+                        }
                     }
                 }
 
@@ -56,25 +60,43 @@ struct PlayQueueView: View {
                 dismiss()
             }
         } label: {
-            HStack(spacing: 13) {
-                CoverArtView(audiobook: book, size: 44, cornerRadius: 8)
-                VStack(alignment: .leading, spacing: 3) {
-                    Text(book.title ?? AudiobookModel.unknownTitle)
-                        .font(.subheadline.weight(.semibold))
-                        .lineLimit(2)
-                    Text(
-                        String(
-                            format: NSLocalizedString("%@ · %@", comment: "Author and duration"),
-                            book.author ?? AudiobookModel.unknownAuthor,
-                            book.duration.hoursMinutesFormatted
-                        )
-                    )
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .lineLimit(1)
-                }
+            rowLabel(entry: .book(book)) { CoverArtView(audiobook: book, size: 44, cornerRadius: 8) }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func serverRow(_ item: AudiobookShelfAPI.Item) -> some View {
+        Button {
+            withHapticFeedback {
+                AudiobookShelfService.shared.join(item) { onPlay($0) }
+                dismiss()
+            }
+        } label: {
+            rowLabel(entry: .server(item)) {
+                AudiobookShelfCover(item: item.id, title: item.title, size: 44, cornerRadius: 8)
             }
         }
         .buttonStyle(.plain)
+    }
+
+    private func rowLabel(entry: LibraryEntry, @ViewBuilder cover: () -> some View) -> some View {
+        HStack(spacing: 13) {
+            cover()
+            VStack(alignment: .leading, spacing: 3) {
+                Text(entry.title.isEmpty ? AudiobookModel.unknownTitle : entry.title)
+                    .font(.subheadline.weight(.semibold))
+                    .lineLimit(2)
+                Text(
+                    String(
+                        format: NSLocalizedString("%@ · %@", comment: "Author and duration"),
+                        entry.author.isEmpty ? AudiobookModel.unknownAuthor : entry.author,
+                        entry.duration.hoursMinutesFormatted
+                    )
+                )
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .lineLimit(1)
+            }
+        }
     }
 }

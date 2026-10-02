@@ -160,9 +160,9 @@ final class GlobalAudioManager {
         let library = AudiobookManager.shared
         // A collection that chains its books names the next one; the play queue is the fallback.
         // Decided before the book can be deleted below, which would take it out of its collections.
-        let chained = currentAudiobook.flatMap { library.nextBook(after: $0) }
+        let chained = currentAudiobook.flatMap { library.nextEntry(after: $0) }
         if let audiobook = currentAudiobook {
-            library.markAsFinished(audiobook)
+            ListenerState.shared.apply(.finish, to: audiobook, from: .player)
             // Deleting unloads this player; the next book below still starts.
             if UserDefaults.standard.bool(forKey: Self.deleteOnCompletionKey) {
                 library.deleteAudiobook(audiobook)
@@ -172,9 +172,21 @@ final class GlobalAudioManager {
 
         // Roll into the next book, the way a playlist does. `startPlaybackAfterOpeningBook`
         // plays as soon as the load finishes, via `pendingAutoplay`.
-        if let next = chained ?? PlayQueue.shared.popNext(from: library.audiobooks) {
+        switch chained {
+        case .server(let item):
+            // A server series' next volume: streaming it makes it join the Library first.
+            AudiobookShelfService.shared.join(item) { next in
+                self.loadAudiobook(next)
+                self.startPlaybackAfterOpeningBook()
+            }
+        case .book(let next):
             loadAudiobook(next)
             startPlaybackAfterOpeningBook()
+        case nil:
+            if let next = PlayQueue.shared.popNext(from: library.audiobooks) {
+                loadAudiobook(next)
+                startPlaybackAfterOpeningBook()
+            }
         }
     }
 
