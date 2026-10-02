@@ -130,4 +130,17 @@ struct ListeningStatsTests {
         #expect(owl.progress(in: stats) == 11)
         #expect(hours.progress(in: stats, legacyHours: 95) == 106)
     }
+
+    @Test("Listening started at 03:00 counts towards Night Owl, not Early Bird")
+    func nightOwlAndEarlyBirdDoNotOverlap() {
+        let book = AudiobookModel(title: "Dune")
+        let night = ListeningStats([session(book, daysAgo: 0, hour: 3, minutes: 600)], now: now, calendar: calendar)
+        let dawn = ListeningStats([session(book, daysAgo: 0, hour: 6, minutes: 600)], now: now, calendar: calendar)
+        let owl = Milestone.all.first { $0.id == "nightOwl" }!
+        let bird = Milestone.all.first { $0.id == "earlyBird" }!
+        #expect(owl.progress(in: night) == 10)
+        #expect(bird.progress(in: night) == 0)
+        #expect(owl.progress(in: dawn) == 0)
+        #expect(bird.progress(in: dawn) == 10)
+    }
 }

@@ -15,6 +15,8 @@ enum SettingsSync {
         "library.autoSeriesCollections", "library.showMissingSeriesBooks",
         "library.viewMode", "library.sortOption", "library.filterOption",
         "player.showChapterTimes", "player.scrubsBook",
+        // Only written once the listener sets it, so a device on the default never overwrites it.
+        "monthlyGoal",
         // The AudiobookShelf token itself goes through iCloud Keychain, never through here.
         AudiobookShelfService.Defaults.server, AudiobookShelfService.Defaults.username,
         AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey
@@ -67,7 +69,10 @@ enum SettingsSync {
             defaults.set(remote, forKey: pair.local)
             changed = true
         }
-        if changed { ThemeManager.shared.loadSettings() }
+        if changed {
+            ThemeManager.shared.loadSettings()
+            ReadingStatistics.shared.loadMonthlyGoal()
+        }
     }
 
     /// Defaults → iCloud, only the keys whose value differs.

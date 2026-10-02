@@ -28,8 +28,7 @@ final class ReadingStatistics {
     init(store: SwiftDataController = .shared) {
         self.store = store
         let defaults = UserDefaults.standard
-        monthlyGoal = defaults.double(forKey: "monthlyGoal")
-        if monthlyGoal == 0 { monthlyGoal = 3600 * 10 }
+        loadMonthlyGoal()
         legacyListeningTime = defaults.double(forKey: "totalListeningTime")
         legacyBooksCompleted = defaults.integer(forKey: "booksCompleted")
         legacyLongestStreak = defaults.integer(forKey: "longestStreak")
@@ -95,6 +94,12 @@ final class ReadingStatistics {
         store.save()
     }
 
+    /// Reads the goal from defaults, where `SettingsSync` mirrors it from the other devices.
+    func loadMonthlyGoal() {
+        let stored = UserDefaults.standard.double(forKey: "monthlyGoal")
+        monthlyGoal = stored > 0 ? stored : 3600 * 10
+    }
+
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
         UserDefaults.standard.set(newGoal, forKey: "monthlyGoal")
@@ -143,6 +148,11 @@ final class ReadingStatistics {
             legacyBooks: legacyBooksCompleted,
             legacyStreak: legacyLongestStreak
         )
+    }
+
+    /// Once shown as unlocked, a badge stays lit even if its rule or the log later counts less.
+    func hasEarned(_ milestone: Milestone) -> Bool {
+        UserDefaults.standard.stringArray(forKey: "shownMilestones")?.contains(milestone.id) ?? false
     }
 
     var unlockedMilestones: [Milestone] {

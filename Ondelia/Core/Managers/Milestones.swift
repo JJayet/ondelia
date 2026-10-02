@@ -5,9 +5,9 @@ import Foundation
 struct Milestone: Identifiable, Hashable {
     enum Kind: Hashable {
         case books, streakDays, hours
-        /// Ten hours started after 21:00.
+        /// Ten hours started between 21:00 and 05:00.
         case nightOwl
-        /// Ten hours started before 08:00.
+        /// Ten hours started between 05:00 and 08:00, so never the same time as Night Owl.
         case earlyBird
     }
 
@@ -42,7 +42,7 @@ struct Milestone: Identifiable, Hashable {
             let buckets = stats.secondsByTimeOfDay
             return Int(((buckets[.lateNight] ?? 0) + (buckets[.night] ?? 0)) / 3600)
         case .earlyBird:
-            return Int(stats.sessions.filter { stats.calendar.component(.hour, from: $0.startedAt) < 8 }
+            return Int(stats.sessions.filter { (5..<8).contains(stats.calendar.component(.hour, from: $0.startedAt)) }
                 .reduce(0) { $0 + $1.seconds } / 3600)
         }
     }
