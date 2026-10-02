@@ -1,0 +1,23 @@
+Ondelia/Core/Managers/ReadingStatistics.swift
+  s_28765eaa9b0225::t_3b4138b98e2c1a 118-119
+Ondelia/Resources/Localizable.xcstrings
+  s_28765eaa9b0225::t_5483d11d5a7e08 5135,5141
+Ondelia/Features/Settings/SettingsView.swift
+  s_28765eaa9b0225::t_5483d11d5a7e08 79
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "dcc2e7ac0ae585577fae421ebbee05246aa773fb",
+  "prompts": {},
+  "sessions": {
+    "s_28765eaa9b0225": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "96b3f346-d293-4839-ab43-a883637b8bc5",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
