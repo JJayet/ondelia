@@ -43,6 +43,13 @@
   - Examples: `feat(player): add sleep timer`, `fix(core): handle empty CUE file`.
 - PRs include: concise description, linked issues, simulator screenshots (iPhone 17), test plan (commands run), and notes on localization/entitlements changes.
 
+## Versioning & Changelog
+
+- Every change to `MARKETING_VERSION` (App Store version) adds a section to `CHANGELOG.md` in the
+  same commit: user-facing changes since the previous version, in English and French, ready for
+  App Store Connect's "What's New". Use the app's UI terms from `Localizable.xcstrings`.
+- Build-number-only bumps (`CURRENT_PROJECT_VERSION`) update the existing section's heading.
+
 ## Security & Configuration Tips
 
 - Do not commit secrets. Configure API keys outside source; never hardcode (see `GoogleImageSearchService`).
