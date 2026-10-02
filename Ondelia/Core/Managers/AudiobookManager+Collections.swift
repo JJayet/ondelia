@@ -34,6 +34,12 @@ extension AudiobookManager {
     /// Makes the series collections agree with what Hardcover says about the library. Called
     /// after every library fetch and after every series lookup; idempotent and cheap.
     ///
+    /// Only ever adds. iCloud brings another device's records in batches, in no set order: a
+    /// collection can land before its books, and this runs after every batch. Deleting a
+    /// collection, or dropping a member, that looked bookless at that moment deleted it — and
+    /// the listener's order and chaining with it — on every device. A book leaves its series
+    /// collection when it is deleted or its series changes here (`leaveSeriesCollections`).
+    ///
     /// With automatic grouping off, a series with no collection yet is offered once through
     /// `collectionPrompt` instead of being created.
     func reconcileSeriesCollections() {
@@ -48,13 +54,6 @@ extension AudiobookManager {
 
         var changed = false
         let declined = declinedSeries
-        // A series collection with no linked book left — the last one deleted or unlinked —
-        // goes too. Not declined: the next book of the series brings it straight back.
-        for collection in collections where collection.isSeries {
-            guard let seriesID = collection.hardcoverSeriesID, bySeries[seriesID] == nil else { continue }
-            swiftDataController.context.delete(collection)
-            changed = true
-        }
         for (seriesID, series) in bySeries {
             let ordered = series.books.sorted(by: CollectionGroup.inReadingOrder).map(\.id)
             if let existing = collections.first(where: { $0.hardcoverSeriesID == seriesID }) {
@@ -62,10 +61,8 @@ extension AudiobookManager {
                 // is the listener's: a volume that is new to it goes on the end, and the sort
                 // mode decides how the card shows it.
                 if existing.name != series.name { existing.name = series.name; changed = true }
-                let members = Set(ordered)
-                var ids = existing.bookIDs.filter { members.contains($0) }
-                ids += ordered.filter { !ids.contains($0) }
-                if existing.bookIDs != ids { existing.bookIDs = ids; changed = true }
+                let added = ordered.filter { !existing.bookIDs.contains($0) }
+                if !added.isEmpty { existing.bookIDs += added; changed = true }
             } else if declined.contains(seriesID) {
                 continue
             } else if Self.autoSeriesCollections {
@@ -210,16 +207,35 @@ extension AudiobookManager {
         fetchCollections()
     }
 
-    /// Called when a book leaves the library, so no collection keeps pointing at it. A server
-    /// series Collection goes with its last member: the listener removed it here, so this is
-    /// not a sync batch arriving half done (see `reconcileServerSeriesCollections`).
+    /// Called when a book leaves the library, so no collection keeps pointing at it. A series
+    /// collection goes with its last member: the listener removed it here, so this is not a
+    /// sync batch arriving half done (see the reconcile functions). Not declined: the next
+    /// book of the series brings it straight back.
     func removeFromAllCollections(bookID: UUID) {
         let serverSeries = AudiobookShelfCatalog.shared.seriesByCollection
         for collection in collections where collection.bookIDs.contains(bookID) {
             collection.bookIDs.removeAll { $0 == bookID }
-            if collection.bookIDs.isEmpty, serverSeries[collection.id] != nil {
+            if collection.bookIDs.isEmpty, collection.isSeries || serverSeries[collection.id] != nil {
                 swiftDataController.context.delete(collection)
             }
+        }
+    }
+
+    /// Takes `book` out of the Hardcover series collections it no longer belongs to: unlinked
+    /// from Hardcover, or now in another series. Called where that change is made on this
+    /// device, never from a reconcile (see `reconcileSeriesCollections`).
+    func leaveSeriesCollections(_ book: AudiobookModel) {
+        let seriesID = book.hardcover?.seriesID
+        var changed = false
+        for collection in collections where collection.isSeries
+            && collection.hardcoverSeriesID != seriesID && collection.bookIDs.contains(book.id) {
+            collection.bookIDs.removeAll { $0 == book.id }
+            if collection.bookIDs.isEmpty { swiftDataController.context.delete(collection) }
+            changed = true
+        }
+        if changed {
+            swiftDataController.save()
+            fetchCollections()
         }
     }
 }

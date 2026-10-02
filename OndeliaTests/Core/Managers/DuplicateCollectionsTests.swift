@@ -36,4 +36,33 @@ struct DuplicateCollectionsTests {
         #expect(murderbot.bookIDs == [one.id])
         #expect(!manager.mergeDuplicateSeriesCollections())
     }
+
+    @Test("A series Collection that arrives before its books survives reconcile")
+    func survivesHalfSync() {
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        let pending = UUID()
+        manager.swiftDataController.context.insert(
+            CollectionModel(name: "Mistborn", hardcoverSeriesID: 9, bookIDs: [pending])
+        )
+        manager.swiftDataController.save()
+        manager.fetchCollections()
+
+        manager.reconcileSeriesCollections()
+        #expect(manager.collections.first?.bookIDs == [pending])
+    }
+
+    @Test("Unlinking a book from Hardcover takes it out of its series, and the series with its last book")
+    func leavesOnUnlink() throws {
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        let book = AudiobookModel(title: "The Final Empire")
+        manager.swiftDataController.context.insert(book)
+        manager.swiftDataController.context.insert(
+            CollectionModel(name: "Mistborn", hardcoverSeriesID: 9, bookIDs: [book.id])
+        )
+        manager.swiftDataController.save()
+        manager.fetchCollections()
+
+        manager.leaveSeriesCollections(book)
+        #expect(manager.collections.isEmpty)
+    }
 }
