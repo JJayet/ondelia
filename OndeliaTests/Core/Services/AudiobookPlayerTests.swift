@@ -12,7 +12,7 @@ struct AudiobookPlayerTests {
     private static let fixtureDuration: TimeInterval = 2.53
 
     private func fixtureURL() throws -> URL {
-        try #require(Bundle(for: MockAVAudioSession.self).url(forResource: "sample", withExtension: "m4a"))
+        try #require(Bundle(for: TestDataFactory.self).url(forResource: "sample", withExtension: "m4a"))
     }
 
     /// A book made of `count` copies of the fixture, with a manifest, so chapter crossing can
