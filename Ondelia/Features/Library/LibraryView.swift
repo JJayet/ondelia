@@ -14,6 +14,7 @@ struct LibraryView: View {
     /// The collection whose screen is pushed, if any.
     @State var collectionForDetail: CollectionModel?
     @State var audiobookForHardcover: AudiobookModel?
+    @State var audiobookForServerLink: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
     @State var newAudiobookTitle = ""
     @State var collectionToRename: CollectionModel?
@@ -43,11 +44,21 @@ struct LibraryView: View {
         }
     }
     @State var showingImporter = false
+    /// This device's books, or the AudiobookShelf server's. Only offered once signed in.
+    @AppStorage("library.source") var source: LibrarySource = .device
+    var showsServer: Bool { source == .audiobookShelf && AudiobookShelfService.shared.isSignedIn && !blendsServer }
+    /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
+    /// redraws the shelf.
+    @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
+    /// Whether the folded "Server series" row is open. Per device, folded by default.
+    @AppStorage("library.showsServerSeries") var showsServerSeries = false
+    let catalog = AudiobookShelfCatalog.shared
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
     @State var selecting = false
     @State var selectedIDs: Set<UUID> = []
     @Environment(\.accessibilityReduceMotion) var reduceMotion
+    @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager, collection: CollectionModel? = nil) {
@@ -63,7 +74,7 @@ struct LibraryView: View {
 
 
     var filteredAudiobooks: [AudiobookModel] {
-        let source = audiobookManager.audiobooks
+        let source = visibleAudiobooks
         // Filter in pure Swift to avoid KVC/NSPredicate on SwiftData models
         let filtered: [AudiobookModel] = {
             switch filterOption {
@@ -75,6 +86,8 @@ struct LibraryView: View {
                 return source.filter { $0.isFinished }
             case .notStarted:
                 return source.filter { $0.currentPosition == 0 }
+            case .downloaded:
+                return source.filter(audiobookManager.hasFile)
             }
         }()
         return filtered.sorted { sortOption.isOrderedBefore($0, $1) }
@@ -112,6 +125,7 @@ struct LibraryView: View {
             changeCover: { audiobookForImagePicker = $0 },
             linkHardcover: { audiobookForHardcover = $0 },
             addToCollection: { openCollectionPicker(for: [$0]) },
+            linkServer: { audiobookForServerLink = $0 },
             delete: { activeAlert = .confirmDelete($0) }
         )
     }
@@ -124,7 +138,7 @@ struct LibraryView: View {
 
     var continueReading: [ContinueReadingEntry] {
         ContinueReadingEntry.build(
-            books: audiobookManager.audiobooks,
+            books: visibleAudiobooks,
             collections: audiobookManager.collections,
             orderedBooks: audiobookManager.orderedBooks(in:)
         )
@@ -138,8 +152,10 @@ struct LibraryView: View {
     @ToolbarContentBuilder
     var importToolbarItem: some ToolbarContent {
         ToolbarItem(placement: .topBarTrailing) {
-            Button {
+            ImportMenu {
                 showingImporter = true
+            } onAudiobookShelf: {
+                source = .audiobookShelf
             } label: {
                 Image(systemName: "plus")
                     .font(.system(size: 15, weight: .bold))
@@ -157,12 +173,21 @@ struct LibraryView: View {
             // Wide: the title row carries the count and the buttons, and the navigation bar
             // goes, so nothing hovers as a band above the shelf on the Mac.
             if isWide { wideHeader }
-            // No search field here: the Search tab is the one place that searches the library.
-            // The table needs the width for its columns; on a phone it reads as the list.
-            switch viewMode {
-            case .list: listModeContent
-            case .grid: gridModeContent
-            case .table: if isWide { tableModeContent } else { listModeContent }
+            if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
+            if showsServer {
+                AudiobookShelfShelfView()
+            } else {
+                // No search field here: the Search tab is the one place that searches the
+                // library. The table needs the width for its columns; on a phone it reads as
+                // the list.
+                Group {
+                    switch viewMode {
+                    case .list: listModeContent
+                    case .grid: gridModeContent
+                    case .table: if isWide { tableModeContent } else { listModeContent }
+                    }
+                }
+                .serverSeriesDestinations(library: catalog.library ?? "")
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
@@ -185,6 +210,13 @@ struct LibraryView: View {
                 audiobookManager.fetchAudiobooks()
             }
         }
+        // Rerun whenever what the catalogue depends on changes: the switch, the account, the
+        // server library picked on the AudiobookShelf shelf.
+        // Cheap when the stored copy is fresh: only a stale one goes back to the server.
+        .task(id: catalogKey) { await catalog.refresh() }
+        .onChange(of: scenePhase) { _, phase in
+            if phase == .active { Task { await catalog.refresh() } }
+        }
         // Backfill: links made before the series lookup existed have no series on them. Each
         // book is asked about once — `seriesChecked` keeps this from running again.
         .task { await HardcoverService.shared.refreshSeries(for: audiobookManager.audiobooks) }
@@ -193,6 +225,24 @@ struct LibraryView: View {
     var body: some View {
         NavigationStack {
             libraryContent
+        }
+        // On the stack, not the shelf: screens it pushes (a series, an author) read the
+        // environment of the stack, and tapping a downloaded book there must still play it.
+        .environment(\.audiobookShelfPlay, { playAndPresent($0) })
+        .environment(\.audiobookShelfAddToCollection, { openCollectionPicker(for: [$0]) })
+        // Here rather than on the server shelf: a stream started from a book's detail screen
+        // can fail too. On the stack, apart from the screen's own alert slot.
+        .alert(
+            AudiobookShelfService.shared.problem?.title ?? "",
+            isPresented: Binding(
+                get: { AudiobookShelfService.shared.problem != nil },
+                set: { if !$0 { AudiobookShelfService.shared.problem = nil } }
+            ),
+            presenting: AudiobookShelfService.shared.problem
+        ) { _ in
+            Button(NSLocalizedString("OK", comment: "OK button"), role: .cancel) {}
+        } message: { problem in
+            Text(problem.message)
         }
         .sheet(isPresented: $showingImporter) {
             DocumentPickerView { urls in
@@ -205,6 +255,7 @@ struct LibraryView: View {
             withAnimation(.easeInOut(duration: 0.5)) {
                 audiobookManager.fetchAudiobooks()
             }
+            await catalog.refresh(force: true)
         }
         .sheet(item: $audiobookForImagePicker) { audiobook in
             ImagePickerView(audiobook: audiobook) { image in
@@ -215,6 +266,7 @@ struct LibraryView: View {
         .sheet(item: $audiobookForHardcover) { audiobook in
             HardcoverBookPickerView(audiobook: audiobook)
         }
+        .sheet(item: $audiobookForServerLink) { AudiobookShelfLinkPickerView(audiobook: $0) }
         .sheet(isPresented: $showingCollectionPicker, onDismiss: { booksForCollectionPicker = [] }) {
             CollectionPickerView(books: booksForCollectionPicker)
         }

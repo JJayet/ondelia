@@ -276,6 +276,20 @@ extension SettingsView {
             }
             .buttonStyle(.plain)
             .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
+
+            SettingsDivider()
+
+            NavigationLink {
+                AudiobookShelfSettingsView()
+            } label: {
+                SettingsRow(title: "AudiobookShelf", icon: "server.rack") {
+                    SettingsValue(text: AudiobookShelfService.shared.isSignedIn
+                        ? NSLocalizedString("Connected", comment: "AudiobookShelf status: signed in")
+                        : NSLocalizedString("Not connected", comment: "AudiobookShelf status: signed out"))
+                }
+            }
+            .buttonStyle(.plain)
+            .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
         }
     }
 

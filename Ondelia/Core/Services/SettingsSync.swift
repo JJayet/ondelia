@@ -14,7 +14,10 @@ enum SettingsSync {
         "playback.autoSleepTimer", "playback.deleteOnCompletion", "playback.bookOpeningDelayMS",
         "library.autoSeriesCollections", "library.showMissingSeriesBooks",
         "library.viewMode", "library.sortOption", "library.filterOption",
-        "player.showChapterTimes", "player.scrubsBook"
+        "player.showChapterTimes", "player.scrubsBook",
+        // The AudiobookShelf token itself goes through iCloud Keychain, never through here.
+        AudiobookShelfService.Defaults.server, AudiobookShelfService.Defaults.username,
+        AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey
     ]
 
     /// One value per device family: the grid density that suits a phone is wrong on a Mac.

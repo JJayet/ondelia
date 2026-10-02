@@ -95,6 +95,8 @@ extension LibraryView {
         case inProgress = "inProgress"
         case completed = "completed"
         case notStarted = "notStarted"
+        /// Audio on this device: plays offline.
+        case downloaded = "downloaded"
 
         var displayName: String {
             switch self {
@@ -102,6 +104,8 @@ extension LibraryView {
             case .inProgress: return NSLocalizedString("In Progress", comment: "Filter: books in progress")
             case .completed: return NSLocalizedString("Completed", comment: "Filter: completed books")
             case .notStarted: return NSLocalizedString("Not Started", comment: "Filter: books not started")
+            // Its own key: "Downloaded" is already the singular status ("Téléchargé").
+            case .downloaded: return String(localized: "filter.downloaded", defaultValue: "Downloaded", comment: "Filter: books with audio on this device")
             }
         }
     }

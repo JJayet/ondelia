@@ -97,8 +97,13 @@ extension AudiobookManager {
     @MainActor
     func finishImportRun(matching imported: [AudiobookModel] = []) {
         isImportRunning = false
+        onImported?(imported)
+        onImported = nil
+        // The handler can delete a book it merged into another (a streamed AudiobookShelf book
+        // taking over its download); a deleted model must not reach the matcher.
+        let remaining = imported.filter { !$0.isDeleted && $0.modelContext != nil }
         // No-op unless Hardcover auto-match is switched on and a token is saved.
-        Task { await HardcoverService.shared.autoMatch(imported) }
+        Task { await HardcoverService.shared.autoMatch(remaining) }
         processPendingImports()
     }
 

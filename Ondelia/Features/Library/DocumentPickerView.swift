@@ -24,7 +24,26 @@ struct DocumentPickerView: UIViewControllerRepresentable {
         picker.allowsMultipleSelection = true
         picker.shouldShowFileExtensions = true
         picker.delegate = context.coordinator
+        picker.directoryURL = Self.lastFolder
         return picker
+    }
+
+    /// Where the last pick came from, so the next one opens there. Without it the picker opens
+    /// in the app's own Documents folder, which file sharing puts in Files, and which only holds
+    /// books that are already imported.
+    private static let lastFolderKey = "import.lastPickerFolder"
+
+    static var lastFolder: URL? {
+        UserDefaults.standard.string(forKey: lastFolderKey).map { URL(fileURLWithPath: $0, isDirectory: true) }
+    }
+
+    /// Remembers the folder of `urls`, unless it is inside the app's own container: that is the
+    /// location this exists to steer away from.
+    static func rememberFolder(of urls: [URL]) {
+        guard let folder = urls.first?.deletingLastPathComponent().standardizedFileURL else { return }
+        let container = URL.homeDirectory.standardizedFileURL.path + "/"
+        guard !folder.path.hasPrefix(container) else { return }
+        UserDefaults.standard.set(folder.path, forKey: lastFolderKey)
     }
 
     func updateUIViewController(_ picker: UIDocumentPickerViewController, context: Context) {}
@@ -37,6 +56,7 @@ struct DocumentPickerView: UIViewControllerRepresentable {
         init(onPick: @escaping ([URL]) -> Void) { self.onPick = onPick }
 
         func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+            DocumentPickerView.rememberFolder(of: urls)
             onPick(urls)
         }
     }

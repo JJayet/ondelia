@@ -170,6 +170,7 @@ final class HardcoverService {
             }
             audiobook.hardcover = nil
             save()
+            AudiobookManager.shared.leaveSeriesCollections(audiobook)
             return
         }
 
@@ -187,6 +188,7 @@ final class HardcoverService {
         }
         audiobook.hardcover = link
         save()
+        AudiobookManager.shared.leaveSeriesCollections(audiobook)
         await refreshSeries(for: audiobook)
     }
 
@@ -274,6 +276,7 @@ final class HardcoverService {
         current.seriesChecked = true
         audiobook.hardcover = current
         save()
+        AudiobookManager.shared.leaveSeriesCollections(audiobook)
         AudiobookManager.shared.reconcileSeriesCollections()
     }
 

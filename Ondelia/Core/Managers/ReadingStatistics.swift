@@ -66,17 +66,33 @@ final class ReadingStatistics {
 
     /// The book just went from unfinished to finished. Rides on the open session when one is
     /// running, otherwise leaves a zero-second marker so the completion outlives the book.
-    func recordFinish(_ book: AudiobookModel) {
+    func recordFinish(_ book: AudiobookModel, at: Date = Date()) {
         guard store.isLoaded else { return }
         if let openSession, openSession.bookID == book.id, !openSession.finishedBook {
             openSession.finishedBook = true
         } else {
-            let marker = ListeningSessionModel(book: book, finishedBook: true)
+            let marker = ListeningSessionModel(book: book, startedAt: at, finishedBook: true)
             store.context.insert(marker)
             sessions.append(marker)
         }
         store.save()
         checkMilestones()
+    }
+
+    /// Takes back the most recent Finish of `book`: unflags the session it rode on, or removes
+    /// the zero-second marker, which held nothing else. Earned milestones stay earned.
+    func retractFinish(_ book: AudiobookModel) {
+        guard store.isLoaded,
+              let latest = sessions.filter({ $0.finishedBook && $0.bookID == book.id })
+                .max(by: { $0.startedAt < $1.startedAt })
+        else { return }
+        if latest.seconds > 0 {
+            latest.finishedBook = false
+        } else {
+            sessions.removeAll { $0 === latest }
+            store.context.delete(latest)
+        }
+        store.save()
     }
 
     func updateMonthlyGoal(_ newGoal: TimeInterval) {

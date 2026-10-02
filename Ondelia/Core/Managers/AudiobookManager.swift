@@ -34,7 +34,9 @@ final class AudiobookManager {
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?)] = []
+    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?, onImported: ImportedHandler?)] = []
+    /// Told which books the running import produced, once its merge offer has been answered.
+    var onImported: ImportedHandler?
     /// True from the moment an import starts until its merge offer has been answered.
     /// Imports run one at a time; see `handleImportRequest`.
     var isImportRunning = false
@@ -58,46 +60,6 @@ final class AudiobookManager {
 
     func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {
         return audiobook.bookmarks
-    }
-    
-    func markAsFinished(_ audiobook: AudiobookModel) {
-        setFinished(audiobook)
-        syncToHardcover(audiobook)
-    }
-
-    /// The only writer of `isFinished = true`: the first flip is a completion in the log, and
-    /// the log keeps it even after the book is deleted.
-    private func setFinished(_ audiobook: AudiobookModel) {
-        guard !audiobook.isFinished else { return }
-        audiobook.isFinished = true
-        ReadingStatistics.shared.recordFinish(audiobook)
-    }
-    
-    func resetProgress(for audiobook: AudiobookModel) {
-        audiobook.currentPosition = 0
-        audiobook.positionUpdatedAt = Date()
-        WatchSyncService.shared.pushSnapshot()
-    }
-    
-    func updateProgress(for audiobook: AudiobookModel, currentTime: TimeInterval) {
-        audiobook.currentPosition = currentTime
-        audiobook.positionUpdatedAt = Date()
-        audiobook.lastPlayed = Date()
-        
-        // Mark as finished if within 30 seconds of the end
-        if audiobook.duration > 0 && (audiobook.duration - currentTime) <= 30 {
-            setFinished(audiobook)
-        }
-        
-        swiftDataController.save()
-        syncToHardcover(audiobook)
-    }
-
-    /// Pushes the reading status to Hardcover. One call site per place that moves a book's
-    /// progress or finished flag; the service itself is a no-op when the book is not linked,
-    /// when nothing crossed a shelf boundary, or when no token is saved.
-    func syncToHardcover(_ audiobook: AudiobookModel) {
-        Task { await HardcoverService.shared.syncProgress(for: audiobook) }
     }
     
     @MainActor
@@ -159,12 +121,21 @@ final class AudiobookManager {
             try? FileManager.default.removeItem(at: fileURL)
         }
         
-        // Delete from Core Data. Transcript windows have no relationship to cascade through.
+        // Delete from Core Data. Transcript windows, AudiobookShelf links and closed Hardcover
+        // reads have no relationship to cascade through.
         let bookID = audiobook.id
         let windows = try? swiftDataController.context.fetch(
             FetchDescriptor<TranscriptWindowModel>(predicate: #Predicate { $0.audiobookID == bookID })
         )
         for window in windows ?? [] { swiftDataController.context.delete(window) }
+        let links = try? swiftDataController.context.fetch(
+            FetchDescriptor<AudiobookShelfLinkModel>(predicate: #Predicate { $0.audiobookID == bookID })
+        )
+        for link in links ?? [] { swiftDataController.context.delete(link) }
+        let closedReads = try? swiftDataController.context.fetch(
+            FetchDescriptor<HardcoverClosedReadModel>(predicate: #Predicate { $0.audiobookID == bookID })
+        )
+        for read in closedReads ?? [] { swiftDataController.context.delete(read) }
         swiftDataController.context.delete(audiobook)
         swiftDataController.save()
         fetchAudiobooks()
@@ -179,27 +150,6 @@ final class AudiobookManager {
         fetchAudiobooks()
         
         Log.library.debug("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
-    }
-    
-    @MainActor
-    func markAsRead(_ audiobook: AudiobookModel) {
-        setFinished(audiobook)
-        audiobook.currentPosition = audiobook.duration // Set to end
-        audiobook.positionUpdatedAt = Date()
-        swiftDataController.save()
-        syncToHardcover(audiobook)
-        fetchAudiobooks()
-        
-        Log.library.debug("✅ AudiobookManager: Marked audiobook as finished: \(audiobook.title ?? "Unknown")")
-    }
-    
-    @MainActor
-    func markAsUnread(_ audiobook: AudiobookModel) {
-        audiobook.isFinished = false
-        swiftDataController.save()
-        fetchAudiobooks()
-        
-        Log.library.debug("🔄 AudiobookManager: Marked audiobook as unfinished: \(audiobook.title ?? "Unknown")")
     }
     
     func searchAudiobooks(query: String) -> [AudiobookModel] {

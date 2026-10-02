@@ -98,7 +98,8 @@ extension HardcoverAPI {
         return id
     }
 
-    /// Moves an open read to a new position, and closes it when `finishedAt` is given.
+    /// Moves an open read to a new position, and closes it when `finishedAt` is given. Without
+    /// one the read is sent with no finish date, which reopens a read a retracted Finish closed.
     static func updateRead(
         id: Int,
         editionID: Int?,
@@ -122,7 +123,8 @@ extension HardcoverAPI {
                     editionID: editionID,
                     seconds: seconds,
                     startedAt: nil,
-                    finishedAt: finishedAt
+                    finishedAt: finishedAt,
+                    clearsFinish: finishedAt == nil
                 )
             ],
             token: token,
@@ -137,12 +139,13 @@ extension HardcoverAPI {
         editionID: Int?,
         seconds: Int,
         startedAt: String?,
-        finishedAt: String?
+        finishedAt: String?,
+        clearsFinish: Bool = false
     ) -> [String: Any] {
         var input: [String: Any] = ["progress_seconds": seconds]
         if let editionID { input["edition_id"] = editionID }
         if let startedAt { input["started_at"] = startedAt }
-        if let finishedAt { input["finished_at"] = finishedAt }
+        if let finishedAt { input["finished_at"] = finishedAt } else if clearsFinish { input["finished_at"] = NSNull() }
         return input
     }
 

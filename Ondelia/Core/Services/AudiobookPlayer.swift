@@ -10,6 +10,9 @@ struct AudiobookTrack: Sendable, Equatable {
     /// Offset of this file from the start of the book.
     let start: TimeInterval
     let duration: TimeInterval
+    /// Sent with every request for a streamed track (the server's bearer token); empty for a
+    /// file on the device.
+    var httpHeaders: [String: String] = [:]
 
     var end: TimeInterval { start + duration }
 }
@@ -89,7 +92,13 @@ final class AudiobookPlayer {
             Log.audio.error("❌ AudiobookPlayer: No playable audio at \(url.lastPathComponent)")
             return false
         }
+        return load(tracks: newTracks)
+    }
 
+    /// Queues a timeline worked out elsewhere — a streamed book's, from its server.
+    @discardableResult
+    func load(tracks newTracks: [AudiobookTrack]) -> Bool {
+        guard !newTracks.isEmpty else { return false }
         tracks = newTracks
         // A stored total can disagree with the files on disk; the timeline we actually play wins.
         duration = newTracks.last?.end ?? 0
@@ -110,7 +119,13 @@ final class AudiobookPlayer {
         trackIndexByItem.removeAll()
         guard tracks.indices.contains(index) else { return }
         for offset in index..<tracks.count {
-            let item = AVPlayerItem(url: tracks[offset].url)
+            let track = tracks[offset]
+            // The header key is not in the public headers, and it is how every streaming
+            // client passes auth to AVFoundation; a token in the URL would reach server logs.
+            let asset = track.httpHeaders.isEmpty
+                ? AVURLAsset(url: track.url)
+                : AVURLAsset(url: track.url, options: ["AVURLAssetHTTPHeaderFieldsKey": track.httpHeaders])
+            let item = AVPlayerItem(asset: asset)
             #if !os(watchOS)
             // Default is mono and stereo only: a Dolby Atmos track would play, but unspatialised.
             item.allowedAudioSpatializationFormats = .monoStereoAndMultichannel

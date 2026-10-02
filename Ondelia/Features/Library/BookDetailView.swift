@@ -269,7 +269,14 @@ struct BookDetailView: View {
 
             ProgressLine(value: audiobook.progressFraction, height: 6)
 
-            if !AudiobookManager.shared.hasFile(audiobook) {
+            if AudiobookManager.shared.hasFile(audiobook) {
+                resumeButton
+            } else if AudiobookShelfService.shared.canStream(audiobook) {
+                // Plays from the server; the download keeps this entry and its position.
+                resumeButton
+                AudiobookShelfDownloadButton(book: audiobook)
+                    .padding(.top, 10)
+            } else {
                 Label(
                     NSLocalizedString("Not on this device", comment: "Missing audio badge"),
                     systemImage: "icloud.and.arrow.down"
@@ -288,8 +295,6 @@ struct BookDetailView: View {
                 .foregroundStyle(.secondary)
                 .multilineTextAlignment(.center)
                 .padding(.top, 8)
-            } else {
-                resumeButton
             }
 
             HStack(spacing: 10) {

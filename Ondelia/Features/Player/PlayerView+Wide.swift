@@ -119,8 +119,10 @@ extension PlayerView {
             if !chapters.isEmpty {
                 metaChip(String(format: NSLocalizedString("%d chapters", comment: "Number of chapters"), chapters.count))
             }
-            // A playing book is on this device by definition; only the opposite is news.
-            if !audiobookManager.hasFile(audiobook) {
+            // On this device is the normal case; only the opposite is news.
+            if AudiobookShelfService.shared.canStream(audiobook) {
+                metaChip(NSLocalizedString("Streaming", comment: "Player: the book plays from the AudiobookShelf server"), dot: .green)
+            } else if !audiobookManager.hasFile(audiobook) {
                 metaChip(NSLocalizedString("Not on this device", comment: "Missing audio badge"), dot: .secondary)
             }
         }

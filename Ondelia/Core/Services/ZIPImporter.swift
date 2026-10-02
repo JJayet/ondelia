@@ -123,7 +123,7 @@ enum ZIPImporter {
         Log.library.debug("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
     }
     
-    private static func validateAudiobookContent(in directory: URL) -> URL? {
+    static func validateAudiobookContent(in directory: URL) -> URL? {
         let fileManager = FileManager.default
         let audioExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
         
@@ -181,23 +181,23 @@ enum ZIPImporter {
                 }
             }
             
-            // Check total size and duration requirements for regular audio files
+            // Only empty files are refused. The 1 MB-per-file and 10 MB-total minimums this used
+            // to apply rejected real books — a children's audiobook is one 8 MB m4b — while a
+            // lone audio file picked from Files had no minimum at all.
             var totalSize: Int64 = 0
             var validAudioFiles = 0
-            
+
             for audioFile in audioFiles {
                 let attributes = try fileManager.attributesOfItem(atPath: audioFile.path)
                 let fileSize = attributes[.size] as? Int64 ?? 0
-                
-                // Skip very small files (likely not audiobook content)
-                if fileSize > 1_000_000 { // 1MB minimum
+                if fileSize > 0 {
                     totalSize += fileSize
                     validAudioFiles += 1
                 }
             }
-            
-            guard validAudioFiles >= 1 && totalSize > 10_000_000 else { // 10MB minimum total
-                Log.library.error("❌ ZIPImporter: Insufficient valid audio content. Files: \(validAudioFiles), Size: \(ByteCountFormatter.string(fromByteCount: totalSize, countStyle: .file))")
+
+            guard validAudioFiles >= 1 else {
+                Log.library.error("❌ ZIPImporter: Only empty audio files found")
                 return nil
             }
             

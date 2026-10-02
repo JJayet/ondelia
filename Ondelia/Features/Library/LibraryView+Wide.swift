@@ -41,15 +41,24 @@ extension LibraryView {
                 }
                 .buttonStyle(.plain)
             } else {
-                Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
-                    withHapticFeedback { selecting = true }
+                if !showsServer {
+                    Button(NSLocalizedString("Select", comment: "Enter library selection mode")) {
+                        withHapticFeedback { selecting = true }
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(shelfBooks.isEmpty)
+                    .glassPill(height: 34)
                 }
-                .buttonStyle(.plain)
-                .disabled(shelfBooks.isEmpty)
-                .glassPill(height: 34)
 
-                Button {
+                serverUnreachableButton
+                    .buttonStyle(.plain)
+                    .frame(width: 34, height: 34)
+                    .glassEffect(.regular, in: Circle())
+
+                ImportMenu {
                     showingImporter = true
+                } onAudiobookShelf: {
+                    source = .audiobookShelf
                 } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 15, weight: .bold))
@@ -70,11 +79,13 @@ extension LibraryView {
     var collectionsRow: some View {
         VStack(alignment: .leading, spacing: 12) {
             SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
+            serverSeriesToggle
             ScrollView(.horizontal, showsIndicators: false) {
                 LazyHStack(spacing: 14) {
                     ForEach(collectionGroups) { group in
                         CollectionTileView(group: group) { collectionForDetail = group.collection }
                     }
+                    ForEach(shownServerSeries) { AudiobookShelfSeriesTile(series: $0) }
                 }
             }
             .clipped()
@@ -93,16 +104,30 @@ extension LibraryView {
             .padding(.horizontal)
             .padding(.top, 8)
 
-            if audiobookManager.audiobooks.isEmpty && !audiobookManager.isImporting {
-                EmptyLibraryView { showingImporter = true }
+            if isShelfEmpty && !audiobookManager.isImporting
+                && AudiobookShelfService.shared.downloads.isEmpty {
+                EmptyLibraryView(onImport: { showingImporter = true }, onAudiobookShelf: openServerShelf)
                     .padding(.horizontal)
                 Spacer()
             } else {
+                // The list and grid show these rows too; the table has no row slot for them.
+                if !AudiobookShelfService.shared.downloads.isEmpty {
+                    DownloadingIndicatorView()
+                        .padding(.horizontal)
+                }
+                if audiobookManager.isImporting {
+                    ImportingIndicatorView(manager: audiobookManager)
+                        .padding(.horizontal)
+                }
+
                 LibraryTableView(
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,
+                    server: shelfServerItems,
+                    serverSeries: displayOnlySeries,
                     onOpenBook: tapBook,
-                    onOpenCollection: { collectionForDetail = $0.collection }
+                    onOpenCollection: { collectionForDetail = $0.collection },
+                    onOpenServer: { AudiobookShelfService.shared.play($0, local: nil) { playAndPresent($0) } }
                 )
             }
         }

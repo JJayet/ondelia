@@ -85,6 +85,13 @@ extension CollectionGroup {
     /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
     @MainActor
     var countLabel: String {
+        if let total = serverSeries?.books?.count, total > books.count {
+            return String(
+                format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
+                books.count,
+                total
+            )
+        }
         guard isSeries else {
             return String(format: NSLocalizedString("%d books", comment: "Number of books in a collection"), books.count)
         }

@@ -36,7 +36,7 @@ extension PlayerView {
 
             // Opens the whole queue rather than starting the book: one tap used to abandon the
             // book playing, with no way to see or reorder what came after.
-            if let next = nextQueuedBook {
+            if let next = nextEntry {
                 Button {
                     withHapticFeedback { showingQueue = true }
                 } label: {
@@ -67,11 +67,12 @@ extension PlayerView {
     /// The book the play queue would start once this one ends — hidden when it is this book.
     /// What starts when this book ends, the same way `handlePlaybackEnded` decides it: a
     /// collection playing back to back names the next book; otherwise the play queue's head.
-    var nextQueuedBook: AudiobookModel? {
-        if let chained = audiobookManager.nextBook(after: audiobook) { return chained }
+    /// A server series can name one that has not joined the Library yet.
+    var nextEntry: LibraryEntry? {
+        if let chained = audiobookManager.nextEntry(after: audiobook) { return chained }
         guard let next = PlayQueue.shared.books(in: audiobookManager.audiobooks).first,
               next.id != audiobook.id else { return nil }
-        return next
+        return .book(next)
     }
 
     @ViewBuilder
@@ -88,13 +89,13 @@ extension PlayerView {
     }
 
     @ViewBuilder
-    private func nextBookRow(_ book: AudiobookModel) -> some View {
+    private func nextBookRow(_ next: LibraryEntry) -> some View {
         row(
             title: String(
                 format: NSLocalizedString("Next: %@", comment: "Player: next queued book"),
-                book.title ?? AudiobookModel.unknownTitle
+                next.title.isEmpty ? AudiobookModel.unknownTitle : next.title
             ),
-            trailing: book.duration.hoursMinutesFormatted
+            trailing: next.duration.hoursMinutesFormatted
         ) {
             Image(systemName: "text.line.first.and.arrowtriangle.forward")
                 .font(.system(size: 12))
