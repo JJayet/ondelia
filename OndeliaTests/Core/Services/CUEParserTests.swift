@@ -4,7 +4,7 @@ import Foundation
 
 struct CUEParserTests {
     private func sample(_ name: String) throws -> URL {
-        try #require(Bundle(for: TestDataFactory.self).url(forResource: name, withExtension: "cue"))
+        try #require(Bundle(for: TestBundleAnchor.self).url(forResource: name, withExtension: "cue"))
     }
 
     @Test("Parses standard CUE format")
