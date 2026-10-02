@@ -31,7 +31,7 @@ extension AudiobookManager {
     ///
     /// The files are copied into the new folder first and the originals removed only once the
     /// merged book is saved, so a failure anywhere leaves the library exactly as it was.
-    /// Bookmarks on the source books are not carried over.
+    /// The listener's state carries over: bookmarks, position, Finished, Collections, Up Next.
     @MainActor
     @discardableResult
     func mergeAudiobooks(_ books: [AudiobookModel], title: String) async -> AudiobookModel? {
@@ -84,19 +84,23 @@ extension AudiobookManager {
         // The same merge done on another device already synced its book here, folder missing:
         // this folder is that book's audio, so no second row.
         let synced = entryAwaitingFolder(at: merged.folderURL, duration: merged.totalDuration)
+        // A synced merge already carries the state its own device carried over.
+        let progress = Self.mergedProgress(of: sources, chapters: merged.chapters)
         let audiobook = synced ?? AudiobookModel(
             title: title,
             author: author ?? "Unknown Author",
             narrator: narrator,
             fileURL: AudiobookModel.storedPath(for: merged.folderURL),
             duration: merged.totalDuration,
-            currentPosition: 0,
-            isFinished: false,
+            currentPosition: progress.position,
+            // Every source Finished: so is the merge, with no new Finish in the log.
+            isFinished: progress.finished,
             coverImageData: cover,
             dateAdded: Date(),
-            lastPlayed: Date.distantPast
+            lastPlayed: sources.map(\.lastPlayed).max() ?? .distantPast
         )
         if synced == nil {
+            if progress.position > 0 { audiobook.positionUpdatedAt = Date() }
             context.insert(audiobook)
             for item in merged.chapters {
                 let chapter = ChapterModel(
@@ -126,6 +130,12 @@ extension AudiobookManager {
         }
 
         // Only now that the merged book is on disk and saved are the sources safe to drop.
+        // Playback writes progress into the model it holds, so it lets go of a source first.
+        if let playing = GlobalAudioManager.shared.currentAudiobook, sources.contains(where: { $0.id == playing.id }) {
+            GlobalAudioManager.shared.unload()
+        }
+        if synced == nil { moveBookmarks(from: sources, chapters: merged.chapters, onto: audiobook) }
+        replaceInCollectionsAndQueue(sources, with: audiobook)
         for source in sources {
             if let url = source.resolvedFileURL {
                 try? FileManager.default.removeItem(at: url)

@@ -47,6 +47,14 @@ final class PlayQueue {
         save()
     }
 
+    /// A Merge puts the merged audiobook where the first of its queued sources was.
+    func replace(_ sourceIDs: Set<UUID>, with mergedID: UUID) {
+        let replaced = AudiobookManager.replacing(sourceIDs, with: mergedID, in: bookIDs)
+        guard replaced != bookIDs else { return }
+        bookIDs = replaced
+        save()
+    }
+
     /// Books in queue order, resolved against a library. Ids with no book are skipped, not
     /// removed: this is read from view bodies, and writing state there is a SwiftUI violation.
     /// `popNext` prunes them.

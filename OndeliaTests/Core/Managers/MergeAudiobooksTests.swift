@@ -66,6 +66,53 @@ struct MergeAudiobooksTests {
         #expect(manager.audiobooks.count == 1)
     }
 
+    @Test("Merging carries bookmarks, position and Collection membership onto the merged timeline")
+    func mergeCarriesListenerState() async throws {
+        let prefix = UUID().uuidString
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        let sources = try makeSources(manager, prefix: prefix)
+        // Merge order is by file name: 01 becomes chapter 1 at 0 s, 02 chapter 2 at 60 s.
+        let (second, first) = (sources[0], sources[1])
+        first.isFinished = true
+        second.currentPosition = 10
+        let bookmark = BookmarkModel(title: "Quote", timestamp: 5)
+        bookmark.audiobook = second
+        let other = UUID()
+        let shelf = CollectionModel(name: "Shelf", bookIDs: [other, second.id, first.id])
+        manager.swiftDataController.context.insert(shelf)
+        manager.fetchCollections()
+
+        let merged = try #require(await manager.mergeAudiobooks(sources, title: "Merged \(prefix)"))
+        defer { if let url = merged.resolvedFileURL { try? FileManager.default.removeItem(at: url) } }
+
+        #expect(merged.currentPosition == 70)
+        #expect(merged.isFinished == false)
+        #expect(merged.bookmarks.map(\.timestamp) == [65])
+        #expect(shelf.bookIDs == [other, merged.id])
+    }
+
+    @Test("A merge of Finished sources is Finished, without a new Finish in the log")
+    func mergeOfFinishedSourcesIsFinished() async throws {
+        let prefix = UUID().uuidString
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        let sources = try makeSources(manager, prefix: prefix)
+        for source in sources { source.isFinished = true }
+
+        let merged = try #require(await manager.mergeAudiobooks(sources, title: "Merged \(prefix)"))
+        defer { if let url = merged.resolvedFileURL { try? FileManager.default.removeItem(at: url) } }
+
+        #expect(merged.isFinished)
+        #expect(merged.currentPosition == 120)
+    }
+
+    @Test("The merged id takes the first source's slot, once")
+    func replacingKeepsTheFirstSlot() {
+        let (a, b, c, merged) = (UUID(), UUID(), UUID(), UUID())
+        #expect(AudiobookManager.replacing([a, b], with: merged, in: [c, b, a]) == [c, merged])
+        #expect(AudiobookManager.replacing([a, b], with: merged, in: [b, merged, a]) == [merged])
+        #expect(AudiobookManager.replacing([a], with: merged, in: [c]) == [c])
+    }
+
     @Test("A single book is never merged, and nothing on disk moves")
     func mergeRefusesASingleBook() async throws {
         let prefix = UUID().uuidString
