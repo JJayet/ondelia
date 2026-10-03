@@ -34,7 +34,7 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       # CodeQL's build tracer breaks sandboxed tools ("Bad CPU type in executable"): packages are
       # resolved before tracing starts, and macro plugins run without the compiler sandbox.
