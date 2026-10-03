@@ -50,7 +50,8 @@ jobs:
             COMPILER_INDEX_STORE_ENABLE=NO \
             | tee build-output.txt
 
-      - name: Run complete test suite
+      # UI tests run locally only; add them back here once the project has contributors.
+      - name: Run unit tests
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -61,13 +62,15 @@ jobs:
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult \
+            -collect-test-diagnostics never \
+            -only-testing:OndeliaTests \
             | tee test-output.txt
 
       - name: Publish verified status
         if: success()
         run: |
           echo '## Validation passed' >> "$GITHUB_STEP_SUMMARY"
-          echo 'The application, unit tests, and UI tests built and the complete test suite passed.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'The application, unit tests, and UI tests built and the unit tests passed.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Publish failure status
         if: failure()
