@@ -27,6 +27,8 @@ struct TranscriptionView: View {
     /// Grouped once per transcript. As a computed property it re-ran on every playback tick.
     @State private var groupedSentences: [TranscriptSentence] = []
     @State private var failed = false
+    /// The window is streamed from the server, which the recogniser cannot read.
+    @State private var streamed = false
     @State private var showingError = false
     @State private var errorMessage = ""
     @State private var searchText = ""
@@ -88,7 +90,9 @@ struct TranscriptionView: View {
                 }
 
                 if displayText.isEmpty {
-                    if request == nil || failed {
+                    if streamed {
+                        TranscriptionStreamedView(audiobook: audiobook)
+                    } else if request == nil || failed {
                         TranscriptionEmptyView { withHapticFeedback { retry() } }
                     } else {
                         Spacer()
@@ -157,7 +161,7 @@ struct TranscriptionView: View {
         // preselected, rather than recognising an English book as French for a whole chapter.
         // Once the file is known, so the picker can name the guess.
         .onChange(of: request?.url, initial: true) { _, url in
-            guard url != nil, !TranscriptionRequest.languageAsked(for: audiobook.id) else { return }
+            guard url?.isFileURL == true, !TranscriptionRequest.languageAsked(for: audiobook.id) else { return }
             showingLanguagePicker = true
         }
         .alert(NSLocalizedString("Transcription Error", comment: "Transcription error alert title"), isPresented: $showingError) {
@@ -184,8 +188,9 @@ struct TranscriptionView: View {
     private func updateRequest() {
         let time = audio.getCurrentTime()
         let language = TranscriptionRequest.storedLanguage(for: audiobook.id)
-        if let request, request.contains(bookTime: time), request.language == language { return }
         guard let next = makeRequest(at: time, language: language) else { return }
+        // Same window, unless its audio moved: a streamed book that finished downloading.
+        if let request, request.contains(bookTime: time), request.language == language, request.url == next.url { return }
         loadKey = LoadKey(request: next)
     }
 
@@ -211,10 +216,12 @@ struct TranscriptionView: View {
         transcription = nil
         groupedSentences = []
         failed = false
+        streamed = false
         guard let request = key.request else { return }
         // Not before the language question is answered: a chapter recognised in the wrong
         // language is a chapter recognised twice. The picker's dismissal restarts this load.
-        guard TranscriptionRequest.languageAsked(for: audiobook.id) else { return }
+        // A streamed window goes on, to find a cached transcript or say why there is none.
+        guard TranscriptionRequest.languageAsked(for: audiobook.id) || !request.url.isFileURL else { return }
 
         do {
             let result = try await transcriptionManager.transcribe(request, bypassCache: key.bypassCache)
@@ -230,6 +237,9 @@ struct TranscriptionView: View {
             }
         } catch is CancellationError {
             return
+        } catch TranscriptionError.streamed {
+            guard !Task.isCancelled, key == loadKey else { return }
+            streamed = true
         } catch {
             guard !Task.isCancelled, key == loadKey else { return }
             errorMessage = error.localizedDescription

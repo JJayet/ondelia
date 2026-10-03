@@ -235,6 +235,10 @@ final class AudiobookShelfService {
             self.linksDidChange()
             self.importing.remove(item)
             AudiobookManager.shared.fetchAudiobooks()
+            // The book playing from the server switches to its file, which the transcript needs.
+            if let playing = GlobalAudioManager.shared.currentAudiobook, books.contains(where: { $0.id == playing.id }) {
+                GlobalAudioManager.shared.reloadCurrentBook()
+            }
         }
     }
 

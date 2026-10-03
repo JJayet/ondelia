@@ -5706,6 +5706,17 @@
           }
         }
       }
+    },
+    "Download this book to transcribe it." : {
+      "comment" : "Transcription: the book is streamed",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargez ce livre pour le transcrire."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"
