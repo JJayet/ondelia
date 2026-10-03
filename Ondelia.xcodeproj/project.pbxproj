@@ -117,7 +117,6 @@
 		F1A886FF2E66445100718F1B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		F1A887012E66445100718F1B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		F1A8871A2E6644BA00718F1B /* OndeliaWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OndeliaWidgetExtension.entitlements; sourceTree = "<group>"; };
-		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F1F056362E65D0B300C6E809 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -383,7 +382,6 @@
 		F1C0NF1G0000000000000003 /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				F1F056352E65D0B300C6E809 /* Secrets.xcconfig */,
 				F1F056362E65D0B300C6E809 /* Base.xcconfig */,
 			);
 			path = Config;

@@ -8,7 +8,7 @@ extension AudiobookManager {
     // MARK: - Import Operations
     /// Queues an import, and runs it when the library is ready and no other import is in flight.
     ///
-    /// One at a time is not a nicety. `importBatch`, `coverBatch`, `pendingMergeTitle` and the
+    /// One at a time is not a nicety. `importBatch`, `pendingMergeTitle` and the
     /// progress counters all describe *the* running import, so a second run starting mid-flight
     /// resets them under the first — which is exactly how the merge offer went missing: whichever
     /// run finished second found `pendingMergeTitle` already consumed and silently offered nothing.
@@ -63,7 +63,6 @@ extension AudiobookManager {
             let folderName = manager.commonAudioFolder(of: urls)?.lastPathComponent
             await MainActor.run {
                 manager.importBatch.removeAll()
-                manager.coverBatch.removeAll()
                 // Often nil: see `commonAudioFolder`. `importAudiobook` fills it from the album tag.
                 manager.pendingMergeTitle = folderName
             }
@@ -87,7 +86,7 @@ extension AudiobookManager {
                     } else {
                         Log.library.debug("🎵 Importing single file: \(url.lastPathComponent)")
                         // A multi-file pick shares one cover question, and one merge offer, at the end.
-                        await manager.importAudiobook(from: url, inCoverBatch: isMultiFilePick)
+                        await manager.importAudiobook(from: url)
                     }
                 }
 

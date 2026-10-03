@@ -64,9 +64,7 @@ extension AudiobookManager {
     /// Imports one audio file.
     /// - Parameters:
     ///   - fallbackCover: used when the file carries no artwork of its own.
-    ///   - inCoverBatch: when true the audiobook joins `coverBatch` instead of raising the cover
-    ///     picker on its own, so a folder split into many books only asks once, at the end.
-    nonisolated func importAudiobook(from url: URL, fallbackCover: UIImage? = nil, inCoverBatch: Bool = false) async {
+    nonisolated func importAudiobook(from url: URL, fallbackCover: UIImage? = nil) async {
         await MainActor.run { isImporting = true }
         
         Log.library.debug("🔍 AudiobookManager: Starting single file import for: \(url.lastPathComponent)")
@@ -158,9 +156,6 @@ extension AudiobookManager {
                 // place that name survives when a file provider stages each file separately.
                 if pendingMergeTitle == nil, let album = metadata.album, !album.isEmpty {
                     pendingMergeTitle = album
-                }
-                if inCoverBatch {
-                    coverBatch.append(audiobook)
                 }
                 fetchAudiobooks()
             }

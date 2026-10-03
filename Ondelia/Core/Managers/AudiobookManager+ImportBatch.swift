@@ -65,7 +65,6 @@ extension AudiobookManager {
         guard offerMerge, count > 1, let suggestedTitle else {
             let imported = importBatch
             importBatch.removeAll()
-            coverBatch.removeAll()
             finishImportRun(matching: imported)
             return
         }
@@ -78,7 +77,6 @@ extension AudiobookManager {
             guard merge else {
                 let imported = self.importBatch
                 self.importBatch.removeAll()
-                self.coverBatch.removeAll()
                 self.finishImportRun(matching: imported)
                 return
             }

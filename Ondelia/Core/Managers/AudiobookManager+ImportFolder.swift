@@ -16,7 +16,7 @@ extension AudiobookManager {
 
         for (index, audioFile) in audioFiles.enumerated() {
             await MainActor.run { currentImportFileName = audioFile.lastPathComponent }
-            await importAudiobook(from: audioFile, fallbackCover: folderCover, inCoverBatch: true)
+            await importAudiobook(from: audioFile, fallbackCover: folderCover)
             // The caller credits the folder itself as one completed entry, so the last file is left to it.
             if index < audioFiles.count - 1 {
                 await MainActor.run { importQueueCompleted += 1 }

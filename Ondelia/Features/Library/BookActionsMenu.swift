@@ -3,7 +3,6 @@ import SwiftUI
 /// Closures the library hosts for a book's actions: the alerts and sheets live on LibraryView.
 struct BookActions {
     var rename: (AudiobookModel) -> Void
-    var changeCover: (AudiobookModel) -> Void
     var linkHardcover: (AudiobookModel) -> Void
     var addToCollection: (AudiobookModel) -> Void
     var linkServer: (AudiobookModel) -> Void
@@ -46,12 +45,6 @@ struct BookActionsMenu: View {
             actions.addToCollection(audiobook)
         } label: {
             Label(NSLocalizedString("Add to Collection", comment: "Collection picker title"), systemImage: "folder.badge.plus")
-        }
-
-        Button {
-            actions.changeCover(audiobook)
-        } label: {
-            Label(NSLocalizedString("Change Cover Image", comment: "Change cover image button"), systemImage: "photo")
         }
 
         if HardcoverService.shared.isLinked && audiobook.hardcover == nil {

@@ -56,7 +56,7 @@
 
 ## Security & Configuration Tips
 
-- Do not commit secrets. Configure API keys outside source; never hardcode (see `GoogleImageSearchService`).
+- Do not commit secrets. Configure API keys outside source; never hardcode.
 - Use HTTPS endpoints; follow CI checks in `.github/workflows/ci.yml`.
 - Add new strings to `Localizable.xcstrings` and fill in French; avoid user data in logs.
 

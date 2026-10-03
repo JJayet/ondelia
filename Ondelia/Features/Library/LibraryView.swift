@@ -8,7 +8,6 @@ struct LibraryView: View {
     let audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
-    @State var audiobookForImagePicker: AudiobookModel?
     /// The book whose detail screen is pushed, if any.
     @State var audiobookForDetail: AudiobookModel?
     /// The collection whose screen is pushed, if any.
@@ -122,7 +121,6 @@ struct LibraryView: View {
                 newAudiobookTitle = audiobook.title ?? ""
                 activeAlert = .rename
             },
-            changeCover: { audiobookForImagePicker = $0 },
             linkHardcover: { audiobookForHardcover = $0 },
             addToCollection: { openCollectionPicker(for: [$0]) },
             linkServer: { audiobookForServerLink = $0 },
@@ -256,12 +254,6 @@ struct LibraryView: View {
                 audiobookManager.fetchAudiobooks()
             }
             await catalog.refresh(force: true)
-        }
-        .sheet(item: $audiobookForImagePicker) { audiobook in
-            ImagePickerView(audiobook: audiobook) { image in
-                audiobookManager.updateCoverImage(for: audiobook, with: image)
-                audiobookForImagePicker = nil
-            }
         }
         .sheet(item: $audiobookForHardcover) { audiobook in
             HardcoverBookPickerView(audiobook: audiobook)
