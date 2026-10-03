@@ -49,7 +49,7 @@ final class PlayQueue {
 
     /// A Merge puts the merged audiobook where the first of its queued sources was.
     func replace(_ sourceIDs: Set<UUID>, with mergedID: UUID) {
-        let replaced = AudiobookManager.replacing(sourceIDs, with: mergedID, in: bookIDs)
+        let replaced = bookIDs.replacingSources(sourceIDs, with: mergedID)
         guard replaced != bookIDs else { return }
         bookIDs = replaced
         save()

@@ -61,7 +61,11 @@ class AudiobookUITestCase: XCTestCase {
         app.launchArguments += [
             "--uitesting",
             "-AppleLanguages", "(\(language))",
-            "-AppleLocale", language == "fr" ? "fr_FR" : "en_US"
+            "-AppleLocale", language == "fr" ? "fr_FR" : "en_US",
+            // The device shelf, whatever the simulator remembers: a signed-in AudiobookShelf
+            // server left the Library on the server's shelf, so no suite found its seeded book.
+            "-library.source", "device",
+            "-audiobookshelf.showInLibrary", "NO"
         ] + extraLaunchArguments
         app.launch()
 

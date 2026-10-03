@@ -19,14 +19,14 @@ private enum HapticGenerators {
 }
 
 /// Emit feedback only for explicit UI actions, never for remote commands or engine updates.
+/// Not generic: Xcode 26 cannot infer `T` when a Button action wraps a call returning a value.
 @MainActor
-@discardableResult
-func withHapticFeedback<T>(
+func withHapticFeedback(
     _ intensity: UIImpactFeedbackGenerator.FeedbackStyle = .light,
-    _ action: () -> T
-) -> T {
+    _ action: () -> Void
+) {
     let impact = HapticGenerators.generator(for: intensity)
     impact.impactOccurred()
     impact.prepare()
-    return action()
+    action()
 }

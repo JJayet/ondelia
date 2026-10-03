@@ -43,6 +43,17 @@
   - Examples: `feat(player): add sleep timer`, `fix(core): handle empty CUE file`.
 - PRs include: concise description, linked issues, simulator screenshots (iPhone 17), test plan (commands run), and notes on localization/entitlements changes.
 
+## Versioning & Changelog
+
+- Every change to `MARKETING_VERSION` (App Store version) adds a section to `CHANGELOG.md` in the
+  same commit, in English and French, ready for App Store Connect:
+  - Promotional text (max 170 chars) highlighting the version's headline change.
+  - Subtitle (max 30 chars) and keywords (max 100 chars, comma-separated, no spaces, no words
+    already in the name or subtitle), revised for the new features.
+  - "What's New": user-facing changes since the previous version.
+  Use the app's UI terms from `Localizable.xcstrings`.
+- Build-number-only bumps (`CURRENT_PROJECT_VERSION`) update the existing section's heading.
+
 ## Security & Configuration Tips
 
 - Do not commit secrets. Configure API keys outside source; never hardcode (see `GoogleImageSearchService`).

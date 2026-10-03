@@ -8,6 +8,13 @@ private struct MergePart: Sendable {
     let sourceURL: URL
     let title: String
     let duration: TimeInterval
+
+    init?(_ book: AudiobookModel) {
+        guard let url = book.resolvedFileURL else { return nil }
+        sourceURL = url
+        title = book.title ?? url.deletingPathExtension().lastPathComponent
+        duration = book.duration
+    }
 }
 
 private struct MergedFolder: Sendable {
@@ -35,13 +42,7 @@ extension AudiobookManager {
     @MainActor
     @discardableResult
     func mergeAudiobooks(_ books: [AudiobookModel], title: String) async -> AudiobookModel? {
-        let sources = books
-            .filter { canMerge($0) }
-            .sorted {
-                ($0.resolvedFileURL?.lastPathComponent ?? "")
-                    .localizedStandardCompare($1.resolvedFileURL?.lastPathComponent ?? "") == .orderedAscending
-            }
-
+        let sources = mergeableSources(books)
         guard sources.count > 1 else {
             importErrorMessage = NSLocalizedString(
                 "At least two single-file audiobooks are needed to merge.",
@@ -50,15 +51,7 @@ extension AudiobookManager {
             return nil
         }
 
-        let parts = sources.compactMap { book -> MergePart? in
-            guard let url = book.resolvedFileURL else { return nil }
-            return MergePart(
-                sourceURL: url,
-                title: book.title ?? url.deletingPathExtension().lastPathComponent,
-                duration: book.duration
-            )
-        }
-        let cover = sources.compactMap(\.coverImageData).first
+        let parts = sources.compactMap { MergePart($0) }
         let author = sources.compactMap(\.author).first { $0 != "Unknown Author" }
         let narrator = sources.compactMap(\.narrator).first
 
@@ -71,22 +64,65 @@ extension AudiobookManager {
         do {
             merged = try await assembleMergedFolder(named: title, from: parts, author: author, narrator: narrator)
         } catch {
-            isImporting = false
-            currentImportFileName = nil
-            importErrorMessage = String(
-                format: NSLocalizedString("The audiobooks could not be merged: %@", comment: "Merge failure"),
-                error.localizedDescription
-            )
+            failMerge(error)
             return nil
         }
 
-        let context = swiftDataController.context
         // The same merge done on another device already synced its book here, folder missing:
         // this folder is that book's audio, so no second row.
         let synced = entryAwaitingFolder(at: merged.folderURL, duration: merged.totalDuration)
+        let audiobook = synced ?? insertMergedBook(
+            title: title, author: author, narrator: narrator, sources: sources, merged: merged
+        )
+
+        do {
+            try swiftDataController.context.save()
+        } catch {
+            // The originals are still untouched, so dropping the copy undoes the whole merge.
+            try? FileManager.default.removeItem(at: merged.folderURL)
+            if synced == nil { swiftDataController.context.delete(audiobook) }
+            failMerge(error)
+            return nil
+        }
+
         // A synced merge already carries the state its own device carried over.
+        replaceSources(sources, with: audiobook, chapters: merged.chapters, carryBookmarks: synced == nil)
+        Log.library.debug("📚 AudiobookManager: Merged \(sources.count) audiobooks into '\(title)'")
+        return audiobook
+    }
+
+    /// The books that can be merged, in file name order: the order their chapters take.
+    private func mergeableSources(_ books: [AudiobookModel]) -> [AudiobookModel] {
+        books
+            .filter { canMerge($0) }
+            .sorted {
+                ($0.resolvedFileURL?.lastPathComponent ?? "")
+                    .localizedStandardCompare($1.resolvedFileURL?.lastPathComponent ?? "") == .orderedAscending
+            }
+    }
+
+    @MainActor
+    private func failMerge(_ error: any Error) {
+        isImporting = false
+        currentImportFileName = nil
+        importErrorMessage = String(
+            format: NSLocalizedString("The audiobooks could not be merged: %@", comment: "Merge failure"),
+            error.localizedDescription
+        )
+    }
+
+    /// A new library row for `merged`, with its chapters and the sources' progress carried over.
+    @MainActor
+    private func insertMergedBook(
+        title: String,
+        author: String?,
+        narrator: String?,
+        sources: [AudiobookModel],
+        merged: MergedFolder
+    ) -> AudiobookModel {
+        let context = swiftDataController.context
         let progress = Self.mergedProgress(of: sources, chapters: merged.chapters)
-        let audiobook = synced ?? AudiobookModel(
+        let audiobook = AudiobookModel(
             title: title,
             author: author ?? "Unknown Author",
             narrator: narrator,
@@ -95,52 +131,44 @@ extension AudiobookManager {
             currentPosition: progress.position,
             // Every source Finished: so is the merge, with no new Finish in the log.
             isFinished: progress.finished,
-            coverImageData: cover,
+            coverImageData: sources.compactMap(\.coverImageData).first,
             dateAdded: Date(),
             lastPlayed: sources.map(\.lastPlayed).max() ?? .distantPast
         )
-        if synced == nil {
-            if progress.position > 0 { audiobook.positionUpdatedAt = Date() }
-            context.insert(audiobook)
-            for item in merged.chapters {
-                let chapter = ChapterModel(
-                    title: item.title,
-                    chapterNumber: Int16(item.chapterNumber),
-                    startTime: item.startTimeInBook,
-                    endTime: item.startTimeInBook + item.duration
-                )
-                chapter.audiobook = audiobook
-                context.insert(chapter)
-            }
-        }
-
-        do {
-            try context.save()
-        } catch {
-            // The originals are still untouched, so dropping the copy undoes the whole merge.
-            try? FileManager.default.removeItem(at: merged.folderURL)
-            if synced == nil { context.delete(audiobook) }
-            isImporting = false
-            currentImportFileName = nil
-            importErrorMessage = String(
-                format: NSLocalizedString("The audiobooks could not be merged: %@", comment: "Merge failure"),
-                error.localizedDescription
+        if progress.position > 0 { audiobook.positionUpdatedAt = Date() }
+        context.insert(audiobook)
+        for item in merged.chapters {
+            let chapter = ChapterModel(
+                title: item.title,
+                chapterNumber: Int16(item.chapterNumber),
+                startTime: item.startTimeInBook,
+                endTime: item.startTimeInBook + item.duration
             )
-            return nil
+            chapter.audiobook = audiobook
+            context.insert(chapter)
         }
+        return audiobook
+    }
 
-        // Only now that the merged book is on disk and saved are the sources safe to drop.
+    /// Only once the merged book is on disk and saved are the sources safe to drop.
+    @MainActor
+    private func replaceSources(
+        _ sources: [AudiobookModel],
+        with audiobook: AudiobookModel,
+        chapters: [FolderChapter],
+        carryBookmarks: Bool
+    ) {
         // Playback writes progress into the model it holds, so it lets go of a source first.
         if let playing = GlobalAudioManager.shared.currentAudiobook, sources.contains(where: { $0.id == playing.id }) {
             GlobalAudioManager.shared.unload()
         }
-        if synced == nil { moveBookmarks(from: sources, chapters: merged.chapters, onto: audiobook) }
+        if carryBookmarks { moveBookmarks(from: sources, chapters: chapters, onto: audiobook) }
         replaceInCollectionsAndQueue(sources, with: audiobook)
         for source in sources {
             if let url = source.resolvedFileURL {
                 try? FileManager.default.removeItem(at: url)
             }
-            context.delete(source)
+            swiftDataController.context.delete(source)
         }
         swiftDataController.save()
 
@@ -149,9 +177,6 @@ extension AudiobookManager {
         currentImportFileName = nil
         importQueueCompleted = importQueueTotal
         fetchAudiobooks()
-
-        Log.library.debug("📚 AudiobookManager: Merged \(sources.count) audiobooks into '\(title)'")
-        return audiobook
     }
 
     /// Copies every part into a fresh folder under Audiobooks and writes the playback manifest.
@@ -167,17 +192,7 @@ extension AudiobookManager {
         }
         let audiobooksDirectory = documents.appendingPathComponent("Audiobooks")
         try fileManager.createDirectory(at: audiobooksDirectory, withIntermediateDirectories: true)
-
-        let baseName = title
-            .replacingOccurrences(of: "/", with: "-")
-            .replacingOccurrences(of: ":", with: "-")
-            .trimmingCharacters(in: .whitespacesAndNewlines)
-        var folderURL = audiobooksDirectory.appendingPathComponent(baseName.isEmpty ? "Audiobook" : baseName)
-        var counter = 1
-        while fileManager.fileExists(atPath: folderURL.path) {
-            folderURL = audiobooksDirectory.appendingPathComponent("\(baseName) (\(counter))")
-            counter += 1
-        }
+        let folderURL = Self.unusedFolderURL(for: title, in: audiobooksDirectory)
         try fileManager.createDirectory(at: folderURL, withIntermediateDirectories: true)
 
         do {
@@ -186,37 +201,11 @@ extension AudiobookManager {
             var usedNames = Set<String>()
 
             for (index, part) in parts.enumerated() {
-                var fileName = part.sourceURL.lastPathComponent
-                var suffix = 1
-                while usedNames.contains(fileName) {
-                    let stem = part.sourceURL.deletingPathExtension().lastPathComponent
-                    fileName = "\(stem)_\(suffix).\(part.sourceURL.pathExtension)"
-                    suffix += 1
-                }
-                usedNames.insert(fileName)
-
-                let destination = try SafeImportPath.resolvedURL(for: fileName, inside: folderURL)
-                try fileManager.copyItem(at: part.sourceURL, to: destination)
-
-                // A book imported from a file with unreadable metadata can carry a zero duration;
-                // the merged manifest has to be right or every later chapter starts in the wrong place.
-                var duration = part.duration
-                if duration <= 0 {
-                    duration = (try? await AVURLAsset(url: destination).load(.duration).seconds) ?? 0
-                    if !duration.isFinite { duration = 0 }
-                }
-                let attributes = try? fileManager.attributesOfItem(atPath: destination.path)
-                let fileSize = attributes?[.size] as? Int64 ?? 0
-
-                chapters.append(FolderChapter(
-                    title: part.title,
-                    fileName: fileName,
-                    duration: duration,
-                    startTimeInBook: cumulative,
-                    chapterNumber: index + 1,
-                    fileSize: fileSize
-                ))
-                cumulative += duration
+                let chapter = try await Self.copy(
+                    part, asChapter: index + 1, startingAt: cumulative, into: folderURL, usedNames: &usedNames
+                )
+                chapters.append(chapter)
+                cumulative += chapter.duration
                 await MainActor.run { self.importQueueCompleted = index + 1 }
             }
 
@@ -238,5 +227,60 @@ extension AudiobookManager {
             try? fileManager.removeItem(at: folderURL)
             throw error
         }
+    }
+
+    /// A folder in `directory` named after `title`, numbered when that name is taken.
+    private nonisolated static func unusedFolderURL(for title: String, in directory: URL) -> URL {
+        let baseName = title
+            .replacingOccurrences(of: "/", with: "-")
+            .replacingOccurrences(of: ":", with: "-")
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+        var folderURL = directory.appendingPathComponent(baseName.isEmpty ? "Audiobook" : baseName)
+        var counter = 1
+        while FileManager.default.fileExists(atPath: folderURL.path) {
+            folderURL = directory.appendingPathComponent("\(baseName) (\(counter))")
+            counter += 1
+        }
+        return folderURL
+    }
+
+    /// Copies one part into `folderURL`, under a file name no earlier part took.
+    private nonisolated static func copy(
+        _ part: MergePart,
+        asChapter number: Int,
+        startingAt start: TimeInterval,
+        into folderURL: URL,
+        usedNames: inout Set<String>
+    ) async throws -> FolderChapter {
+        var fileName = part.sourceURL.lastPathComponent
+        var suffix = 1
+        while usedNames.contains(fileName) {
+            let stem = part.sourceURL.deletingPathExtension().lastPathComponent
+            fileName = "\(stem)_\(suffix).\(part.sourceURL.pathExtension)"
+            suffix += 1
+        }
+        usedNames.insert(fileName)
+
+        let destination = try SafeImportPath.resolvedURL(for: fileName, inside: folderURL)
+        try FileManager.default.copyItem(at: part.sourceURL, to: destination)
+
+        // A book imported from a file with unreadable metadata can carry a zero duration;
+        // the merged manifest has to be right or every later chapter starts in the wrong place.
+        var duration = part.duration
+        if duration <= 0 {
+            duration = (try? await AVURLAsset(url: destination).load(.duration).seconds) ?? 0
+            if !duration.isFinite { duration = 0 }
+        }
+        let attributes = try? FileManager.default.attributesOfItem(atPath: destination.path)
+        let fileSize = attributes?[.size] as? Int64 ?? 0
+
+        return FolderChapter(
+            title: part.title,
+            fileName: fileName,
+            duration: duration,
+            startTimeInBook: start,
+            chapterNumber: number,
+            fileSize: fileSize
+        )
     }
 }

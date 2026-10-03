@@ -7,10 +7,19 @@ import SwiftData
 @Observable
 final class ReadingStatistics {
     static let shared = ReadingStatistics()
+
+    enum Defaults {
+        /// Synced by `SettingsSync`, which never lets a stale value overwrite one set elsewhere.
+        static let monthlyGoal = "monthlyGoal"
+        /// Ids of the earned milestones, merged across devices by `SettingsSync`.
+        static let shownMilestones = "shownMilestones"
+    }
+
+    static let defaultMonthlyGoal: TimeInterval = 3600 * 10
     private let store: SwiftDataController
 
     private(set) var sessions: [ListeningSessionModel] = []
-    var monthlyGoal: TimeInterval = 3600 * 10
+    var monthlyGoal: TimeInterval = defaultMonthlyGoal
     /// Just crossed a badge's line; the tab view shows it and clears it.
     var newlyUnlocked: Milestone?
 
@@ -39,9 +48,9 @@ final class ReadingStatistics {
     func reload() {
         guard store.isLoaded else { return }
         sessions = (try? store.context.fetch(FetchDescriptor<ListeningSessionModel>())) ?? []
-        if UserDefaults.standard.array(forKey: "shownMilestones") == nil {
+        if UserDefaults.standard.array(forKey: Defaults.shownMilestones) == nil {
             // First run with badges: what is already earned is not news.
-            UserDefaults.standard.set(unlockedMilestones.map(\.id), forKey: "shownMilestones")
+            UserDefaults.standard.set(unlockedMilestones.map(\.id), forKey: Defaults.shownMilestones)
         }
     }
 
@@ -95,17 +104,19 @@ final class ReadingStatistics {
     }
 
     /// Reads the goal from defaults, where `SettingsSync` mirrors it from the other devices.
-    func loadMonthlyGoal() {
-        let stored = UserDefaults.standard.double(forKey: "monthlyGoal")
-        monthlyGoal = stored > 0 ? stored : 3600 * 10
+    func loadMonthlyGoal(from defaults: UserDefaults = .standard) {
+        let stored = defaults.double(forKey: Defaults.monthlyGoal)
+        monthlyGoal = stored > 0 ? stored : Self.defaultMonthlyGoal
     }
 
     func updateMonthlyGoal(_ newGoal: TimeInterval) {
         monthlyGoal = newGoal
-        UserDefaults.standard.set(newGoal, forKey: "monthlyGoal")
+        UserDefaults.standard.set(newGoal, forKey: Defaults.monthlyGoal)
+        SettingsSync.publish(Defaults.monthlyGoal)
     }
 
-    /// Clears the log and the pre-log counters. The goal stays.
+    /// Clears the log and the pre-log counters. The goal and earned Milestones stay: earned badges
+    /// are a union across devices, so clearing them here would only see iCloud bring them back.
     func resetAll() {
         for session in sessions { store.context.delete(session) }
         sessions = []
@@ -116,7 +127,6 @@ final class ReadingStatistics {
         for key in ["totalListeningTime", "booksCompleted", "longestStreak", "currentStreak", "monthlyProgress", "lastListenDate"] {
             UserDefaults.standard.removeObject(forKey: key)
         }
-        UserDefaults.standard.set([String](), forKey: "shownMilestones")
         store.save()
     }
 
@@ -152,7 +162,7 @@ final class ReadingStatistics {
 
     /// Once shown as unlocked, a badge stays lit even if its rule or the log later counts less.
     func hasEarned(_ milestone: Milestone) -> Bool {
-        UserDefaults.standard.stringArray(forKey: "shownMilestones")?.contains(milestone.id) ?? false
+        UserDefaults.standard.stringArray(forKey: Defaults.shownMilestones)?.contains(milestone.id) ?? false
     }
 
     var unlockedMilestones: [Milestone] {
@@ -161,13 +171,13 @@ final class ReadingStatistics {
     }
 
     private func checkMilestones() {
-        var shown = Set(UserDefaults.standard.stringArray(forKey: "shownMilestones") ?? [])
+        var shown = Set(UserDefaults.standard.stringArray(forKey: Defaults.shownMilestones) ?? [])
         // Only the unearned badges cost a scan; the shown ones are skipped before any stats work.
         let stats = self.stats
         guard let fresh = Milestone.all.first(where: { !shown.contains($0.id) && progress(of: $0, in: stats) >= $0.target })
         else { return }
         shown.insert(fresh.id)
-        UserDefaults.standard.set(Array(shown), forKey: "shownMilestones")
+        UserDefaults.standard.set(Array(shown), forKey: Defaults.shownMilestones)
         newlyUnlocked = fresh
     }
 }
