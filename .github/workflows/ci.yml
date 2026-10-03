@@ -10,6 +10,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   build-and-test:
     name: Build and test
@@ -19,13 +22,13 @@ jobs:
 
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Show Xcode version
         run: xcodebuild -version
 
       - name: Cache build dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             DerivedData/SourcePackages
@@ -52,6 +55,9 @@ jobs:
 
       # UI tests run locally only; add them back here once the project has contributors.
       - name: Run unit tests
+        env:
+          # Reaches the tests as `CI`, which skips tests marked `.needsRealTimePlayback`.
+          TEST_RUNNER_CI: "1"
         run: |
           set -o pipefail
           xcodebuild test-without-building \
@@ -80,7 +86,7 @@ jobs:
 
       - name: Archive diagnostics
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: validation-${{ github.run_number }}
           path: |
