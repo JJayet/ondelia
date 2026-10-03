@@ -5673,6 +5673,39 @@
           }
         }
       }
+    },
+    "Stream" : {
+      "comment" : "AudiobookShelf: stream item button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire en streaming"
+          }
+        }
+      }
+    },
+    "Tap Action" : {
+      "comment" : "AudiobookShelf setting: what tapping a server book does",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Action au toucher"
+          }
+        }
+      }
+    },
+    "What tapping a book that is not on this device does. A long press offers the other." : {
+      "comment" : "AudiobookShelf settings footer: tap action",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que fait un toucher sur un livre absent de cet appareil. Un appui long propose l’autre action."
+          }
+        }
+      }
     }
   },
   "version" : "1.1"

@@ -11,6 +11,7 @@ struct AudiobookShelfSettingsView: View {
     @State private var error: String?
     @AppStorage(AudiobookShelfCatalog.enabledKey) private var showsInLibrary = false
     @AppStorage(AudiobookShelfService.Defaults.library) private var selectedLibrary = ""
+    @AppStorage(AudiobookShelfService.Defaults.tapAction) private var tapAction = AudiobookShelfService.TapAction.stream
     @State private var libraries: [AudiobookShelfAPI.Library] = []
 
     var body: some View {
@@ -55,6 +56,20 @@ struct AudiobookShelfSettingsView: View {
                     "Your server's books are in Library, under AudiobookShelf. Tap one to download it; downloaded books play offline.",
                     comment: "AudiobookShelf settings: where the server books are"
                 ))
+        }
+
+        Section {
+            Picker(NSLocalizedString("Tap Action", comment: "AudiobookShelf setting: what tapping a server book does"), selection: $tapAction) {
+                Text(NSLocalizedString("Stream", comment: "AudiobookShelf: stream item button"))
+                    .tag(AudiobookShelfService.TapAction.stream)
+                Text(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"))
+                    .tag(AudiobookShelfService.TapAction.download)
+            }
+        } footer: {
+            Text(NSLocalizedString(
+                "What tapping a book that is not on this device does. A long press offers the other.",
+                comment: "AudiobookShelf settings footer: tap action"
+            ))
         }
 
         if libraries.count > 1 {

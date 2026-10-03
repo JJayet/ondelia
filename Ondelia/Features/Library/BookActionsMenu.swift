@@ -47,6 +47,24 @@ struct BookActionsMenu: View {
             Label(NSLocalizedString("Add to Collection", comment: "Collection picker title"), systemImage: "folder.badge.plus")
         }
 
+        // A streamed book: download it, or cancel its download.
+        let server = AudiobookShelfService.shared
+        if let item = server.itemID(for: audiobook) {
+            if server.downloads[item] != nil {
+                Button(role: .destructive) {
+                    server.cancelDownload(id: item)
+                } label: {
+                    Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
+                }
+            } else if server.canStream(audiobook), !server.importing.contains(item) {
+                Button {
+                    server.download(audiobook)
+                } label: {
+                    Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
+                }
+            }
+        }
+
         if HardcoverService.shared.isLinked && audiobook.hardcover == nil {
             Button {
                 actions.linkHardcover(audiobook)

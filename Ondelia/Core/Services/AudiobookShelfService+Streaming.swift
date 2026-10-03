@@ -21,6 +21,13 @@ extension AudiobookShelfService {
         isSignedIn && !AudiobookManager.shared.hasFile(book) && itemID(for: book) != nil
     }
 
+    /// Downloads a streamed book, sized from the catalogue when it lists the item.
+    func download(_ book: AudiobookModel) {
+        guard let item = itemID(for: book) else { return }
+        let size = AudiobookShelfCatalog.shared.items.first { $0.id == item }?.size
+        download(id: item, title: book.title ?? "", author: book.author, size: size)
+    }
+
     /// The book's timeline on the server, or nil when it is not a book to stream. A failed
     /// request is reported through `problem` and also returns nil; the load then fails.
     func streamTracks(for book: AudiobookModel) async -> [AudiobookTrack]? {

@@ -15,6 +15,16 @@ final class AudiobookShelfService {
         static let server = "audiobookshelf.server"
         static let username = "audiobookshelf.username"
         static let library = "audiobookshelf.library"
+        static let tapAction = "audiobookshelf.tapAction"
+    }
+
+    /// What tapping a server book not on this device does; a long press offers the other.
+    enum TapAction: String {
+        case stream, download
+    }
+
+    var tapAction: TapAction {
+        UserDefaults.standard.string(forKey: Defaults.tapAction).flatMap(TapAction.init) ?? .stream
     }
 
     private static let tokenKey = "audiobookshelf.token"
@@ -140,16 +150,17 @@ final class AudiobookShelfService {
     }
 
     func download(_ item: AudiobookShelfAPI.Item) {
-        download(id: item.id, title: item.title, author: item.author)
+        download(id: item.id, title: item.title, author: item.author, size: item.size)
     }
 
-    func download(id: String, title: String, author: String?) {
+    /// `size` stands in for the length a zipped download is sent without.
+    func download(id: String, title: String, author: String?, size: Int64? = nil) {
         guard let server, let token, downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
         task.taskDescription = AudiobookShelfDownloader.describe(id: id, title: title)
-        downloads[id] = DownloadProgress(title: title, author: author)
+        downloads[id] = DownloadProgress(title: title, author: author, expected: size)
         task.resume()
     }
 
@@ -165,9 +176,9 @@ final class AudiobookShelfService {
         guard let current = downloads[id] else { return }
         var next = current
         next.received = received
-        next.expected = expected
+        next.expected = expected ?? current.expected
         // Progress fires for every chunk; redraw at most once per percent (or MB when unsized).
-        let step: Int64 = expected.map { max($0 / 100, 1) } ?? 1_000_000
+        let step: Int64 = next.expected.map { max($0 / 100, 1) } ?? 1_000_000
         guard next.received / step != current.received / step || next.expected != current.expected else { return }
         downloads[id] = next
     }

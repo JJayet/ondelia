@@ -226,8 +226,8 @@ struct LibraryView: View {
         }
         // On the stack, not the shelf: screens it pushes (a series, an author) read the
         // environment of the stack, and tapping a downloaded book there must still play it.
-        .environment(\.audiobookShelfPlay, { playAndPresent($0) })
-        .environment(\.audiobookShelfAddToCollection, { openCollectionPicker(for: [$0]) })
+        .environment(\.audiobookShelfPlay, AudiobookShelfAction { playAndPresent($0) })
+        .environment(\.audiobookShelfAddToCollection, AudiobookShelfAction { openCollectionPicker(for: [$0]) })
         // Here rather than on the server shelf: a stream started from a book's detail screen
         // can fail too. On the stack, apart from the screen's own alert slot.
         .alert(
