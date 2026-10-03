@@ -57,19 +57,20 @@ struct AudiobookShelfSettingsView: View {
                 ))
         }
 
-        // The server shelf's library menu, here while the Library has no shelf to carry it.
-        if showsInLibrary, libraries.count > 1 {
+        if libraries.count > 1 {
             Section {
                 Picker(NSLocalizedString("Library", comment: "AudiobookShelf library picker"), selection: $selectedLibrary) {
                     ForEach(libraries) { Text($0.name).tag($0.id) }
                 }
                 .onChange(of: selectedLibrary) {
+                    // Through the service, so the watch follows the new library too.
+                    service.selectedLibrary = selectedLibrary
                     Task { await AudiobookShelfCatalog.shared.refresh() }
                 }
             } footer: {
                 Text(NSLocalizedString(
-                    "The server library whose audiobooks appear in Library.",
-                    comment: "AudiobookShelf settings: which server library is blended in"
+                    "The server library to browse and download from.",
+                    comment: "AudiobookShelf settings: which server library is used"
                 ))
             }
         }
@@ -137,6 +138,10 @@ struct AudiobookShelfSettingsView: View {
     private func loadLibraries() async {
         guard let server = service.server, let token = service.token else { return }
         libraries = (try? await AudiobookShelfAPI.libraries(server: server, token: token)) ?? []
+        // Nothing saved yet (or a library gone from the server): show the one the app falls back to.
+        if !libraries.contains(where: { $0.id == selectedLibrary }), let first = libraries.first?.id {
+            selectedLibrary = first
+        }
     }
 
     private func signIn() {

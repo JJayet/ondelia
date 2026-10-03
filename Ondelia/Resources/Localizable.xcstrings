@@ -5786,13 +5786,13 @@
         }
       }
     },
-    "The server library whose audiobooks appear in Library." : {
-      "comment" : "AudiobookShelf settings: which server library is blended in",
+    "The server library to browse and download from." : {
+      "comment" : "AudiobookShelf settings: which server library is used",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La bibliothèque du serveur dont les livres apparaissent dans Bibliothèque."
+            "value" : "La bibliothèque du serveur à parcourir et depuis laquelle télécharger."
           }
         }
       }
