@@ -61,6 +61,8 @@ jobs:
             -clonedSourcePackagesDirPath DerivedData/SourcePackages \
             -enableCodeCoverage YES \
             -resultBundlePath TestResults.xcresult \
+            -collect-test-diagnostics never \
+            -skip-testing:OndeliaUITests/ScreenshotUITests \
             | tee test-output.txt
 
       - name: Publish verified status
