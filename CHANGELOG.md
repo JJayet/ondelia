@@ -5,6 +5,46 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.6 (1) — 2026-10-03
+
+### English
+
+Promotional text
+New: your Apple Watch streams from your AudiobookShelf server over Wi-Fi or cellular. Leave your iPhone at home and keep listening.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,cue,player,chapters,offline,sleep,bookmarks,carplay,watch,lte,selfhosted,hardcover
+
+What's New
+
+Apple Watch
+- Stream your AudiobookShelf books on Apple Watch over Wi-Fi or cellular, without your iPhone nearby.
+- Tap Server on the watch to browse or search your server library and start any book; it joins your Library on iPhone too.
+- When a chapter isn't on the watch yet, playback carries on from the server instead of waiting for your iPhone.
+- Your iPhone signs the watch in to AudiobookShelf: there's nothing to type on your wrist.
+
+### Français
+
+Texte promotionnel
+Nouveau : votre Apple Watch écoute votre serveur AudiobookShelf en Wi-Fi ou en cellulaire. Laissez l'iPhone à la maison, l'écoute continue.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,flac,lecteur,chapitres,hors,ligne,minuteur,sommeil,signets,montre,carplay,hardcover,lte
+
+Nouveautés
+
+Apple Watch
+- Écoutez vos livres AudiobookShelf en streaming sur l'Apple Watch, en Wi-Fi ou en cellulaire, sans iPhone à proximité.
+- Touchez Serveur sur la montre pour parcourir ou rechercher la bibliothèque du serveur et lancer n'importe quel livre ; il rejoint aussi votre Bibliothèque sur l'iPhone.
+- Quand un chapitre n'est pas encore sur la montre, la lecture continue depuis le serveur au lieu d'attendre l'iPhone.
+- L'iPhone connecte la montre à AudiobookShelf : rien à saisir au poignet.
+
 ## 1.5 (1) — 2026-10-02
 
 ### English
