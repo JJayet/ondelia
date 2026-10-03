@@ -1,0 +1,19 @@
+.github/workflows/ci.yml
+  s_65dd49b90fdc16::t_fbd8c433353298 53-54,66,73
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "ef1bf39244dd50dddcd9070311385b2a3e2a56a0",
+  "prompts": {},
+  "sessions": {
+    "s_65dd49b90fdc16": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3e55861a-0e2b-49ca-8d77-f76518509a41",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
