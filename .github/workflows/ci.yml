@@ -55,6 +55,9 @@ jobs:
 
       # UI tests run locally only; add them back here once the project has contributors.
       - name: Run unit tests
+        env:
+          # Reaches the tests as `CI`, which skips tests marked `.needsRealTimePlayback`.
+          TEST_RUNNER_CI: "1"
         run: |
           set -o pipefail
           xcodebuild test-without-building \

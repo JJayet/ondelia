@@ -102,7 +102,7 @@ struct AudiobookPlayerTests {
 
     // MARK: - Transport
 
-    @Test("Play advances the position, pause stops it")
+    @Test("Play advances the position, pause stops it", .needsRealTimePlayback)
     func playAdvancesTime() async throws {
         let player = AudiobookPlayer()
         #expect(await player.load(try singleFileBook()))
@@ -211,7 +211,7 @@ struct AudiobookPlayerTests {
         #expect(player.currentChapterIndex == 2)
     }
 
-    @Test("The queue advances into the next chapter on its own")
+    @Test("The queue advances into the next chapter on its own", .needsRealTimePlayback)
     func queueAdvancesAcrossChapters() async throws {
         let player = AudiobookPlayer()
         #expect(await player.load(try multiChapterBook(count: 2)))
@@ -225,7 +225,7 @@ struct AudiobookPlayerTests {
         player.pause()
     }
 
-    @Test("Reaching the end of the last chapter reports the end of the book")
+    @Test("Reaching the end of the last chapter reports the end of the book", .needsRealTimePlayback)
     func lastChapterEndReportsBookEnd() async throws {
         let player = AudiobookPlayer()
         #expect(await player.load(try multiChapterBook(count: 2)))
