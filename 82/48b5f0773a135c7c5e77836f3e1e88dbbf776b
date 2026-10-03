@@ -1,0 +1,25 @@
+CHANGELOG.md
+  s_e5a96695acb19c::t_7a5f248bae3618 8-47
+Ondelia.xcodeproj/project.pbxproj
+  s_e5a96695acb19c::t_aca993478b933a 839,880,1026,1045,1062,1079,1109,1143,1166,1190,1213,1236,1271,1306,1341,1377
+docs/adr/0002-server-audiobooks-shown-not-joined.md
+  s_e5a96695acb19c::t_3d46653ca2f3f2 11
+docs/adr/0003-watch-streams-and-phone-adopts.md
+  s_e5a96695acb19c::t_3d46653ca2f3f2 1-14
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "8248b5f0773a135c7c5e77836f3e1e88dbbf776b",
+  "prompts": {},
+  "sessions": {
+    "s_e5a96695acb19c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db08d604-42b9-4587-b0d3-541e3e23cf4b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
