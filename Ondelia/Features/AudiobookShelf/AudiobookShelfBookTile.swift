@@ -2,13 +2,21 @@ import SwiftUI
 
 extension EnvironmentValues {
     /// Plays a library book from the server shelf. Set by `LibraryView`, which owns the player.
-    @Entry var audiobookShelfPlay: (@MainActor (AudiobookModel) -> Void)?
+    @Entry var audiobookShelfPlay: AudiobookShelfAction?
     /// Library books by server item, computed once per shelf rather than once per tile.
     @Entry var audiobookShelfLibraryBooks: [String: AudiobookModel] = [:]
     /// The server library the shelf shows, for actions that fetch more of it.
     @Entry var audiobookShelfLibrary = ""
     /// Opens the collection picker for a book. Set by `LibraryView`, which owns the sheet.
-    @Entry var audiobookShelfAddToCollection: (@MainActor (AudiobookModel) -> Void)?
+    @Entry var audiobookShelfAddToCollection: AudiobookShelfAction?
+}
+
+/// A book action set by `LibraryView`. Always equal, like SwiftUI's own actions: a new closure
+/// each render must not redraw every tile.
+struct AudiobookShelfAction: Equatable {
+    let run: @MainActor (AudiobookModel) -> Void
+
+    static func == (lhs: Self, rhs: Self) -> Bool { true }
 }
 
 extension View {
@@ -111,7 +119,7 @@ struct AudiobookShelfBookTile: View {
     }
 
     private func tap() {
-        withHapticFeedback { service.play(item, local: localBook, with: play) }
+        withHapticFeedback { service.open(item, local: localBook, with: play?.run) }
     }
 }
 

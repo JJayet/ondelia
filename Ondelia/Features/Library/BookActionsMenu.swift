@@ -3,7 +3,6 @@ import SwiftUI
 /// Closures the library hosts for a book's actions: the alerts and sheets live on LibraryView.
 struct BookActions {
     var rename: (AudiobookModel) -> Void
-    var changeCover: (AudiobookModel) -> Void
     var linkHardcover: (AudiobookModel) -> Void
     var addToCollection: (AudiobookModel) -> Void
     var linkServer: (AudiobookModel) -> Void
@@ -48,10 +47,22 @@ struct BookActionsMenu: View {
             Label(NSLocalizedString("Add to Collection", comment: "Collection picker title"), systemImage: "folder.badge.plus")
         }
 
-        Button {
-            actions.changeCover(audiobook)
-        } label: {
-            Label(NSLocalizedString("Change Cover Image", comment: "Change cover image button"), systemImage: "photo")
+        // A streamed book: download it, or cancel its download.
+        let server = AudiobookShelfService.shared
+        if let item = server.itemID(for: audiobook) {
+            if server.downloads[item] != nil {
+                Button(role: .destructive) {
+                    server.cancelDownload(id: item)
+                } label: {
+                    Label(NSLocalizedString("Cancel Download", comment: "AudiobookShelf: cancel download button"), systemImage: "xmark")
+                }
+            } else if server.canStream(audiobook), !server.importing.contains(item) {
+                Button {
+                    server.download(audiobook)
+                } label: {
+                    Label(NSLocalizedString("Download", comment: "AudiobookShelf: download item button"), systemImage: "arrow.down.circle")
+                }
+            }
         }
 
         if HardcoverService.shared.isLinked && audiobook.hardcover == nil {

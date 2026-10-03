@@ -172,7 +172,6 @@ extension AudiobookManager {
         }
         swiftDataController.save()
 
-        coverBatch.removeAll()
         isImporting = false
         currentImportFileName = nil
         importQueueCompleted = importQueueTotal

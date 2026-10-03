@@ -34,17 +34,19 @@ final class AudiobookManager {
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?, onImported: ImportedHandler?)] = []
+    var pendingImports: [(
+        urls: [URL], mergesWithoutAsking: Bool, completion: (@Sendable () -> Void)?, onImported: ImportedHandler?
+    )] = []
     /// Told which books the running import produced, once its merge offer has been answered.
     var onImported: ImportedHandler?
+    /// The running import is known to be one book, so its parts merge without the offer.
+    var mergesWithoutAsking = false
     /// True from the moment an import starts until its merge offer has been answered.
     /// Imports run one at a time; see `handleImportRequest`.
     var isImportRunning = false
     var isDrainingImports = false
     /// Inbox files already handed to an import, so a second scan does not import them again.
     var inboxHandedOff: Set<String> = []
-    /// Audiobooks split out of one folder: they all receive the cover picked for any one of them.
-    var coverBatch: [AudiobookModel] = []
     /// Every audiobook the running import produced, so the merge offer knows what it would merge.
     var importBatch: [AudiobookModel] = []
     /// Name to suggest for that merge, set when the batch clearly came from one folder.
@@ -85,21 +87,6 @@ final class AudiobookManager {
         context.delete(bookmark)
         swiftDataController.save()
         WatchSyncService.shared.pushSnapshot()
-    }
-
-    // MARK: - Cover Image Management
-    @MainActor
-    func updateCoverImage(for audiobook: AudiobookModel, with image: UIImage) {
-        let imageData = image.coverJPEGData()
-        audiobook.coverImageData = imageData
-        CoverImageCache.invalidate(audiobook)
-        for sibling in coverBatch where sibling.persistentModelID != audiobook.persistentModelID {
-            sibling.coverImageData = imageData
-            CoverImageCache.invalidate(sibling)
-        }
-        coverBatch.removeAll()
-        swiftDataController.save()
-        fetchAudiobooks()
     }
 
     // MARK: - Library Management

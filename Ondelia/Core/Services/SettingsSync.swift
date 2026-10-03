@@ -23,7 +23,8 @@ enum SettingsSync {
         "player.showChapterTimes", "player.scrubsBook",
         // The AudiobookShelf token itself goes through iCloud Keychain, never through here.
         AudiobookShelfService.Defaults.server, AudiobookShelfService.Defaults.username,
-        AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey
+        AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey,
+        AudiobookShelfService.Defaults.tapAction
     ]
 
     /// Set by the listener and never pushed on their own: `publish` sends the listener's change,

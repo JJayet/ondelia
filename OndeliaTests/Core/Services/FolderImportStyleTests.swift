@@ -108,21 +108,4 @@ struct FolderImportStyleTests {
         #expect(manager.commonAudioFolder(of: files) == folder.standardizedFileURL)
         #expect(manager.commonAudioFolder(of: files + [folder]) == nil)
     }
-
-    @Test("One cover picked at the end of a split import covers the whole batch")
-    func coverBatchSharesPickedImage() throws {
-        let manager = AudiobookManager(swiftDataController: .inMemory())
-        let context = manager.swiftDataController.context
-        let books = (0..<3).map { index -> AudiobookModel in
-            let book = AudiobookModel(title: "Chapter \(index)")
-            context.insert(book)
-            return book
-        }
-        manager.coverBatch = books
-
-        manager.updateCoverImage(for: books[0], with: UIImage(systemName: "book")!)
-
-        #expect(books.allSatisfy { $0.coverImageData != nil })
-        #expect(manager.coverBatch.isEmpty)
-    }
 }

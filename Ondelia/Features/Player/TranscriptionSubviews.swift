@@ -91,6 +91,31 @@ struct TranscriptionEmptyView: View {
     }
 }
 
+/// A streamed book has no file to transcribe: offer to download it. When the download lands,
+/// the player switches to the file and the transcript loads.
+struct TranscriptionStreamedView: View {
+    let audiobook: AudiobookModel
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Image(systemName: "icloud")
+                .font(.system(size: 60))
+                .foregroundStyle(Color.secondaryText)
+
+            Text(TranscriptionError.streamed.localizedDescription)
+                .font(.title3)
+                .fontWeight(.semibold)
+                .multilineTextAlignment(.center)
+                .foregroundStyle(Color.primaryText)
+
+            AudiobookShelfDownloadButton(book: audiobook)
+                .frame(maxWidth: 280)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
 // MARK: - Text View
 struct TranscriptionTextView: View {
     let text: String

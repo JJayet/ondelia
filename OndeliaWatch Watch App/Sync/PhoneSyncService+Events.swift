@@ -20,7 +20,9 @@ extension PhoneSyncService {
             clearBook(bookID)
         case .pauseOtherSide:
             WatchAudioManager.shared.pause()
-        case .bookmarkAdded, .chapterRequested, .chapterDeleted, .watchInventory, .listened:
+        case let .serverAccount(account):
+            WatchServerAccount.shared.apply(account)
+        case .bookmarkAdded, .chapterRequested, .chapterDeleted, .watchInventory, .listened, .joined:
             // Sent by the watch, never to it.
             break
         }

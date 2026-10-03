@@ -235,7 +235,7 @@ extension LibraryView {
                 Button(audiobook.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
                     withHapticFeedback {
                         withAnimation(.easeInOut(duration: 0.3)) {
-                            ListenerState.shared.apply(
+                            _ = ListenerState.shared.apply(
                                 audiobook.isFinished ? .unfinish : .finish, to: audiobook, from: .listener
                             )
                         }

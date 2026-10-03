@@ -65,20 +65,18 @@ extension AudiobookManager {
         guard offerMerge, count > 1, let suggestedTitle else {
             let imported = importBatch
             importBatch.removeAll()
-            coverBatch.removeAll()
             finishImportRun(matching: imported)
             return
         }
         // The batch stays on the manager rather than being captured: SwiftData models are not
         // Sendable, so it must never cross into the answering task.
-        mergePrompt = MergePrompt(suggestedTitle: suggestedTitle, bookCount: count) { [weak self] merge in
+        let prompt = MergePrompt(suggestedTitle: suggestedTitle, bookCount: count) { [weak self] merge in
             // Clearing the prompt first keeps a second answer (button plus dismissal) from acting twice.
             guard let self, self.mergePrompt != nil else { return }
             self.mergePrompt = nil
             guard merge else {
                 let imported = self.importBatch
                 self.importBatch.removeAll()
-                self.coverBatch.removeAll()
                 self.finishImportRun(matching: imported)
                 return
             }
@@ -90,6 +88,9 @@ extension AudiobookManager {
                 self.finishImportRun(matching: merged.map { [$0] } ?? batch)
             }
         }
+        mergePrompt = prompt
+        // Answered at once, in this same turn, so the offer is never drawn.
+        if mergesWithoutAsking { prompt.respond(true) }
     }
 
     /// Releases the import gate. Held past the end of the copying on purpose: the batch is still

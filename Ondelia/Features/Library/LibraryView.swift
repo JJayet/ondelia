@@ -8,7 +8,6 @@ struct LibraryView: View {
     let audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
-    @State var audiobookForImagePicker: AudiobookModel?
     /// The book whose detail screen is pushed, if any.
     @State var audiobookForDetail: AudiobookModel?
     /// The collection whose screen is pushed, if any.
@@ -122,7 +121,6 @@ struct LibraryView: View {
                 newAudiobookTitle = audiobook.title ?? ""
                 activeAlert = .rename
             },
-            changeCover: { audiobookForImagePicker = $0 },
             linkHardcover: { audiobookForHardcover = $0 },
             addToCollection: { openCollectionPicker(for: [$0]) },
             linkServer: { audiobookForServerLink = $0 },
@@ -228,8 +226,8 @@ struct LibraryView: View {
         }
         // On the stack, not the shelf: screens it pushes (a series, an author) read the
         // environment of the stack, and tapping a downloaded book there must still play it.
-        .environment(\.audiobookShelfPlay, { playAndPresent($0) })
-        .environment(\.audiobookShelfAddToCollection, { openCollectionPicker(for: [$0]) })
+        .environment(\.audiobookShelfPlay, AudiobookShelfAction { playAndPresent($0) })
+        .environment(\.audiobookShelfAddToCollection, AudiobookShelfAction { openCollectionPicker(for: [$0]) })
         // Here rather than on the server shelf: a stream started from a book's detail screen
         // can fail too. On the stack, apart from the screen's own alert slot.
         .alert(
@@ -256,12 +254,6 @@ struct LibraryView: View {
                 audiobookManager.fetchAudiobooks()
             }
             await catalog.refresh(force: true)
-        }
-        .sheet(item: $audiobookForImagePicker) { audiobook in
-            ImagePickerView(audiobook: audiobook) { image in
-                audiobookManager.updateCoverImage(for: audiobook, with: image)
-                audiobookForImagePicker = nil
-            }
         }
         .sheet(item: $audiobookForHardcover) { audiobook in
             HardcoverBookPickerView(audiobook: audiobook)

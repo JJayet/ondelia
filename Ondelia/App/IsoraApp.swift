@@ -124,6 +124,7 @@ struct IsoraApp: App {
         AudiobookManager.shared.importInboxFiles()
         // Another device may have signed in to AudiobookShelf, or out, meanwhile.
         AudiobookShelfService.shared.reload()
+        WatchSyncService.shared.sendServerAccount()
         // Refresh Now Playing info when app becomes active. Not `resumePlayback`: that applies
         // the smart rewind, which turned every unlock into a two-second stutter.
         if globalAudioManager.isPlaying() {

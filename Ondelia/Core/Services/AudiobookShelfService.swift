@@ -15,6 +15,16 @@ final class AudiobookShelfService {
         static let server = "audiobookshelf.server"
         static let username = "audiobookshelf.username"
         static let library = "audiobookshelf.library"
+        static let tapAction = "audiobookshelf.tapAction"
+    }
+
+    /// What tapping a server book not on this device does; a long press offers the other.
+    enum TapAction: String {
+        case stream, download
+    }
+
+    var tapAction: TapAction {
+        UserDefaults.standard.string(forKey: Defaults.tapAction).flatMap(TapAction.init) ?? .stream
     }
 
     private static let tokenKey = "audiobookshelf.token"
@@ -109,7 +119,10 @@ final class AudiobookShelfService {
 
     var selectedLibrary: String? {
         get { UserDefaults.standard.string(forKey: Defaults.library) }
-        set { UserDefaults.standard.set(newValue, forKey: Defaults.library) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Defaults.library)
+            WatchSyncService.shared.sendServerAccount()
+        }
     }
 
     func signIn(server input: String, username: String, password: String) async throws {
@@ -121,6 +134,7 @@ final class AudiobookShelfService {
         UserDefaults.standard.set(server.absoluteString, forKey: Defaults.server)
         UserDefaults.standard.set(username, forKey: Defaults.username)
         reload()
+        WatchSyncService.shared.sendServerAccount()
     }
 
     /// Forgets the account — on every device when it is synced, since the token lives in
@@ -130,21 +144,23 @@ final class AudiobookShelfService {
         Keychain.set(nil, for: Self.tokenKey)
         UserDefaults.standard.removeObject(forKey: Defaults.library)
         reload()
+        WatchSyncService.shared.sendServerAccount()
         AudiobookShelfCatalog.shared.forget()
         AudiobookShelfImages.forget()
     }
 
     func download(_ item: AudiobookShelfAPI.Item) {
-        download(id: item.id, title: item.title, author: item.author)
+        download(id: item.id, title: item.title, author: item.author, size: item.size)
     }
 
-    func download(id: String, title: String, author: String?) {
+    /// `size` stands in for the length a zipped download is sent without.
+    func download(id: String, title: String, author: String?, size: Int64? = nil) {
         guard let server, let token, downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
         task.taskDescription = AudiobookShelfDownloader.describe(id: id, title: title)
-        downloads[id] = DownloadProgress(title: title, author: author)
+        downloads[id] = DownloadProgress(title: title, author: author, expected: size)
         task.resume()
     }
 
@@ -160,9 +176,9 @@ final class AudiobookShelfService {
         guard let current = downloads[id] else { return }
         var next = current
         next.received = received
-        next.expected = expected
+        next.expected = expected ?? current.expected
         // Progress fires for every chunk; redraw at most once per percent (or MB when unsized).
-        let step: Int64 = expected.map { max($0 / 100, 1) } ?? 1_000_000
+        let step: Int64 = next.expected.map { max($0 / 100, 1) } ?? 1_000_000
         guard next.received / step != current.received / step || next.expected != current.expected else { return }
         downloads[id] = next
     }
@@ -191,7 +207,8 @@ final class AudiobookShelfService {
     private func importDownload(_ file: URL, item: String, title: String? = nil, author: String? = nil) {
         let folder = file.deletingLastPathComponent()
         importing.insert(item)
-        AudiobookManager.shared.handleImportRequest(urls: [file]) {
+        // One server item is one book: a folder of chapters merges without asking.
+        AudiobookManager.shared.handleImportRequest(urls: [file], mergesWithoutAsking: true) {
             try? FileManager.default.removeItem(at: folder)
         } onImported: { imported in
             let context = SwiftDataController.shared.context
@@ -219,6 +236,10 @@ final class AudiobookShelfService {
             self.linksDidChange()
             self.importing.remove(item)
             AudiobookManager.shared.fetchAudiobooks()
+            // The book playing from the server switches to its file, which the transcript needs.
+            if let playing = GlobalAudioManager.shared.currentAudiobook, books.contains(where: { $0.id == playing.id }) {
+                GlobalAudioManager.shared.reloadCurrentBook()
+            }
         }
     }
 

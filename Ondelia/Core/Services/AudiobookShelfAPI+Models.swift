@@ -69,6 +69,9 @@ extension AudiobookShelfAPI {
         let collapsedSeries: CollapsedSeries?
         /// When the server got the book, in milliseconds since 1970.
         var addedAt: Double?
+        /// The book's files, in bytes: what a download will weigh when the server zips it
+        /// without saying.
+        var size: Int64?
 
         var dateAdded: Date { Date(timeIntervalSince1970: (addedAt ?? 0) / 1000) }
 

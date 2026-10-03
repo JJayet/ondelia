@@ -17,6 +17,15 @@ struct RootView: View {
             content
                 .navigationTitle(Text(String(localized: "In Progress")))
                 .toolbar {
+                    if WatchServerAccount.shared.canBrowse {
+                        ToolbarItem(placement: .topBarLeading) {
+                            NavigationLink {
+                                WatchServerBrowseView()
+                            } label: {
+                                Label(String(localized: "Server"), systemImage: "server.rack")
+                            }
+                        }
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         NavigationLink {
                             OnWatchStorageView()

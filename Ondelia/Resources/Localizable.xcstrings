@@ -56,9 +56,7 @@
         }
       }
     },
-    "" : {
-
-    },
+    "" : {},
     "-%@" : {
       "comment" : "Player: time remaining, negative clock format",
       "localizations" : {
@@ -1314,17 +1312,6 @@
         }
       }
     },
-    "Change Cover Image" : {
-      "comment" : "Change cover image button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Changer l'image de couverture"
-          }
-        }
-      }
-    },
     "Chapter %d" : {
       "comment" : "Default chapter title with number",
       "localizations" : {
@@ -1404,28 +1391,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les chapitres sont ici"
-          }
-        }
-      }
-    },
-    "Choose Cover Image" : {
-      "comment" : "Choose cover image title",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir l'image de couverture"
-          }
-        }
-      }
-    },
-    "Choose from Photos" : {
-      "comment" : "Choose from Photos button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Choisir dans les photos"
           }
         }
       }
@@ -1657,17 +1622,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Impossible de charger la bibliothèque"
-          }
-        }
-      }
-    },
-    "Cover Image" : {
-      "comment" : "Cover image view title",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Image de couverture"
           }
         }
       }
@@ -2014,17 +1968,6 @@
         }
       }
     },
-    "Failed to download image: %@" : {
-      "comment" : "Image download error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Impossible de télécharger l'image : %@"
-          }
-        }
-      }
-    },
     "Faster" : {
       "comment" : "Playback menu: next speed step",
       "localizations" : {
@@ -2075,17 +2018,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Premier livre terminé"
-          }
-        }
-      }
-    },
-    "for %@" : {
-      "comment" : "Cover image for audiobook title",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "pour %@"
           }
         }
       }
@@ -2498,17 +2430,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Intégrations"
-          }
-        }
-      }
-    },
-    "Invalid image URL" : {
-      "comment" : "Invalid image URL error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "URL d'image invalide"
           }
         }
       }
@@ -3094,28 +3015,6 @@
         }
       }
     },
-    "No images found" : {
-      "comment" : "No images found message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune image trouvée"
-          }
-        }
-      }
-    },
-    "No images found for this audiobook" : {
-      "comment" : "No images found for audiobook message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucune image trouvée pour ce livre audio"
-          }
-        }
-      }
-    },
     "No listening yet" : {
       "comment" : "Snapshot: empty",
       "localizations" : {
@@ -3145,17 +3044,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucun résultat"
-          }
-        }
-      }
-    },
-    "No title available for search" : {
-      "comment" : "No title error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Aucun titre disponible pour la recherche"
           }
         }
       }
@@ -3353,6 +3241,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "sur l'iPhone"
+          }
+        }
+      }
+    },
+    "on server" : {
+      "comment" : "Watch book status suffix: the audiobook streams from the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur le serveur"
           }
         }
       }
@@ -4233,28 +4132,6 @@
         }
       }
     },
-    "Search failed: %@" : {
-      "comment" : "Search failed error message",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Échec de la recherche : %@"
-          }
-        }
-      }
-    },
-    "Search Google Images" : {
-      "comment" : "Search Google Images button",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Rechercher dans Google Images"
-          }
-        }
-      }
-    },
     "Search in transcription..." : {
       "comment" : "Search text field placeholder",
       "localizations" : {
@@ -4295,17 +4172,6 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Recherchez vos livres audio"
-          }
-        }
-      }
-    },
-    "Searching for images..." : {
-      "comment" : "Searching for images loading text",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Recherche d'images…"
           }
         }
       }
@@ -5362,17 +5228,6 @@
         }
       }
     },
-    "Try searching for images or choose from your photos" : {
-      "comment" : "No images found instructions",
-      "localizations" : {
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Essayez de rechercher des images ou choisissez dans vos photos"
-          }
-        }
-      }
-    },
     "Try searching for the title and author." : {
       "comment" : "Hardcover empty results message",
       "localizations" : {
@@ -5775,13 +5630,13 @@
         }
       }
     },
-    "The server library whose audiobooks appear in Library." : {
-      "comment" : "AudiobookShelf settings: which server library is blended in",
+    "The server library to browse and download from." : {
+      "comment" : "AudiobookShelf settings: which server library is used",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "La bibliothèque du serveur dont les livres apparaissent dans Bibliothèque."
+            "value" : "La bibliothèque du serveur à parcourir et depuis laquelle télécharger."
           }
         }
       }
@@ -5815,6 +5670,50 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Réduit"
+          }
+        }
+      }
+    },
+    "Stream" : {
+      "comment" : "AudiobookShelf: stream item button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lire en streaming"
+          }
+        }
+      }
+    },
+    "Tap Action" : {
+      "comment" : "AudiobookShelf setting: what tapping a server book does",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Action au toucher"
+          }
+        }
+      }
+    },
+    "What tapping a book that is not on this device does. A long press offers the other." : {
+      "comment" : "AudiobookShelf settings footer: tap action",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce que fait un toucher sur un livre absent de cet appareil. Un appui long propose l’autre action."
+          }
+        }
+      }
+    },
+    "Download this book to transcribe it." : {
+      "comment" : "Transcription: the book is streamed",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Téléchargez ce livre pour le transcrire."
           }
         }
       }

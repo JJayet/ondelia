@@ -216,6 +216,17 @@ final class GlobalAudioManager {
         publishPlaybackSnapshot(reloadTimeline: true)
     }
 
+    /// Opens the current book again where it is, playing on if it was: its audio moved, as when
+    /// a streamed book finishes downloading.
+    func reloadCurrentBook() {
+        guard let audiobook = currentAudiobook, player != nil, !isLoading else { return }
+        let wasPlaying = isPlaying()
+        persistProgress()
+        teardownPlayer()
+        loadAudiobook(audiobook)
+        if wasPlaying { startPlaybackAfterOpeningBook() }
+    }
+
     private func teardownPlayer() {
         guard let player else { return }
         player.tearDown()

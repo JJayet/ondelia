@@ -21,6 +21,13 @@ extension AudiobookShelfService {
         isSignedIn && !AudiobookManager.shared.hasFile(book) && itemID(for: book) != nil
     }
 
+    /// Downloads a streamed book, sized from the catalogue when it lists the item.
+    func download(_ book: AudiobookModel) {
+        guard let item = itemID(for: book) else { return }
+        let size = AudiobookShelfCatalog.shared.items.first { $0.id == item }?.size
+        download(id: item, title: book.title ?? "", author: book.author, size: size)
+    }
+
     /// The book's timeline on the server, or nil when it is not a book to stream. A failed
     /// request is reported through `problem` and also returns nil; the load then fails.
     func streamTracks(for book: AudiobookModel) async -> [AudiobookTrack]? {
@@ -66,22 +73,34 @@ extension AudiobookShelfService {
     /// The library entry for `item`: the existing one, or a new one made from the server's
     /// metadata, chapters and cover.
     func libraryBook(for item: AudiobookShelfAPI.Item) async throws -> AudiobookModel {
-        if let existing = libraryBooks[item.id] { return existing }
+        try await libraryBook(itemID: item.id, title: item.title, author: item.author, duration: item.media.duration)
+    }
+
+    /// `id` is the watch's, when the watch streamed the book first and already uses that id.
+    func libraryBook(
+        itemID: String,
+        id: UUID = UUID(),
+        title: String = "",
+        author: String? = nil,
+        duration: Double? = nil
+    ) async throws -> AudiobookModel {
+        if let existing = libraryBooks[itemID] { return existing }
         guard let server, let token else { throw AudiobookShelfAPI.Failure.http(401) }
 
-        let playback = try await AudiobookShelfAPI.playbackItem(server: server, token: token, item: item.id)
+        let playback = try await AudiobookShelfAPI.playbackItem(server: server, token: token, item: itemID)
         let cover = try? await URLSession.shared.data(
-            for: AudiobookShelfAPI.coverRequest(server: server, token: token, item: item.id, width: 800)
+            for: AudiobookShelfAPI.coverRequest(server: server, token: token, item: itemID, width: 800)
         )
         // The requests took a while; a tap on the same book in the meantime may have made it.
-        if let existing = libraryBooks[item.id] { return existing }
+        if let existing = libraryBooks[itemID] { return existing }
 
         let book = AudiobookModel(
-            title: playback.media.metadata.title ?? item.title,
-            author: playback.author ?? item.author,
+            id: id,
+            title: playback.media.metadata.title ?? title,
+            author: playback.author ?? author,
             narrator: playback.narrator,
             fileURL: nil,
-            duration: playback.media.duration ?? item.media.duration ?? 0,
+            duration: playback.media.duration ?? duration ?? 0,
             coverImageData: (cover?.1 as? HTTPURLResponse)?.statusCode == 200 ? cover?.0 : nil
         )
         let context = SwiftDataController.shared.context
@@ -96,7 +115,7 @@ extension AudiobookShelfService {
             context.insert(row)
             row.audiobook = book
         }
-        context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item.id))
+        context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: itemID))
         SwiftDataController.shared.save()
         linksDidChange()
         AudiobookManager.shared.fetchAudiobooks()

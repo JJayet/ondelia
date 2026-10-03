@@ -18,14 +18,20 @@ extension PhoneSyncService {
         for book in existing { byID[book.id] = book }
 
         for summary in snapshot.books {
-            upsert(summary, existing: byID[summary.id], context: context)
+            upsert(summary, existing: byID[summary.id] ?? adoptTwin(of: summary), context: context)
+            WatchServerAccount.shared.setLink(itemID: summary.serverItemID, for: summary.id)
         }
 
         // A book the phone no longer lists is only dropped when the watch holds no audio for
-        // it; otherwise the listener would lose something they can still play offline.
+        // it; otherwise the listener would lose something they can still play offline. Nor
+        // while it plays, or when it was played after the phone built this snapshot: a book
+        // the watch streamed may not have reached the phone yet.
         let kept = Set(snapshot.books.map(\.id))
         for book in existing where !kept.contains(book.id) {
-            guard WatchLibraryDisk.chaptersOnDisk(bookID: book.id).isEmpty else { continue }
+            guard WatchLibraryDisk.chaptersOnDisk(bookID: book.id).isEmpty,
+                  WatchAudioManager.shared.currentBook?.id != book.id,
+                  book.lastPlayed < snapshot.sentAt else { continue }
+            WatchServerAccount.shared.setLink(itemID: nil, for: book.id)
             context.delete(book)
         }
 
@@ -37,6 +43,17 @@ extension PhoneSyncService {
         skipBackSeconds = snapshot.skipBackSeconds ?? 15
         skipForwardSeconds = snapshot.skipForwardSeconds ?? 15
         WatchAudioManager.shared.applyRemoteSkipIntervals()
+    }
+
+    /// A book this watch streamed first and the phone already held under another id: it takes
+    /// the phone's id, so both sides speak of one book. The phone maps the old id for the
+    /// events still on their way.
+    private func adoptTwin(of summary: BookSummary) -> AudiobookModel? {
+        guard let item = summary.serverItemID,
+              let twin = WatchServerAccount.shared.book(forItem: item), twin.id != summary.id else { return nil }
+        WatchServerAccount.shared.setLink(itemID: nil, for: twin.id)
+        twin.id = summary.id
+        return twin
     }
 
     private func upsert(_ summary: BookSummary, existing: AudiobookModel?, context: ModelContext) {

@@ -8,3 +8,4 @@ With "Show server audiobooks in Library" on, every server audiobook of the selec
 - The Library screen loses its "AudiobookShelf" segment while server audiobooks are shown: series browse as Collections and the Search tab searches both, so the separate shelf has nothing left to do.
 - When the server is unreachable, signed out, or the setting is off, server audiobooks vanish and so do streamed audiobooks: only audiobooks with audio on the device (and those with missing audio) are shown. Streamed audiobooks keep their records and reappear when the server returns.
 - A duplicate between an imported audiobook and a server audiobook is resolved by giving the imported one a server link, never by matching titles automatically.
+- The Watch does not blend server audiobooks into its list; it browses them on a separate Server screen and streams them on its own (see ADR 0003).

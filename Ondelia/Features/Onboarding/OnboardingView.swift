@@ -198,7 +198,7 @@ private struct OnboardingPageControl: UIViewRepresentable {
         control.pageIndicatorTintColor = .tertiaryLabel
     }
 
-    final class Coordinator: NSObject {
+    @MainActor final class Coordinator: NSObject {
         var page: Binding<Int>
 
         init(page: Binding<Int>) { self.page = page }

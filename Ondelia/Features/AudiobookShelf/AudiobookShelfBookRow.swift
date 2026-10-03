@@ -2,7 +2,7 @@ import SwiftUI
 
 /// A server book that has not joined the Library, drawn like `EnhancedAudiobookRowView` so it
 /// sits in the Library list beside the books that have. Tapping streams it, which makes it
-/// join; a long press downloads it.
+/// join, or downloads it, as `TapAction` says; a long press offers the other.
 struct AudiobookShelfBookRow: View {
     let item: AudiobookShelfAPI.Item
 
@@ -12,7 +12,7 @@ struct AudiobookShelfBookRow: View {
 
     var body: some View {
         Button {
-            withHapticFeedback { service.play(item, local: nil, with: play) }
+            withHapticFeedback { service.open(item, local: nil, with: play?.run) }
         } label: {
             HStack(spacing: 13) {
                 AudiobookShelfCover(item: item.id, title: item.title, size: coverSize, cornerRadius: 13)

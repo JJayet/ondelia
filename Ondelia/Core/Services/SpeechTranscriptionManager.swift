@@ -143,6 +143,8 @@ final class SpeechTranscriptionManager {
             return cached
         }
 
+        // The recogniser reads files only; a transcript cached before the book went is still fine.
+        guard request.url.isFileURL else { throw TranscriptionError.streamed }
         let result = try await transcribeWindow(request, locale: locale)
         await store()?.save(result, for: request, engine: "SpeechAnalyzer")
         return result
@@ -270,6 +272,8 @@ enum TranscriptionError: Error, LocalizedError {
     case audioUnreadable
     case transcriptionFailed(Error)
     case assetInstallationFailed
+    /// The book plays from the server, and only a file on this device can be transcribed.
+    case streamed
 
     var errorDescription: String? {
         switch self {
@@ -281,6 +285,11 @@ enum TranscriptionError: Error, LocalizedError {
             return String(
                 format: NSLocalizedString("Transcription failed: %@", comment: "Transcription error"),
                 error.localizedDescription
+            )
+        case .streamed:
+            return NSLocalizedString(
+                "Download this book to transcribe it.",
+                comment: "Transcription: the book is streamed"
             )
         case .assetInstallationFailed:
             return NSLocalizedString(

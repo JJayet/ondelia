@@ -30,10 +30,7 @@ struct AudiobookShelfDownloadButton: View {
                 .font(.system(size: 13.5, weight: .semibold))
             } else {
                 Button {
-                    withHapticFeedback {
-                        guard let item else { return }
-                        service.download(id: item, title: book.title ?? "", author: book.author)
-                    }
+                    withHapticFeedback { service.download(book) }
                 } label: {
                     Label(
                         NSLocalizedString("Download", comment: "AudiobookShelf: download item button"),

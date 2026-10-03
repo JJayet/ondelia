@@ -117,7 +117,6 @@
 		F1A886FF2E66445100718F1B /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		F1A887012E66445100718F1B /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		F1A8871A2E6644BA00718F1B /* OndeliaWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = OndeliaWidgetExtension.entitlements; sourceTree = "<group>"; };
-		F1F056352E65D0B300C6E809 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
 		F1F056362E65D0B300C6E809 /* Base.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Base.xcconfig; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -154,6 +153,11 @@
 				Core/Models/SwiftData/TranscriptWindowModel.swift,
 				Core/Services/AudiobookPlayer.swift,
 				"Core/Services/AudiobookPlayer+Tracks.swift",
+				Core/Services/AudiobookShelfAPI.swift,
+				"Core/Services/AudiobookShelfAPI+Browse.swift",
+				"Core/Services/AudiobookShelfAPI+Models.swift",
+				"Core/Services/AudiobookShelfAPI+Playback.swift",
+				Core/Services/Keychain.swift,
 				Core/Services/Log.swift,
 				Core/Services/SafeImportPath.swift,
 				Resources/Day.icon,
@@ -378,7 +382,6 @@
 		F1C0NF1G0000000000000003 /* Config */ = {
 			isa = PBXGroup;
 			children = (
-				F1F056352E65D0B300C6E809 /* Secrets.xcconfig */,
 				F1F056362E65D0B300C6E809 /* Base.xcconfig */,
 			);
 			path = Config;
@@ -831,7 +834,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora;
 				PRODUCT_MODULE_NAME = Isora;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -872,7 +875,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora;
 				PRODUCT_MODULE_NAME = Isora;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1018,7 +1021,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraTests;
 				PRODUCT_MODULE_NAME = IsoraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1037,7 +1040,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraTests;
 				PRODUCT_MODULE_NAME = IsoraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1054,7 +1057,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraUITests;
 				PRODUCT_MODULE_NAME = IsoraUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1071,7 +1074,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraUITests;
 				PRODUCT_MODULE_NAME = IsoraUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1101,7 +1104,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp;
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1135,7 +1138,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp;
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1158,7 +1161,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppTests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1182,7 +1185,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppTests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1205,7 +1208,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppUITests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1228,7 +1231,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppUITests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1263,7 +1266,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp.IsoraWatchWidget;
 				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1298,7 +1301,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp.IsoraWatchWidget;
 				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1333,7 +1336,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.IsoraWidget;
 				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1369,7 +1372,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.5;
+				MARKETING_VERSION = 1.6.1;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.IsoraWidget;
 				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";

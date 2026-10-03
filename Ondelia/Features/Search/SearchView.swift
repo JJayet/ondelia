@@ -157,16 +157,20 @@ struct SearchView: View {
             }
     }
 
-    /// Tapping streams it, which makes it join the Library; a long press downloads it.
+    /// Tapping streams it, which makes it join the Library, or downloads it, as `TapAction`
+    /// says; a long press offers the other.
     private func serverRow(_ item: AudiobookShelfAPI.Item) -> some View {
         SearchResultRow(entry: .server(item), query: debouncedQuery)
             .contentShape(Rectangle())
             .onTapGesture {
                 withHapticFeedback(.medium) {
-                    AudiobookShelfService.shared.play(item, local: nil) { present($0) }
+                    AudiobookShelfService.shared.open(item, local: nil) { present($0) }
                 }
             }
-            .contextMenu { AudiobookShelfItemMenu(item: item, isOnDevice: false, joined: false) }
+            .contextMenu {
+                AudiobookShelfItemMenu(item: item, isOnDevice: false, joined: false)
+                    .environment(\.audiobookShelfPlay, AudiobookShelfAction { present($0) })
+            }
     }
 
     private func present(_ book: AudiobookModel) {
