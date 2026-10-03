@@ -1,0 +1,52 @@
+Ondelia/Features/Library/LibraryView.swift
+  s_e56dafd4586272::t_9148adedd10251 229-230
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_e56dafd4586272::t_c69e922c1db470 14,61-72
+  s_e56dafd4586272::t_53f7bb0052dbf7 73-74
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_e56dafd4586272::t_24bd3c1dcefd9b 153,156-157,163,179,181
+  s_e56dafd4586272::t_c69e922c1db470 18-27
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_e56dafd4586272::t_9148adedd10251 238
+Ondelia/Core/Services/SettingsSync.swift
+  s_e56dafd4586272::t_c69e922c1db470 26-27
+Ondelia/Features/Search/SearchView.swift
+  s_e56dafd4586272::t_c69e922c1db470 160-161,167,170-173
+Ondelia/Core/Services/AudiobookShelfAPI+Models.swift
+  s_e56dafd4586272::t_24bd3c1dcefd9b 72-74
+Ondelia/Features/Onboarding/OnboardingView.swift
+  s_e56dafd4586272::t_9148adedd10251 201
+Ondelia/Features/AudiobookShelf/AudiobookShelfBookRow.swift
+  s_e56dafd4586272::t_c69e922c1db470 5,15
+Ondelia/Resources/Localizable.xcstrings
+  s_e56dafd4586272::t_c69e922c1db470 5676-5708
+Ondelia/Features/AudiobookShelf/AudiobookShelfBookTile.swift
+  s_e56dafd4586272::t_c69e922c1db470 122
+  s_e56dafd4586272::t_9148adedd10251 5,11-19
+Ondelia/Features/Library/BookActionsMenu.swift
+  s_e56dafd4586272::t_9148adedd10251 50-67
+Ondelia/Core/Services/AudiobookShelfService+Streaming.swift
+  s_e56dafd4586272::t_9148adedd10251 24-30
+Ondelia/Features/AudiobookShelf/AudiobookShelfDownloadButton.swift
+  s_e56dafd4586272::t_9148adedd10251 33
+Ondelia/Features/AudiobookShelf/AudiobookShelfItemMenu.swift
+  s_e56dafd4586272::t_9148adedd10251 29
+  s_e56dafd4586272::t_c69e922c1db470 10-12,42,49-55,70-78
+  s_e56dafd4586272::t_e373a628868db9 79-80
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "329822933c9f1970b86779eb74ca3b1d53e5a2d4",
+  "prompts": {},
+  "sessions": {
+    "s_e56dafd4586272": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "11220c8e-d1dc-472f-a317-ae94752ec006",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
