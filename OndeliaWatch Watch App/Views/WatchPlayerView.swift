@@ -162,8 +162,9 @@ struct WatchPlayerView: View {
     // MARK: - Actions
 
     private func loadIfPossible() async {
-        guard !isLoaded,
-              !WatchTransferState.shared.readyChapters(bookID: book.id).isEmpty else { return }
+        let hasFiles = !WatchTransferState.shared.readyChapters(bookID: book.id).isEmpty
+        let streams = !isRemote && WatchServerAccount.shared.canStream(book)
+        guard !isLoaded, hasFiles || streams else { return }
         await audio.load(book)
         scrub = audio.player.currentTime
     }

@@ -56,6 +56,7 @@ struct WatchBookRowView: View {
         }
         if case .queued = chapterState { return String(localized: "waiting") }
         let percent = Int((book.progressFraction * 100).rounded())
+        if streamsHere { return "\(percent) % · \(String(localized: "on server"))" }
         return "\(percent) % · \(String(localized: "on iPhone"))"
     }
 
@@ -75,12 +76,17 @@ struct WatchBookRowView: View {
         .background(.quaternary, in: Circle())
     }
 
+    /// Away from the phone, a linked book plays from the server instead of waiting for files.
+    private var streamsHere: Bool {
+        !sync.isReachable && WatchServerAccount.shared.canStream(book)
+    }
+
     private var actionIcon: String {
-        chapterState.isReady || sync.isReachable ? "play.fill" : "arrow.down"
+        chapterState.isReady || sync.isReachable || streamsHere ? "play.fill" : "arrow.down"
     }
 
     private func act() {
-        if chapterState.isReady {
+        if chapterState.isReady || streamsHere {
             Task { await WatchAudioManager.shared.loadAndPlay(book) }
             return
         }

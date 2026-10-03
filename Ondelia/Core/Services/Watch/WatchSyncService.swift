@@ -32,6 +32,10 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
     var isDraining = false
     var transferObservations: [String: NSKeyValueObservation] = [:]
     var lastTransferProgressAt: Date = .distantPast
+    /// Events about a book the watch made while streaming, held until the Library entry exists.
+    var joinBuffers: [UUID: [SyncEvent]] = [:]
+    /// The sign-in last handed to the watch this launch; `.some(nil)` is a sign-out.
+    var sentServerAccount: ServerAccount??
 
     private override init() { super.init() }
 
@@ -47,7 +51,8 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
     }
 
     func book(_ id: UUID) -> AudiobookModel? {
-        AudiobookManager.shared.audiobooks.first { $0.id == id }
+        let id = aliases[id] ?? id
+        return AudiobookManager.shared.audiobooks.first { $0.id == id }
     }
 
     /// Sends one event. The default is the queued, guaranteed transfer. `urgent` events —
@@ -120,6 +125,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
                 Log.sync.error("❌ WatchSyncService: activation failed — \(failure, privacy: .public)")
             }
             guard activated else { return }
+            self.sendServerAccount()
             self.pushSnapshot(immediate: true)
             self.drainQueue()
         }

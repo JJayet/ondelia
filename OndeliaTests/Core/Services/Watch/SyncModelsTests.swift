@@ -35,7 +35,8 @@ struct SyncModelsTests {
                             title: "Le père",
                             dateCreated: Date(timeIntervalSince1970: 1_756_000_000)
                         )
-                    ]
+                    ],
+                    serverItemID: "li_abc123"
                 )
             ],
             nowPlaying: NowPlayingState(bookID: bookID, position: 42.5, rate: 1.25, isPlaying: true),
@@ -64,12 +65,31 @@ struct SyncModelsTests {
             .bookCleared(bookID: bookID),
             .watchInventory(bookID: bookID, chapterNumbers: [3, 4, 5]),
             .transferProgress(bookID: bookID, chapterNumber: 4, fraction: 0.62),
-            .pauseOtherSide
+            .pauseOtherSide,
+            .serverAccount(ServerAccount(server: URL(string: "https://abs.example.com/abs")!, token: "t", library: "lib")),
+            .serverAccount(nil),
+            .joined(bookID: bookID, itemID: "li_abc123")
         ]
 
         for event in events {
             #expect(try roundTrip(event) == event)
         }
+    }
+
+    @Test("A book from a phone build without server links decodes with none")
+    func summaryWithoutServerItem() throws {
+        let json = #"{"id":"\#(UUID().uuidString)","title":"T","duration":1,"currentPosition":0,"#
+            + #""isFinished":false,"chapters":[],"bookmarks":[]}"#
+        let summary = try SyncCodec.decode(BookSummary.self, from: Data(json.utf8))
+        #expect(summary.serverItemID == nil)
+    }
+
+    @Test("Watch events wait on their book; account and join events do not")
+    func eventBookID() {
+        let bookID = UUID()
+        #expect(SyncEvent.listened(bookID: bookID, seconds: 30, at: Date()).bookID == bookID)
+        #expect(SyncEvent.joined(bookID: bookID, itemID: "li").bookID == nil)
+        #expect(SyncEvent.serverAccount(nil).bookID == nil)
     }
 
     @Test("Every remote command round-trips")

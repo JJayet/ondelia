@@ -3357,6 +3357,17 @@
         }
       }
     },
+    "on server" : {
+      "comment" : "Watch book status suffix: the audiobook streams from the AudiobookShelf server",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "sur le serveur"
+          }
+        }
+      }
+    },
     "On next launch" : {
       "comment" : "Settings: tips reset is pending",
       "localizations" : {

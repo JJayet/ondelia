@@ -24,6 +24,8 @@ final class WatchAudioManager {
     private(set) var needsHeadphones = false
     /// Set when playback stopped at a chapter this watch has not been sent yet.
     private(set) var waitingForChapter: Int?
+    /// The book plays from the server rather than from chapter files on the watch.
+    private(set) var isStreaming = false
 
     var sleepTimer: SleepTimerOption = .off
     private(set) var sleepTimeRemaining: TimeInterval?
@@ -55,7 +57,7 @@ final class WatchAudioManager {
         waitingForChapter = nil
         lastChapterNumber = nil
         installCallbacks()
-        guard await player.load(book) else {
+        guard await loadTracks(for: book) else {
             Log.audio.error("❌ WatchAudioManager: nothing playable for this book")
             return
         }
@@ -69,6 +71,32 @@ final class WatchAudioManager {
     func loadAndPlay(_ book: AudiobookModel) async {
         await load(book)
         await startPlayback()
+    }
+
+    /// The chapter files when the one at the position is here, the server when it is not and
+    /// the book is linked, and the files again, as before streaming, when neither works.
+    private func loadTracks(for book: AudiobookModel) async -> Bool {
+        isStreaming = false
+        let onDisk = PhoneSyncService.shared.chaptersOnDisk(bookID: book.id)
+        let isHere = book.currentChapterNumber.map(onDisk.contains) ?? false
+        if !isHere, let tracks = await WatchServerAccount.shared.streamTracks(for: book), player.load(tracks: tracks) {
+            isStreaming = true
+            return true
+        }
+        return await player.load(book)
+    }
+
+    /// Carries on from `position` over the network: the next chapter is not on the watch.
+    /// False when the server cannot be reached, which leaves waiting for the phone.
+    func continueStreaming(_ book: AudiobookModel, from position: TimeInterval) async -> Bool {
+        guard currentBook?.id == book.id,
+              let tracks = await WatchServerAccount.shared.streamTracks(for: book),
+              player.load(tracks: tracks) else { return false }
+        isStreaming = true
+        player.setPlaybackRate(book.speed)
+        player.seek(to: position)
+        await startPlayback()
+        return true
     }
 
     private func installCallbacks() {
@@ -143,6 +171,7 @@ final class WatchAudioManager {
         stopTicker()
         player.tearDown()
         currentBook = nil
+        isStreaming = false
         waitingForChapter = nil
         sleepTimer = .off
         sleepTimeRemaining = nil

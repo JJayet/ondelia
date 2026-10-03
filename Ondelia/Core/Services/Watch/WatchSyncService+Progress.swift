@@ -7,6 +7,10 @@ extension WatchSyncService {
     private static let progressInterval: TimeInterval = 30
 
     func handle(_ event: SyncEvent) {
+        if let bookID = event.bookID, joinBuffers[bookID] != nil {
+            joinBuffers[bookID]?.append(event)
+            return
+        }
         switch event {
         case let .progress(bookID, position, at):
             applyRemoteProgress(bookID: bookID, position: position, at: at)
@@ -30,6 +34,11 @@ extension WatchSyncService {
         case .pauseOtherSide:
             guard GlobalAudioManager.shared.isPlaying() else { return }
             GlobalAudioManager.shared.pausePlayback()
+        case let .joined(bookID, itemID):
+            watchJoined(bookID: bookID, itemID: itemID)
+        case .serverAccount:
+            // Sent by the phone, never to it.
+            break
         }
     }
 

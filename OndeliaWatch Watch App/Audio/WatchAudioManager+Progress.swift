@@ -75,7 +75,7 @@ extension WatchAudioManager {
     }
 
     private func prefetch(after number: Int) {
-        guard let book = currentBook else { return }
+        guard let book = currentBook, !isStreaming else { return }
         let target = number + 2
         guard book.sortedChapters.contains(where: { Int($0.chapterNumber) == target }) else { return }
         guard !PhoneSyncService.shared.chaptersOnDisk(bookID: book.id).contains(target),
@@ -86,7 +86,8 @@ extension WatchAudioManager {
     /// The queue moves on by itself, so a chapter the watch has not been sent would be silently
     /// skipped. Stop there instead and ask for it.
     func handleTrackEnded(_ trackIndex: Int) {
-        guard let book = currentBook, player.tracks.indices.contains(trackIndex) else { return }
+        // A streamed book's tracks are the server's files, and the queue already holds them all.
+        guard let book = currentBook, !isStreaming, player.tracks.indices.contains(trackIndex) else { return }
         let boundary = player.tracks[trackIndex].end
         evictFinishedChapter(before: boundary, in: book)
 
@@ -101,9 +102,20 @@ extension WatchAudioManager {
         // `AVQueuePlayer` has already advanced past the gap to the next file it *does* hold, so
         // the position has to be pinned back to where the listener actually stopped.
         player.seek(to: boundary)
+        persistProgress()
+        guard WatchServerAccount.shared.canStream(book) else {
+            waitForChapter(number, of: book)
+            return
+        }
+        Task {
+            guard await continueStreaming(book, from: boundary) == false else { return }
+            waitForChapter(number, of: book)
+        }
+    }
+
+    private func waitForChapter(_ number: Int, of book: AudiobookModel) {
         setWaitingForChapter(number)
         PhoneSyncService.shared.requestChapter(bookID: book.id, number: number)
-        persistProgress()
         updateNowPlaying()
     }
 

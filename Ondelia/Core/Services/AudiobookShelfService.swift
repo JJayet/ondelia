@@ -109,7 +109,10 @@ final class AudiobookShelfService {
 
     var selectedLibrary: String? {
         get { UserDefaults.standard.string(forKey: Defaults.library) }
-        set { UserDefaults.standard.set(newValue, forKey: Defaults.library) }
+        set {
+            UserDefaults.standard.set(newValue, forKey: Defaults.library)
+            WatchSyncService.shared.sendServerAccount()
+        }
     }
 
     func signIn(server input: String, username: String, password: String) async throws {
@@ -121,6 +124,7 @@ final class AudiobookShelfService {
         UserDefaults.standard.set(server.absoluteString, forKey: Defaults.server)
         UserDefaults.standard.set(username, forKey: Defaults.username)
         reload()
+        WatchSyncService.shared.sendServerAccount()
     }
 
     /// Forgets the account — on every device when it is synced, since the token lives in
@@ -130,6 +134,7 @@ final class AudiobookShelfService {
         Keychain.set(nil, for: Self.tokenKey)
         UserDefaults.standard.removeObject(forKey: Defaults.library)
         reload()
+        WatchSyncService.shared.sendServerAccount()
         AudiobookShelfCatalog.shared.forget()
         AudiobookShelfImages.forget()
     }

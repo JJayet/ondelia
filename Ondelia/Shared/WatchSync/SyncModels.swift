@@ -41,6 +41,9 @@ struct BookSummary: Codable, Sendable, Equatable {
     let isFinished: Bool
     let chapters: [ChapterSummary]
     let bookmarks: [BookmarkSummary]
+    /// The AudiobookShelf item the book is linked to, so the watch can stream it. Optional: an
+    /// older phone build sends none.
+    let serverItemID: String?
 
     init(
         id: UUID,
@@ -52,7 +55,8 @@ struct BookSummary: Codable, Sendable, Equatable {
         playbackSpeed: Double? = nil,
         isFinished: Bool = false,
         chapters: [ChapterSummary] = [],
-        bookmarks: [BookmarkSummary] = []
+        bookmarks: [BookmarkSummary] = [],
+        serverItemID: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -64,6 +68,7 @@ struct BookSummary: Codable, Sendable, Equatable {
         self.isFinished = isFinished
         self.chapters = chapters
         self.bookmarks = bookmarks
+        self.serverItemID = serverItemID
     }
 }
 
@@ -127,6 +132,19 @@ enum SyncEvent: Codable, Sendable, Equatable {
     case transferProgress(bookID: UUID, chapterNumber: Int, fraction: Double)
     /// Playback started here: stop making noise over there.
     case pauseOtherSide
+    /// The phone's AudiobookShelf sign-in, so the watch can stream on its own. Nil: signed out.
+    case serverAccount(ServerAccount?)
+    /// The watch streamed `itemID` as a book it created under `bookID`: it joins the Library.
+    case joined(bookID: UUID, itemID: String)
+}
+
+/// What the watch needs to talk to AudiobookShelf by itself. Sent through `transferUserInfo`,
+/// which WatchConnectivity encrypts; the watch keeps the token in its own keychain.
+struct ServerAccount: Codable, Sendable, Equatable {
+    let server: URL
+    let token: String
+    /// The server library the phone has selected, the one the watch browses.
+    let library: String?
 }
 
 /// Transport control of the other side, sent through `sendMessage` while reachable.
