@@ -207,7 +207,8 @@ final class AudiobookShelfService {
     private func importDownload(_ file: URL, item: String, title: String? = nil, author: String? = nil) {
         let folder = file.deletingLastPathComponent()
         importing.insert(item)
-        AudiobookManager.shared.handleImportRequest(urls: [file]) {
+        // One server item is one book: a folder of chapters merges without asking.
+        AudiobookManager.shared.handleImportRequest(urls: [file], mergesWithoutAsking: true) {
             try? FileManager.default.removeItem(at: folder)
         } onImported: { imported in
             let context = SwiftDataController.shared.context

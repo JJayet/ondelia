@@ -122,4 +122,19 @@ struct ImportMergePromptTests {
         #expect(received?.count == 1)
         #expect(manager.onImported == nil)
     }
+
+    @Test("An import known to be one book merges without the prompt")
+    func mergesWithoutAsking() async throws {
+        // A server download: answering "No" would leave its chapters as separate books.
+        let folder = try makeBook(files: ["01.mp3", "02.mp3"])
+        defer { try? FileManager.default.removeItem(at: folder) }
+        let manager = AudiobookManager(swiftDataController: .inMemory())
+        var received: [AudiobookModel]?
+        manager.handleImportRequest(urls: [folder], mergesWithoutAsking: true, onImported: { books in received = books })
+        for _ in 0..<80 where received == nil {
+            #expect(manager.mergePrompt == nil)
+            try? await Task.sleep(nanoseconds: 100_000_000)
+        }
+        #expect(received?.count == 1)
+    }
 }

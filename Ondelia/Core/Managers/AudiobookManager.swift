@@ -34,9 +34,13 @@ final class AudiobookManager {
     var importErrorMessage: String?
     var mergePrompt: MergePrompt?
     
-    var pendingImports: [(urls: [URL], completion: (@Sendable () -> Void)?, onImported: ImportedHandler?)] = []
+    var pendingImports: [(
+        urls: [URL], mergesWithoutAsking: Bool, completion: (@Sendable () -> Void)?, onImported: ImportedHandler?
+    )] = []
     /// Told which books the running import produced, once its merge offer has been answered.
     var onImported: ImportedHandler?
+    /// The running import is known to be one book, so its parts merge without the offer.
+    var mergesWithoutAsking = false
     /// True from the moment an import starts until its merge offer has been answered.
     /// Imports run one at a time; see `handleImportRequest`.
     var isImportRunning = false

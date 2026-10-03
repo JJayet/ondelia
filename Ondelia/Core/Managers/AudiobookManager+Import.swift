@@ -15,21 +15,27 @@ extension AudiobookManager {
     ///
     /// `onImported` receives the books the import ended with — after a merge, the merged one —
     /// including books it skipped because the library already held them.
+    /// - Parameter mergesWithoutAsking: the import is one book, as a server download is: its
+    ///   parts are merged without offering to.
     @MainActor
     func handleImportRequest(
         urls: [URL],
+        mergesWithoutAsking: Bool = false,
         completion: (@Sendable () -> Void)? = nil,
         onImported: ImportedHandler? = nil
     ) {
         guard swiftDataController.isLoaded, !isLoadingLibrary, !isImportRunning else {
             Log.library.debug("📚 AudiobookManager: Busy, queueing import of \(urls.count) item(s)")
-            pendingImports.append((urls: urls, completion: completion, onImported: onImported))
+            pendingImports.append((
+                urls: urls, mergesWithoutAsking: mergesWithoutAsking, completion: completion, onImported: onImported
+            ))
             drainPendingImportsWhenIdle()
             return
         }
 
         isImportRunning = true
         self.onImported = onImported
+        self.mergesWithoutAsking = mergesWithoutAsking
         importQueueTotal = urls.count
         importQueueCompleted = 0
         isImporting = true
@@ -107,7 +113,12 @@ extension AudiobookManager {
 
         Log.library.debug("📚 AudiobookManager: \(self.pendingImports.count) import(s) queued, starting the next")
         let next = pendingImports.removeFirst()
-        handleImportRequest(urls: next.urls, completion: next.completion, onImported: next.onImported)
+        handleImportRequest(
+            urls: next.urls,
+            mergesWithoutAsking: next.mergesWithoutAsking,
+            completion: next.completion,
+            onImported: next.onImported
+        )
     }
 
     nonisolated func importZIPAudiobook(from zipURL: URL) async {
@@ -133,6 +144,12 @@ extension AudiobookManager {
 
         // Import the extracted folder using existing folder import logic
         await importAudiobookFolder(from: extracted.folder)
+        // Audio at the archive's root sits in the extraction folder, named by a UUID: the
+        // archive's own name is the one to suggest for the merge.
+        if extracted.folder == extracted.root {
+            let name = zipURL.deletingPathExtension().lastPathComponent
+            await MainActor.run { pendingMergeTitle = name }
+        }
 
         // Delete the extraction root itself. Walking two parents up from the audiobook folder
         // landed on the app's whole temporary directory whenever the archive held its audio at
