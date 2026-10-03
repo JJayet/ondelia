@@ -36,8 +36,8 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v4
 
-      # CodeQL's build tracer breaks SwiftPM's sandboxed manifest loading ("Bad CPU type in
-      # executable"), so packages are resolved before tracing starts.
+      # CodeQL's build tracer breaks sandboxed tools ("Bad CPU type in executable"): packages are
+      # resolved before tracing starts, and macro plugins run without the compiler sandbox.
       - name: Resolve Swift packages
         if: matrix.build-mode == 'manual'
         run: |
@@ -66,7 +66,8 @@ jobs:
             -disableAutomaticPackageResolution \
             -skipPackagePluginValidation \
             CODE_SIGNING_ALLOWED=NO \
-            DEVELOPMENT_TEAM=""
+            DEVELOPMENT_TEAM="" \
+            OTHER_SWIFT_FLAGS='$(inherited) -disable-sandbox'
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v4
