@@ -1,0 +1,65 @@
+Ondelia/Core/Services/AudiobookShelfService+Streaming.swift
+  s_e5a96695acb19c::t_0e2d9dcbdb30c3 69-80,83,85,88,91-93,96,111
+"OndeliaWatch Watch App/Audio/WatchAudioManager+Progress.swift"
+  s_e5a96695acb19c::t_15a40b89383aaa 78,89-90,105-116
+"OndeliaWatch Watch App/Views/WatchPlayerView.swift"
+  s_e5a96695acb19c::t_9d00e7a0adf23e 165-167
+OndeliaTests/Core/Services/Watch/SyncModelsTests.swift
+  s_e5a96695acb19c::t_d645f41f61ab15 38-39,68-71,79-93
+  s_e5a96695acb19c::t_30cf8e578e830c 94
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_e5a96695acb19c::t_0e2d9dcbdb30c3 112-115
+  s_e5a96695acb19c::t_2659aa89fc9bb7 127,137
+"OndeliaWatch Watch App/Sync/WatchServerAccount.swift"
+  s_e5a96695acb19c::t_78445157934d44 16-18
+  s_e5a96695acb19c::t_8dfbc9ba713bde 1-15,19-142
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Events.swift"
+  s_e5a96695acb19c::t_3362d8bf5a0238 23-25
+"OndeliaWatch Watch App/Audio/WatchAudioManager.swift"
+  s_e5a96695acb19c::t_15a40b89383aaa 27-28,60,76-101,174
+"OndeliaWatch Watch App/RootView.swift"
+  s_e5a96695acb19c::t_9d00e7a0adf23e 20-28
+Ondelia.xcodeproj/project.pbxproj
+  s_e5a96695acb19c::t_be33ce950bb2f2 157-161
+Ondelia/Resources/Localizable.xcstrings
+  s_e5a96695acb19c::t_912d62601cac2a 3360-3366
+  s_e5a96695acb19c::t_bc0cd8c3cb4f37 3367-3370
+Ondelia/Core/Services/Watch/WatchSyncService+Snapshot.swift
+  s_e5a96695acb19c::t_0e2d9dcbdb30c3 95-96
+Ondelia/Shared/WatchSync/SyncModels.swift
+  s_e5a96695acb19c::t_2e6d8062b00743 44-46,58-59,71,135-147
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Snapshot.swift"
+  s_e5a96695acb19c::t_3362d8bf5a0238 21-22,26-28,31-34,48-56
+  s_e5a96695acb19c::t_88df576ff0e480 57-58
+Ondelia/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_e5a96695acb19c::t_0e2d9dcbdb30c3 10-13,37-41
+"OndeliaWatch Watch App/Views/WatchBookRowView.swift"
+  s_e5a96695acb19c::t_9d00e7a0adf23e 59,79-83,85,89
+"OndeliaWatch Watch App/Views/WatchServerBrowseView.swift"
+  s_e5a96695acb19c::t_a8a9aa9a020e04 1-111
+Ondelia/Core/Services/Watch/WatchSyncService.swift
+  s_e5a96695acb19c::t_0e2d9dcbdb30c3 35-36,54-55,128
+  s_e5a96695acb19c::t_323227d474bd6c 37-38
+Ondelia/Core/Services/Watch/WatchSyncService+Server.swift
+  s_e5a96695acb19c::t_08723ece9f8322 1-13,17-50,52-77
+  s_e5a96695acb19c::t_323227d474bd6c 14-16
+  s_e5a96695acb19c::t_c562c309d6c145 51
+Ondelia/App/IsoraApp.swift
+  s_e5a96695acb19c::t_57f3402d35d74a 127
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.4",
+  "base_commit_sha": "7e541a486f29139dd0fd714cead8f5d20a13fc67",
+  "prompts": {},
+  "sessions": {
+    "s_e5a96695acb19c": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "db08d604-42b9-4587-b0d3-541e3e23cf4b",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
