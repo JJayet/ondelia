@@ -17,8 +17,7 @@ struct AudiobookShelfHiddenView: View {
     @State private var error: String?
     private let hidden = AudiobookShelfHidden.shared
 
-    /// Collections arrive with server collections.
-    private static let kinds: [HiddenServerEntryModel.Kind] = [.series, .book, .author]
+    private static let kinds: [HiddenServerEntryModel.Kind] = [.series, .collection, .book, .author]
 
     var body: some View {
         List {
@@ -81,8 +80,9 @@ struct AudiobookShelfHiddenView: View {
                 withHapticFeedback {
                     if isShown {
                         hidden.show(kind, row.id, on: account.id)
-                    } else if kind == .series {
-                        AudiobookManager.shared.hideServerSeries(row.id, name: row.name, on: account.id)
+                    } else if kind == .series || kind == .collection {
+                        let group = AudiobookShelfAPI.Series(id: row.id, name: row.name, isCollection: kind == .collection)
+                        AudiobookManager.shared.hideServerGroup(group, on: account.id)
                     } else {
                         hidden.hide(kind, row.id, name: row.name, on: account.id)
                     }
@@ -110,15 +110,18 @@ struct AudiobookShelfHiddenView: View {
         do {
             var items = catalog.items
             var series = catalog.series
+            var collections = catalog.collections
             if catalog.serverID != account.id || catalog.library != library || items.isEmpty {
                 async let fetchedItems = AudiobookShelfAPI.allItems(server: server, token: token, library: library)
                 async let fetchedSeries = AudiobookShelfAPI.allSeries(server: server, token: token, library: library)
-                (items, series) = try await (fetchedItems, fetchedSeries)
+                async let fetchedCollections = try? AudiobookShelfAPI.collections(server: server, token: token, library: library)
+                (items, series, collections) = try await (fetchedItems, fetchedSeries, fetchedCollections ?? [])
             }
             let authors = try await AudiobookShelfAPI.authors(server: server, token: token, library: library)
             rows = [
                 .book: items.map { Row(id: $0.id, name: $0.title, detail: $0.author) },
                 .series: series.map { Row(id: $0.id, name: $0.name) },
+                .collection: collections.map { Row(id: $0.id, name: $0.name) },
                 .author: authors.map { Row(id: $0.id, name: $0.name) }
             ]
         } catch {

@@ -4,7 +4,7 @@ import SwiftUI
 extension CollectionDetailView {
     var booksSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            SectionLabel(group.isSeries || group.serverSeries != nil
+            SectionLabel(group.isSeries || group.serverSeries?.isServerCollection == false
                 ? NSLocalizedString("Volumes", comment: "Collection detail: series books section")
                 : NSLocalizedString("Books", comment: "Collection detail: books section"))
                 .padding(.horizontal, 8)

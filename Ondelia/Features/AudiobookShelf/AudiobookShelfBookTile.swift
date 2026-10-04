@@ -47,7 +47,7 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
                 Divider()
                 Button(role: .destructive) {
                     switch group {
-                    case .series(let id): AudiobookManager.shared.hideServerSeries(id, name: name, on: serverID)
+                    case .series(let group): AudiobookManager.shared.hideServerGroup(group, on: serverID)
                     case .author(let id): AudiobookShelfHidden.shared.hide(.author, id, name: name, on: serverID)
                     }
                 } label: {

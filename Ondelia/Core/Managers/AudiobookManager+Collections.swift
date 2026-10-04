@@ -201,7 +201,7 @@ extension AudiobookManager {
         let catalog = AudiobookShelfCatalog.shared
         if let seriesID = collection.hardcoverSeriesID { declinedSeries.insert(seriesID) }
         else if let series = catalog.seriesByCollection[collection.id], let serverID = catalog.serverID {
-            hideServerSeries(series.id, name: series.name, on: serverID)
+            hideServerGroup(series, on: serverID)
             return
         }
         // Any other Collection may be a server series one; remembering a hand-made one's id

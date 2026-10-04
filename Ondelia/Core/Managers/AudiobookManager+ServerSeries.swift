@@ -29,8 +29,8 @@ extension AudiobookManager {
         let declined = declinedServerSeries
         let hidden = AudiobookShelfHidden.shared
         var changed = false
-        for series in catalog.series where !hidden.isHidden(.series, series.id, on: catalog.serverID) {
-            let id = AudiobookShelfCatalog.collectionID(forSeries: series.id)
+        for series in catalog.groups where !hidden.isHidden(series.hiddenKind, series.id, on: catalog.serverID) {
+            let id = AudiobookShelfCatalog.collectionID(for: series)
             let members = (series.books ?? []).compactMap { linked[$0.id]?.id }
             guard !members.isEmpty else { continue }
             if let existing = collections.first(where: { $0.id == id }) {
@@ -64,10 +64,11 @@ extension AudiobookManager {
         declinedServerSeries = declined
     }
 
-    /// Hides a server series: its Collection, if the Library made one, goes too. Its books stay.
-    func hideServerSeries(_ seriesID: String, name: String, on serverID: String) {
-        AudiobookShelfHidden.shared.hide(.series, seriesID, name: name, on: serverID)
-        let id = AudiobookShelfCatalog.collectionID(forSeries: seriesID)
+    /// Hides a server series or server collection: its Collection, if the Library made one,
+    /// goes too. Its books stay.
+    func hideServerGroup(_ group: AudiobookShelfAPI.Series, on serverID: String) {
+        AudiobookShelfHidden.shared.hide(group.hiddenKind, group.id, name: group.name, on: serverID)
+        let id = AudiobookShelfCatalog.collectionID(for: group)
         if let collection = collections.first(where: { $0.id == id }) {
             swiftDataController.context.delete(collection)
             swiftDataController.save()

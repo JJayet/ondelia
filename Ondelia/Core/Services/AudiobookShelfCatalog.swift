@@ -26,9 +26,28 @@ final class AudiobookShelfCatalog {
     private(set) var status: Status = .idle
     /// The server library's series, each with its books in series order.
     private(set) var series: [AudiobookShelfAPI.Series] = [] {
-        didSet { collectionSeries = Dictionary(series.map { (Self.collectionID(forSeries: $0.id), $0) }) { first, _ in first } }
+        didSet { indexGroups() }
+    }
+    /// The server library's collections, drawn as series (`isServerCollection`).
+    private(set) var collections: [AudiobookShelfAPI.Series] = [] {
+        didSet { indexGroups() }
     }
     private var collectionSeries: [UUID: AudiobookShelfAPI.Series] = [:]
+
+    private func indexGroups() {
+        collectionSeries = Dictionary((series + collections).map { (Self.collectionID(for: $0), $0) }) { first, _ in first }
+    }
+
+    /// Series and collections, each one a Collection once the Library holds one of its books.
+    var groups: [AudiobookShelfAPI.Series] { series + collections }
+
+    /// The server collections by name, for listing them among the Collections. Empty while not
+    /// shown; hidden ones left out.
+    var collectionsByName: [AudiobookShelfAPI.Series] {
+        guard isActive else { return [] }
+        let hidden = AudiobookShelfHidden.shared
+        return collections.filter { !hidden.isHidden(.collection, $0.id, on: serverID) }
+    }
 
     /// The series by name, for listing them among the Collections. Empty while not shown;
     /// hidden ones left out.
@@ -61,7 +80,16 @@ final class AudiobookShelfCatalog {
     /// would mean a new schema version). Two devices can still each make a record with that
     /// id before iCloud brings them the other's; `mergeDuplicateSeriesCollections` folds them.
     nonisolated static func collectionID(forSeries id: String) -> UUID {
-        var bytes = Array(SHA256.hash(data: Data("audiobookshelf-series:\(id)".utf8)).prefix(16))
+        derivedID("audiobookshelf-series:\(id)")
+    }
+
+    /// The id of the Collection that stands for a server series or server collection.
+    nonisolated static func collectionID(for group: AudiobookShelfAPI.Series) -> UUID {
+        group.isServerCollection ? derivedID("audiobookshelf-collection:\(group.id)") : collectionID(forSeries: group.id)
+    }
+
+    private nonisolated static func derivedID(_ name: String) -> UUID {
+        var bytes = Array(SHA256.hash(data: Data(name.utf8)).prefix(16))
         bytes[6] = (bytes[6] & 0x0F) | 0x50 // version 5 layout, name-based
         bytes[8] = (bytes[8] & 0x3F) | 0x80 // RFC 4122 variant
         return UUID(uuid: (
@@ -115,9 +143,11 @@ final class AudiobookShelfCatalog {
             let library = try await selectedLibrary(server: server, token: token)
             async let fetched = AudiobookShelfAPI.allItems(server: server, token: token, library: library)
             async let fetchedSeries = AudiobookShelfAPI.allSeries(server: server, token: token, library: library)
+            // Optional: a server without collections, or one refusing them, still shows its books.
+            async let fetchedCollections = try? AudiobookShelfAPI.collections(server: server, token: token, library: library)
             let snapshot = Snapshot(
                 server: server.absoluteString, library: library, fetchedAt: Date(),
-                items: try await fetched, series: try await fetchedSeries
+                items: try await fetched, series: try await fetchedSeries, collections: await fetchedCollections
             )
             await apply(snapshot)
             let url = Self.snapshotURL
@@ -139,6 +169,7 @@ final class AudiobookShelfCatalog {
         let items = snapshot.items
         sorted = await Task.detached(priority: .userInitiated) { Sorted(items) }.value
         series = snapshot.series
+        collections = snapshot.collections ?? []
         library = snapshot.library
         fetchedAt = snapshot.fetchedAt
         status = .ready
@@ -160,6 +191,7 @@ final class AudiobookShelfCatalog {
         fetching = nil
         sorted = Sorted()
         series = []
+        collections = []
         library = nil
         fetchedAt = nil
         status = .idle
@@ -179,6 +211,8 @@ final class AudiobookShelfCatalog {
         let fetchedAt: Date
         let items: [AudiobookShelfAPI.Item]
         let series: [AudiobookShelfAPI.Series]
+        /// Absent from snapshots stored before server collections.
+        var collections: [AudiobookShelfAPI.Series]?
     }
 
     /// The server's books in each order the Library sorts by.

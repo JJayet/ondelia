@@ -38,7 +38,7 @@ struct AudiobookShelfSeriesTile: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.series(series.id), name: series.name)
+        .audiobookShelfDownloadAllMenu(.series(series), name: series.name)
     }
 }
 

@@ -37,6 +37,26 @@ extension AudiobookShelfAPI {
         }
     }
 
+    /// Every collection of a library with its books in the collection's order, as series.
+    /// No limit: the server then sends them all.
+    static func collections(server: URL, token: String, library: String) async throws -> [Series] {
+        let url = server.appending(path: "api/libraries/\(library)/collections")
+        return try await send(authorized(url, token: token), as: CollectionsResponse.self).series
+    }
+
+    struct CollectionsResponse: Decodable {
+        struct Collection: Decodable {
+            let id: String
+            let name: String
+            let books: [Item]?
+        }
+        let results: [Collection]
+
+        var series: [Series] {
+            results.map { Series(id: $0.id, name: $0.name, books: $0.books ?? [], isCollection: true) }
+        }
+    }
+
     /// The query for a library's items in one series.
     ///
     /// Built by hand: the filter value is `series.<base64 id>`, and `URLQueryItem` leaves the

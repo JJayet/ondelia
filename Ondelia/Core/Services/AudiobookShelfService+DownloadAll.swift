@@ -3,7 +3,8 @@ import Foundation
 /// Downloading a whole series or everything by an author, from a long press on the shelf.
 extension AudiobookShelfService {
     enum DownloadGroup {
-        case series(String)
+        /// A server series, or a server collection, whose books came with it.
+        case series(AudiobookShelfAPI.Series)
         case author(String)
     }
 
@@ -14,8 +15,10 @@ extension AudiobookShelfService {
         guard let server, let token else { return }
         do {
             let items = switch group {
-            case .series(let id):
-                try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: id)
+            case .series(let group) where group.isServerCollection:
+                group.books ?? []
+            case .series(let group):
+                try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: group.id)
             case .author(let id):
                 try await AudiobookShelfAPI.authorItems(server: server, token: token, library: library, author: id)
             }
