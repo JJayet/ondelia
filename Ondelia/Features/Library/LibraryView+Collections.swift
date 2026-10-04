@@ -11,13 +11,14 @@ extension LibraryView {
     var collectionsStrip: some View {
         let groups = collectionGroups.sorted(by: CollectionGroup.byRecent).prefix(Self.stripLimit)
         let server = displayOnlyServerCollections.prefix(Self.stripLimit - groups.count)
+        let total = collectionGroups.count + displayOnlyServerCollections.count
         let tileWidth: CGFloat = isWide ? 200 : 150
         let padding: CGFloat = isWide ? 24 : 16
         return VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline, spacing: 9) {
                 Text(NSLocalizedString("Collections", comment: "Section title for collections"))
                     .font(.system(size: 19, weight: .bold))
-                Text(verbatim: "\(collectionGroups.count + displayOnlyServerCollections.count)")
+                Text(verbatim: "\(total)")
                     .font(.system(size: 13))
                     .foregroundStyle(.secondary)
                 Spacer(minLength: 0)
@@ -32,16 +33,44 @@ extension LibraryView {
             .padding(.horizontal, padding)
 
             ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 11) {
+                // Not lazy: at most nine tiles, and the last one takes the others' height.
+                HStack(spacing: 11) {
                     ForEach(groups) { group in
                         CollectionTileView(group: group, onOpen: { collectionForDetail = group.collection }, width: tileWidth)
                             .contextMenu { collectionMenu(group) }
                     }
                     ForEach(server) { AudiobookShelfSeriesTile(series: $0, width: tileWidth) }
+                    if total > groups.count + server.count {
+                        seeAllTile(total: total, width: tileWidth)
+                    }
                 }
+                .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, padding)
             }
         }
+    }
+
+    /// The strip's last tile, for whoever scrolls to its end: the same way in as See All.
+    private func seeAllTile(total: Int, width: CGFloat) -> some View {
+        Button {
+            withHapticFeedback { showsAllCollections = true }
+        } label: {
+            VStack(spacing: 8) {
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 22, weight: .semibold))
+                Text(NSLocalizedString("See All", comment: "Library: open the Collections screen"))
+                    .font(.system(size: 14.5, weight: .semibold))
+                Text(verbatim: "\(total)")
+                    .font(.system(size: 12.5))
+                    .foregroundStyle(.secondary)
+            }
+            .foregroundStyle(.tint)
+            .frame(width: width)
+            .frame(maxHeight: .infinity)
+            .contentShape(Rectangle())
+            .glassCard(cornerRadius: 17)
+        }
+        .buttonStyle(.plain)
     }
 
     /// The Collections screen: every Collection, unfiltered, and every server collection and
