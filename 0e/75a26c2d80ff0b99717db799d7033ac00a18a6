@@ -1,0 +1,20 @@
+Ondelia/Features/Library/LibraryView+Collections.swift
+  s_670286740487a4::t_2a42d1e146afd9 14,21,36-37,43-45,47,53-73
+  s_670286740487a4::t_3ff96e1d755ae1 74-75
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "0e75a26c2d80ff0b99717db799d7033ac00a18a6",
+  "prompts": {},
+  "sessions": {
+    "s_670286740487a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5c57d18-b555-4f47-ac92-5e7dd7177ccc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}

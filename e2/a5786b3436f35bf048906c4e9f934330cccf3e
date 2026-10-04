@@ -1,0 +1,58 @@
+Ondelia/Features/Library/CollectionTileView.swift
+  s_670286740487a4::t_f3b14ee5caffb9 15
+  s_670286740487a4::t_aea554d067c877 3
+  s_670286740487a4::t_cff6a5af14131d 4,8,32
+Ondelia/Shared/AccessibilityIdentifiers.swift
+  s_670286740487a4::t_b77f501d2a0e4f 34-35
+Ondelia/Features/Library/CollectionCovers.swift
+  s_670286740487a4::t_8f1a1f1c415184 1-51,67-171
+  s_670286740487a4::t_0b6ed32e1d54ef 52-66
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_670286740487a4::t_ff69b3c03b9803 110
+Ondelia/Features/Library/LibraryView+Collections.swift
+  s_670286740487a4::t_e2e0c58a3f1e85 5-59
+Ondelia/Features/Library/LibraryView.swift
+  s_670286740487a4::t_ff69b3c03b9803 52-53,202
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_670286740487a4::t_e2e0c58a3f1e85 38-40,43,113-114
+OndeliaTests/Core/Services/CollectionGroupTests.swift
+  s_670286740487a4::t_a31f019a98b806 2
+  s_670286740487a4::t_fa5032c8761727 228-253
+Ondelia/Resources/Localizable.xcstrings
+  s_670286740487a4::t_0891da46243ca5 1514,1877-1883
+  s_670286740487a4::t_083991ddb94eb5 342-352,1436,1457-1467,1490-1513,1515-1557,1884-1887,3110-3131,3559-3569,3922,4079-4089,4468-4478,4545-4555,4633-4654,4712,5060-5070,5873-5883
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesTile.swift
+  s_670286740487a4::t_cff6a5af14131d 7,36
+Ondelia/Features/Library/LibraryView+Server.swift
+  s_670286740487a4::t_ff69b3c03b9803 22-25,27-28,31-32,35,39
+Ondelia/Features/Library/CollectionsView.swift
+  s_670286740487a4::t_f3b14ee5caffb9 16-17,168-173,175,180
+  s_670286740487a4::t_178cac7f29b54d 1-5,7-9,11-15,18-111,113-167,174,176-179,181-206
+  s_670286740487a4::t_f34394195d669b 6,10,112
+Ondelia/Features/Library/CollectionGroup.swift
+  s_670286740487a4::t_705399c9d40813 29-34,138,144-151,201-234
+  s_670286740487a4::t_1a2749c07ac693 235
+Ondelia/Features/Library/CollectionRowView.swift
+  s_670286740487a4::t_eab239f9773c8d 71
+  s_670286740487a4::t_f3b14ee5caffb9 10-11,69-70
+  s_670286740487a4::t_df8eadfc562324 84-86,89-90
+  s_670286740487a4::t_60c41c52cb9250 1-9,12-68,72-83,87-88,91-105
+Ondelia/Features/Library/CollectionDetailView.swift
+  s_670286740487a4::t_0b6ed32e1d54ef 67-71
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "e2a5786b3436f35bf048906c4e9f934330cccf3e",
+  "prompts": {},
+  "sessions": {
+    "s_670286740487a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5c57d18-b555-4f47-ac92-5e7dd7177ccc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
