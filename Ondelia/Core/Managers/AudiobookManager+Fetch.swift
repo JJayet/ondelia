@@ -57,6 +57,7 @@ extension AudiobookManager {
             self.isLoadingLibrary = false
             AudiobookShelfService.shared.linksDidChange()
             AudiobookShelfService.shared.backfillItemServers()
+            AudiobookShelfHidden.shared.reload()
             fetchCollections()
             reconcileSeriesCollections()
             reconcileServerSeriesCollections()

@@ -1,6 +1,83 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Hidden & Shown" : {
+      "comment" : "AudiobookShelf settings: hide or show server entries",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masqués et affichés"
+          }
+        }
+      }
+    },
+    "Hidden Only" : {
+      "comment" : "Hidden & Shown: list only what is hidden",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masqués uniquement"
+          }
+        }
+      }
+    },
+    "Hidden books, series and authors stay on the server and appear nowhere in Ondelia." : {
+      "comment" : "AudiobookShelf settings footer: hidden entries",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les livres, séries et auteurs masqués restent sur le serveur et n’apparaissent nulle part dans Ondelia."
+          }
+        }
+      }
+    },
+    "Hidden with %@" : {
+      "comment" : "Hidden & Shown: a book hidden because its author is",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masqué avec %@"
+          }
+        }
+      }
+    },
+    "Hide" : {
+      "comment" : "Hide a server audiobook, series or author",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer"
+          }
+        }
+      }
+    },
+    "Hiding an author also hides all of their books." : {
+      "comment" : "Hidden & Shown footer for authors",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer un auteur masque aussi tous ses livres."
+          }
+        }
+      }
+    },
+    "Nothing Hidden" : {
+      "comment" : "Hidden & Shown: empty list",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien de masqué"
+          }
+        }
+      }
+    },
     "Port" : {
       "comment" : "AudiobookShelf server port field",
       "localizations" : {
@@ -19,6 +96,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Port (facultatif)"
+          }
+        }
+      }
+    },
+    "Remove Download" : {
+      "comment" : "AudiobookShelf: delete a downloaded book's audio, keep it streamable",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer le téléchargement"
           }
         }
       }

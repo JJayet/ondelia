@@ -6,27 +6,38 @@ struct AudiobookShelfTabContent: View {
     let shelves: AudiobookShelfShelves
     let library: String
 
+    private var hidden: AudiobookShelfHidden { .shared }
+    private var serverID: String? { AudiobookShelfService.shared.primary?.id }
+
+    /// Hidden entries are left out, so the last one shown asks for the next page rather than
+    /// the pager's last, which may be hidden.
     var body: some View {
         switch tab {
         case .books:
             paged(shelves.books) { items in
-                AudiobookShelfBookGridContent(items: items) { item in
-                    Task { await shelves.books.loadMore(after: item) }
+                let shown = items.filter { !hidden.isHidden($0, on: serverID) }
+                AudiobookShelfBookGridContent(items: shown) { item in
+                    if item.id == shown.last?.id { Task { await shelves.books.loadMore() } }
                 }
             }
         case .series:
             paged(shelves.series) { items in
+                let shown = items.filter { !hidden.isHidden(.series, $0.id, on: serverID) }
                 LazyVStack(spacing: 12) {
-                    ForEach(items) { series in
+                    ForEach(shown) { series in
                         AudiobookShelfSeriesCard(series: series)
-                            .onAppear { Task { await shelves.series.loadMore(after: series) } }
+                            .onAppear {
+                                if series.id == shown.last?.id { Task { await shelves.series.loadMore() } }
+                            }
                     }
                 }
             }
         case .authors:
             paged(shelves.authors) { items in
                 LazyVStack(spacing: 8) {
-                    ForEach(items) { AudiobookShelfAuthorRow(author: $0) }
+                    ForEach(items.filter { !hidden.isHidden(.author, $0.id, on: serverID) }) {
+                        AudiobookShelfAuthorRow(author: $0)
+                    }
                 }
             }
         }
@@ -110,7 +121,7 @@ struct AudiobookShelfAuthorRow: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.author(author.id))
+        .audiobookShelfDownloadAllMenu(.author(author.id), name: author.name)
         .task(id: author.id) {
             // Most authors have no portrait; asking only for those that do saves a 404 each.
             guard author.imagePath != nil else { return }
@@ -129,8 +140,18 @@ struct AudiobookShelfAuthorRow: View {
 
 /// What a search found: authors, then series, then books.
 struct AudiobookShelfSearchResultsView: View {
-    let results: AudiobookShelfAPI.SearchResults
+    let found: AudiobookShelfAPI.SearchResults
     let query: String
+
+    init(results: AudiobookShelfAPI.SearchResults, query: String) {
+        found = results
+        self.query = query
+    }
+
+    /// Without what the listener hid.
+    private var results: AudiobookShelfAPI.SearchResults {
+        AudiobookShelfHidden.shared.filter(found, on: AudiobookShelfService.shared.primary?.id)
+    }
 
     var body: some View {
         if results.isEmpty {

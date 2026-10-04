@@ -66,7 +66,7 @@ struct AudiobookShelfSeriesCard: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.series(series.id))
+        .audiobookShelfDownloadAllMenu(.series(series.id), name: series.name)
     }
 
     private var countLabel: String {
@@ -245,6 +245,6 @@ struct AudiobookShelfCollapsedSeriesTile: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.series(series.id))
+        .audiobookShelfDownloadAllMenu(.series(series.id), name: series.name)
     }
 }

@@ -92,6 +92,19 @@ struct AudiobookShelfSettingsView: View {
             }
         }
 
+        if let account = service.primary {
+            Section {
+                NavigationLink(NSLocalizedString("Hidden & Shown", comment: "AudiobookShelf settings: hide or show server entries")) {
+                    AudiobookShelfHiddenView(account: account)
+                }
+            } footer: {
+                Text(NSLocalizedString(
+                    "Hidden books, series and authors stay on the server and appear nowhere in Ondelia.",
+                    comment: "AudiobookShelf settings footer: hidden entries"
+                ))
+            }
+        }
+
         Section {
             Button(role: .destructive) {
                 withHapticFeedback { service.signOut() }

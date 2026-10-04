@@ -30,8 +30,16 @@ final class AudiobookShelfCatalog {
     }
     private var collectionSeries: [UUID: AudiobookShelfAPI.Series] = [:]
 
-    /// The series by name, for listing them among the Collections. Empty while not shown.
-    var seriesByName: [AudiobookShelfAPI.Series] { isActive ? series : [] }
+    /// The series by name, for listing them among the Collections. Empty while not shown;
+    /// hidden ones left out.
+    var seriesByName: [AudiobookShelfAPI.Series] {
+        guard isActive else { return [] }
+        let hidden = AudiobookShelfHidden.shared
+        return series.filter { !hidden.isHidden(.series, $0.id, on: serverID) }
+    }
+
+    /// The server these books and series come from.
+    var serverID: String? { service.primary?.id }
     /// The server library `items` came from.
     private(set) var library: String?
     /// When `items` was fetched from the server, possibly by an earlier launch.
@@ -215,18 +223,25 @@ final class AudiobookShelfCatalog {
     }
 
     /// Server audiobooks that have not joined the Library, given its books by server item, in
-    /// the order `sort` asks for.
+    /// the order `sort` asks for. Hidden ones left out.
     func unjoined(linked: [String: AudiobookModel], sortedFor sort: LibraryView.SortOption = .title) -> [AudiobookShelfAPI.Item] {
         guard isActive else { return [] }
-        return sorted.items(for: sort).filter { linked[$0.id] == nil }
+        let hidden = AudiobookShelfHidden.shared
+        let server = serverID
+        return sorted.items(for: sort).filter { linked[$0.id] == nil && !hidden.isHidden($0, on: server) }
     }
 
-    /// The Library books to show. While the server is off, streamed ones are hidden: only books
-    /// with audio on this device, or with missing audio, are left. Hidden, never deleted.
+    /// The Library books to show. While the server is off, streamed ones are left out: only
+    /// books with audio on this device, or with missing audio, remain. So are streamed ones the
+    /// listener hid. Left out, never deleted.
     func visible(_ books: [AudiobookModel], linked: [String: AudiobookModel]) -> [AudiobookModel] {
-        guard !isActive else { return books }
-        let streamed = Set(linked.values.map(\.id))
         let manager = AudiobookManager.shared
-        return books.filter { !streamed.contains($0.id) || manager.hasFile($0) }
+        let hidden = AudiobookShelfHidden.shared
+        let server = serverID
+        var leftOut: Set<UUID> = []
+        for (item, book) in linked where !manager.hasFile(book) {
+            if !isActive || hidden.isHidden(item: item, authors: book.author, on: server) { leftOut.insert(book.id) }
+        }
+        return leftOut.isEmpty ? books : books.filter { !leftOut.contains($0.id) }
     }
 }

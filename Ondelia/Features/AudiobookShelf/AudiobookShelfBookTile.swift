@@ -21,13 +21,15 @@ struct AudiobookShelfAction: Equatable {
 
 extension View {
     /// Long press on a series or an author: download every book of it not on this device.
-    func audiobookShelfDownloadAllMenu(_ group: AudiobookShelfService.DownloadGroup) -> some View {
-        modifier(AudiobookShelfDownloadAllMenu(group: group))
+    /// Download All and Hide, on a server series or author.
+    func audiobookShelfDownloadAllMenu(_ group: AudiobookShelfService.DownloadGroup, name: String) -> some View {
+        modifier(AudiobookShelfDownloadAllMenu(group: group, name: name))
     }
 }
 
 private struct AudiobookShelfDownloadAllMenu: ViewModifier {
     let group: AudiobookShelfService.DownloadGroup
+    let name: String
     @Environment(\.audiobookShelfLibrary) private var library
 
     func body(content: Content) -> some View {
@@ -40,6 +42,17 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
                     NSLocalizedString("Download All", comment: "AudiobookShelf: download every book of a series or author"),
                     systemImage: "arrow.down.circle"
                 )
+            }
+            if let serverID = AudiobookShelfCatalog.shared.serverID {
+                Divider()
+                Button(role: .destructive) {
+                    switch group {
+                    case .series(let id): AudiobookManager.shared.hideServerSeries(id, name: name, on: serverID)
+                    case .author(let id): AudiobookShelfHidden.shared.hide(.author, id, name: name, on: serverID)
+                    }
+                } label: {
+                    Label(NSLocalizedString("Hide", comment: "Hide a server audiobook, series or author"), systemImage: "eye.slash")
+                }
             }
         }
     }

@@ -144,3 +144,23 @@ extension AudiobookShelfService {
         context.delete(imported)
     }
 }
+
+extension AudiobookShelfService {
+    /// The server a Library audiobook's item lives on.
+    func serverID(for book: AudiobookModel) -> String? {
+        guard let item = itemID(for: book) else { return nil }
+        var descriptor = FetchDescriptor<AudiobookShelfItemServerModel>(predicate: #Predicate { $0.itemID == item })
+        descriptor.fetchLimit = 1
+        return (try? SwiftDataController.shared.context.fetch(descriptor))?.first?.serverID ?? primary?.id
+    }
+
+    /// Deletes a downloaded book's audio from this device; it streams from then on, keeping its
+    /// position and bookmarks. The stored path stays: another device may hold the file there.
+    func removeDownload(_ book: AudiobookModel) {
+        guard itemID(for: book) != nil, let file = book.resolvedFileURL else { return }
+        let audio = GlobalAudioManager.shared
+        if audio.currentAudiobook?.id == book.id { audio.unload() }
+        try? FileManager.default.removeItem(at: file)
+        AudiobookManager.shared.fetchAudiobooks()
+    }
+}

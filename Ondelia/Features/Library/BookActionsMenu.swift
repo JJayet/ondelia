@@ -84,12 +84,33 @@ struct BookActionsMenu: View {
 
         Divider()
 
-        Button(role: .destructive) {
-            actions.delete(audiobook)
-        } label: {
-            Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
+        // A server audiobook with no audio here is hidden rather than deleted: deleting would
+        // only bring it back as a server audiobook. One with audio here can drop the audio.
+        let item = server.itemID(for: audiobook)
+        let hasFile = AudiobookManager.shared.hasFile(audiobook)
+        if item != nil, hasFile {
+            Button(role: .destructive) {
+                server.removeDownload(audiobook)
+            } label: {
+                Label(NSLocalizedString("Remove Download", comment: "AudiobookShelf: delete a downloaded book's audio, keep it streamable"), systemImage: "icloud.and.arrow.down")
+            }
+            .tint(.red)
         }
-        // The destructive role reddens the title; the glyph still follows the app accent.
-        .tint(.red)
+        if let item, !hasFile, let serverID = server.serverID(for: audiobook) {
+            Button(role: .destructive) {
+                AudiobookShelfHidden.shared.hide(.book, item, name: audiobook.title ?? "", on: serverID)
+            } label: {
+                Label(NSLocalizedString("Hide", comment: "Hide a server audiobook, series or author"), systemImage: "eye.slash")
+            }
+            .tint(.red)
+        } else {
+            Button(role: .destructive) {
+                actions.delete(audiobook)
+            } label: {
+                Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
+            }
+            // The destructive role reddens the title; the glyph still follows the app accent.
+            .tint(.red)
+        }
     }
 }

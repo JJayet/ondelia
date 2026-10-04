@@ -25,9 +25,11 @@ extension AudiobookManager {
         guard swiftDataController.isLoaded, catalog.isActive, catalog.status == .ready else { return }
         mergeDuplicateSeriesCollections()
         let linked = AudiobookShelfService.shared.libraryBooks
+        migrateDeclinedServerSeries()
         let declined = declinedServerSeries
+        let hidden = AudiobookShelfHidden.shared
         var changed = false
-        for series in catalog.series {
+        for series in catalog.series where !hidden.isHidden(.series, series.id, on: catalog.serverID) {
             let id = AudiobookShelfCatalog.collectionID(forSeries: series.id)
             let members = (series.books ?? []).compactMap { linked[$0.id]?.id }
             guard !members.isEmpty else { continue }
@@ -42,6 +44,32 @@ extension AudiobookManager {
             }
         }
         if changed {
+            swiftDataController.save()
+            fetchCollections()
+        }
+    }
+
+    /// Server series Collections deleted before hiding existed become hidden series, once the
+    /// catalogue says which series each id stands for.
+    private func migrateDeclinedServerSeries() {
+        let catalog = AudiobookShelfCatalog.shared
+        guard let serverID = catalog.serverID else { return }
+        var declined = declinedServerSeries
+        guard !declined.isEmpty else { return }
+        for series in catalog.series {
+            let id = AudiobookShelfCatalog.collectionID(forSeries: series.id).uuidString
+            guard declined.remove(id) != nil else { continue }
+            AudiobookShelfHidden.shared.hide(.series, series.id, name: series.name, on: serverID)
+        }
+        declinedServerSeries = declined
+    }
+
+    /// Hides a server series: its Collection, if the Library made one, goes too. Its books stay.
+    func hideServerSeries(_ seriesID: String, name: String, on serverID: String) {
+        AudiobookShelfHidden.shared.hide(.series, seriesID, name: name, on: serverID)
+        let id = AudiobookShelfCatalog.collectionID(forSeries: seriesID)
+        if let collection = collections.first(where: { $0.id == id }) {
+            swiftDataController.context.delete(collection)
             swiftDataController.save()
             fetchCollections()
         }
