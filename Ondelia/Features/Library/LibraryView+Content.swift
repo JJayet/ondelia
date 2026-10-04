@@ -60,7 +60,9 @@ extension LibraryView {
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 ForEach(shownServerSeries) { series in
+                    // A NavigationLink row: List adds its own chevron beside the card's.
                     AudiobookShelfSeriesCard(series: series)
+                        .navigationLinkIndicatorVisibility(.hidden)
                         .listRowBackground(Color.clear)
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
