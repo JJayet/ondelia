@@ -61,7 +61,7 @@ extension AudiobookShelfService {
     /// Gives a Library audiobook its server link, by the listener's choice.
     func link(_ book: AudiobookModel, to item: AudiobookShelfAPI.Item) {
         guard libraryBooks[item.id] == nil, itemID(for: book) == nil else { return }
-        SwiftDataController.shared.context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item.id))
+        Self.insertLink(audiobookID: book.id, itemID: item.id, serverID: primary?.id, context: SwiftDataController.shared.context)
         SwiftDataController.shared.save()
         linksDidChange()
         AudiobookManager.shared.fetchAudiobooks()

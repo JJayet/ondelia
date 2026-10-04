@@ -59,19 +59,31 @@ enum IsoraSchemaV5: VersionedSchema {
     }
 }
 
+/// Version 6 records which AudiobookShelf server an item lives on and what the listener hid, as
+/// new entities for the same reason.
+enum IsoraSchemaV6: VersionedSchema {
+    static var versionIdentifier: Schema.Version { Schema.Version(6, 0, 0) }
+
+    static var models: [any PersistentModel.Type] {
+        IsoraSchemaV5.models + [AudiobookShelfItemServerModel.self, HiddenServerEntryModel.self]
+    }
+}
+
 /// The schema every store (phone, watch, tests) is built from.
-typealias IsoraCurrentSchema = IsoraSchemaV5
+typealias IsoraCurrentSchema = IsoraSchemaV6
 
 enum IsoraMigrationPlan: SchemaMigrationPlan {
     static var schemas: [any VersionedSchema.Type] {
-        [IsoraSchemaV1.self, IsoraSchemaV2.self, IsoraSchemaV3.self, IsoraSchemaV4.self, IsoraSchemaV5.self]
+        [IsoraSchemaV1.self, IsoraSchemaV2.self, IsoraSchemaV3.self, IsoraSchemaV4.self, IsoraSchemaV5.self,
+         IsoraSchemaV6.self]
     }
     static var stages: [MigrationStage] {
         [
             .lightweight(fromVersion: IsoraSchemaV1.self, toVersion: IsoraSchemaV2.self),
             .lightweight(fromVersion: IsoraSchemaV2.self, toVersion: IsoraSchemaV3.self),
             .lightweight(fromVersion: IsoraSchemaV3.self, toVersion: IsoraSchemaV4.self),
-            .lightweight(fromVersion: IsoraSchemaV4.self, toVersion: IsoraSchemaV5.self)
+            .lightweight(fromVersion: IsoraSchemaV4.self, toVersion: IsoraSchemaV5.self),
+            .lightweight(fromVersion: IsoraSchemaV5.self, toVersion: IsoraSchemaV6.self)
         ]
     }
 }

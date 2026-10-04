@@ -1,6 +1,28 @@
 {
   "sourceLanguage" : "en",
   "strings" : {
+    "Port" : {
+      "comment" : "AudiobookShelf server port field",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Port"
+          }
+        }
+      }
+    },
+    "Port (optional)" : {
+      "comment" : "AudiobookShelf server port field placeholder",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Port (facultatif)"
+          }
+        }
+      }
+    },
     "The server no longer accepts this sign-in. Sign out and sign in again in Settings." : {
       "comment" : "AudiobookShelf: saved token refused",
       "localizations" : {

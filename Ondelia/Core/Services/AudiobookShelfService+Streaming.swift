@@ -115,7 +115,7 @@ extension AudiobookShelfService {
             context.insert(row)
             row.audiobook = book
         }
-        context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: itemID))
+        Self.insertLink(audiobookID: book.id, itemID: itemID, serverID: primary?.id, context: context)
         SwiftDataController.shared.save()
         linksDidChange()
         AudiobookManager.shared.fetchAudiobooks()

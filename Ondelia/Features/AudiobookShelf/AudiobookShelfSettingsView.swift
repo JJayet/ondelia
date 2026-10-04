@@ -5,6 +5,8 @@ struct AudiobookShelfSettingsView: View {
     private let service = AudiobookShelfService.shared
 
     @State private var server = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.server) ?? ""
+    /// Optional: replaces any port in the address. Empty means the scheme's default.
+    @State private var port = ""
     @State private var username = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.username) ?? ""
     @State private var password = ""
     @State private var isSigningIn = false
@@ -114,6 +116,14 @@ struct AudiobookShelfSettingsView: View {
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()
 
+            TextField(
+                NSLocalizedString("Port", comment: "AudiobookShelf server port field"),
+                text: $port,
+                prompt: Text(NSLocalizedString("Port (optional)", comment: "AudiobookShelf server port field placeholder"))
+            )
+            .accessibilityLabel(NSLocalizedString("Port", comment: "AudiobookShelf server port field"))
+            .keyboardType(.numberPad)
+
             TextField(NSLocalizedString("Username", comment: "AudiobookShelf username field"), text: $username)
                 .textContentType(.username)
                 .textInputAutocapitalization(.never)
@@ -146,7 +156,7 @@ struct AudiobookShelfSettingsView: View {
                 }
                 .frame(maxWidth: .infinity)
             }
-            .disabled(isSigningIn || server.isEmpty || username.isEmpty)
+            .disabled(isSigningIn || server.isEmpty || username.isEmpty || !isPortValid)
         }
     }
 
@@ -159,14 +169,16 @@ struct AudiobookShelfSettingsView: View {
         }
     }
 
+    private var isPortValid: Bool { port.isEmpty || Int(port).map { (1...65535).contains($0) } == true }
+
     private func signIn() {
-        guard !isSigningIn, !server.isEmpty, !username.isEmpty else { return }
+        guard !isSigningIn, !server.isEmpty, !username.isEmpty, isPortValid else { return }
         withHapticFeedback {}
         Task {
             isSigningIn = true
             defer { isSigningIn = false }
             do {
-                try await service.signIn(server: server, username: username, password: password)
+                try await service.signIn(server: server, port: Int(port), username: username, password: password)
                 password = ""
                 error = nil
             } catch {
