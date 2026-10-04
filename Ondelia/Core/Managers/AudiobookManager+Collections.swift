@@ -195,10 +195,15 @@ extension AudiobookManager {
         fetchCollections()
     }
 
-    /// The books stay. A series collection is also remembered as declined, otherwise the next
-    /// reconcile would put it straight back.
+    /// The books stay. A series collection is also remembered as declined, and a server series
+    /// one hidden, otherwise the next reconcile would put it straight back.
     func deleteCollection(_ collection: CollectionModel) {
+        let catalog = AudiobookShelfCatalog.shared
         if let seriesID = collection.hardcoverSeriesID { declinedSeries.insert(seriesID) }
+        else if let series = catalog.seriesByCollection[collection.id], let serverID = catalog.serverID(forGroup: series.id) {
+            hideServerGroup(series, on: serverID)
+            return
+        }
         // Any other Collection may be a server series one; remembering a hand-made one's id
         // costs nothing, since no series will ever derive it.
         else { declinedServerSeries.insert(collection.id.uuidString) }

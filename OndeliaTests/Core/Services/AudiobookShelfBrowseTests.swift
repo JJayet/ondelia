@@ -73,3 +73,31 @@ struct AudiobookShelfBrowseTests {
         #expect(pager.isExhausted)
     }
 }
+
+@Suite("AudiobookShelf server collections")
+struct AudiobookShelfCollectionTests {
+    @Test("Collections decode as series flagged as collections, books in the server's order")
+    func decoding() throws {
+        // Shape taken from AudiobookShelf 2.x: expanded library items.
+        let json = """
+        {"results":[{"id":"col_1","libraryId":"lib","name":"Favourites","books":[
+          {"id":"li_b","media":{"metadata":{"title":"Hyperion","authors":[{"id":"x","name":"Dan Simmons"}]},"duration":60}},
+          {"id":"li_a","media":{"metadata":{"title":"Dune","authors":[{"id":"y","name":"Frank Herbert"}]},"duration":90}}
+        ]}],"total":1}
+        """
+        let decoded = try JSONDecoder().decode(AudiobookShelfAPI.CollectionsResponse.self, from: Data(json.utf8)).series
+        #expect(decoded.map(\.name) == ["Favourites"])
+        #expect(decoded.first?.isServerCollection == true)
+        #expect(decoded.first?.books?.map(\.id) == ["li_b", "li_a"])
+        #expect(decoded.first?.books?.first?.author == "Dan Simmons")
+    }
+
+    @Test("A collection and a series with the same id stand for different Collections")
+    func collectionIDs() {
+        let series = AudiobookShelfAPI.Series(id: "x", name: "S")
+        let collection = AudiobookShelfAPI.Series(id: "x", name: "C", isCollection: true)
+        #expect(AudiobookShelfCatalog.collectionID(for: series) == AudiobookShelfCatalog.collectionID(forSeries: "x"))
+        #expect(AudiobookShelfCatalog.collectionID(for: collection) != AudiobookShelfCatalog.collectionID(for: series))
+        #expect(collection.hiddenKind == .collection)
+    }
+}

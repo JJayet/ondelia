@@ -16,9 +16,11 @@ extension AudiobookShelfService {
         return (try? SwiftDataController.shared.context.fetch(descriptor))?.first?.itemID
     }
 
-    /// Whether the book can play from the server: signed in, linked, and not on this device.
+    /// Whether the book can play from the server: linked, signed in to its server, and not on
+    /// this device.
     func canStream(_ book: AudiobookModel) -> Bool {
-        isSignedIn && !AudiobookManager.shared.hasFile(book) && itemID(for: book) != nil
+        guard !AudiobookManager.shared.hasFile(book), let item = itemID(for: book) else { return false }
+        return session(forItem: item) != nil
     }
 
     /// Downloads a streamed book, sized from the catalogue when it lists the item.
@@ -31,7 +33,7 @@ extension AudiobookShelfService {
     /// The book's timeline on the server, or nil when it is not a book to stream. A failed
     /// request is reported through `problem` and also returns nil; the load then fails.
     func streamTracks(for book: AudiobookModel) async -> [AudiobookTrack]? {
-        guard canStream(book), let item = itemID(for: book), let server, let token else { return nil }
+        guard canStream(book), let item = itemID(for: book), let (server, token) = session(forItem: item) else { return nil }
         do {
             let playback = try await AudiobookShelfAPI.playbackItem(server: server, token: token, item: item)
             let headers = ["Authorization": "Bearer \(token)"]
@@ -85,7 +87,7 @@ extension AudiobookShelfService {
         duration: Double? = nil
     ) async throws -> AudiobookModel {
         if let existing = libraryBooks[itemID] { return existing }
-        guard let server, let token else { throw AudiobookShelfAPI.Failure.http(401) }
+        guard let (server, token) = session(forItem: itemID) else { throw AudiobookShelfAPI.Failure.http(401) }
 
         let playback = try await AudiobookShelfAPI.playbackItem(server: server, token: token, item: itemID)
         let cover = try? await URLSession.shared.data(
@@ -115,7 +117,7 @@ extension AudiobookShelfService {
             context.insert(row)
             row.audiobook = book
         }
-        context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: itemID))
+        Self.insertLink(audiobookID: book.id, itemID: itemID, serverID: account(forItem: itemID)?.id, context: context)
         SwiftDataController.shared.save()
         linksDidChange()
         AudiobookManager.shared.fetchAudiobooks()
@@ -142,5 +144,25 @@ extension AudiobookShelfService {
         for link in links ?? [] { context.delete(link) }
         // Not `deleteAudiobook`: that also deletes the file, which now belongs to `streamed`.
         context.delete(imported)
+    }
+}
+
+extension AudiobookShelfService {
+    /// The server a Library audiobook's item lives on.
+    func serverID(for book: AudiobookModel) -> String? {
+        guard let item = itemID(for: book) else { return nil }
+        var descriptor = FetchDescriptor<AudiobookShelfItemServerModel>(predicate: #Predicate { $0.itemID == item })
+        descriptor.fetchLimit = 1
+        return (try? SwiftDataController.shared.context.fetch(descriptor))?.first?.serverID ?? primary?.id
+    }
+
+    /// Deletes a downloaded book's audio from this device; it streams from then on, keeping its
+    /// position and bookmarks. The stored path stays: another device may hold the file there.
+    func removeDownload(_ book: AudiobookModel) {
+        guard itemID(for: book) != nil, let file = book.resolvedFileURL else { return }
+        let audio = GlobalAudioManager.shared
+        if audio.currentAudiobook?.id == book.id { audio.unload() }
+        try? FileManager.default.removeItem(at: file)
+        AudiobookManager.shared.fetchAudiobooks()
     }
 }

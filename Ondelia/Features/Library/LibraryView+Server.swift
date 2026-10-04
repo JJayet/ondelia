@@ -25,7 +25,15 @@ extension LibraryView {
     var displayOnlySeries: [AudiobookShelfAPI.Series] {
         guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
         let stored = Set(audiobookManager.collections.map(\.id))
-        return catalog.seriesByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(forSeries: $0.id)) }
+        return catalog.seriesByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(for: $0)) }
+    }
+
+    /// Server collections with no Collection of their own yet, the same way. Not folded like the
+    /// series: a server has few, chosen by hand.
+    var displayOnlyServerCollections: [AudiobookShelfAPI.Series] {
+        guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
+        let stored = Set(audiobookManager.collections.map(\.id))
+        return catalog.collectionsByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(for: $0)) }
     }
 
     /// The series behind the folded "Server series" row, once it is opened.
@@ -71,7 +79,9 @@ extension LibraryView {
         }
     }
 
-    var hasCollections: Bool { !collectionGroups.isEmpty || !displayOnlySeries.isEmpty }
+    var hasCollections: Bool {
+        !collectionGroups.isEmpty || !displayOnlySeries.isEmpty || !displayOnlyServerCollections.isEmpty
+    }
 
     /// No book at all, of the Library's or the server's: the empty state's cue.
     var isShelfEmpty: Bool {
@@ -85,11 +95,12 @@ extension LibraryView {
         blendsServer ? nil : { source = .audiobookShelf }
     }
 
-    /// What the catalogue depends on: the switch, the account, and the server library, which
-    /// the AudiobookShelf shelf can change.
+    /// What the catalogue depends on: the switch, and each server's sign-in, server library
+    /// (which the AudiobookShelf shelf can change) and whether it is shown.
     var catalogKey: String {
         let service = AudiobookShelfService.shared
-        return "\(blendsServer) \(service.server?.absoluteString ?? "") \(service.token != nil) \(source)"
+        let servers = service.accounts.map { "\($0.id):\($0.library ?? ""):\($0.showsInLibrary):\(service.token(for: $0) != nil)" }
+        return "\(blendsServer) \(servers.joined(separator: ",")) \(source)"
     }
 
     /// "On This Device" / "AudiobookShelf", above either shelf. Gone while server audiobooks

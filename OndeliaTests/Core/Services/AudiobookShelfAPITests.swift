@@ -18,6 +18,25 @@ struct AudiobookShelfAPITests {
         #expect(AudiobookShelfAPI.serverURL(from: "ftp://host") == nil)
     }
 
+    @Test("The Port field replaces a typed port and is range-checked")
+    func serverURLPort() {
+        #expect(AudiobookShelfAPI.serverURL(from: "http://nas.local", port: 13378)?.absoluteString == "http://nas.local:13378")
+        #expect(AudiobookShelfAPI.serverURL(from: "nas.local:80/abs", port: 8443)?.absoluteString == "https://nas.local:8443/abs")
+        #expect(AudiobookShelfAPI.serverURL(from: "nas.local", port: 0) == nil)
+        #expect(AudiobookShelfAPI.serverURL(from: "nas.local", port: 70000) == nil)
+    }
+
+    @Test("A server's id ignores case, default ports and trailing slashes, not the username")
+    func accountID() throws {
+        let id = { (url: String, user: String) in
+            AudiobookShelfAccount.id(server: try #require(URL(string: url)), username: user)
+        }
+        #expect(try id("https://ABS.example.com", "jo") == id("https://abs.example.com:443/", "jo"))
+        #expect(try id("http://nas:13378", "jo") != id("http://nas:13379", "jo"))
+        #expect(try id("https://abs.example.com", "jo") != id("https://abs.example.com", "ann"))
+        #expect(try UUID(uuidString: id("https://abs.example.com", "jo")) != nil)
+    }
+
     @Test("Items URL pages by title under the server path")
     func itemsURL() throws {
         let server = try #require(URL(string: "https://host/abs"))
@@ -98,5 +117,25 @@ struct AudiobookShelfAPITests {
         #expect(AudiobookShelfDownloader.parse("li_a")?.id == "li_a")
         #expect(AudiobookShelfDownloader.parse("li_a")?.title == "")
         #expect(AudiobookShelfDownloader.parse(nil) == nil)
+    }
+}
+
+@MainActor
+@Suite("AudiobookShelf accounts")
+struct AudiobookShelfAccountTests {
+    @Test("The single account's keys become the first account, with its server library")
+    func legacyAccount() throws {
+        let suite = "abs-legacy-\(UUID().uuidString)"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        #expect(AudiobookShelfService.legacyAccount(defaults: defaults) == nil)
+
+        defaults.set("http://nas:13378", forKey: AudiobookShelfService.Defaults.server)
+        defaults.set("jo", forKey: AudiobookShelfService.Defaults.username)
+        defaults.set("lib_1", forKey: AudiobookShelfService.Defaults.library)
+        let account = try #require(AudiobookShelfService.legacyAccount(defaults: defaults))
+        #expect(account.server.absoluteString == "http://nas:13378")
+        #expect(account.library == "lib_1")
+        #expect(account.id == AudiobookShelfAccount.id(server: account.server, username: "jo"))
     }
 }

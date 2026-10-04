@@ -107,6 +107,12 @@ extension AudiobookShelfAPI {
         /// Filled by the series list and search, in series order but without their sequence.
         var books: [Item]?
         var totalDuration: Double?
+        /// A server collection, drawn as a series: a named, ordered list of books. Its books come
+        /// with it, so nothing is fetched to open it.
+        var isCollection: Bool?
+
+        var isServerCollection: Bool { isCollection == true }
+        var hiddenKind: HiddenServerEntryModel.Kind { isServerCollection ? .collection : .series }
     }
 
     struct Author: Decodable, Identifiable, Hashable {

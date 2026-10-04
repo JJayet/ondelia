@@ -22,6 +22,7 @@ enum SettingsSync {
         "library.viewMode", "library.sortOption", "library.filterOption",
         "player.showChapterTimes", "player.scrubsBook",
         // The AudiobookShelf token itself goes through iCloud Keychain, never through here.
+        AudiobookShelfService.accountsKey,
         AudiobookShelfService.Defaults.server, AudiobookShelfService.Defaults.username,
         AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey,
         AudiobookShelfService.Defaults.tapAction

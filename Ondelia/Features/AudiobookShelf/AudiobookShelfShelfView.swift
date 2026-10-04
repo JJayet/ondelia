@@ -55,10 +55,17 @@ struct AudiobookShelfShelfView: View {
         }
         .scrollContentBackground(.hidden)
         .serverSeriesDestinations(library: library ?? "")
-        .task { await loadLibraries() }
+        .task(id: service.browsingAccount?.id) {
+            // Another server: its own libraries and shelves.
+            libraries = []
+            library = nil
+            shelves = nil
+            error = nil
+            await loadLibraries()
+        }
         .task(id: query) { await search() }
         .onChange(of: library) { _, id in
-            service.selectedLibrary = id
+            if let account = service.browsingAccount { service.setLibrary(id, for: account.id) }
             shelves = id.map(AudiobookShelfShelves.init(library:))
         }
         .refreshable {
@@ -92,6 +99,7 @@ struct AudiobookShelfShelfView: View {
 
             if query.isEmpty {
                 HStack {
+                    if service.accounts.count > 1 { serverPicker }
                     Picker(NSLocalizedString("Show", comment: "AudiobookShelf shelf tab picker"), selection: $tab) {
                         ForEach(Tab.allCases) { Text($0.title).tag($0) }
                     }
@@ -115,11 +123,32 @@ struct AudiobookShelfShelfView: View {
         .padding(.top, 8)
     }
 
+    /// Which signed-in server the shelf shows.
+    private var serverPicker: some View {
+        Menu {
+            Picker(
+                NSLocalizedString("Server", comment: "AudiobookShelf settings section: server"),
+                selection: Binding(
+                    get: { service.browsingAccount?.id },
+                    set: { service.browsingAccountID = $0 }
+                )
+            ) {
+                ForEach(service.accounts) { Text($0.displayName).tag(Optional($0.id)) }
+            }
+        } label: {
+            Image(systemName: "server.rack")
+                .frame(width: 34, height: 34)
+                .glassEffect(.regular, in: Circle())
+        }
+        .accessibilityLabel(NSLocalizedString("Server", comment: "AudiobookShelf settings section: server"))
+        .accessibilityValue(service.browsingAccount?.displayName ?? "")
+    }
+
     private func loadLibraries() async {
-        guard libraries.isEmpty, let server = service.server, let token = service.token else { return }
+        guard libraries.isEmpty, let (server, token) = service.session(for: service.browsingAccount) else { return }
         do {
             libraries = try await AudiobookShelfAPI.libraries(server: server, token: token)
-            let saved = service.selectedLibrary
+            let saved = service.browsingAccount?.library
             library = libraries.contains { $0.id == saved } ? saved : libraries.first?.id
             if library == nil {
                 error = NSLocalizedString("This server has no book library.", comment: "AudiobookShelf: server has no book library")
@@ -137,7 +166,7 @@ struct AudiobookShelfShelfView: View {
         }
         // Debounce: `.task(id:)` cancels this sleep when the next keystroke arrives.
         try? await Task.sleep(for: .milliseconds(350))
-        guard !Task.isCancelled, let library, let server = service.server, let token = service.token else { return }
+        guard !Task.isCancelled, let library, let (server, token) = service.session(for: service.browsingAccount) else { return }
         results = try? await AudiobookShelfAPI.search(server: server, token: token, library: library, query: text)
     }
 }
@@ -152,10 +181,10 @@ final class AudiobookShelfShelves {
     init(library: String) {
         func session() throws -> (URL, String) {
             let service = AudiobookShelfService.shared
-            guard let server = service.server, let token = service.token else {
+            guard let session = service.session(for: service.browsingAccount) else {
                 throw AudiobookShelfAPI.Failure.http(401)
             }
-            return (server, token)
+            return session
         }
         books = AudiobookShelfPager { page in
             let (server, token) = try await MainActor.run { try session() }

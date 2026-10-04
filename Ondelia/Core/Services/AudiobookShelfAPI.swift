@@ -52,15 +52,21 @@ enum AudiobookShelfAPI {
 
     /// What the reader typed, as a base URL: trimmed, `https://` when no scheme was given, no
     /// trailing slash. A path is kept, for servers behind a reverse proxy at `/audiobookshelf`.
-    static func serverURL(from input: String) -> URL? {
+    /// `port`, from the Port field, replaces any port typed in the address; out of range, the
+    /// address is rejected.
+    static func serverURL(from input: String, port: Int? = nil) -> URL? {
         var text = input.trimmingCharacters(in: .whitespacesAndNewlines)
         while text.hasSuffix("/") { text.removeLast() }
         guard !text.isEmpty else { return nil }
         if !text.contains("://") { text = "https://" + text }
-        guard let url = URL(string: text), let scheme = url.scheme?.lowercased(),
-              scheme == "http" || scheme == "https", url.host?.isEmpty == false
+        guard var parts = URLComponents(string: text), let scheme = parts.scheme?.lowercased(),
+              scheme == "http" || scheme == "https", parts.host?.isEmpty == false
         else { return nil }
-        return url
+        if let port {
+            guard (1...65535).contains(port) else { return nil }
+            parts.port = port
+        }
+        return parts.url
     }
 
     /// Signs in with a username and password and returns the user's API token.

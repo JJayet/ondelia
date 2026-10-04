@@ -84,7 +84,9 @@ extension LibraryView {
                 LazyHStack(spacing: 14) {
                     ForEach(collectionGroups) { group in
                         CollectionTileView(group: group) { collectionForDetail = group.collection }
+                            .contextMenu { collectionMenu(group) }
                     }
+                    ForEach(displayOnlyServerCollections) { AudiobookShelfSeriesTile(series: $0) }
                     ForEach(shownServerSeries) { AudiobookShelfSeriesTile(series: $0) }
                 }
             }
@@ -124,7 +126,7 @@ extension LibraryView {
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,
                     server: shelfServerItems,
-                    serverSeries: displayOnlySeries,
+                    serverSeries: displayOnlyServerCollections + displayOnlySeries,
                     onOpenBook: tapBook,
                     onOpenCollection: { collectionForDetail = $0.collection },
                     onOpenServer: { AudiobookShelfService.shared.play($0, local: nil) { playAndPresent($0) } }

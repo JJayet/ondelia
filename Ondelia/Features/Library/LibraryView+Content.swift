@@ -55,6 +55,14 @@ extension LibraryView {
                         .listRowSeparator(.hidden)
                         .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
                 }
+                ForEach(displayOnlyServerCollections) { collection in
+                    // A NavigationLink row: List adds its own chevron beside the card's.
+                    AudiobookShelfSeriesCard(series: collection)
+                        .navigationLinkIndicatorVisibility(.hidden)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(.hidden)
+                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
+                }
                 serverSeriesToggle
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -146,6 +154,7 @@ extension LibraryView {
                         ForEach(collectionGroups) { group in
                             collectionCard(group)
                         }
+                        ForEach(displayOnlyServerCollections) { AudiobookShelfSeriesCard(series: $0) }
                         serverSeriesToggle
                         ForEach(shownServerSeries) { AudiobookShelfSeriesCard(series: $0) }
                     }

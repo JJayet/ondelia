@@ -4,6 +4,49 @@ import SwiftUI
 extension LibraryView {
     func collectionCard(_ group: CollectionGroup) -> some View {
         CollectionCardView(group: group) { collectionForDetail = group.collection }
+            .contextMenu { collectionMenu(group) }
+    }
+
+    /// A Collection's long-press menu: download what is not on this device, rename, and
+    /// remove it. A server series or server collection is hidden rather than deleted, which is
+    /// what deleting it does anyway (`deleteCollection`).
+    @ViewBuilder
+    func collectionMenu(_ group: CollectionGroup) -> some View {
+        let service = AudiobookShelfService.shared
+        let streamed = group.books.filter(service.canStream)
+        if let serverGroup = group.serverSeries {
+            Button {
+                withHapticFeedback(.medium) {}
+                Task { await service.downloadAll(.series(serverGroup), library: "") }
+            } label: {
+                Label(NSLocalizedString("Download All", comment: "AudiobookShelf: download every book of a series or author"), systemImage: "arrow.down.circle")
+            }
+        } else if !streamed.isEmpty {
+            Button {
+                withHapticFeedback(.medium) {}
+                streamed.forEach(service.download)
+            } label: {
+                Label(NSLocalizedString("Download All", comment: "AudiobookShelf: download every book of a series or author"), systemImage: "arrow.down.circle")
+            }
+        }
+        Button {
+            collectionToRename = group.collection
+            newCollectionName = group.collection.name
+            activeAlert = .renameCollection
+        } label: {
+            Label(NSLocalizedString("Rename", comment: "Rename button"), systemImage: "pencil")
+        }
+        Divider()
+        Button(role: .destructive) {
+            withHapticFeedback { audiobookManager.deleteCollection(group.collection) }
+        } label: {
+            if group.serverSeries != nil {
+                Label(NSLocalizedString("Hide", comment: "Hide a server audiobook, series or author"), systemImage: "eye.slash")
+            } else {
+                Label(NSLocalizedString("Delete Collection", comment: "Delete a collection, keeping its books"), systemImage: "trash")
+            }
+        }
+        .tint(.red)
     }
 
     func collectionDetail(_ collection: CollectionModel) -> some View {

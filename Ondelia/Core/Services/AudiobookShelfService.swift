@@ -27,8 +27,6 @@ final class AudiobookShelfService {
         UserDefaults.standard.string(forKey: Defaults.tapAction).flatMap(TapAction.init) ?? .stream
     }
 
-    private static let tokenKey = "audiobookshelf.token"
-
     struct DownloadProgress: Equatable {
         var title = ""
         /// Not kept across a relaunch: the task description carries the title only.
@@ -58,9 +56,9 @@ final class AudiobookShelfService {
 
     /// Mirrors of the keychain and defaults, so views observing `isSignedIn` update. Another
     /// device's sign-in arrives through iCloud Keychain and `SettingsSync`; `reload` picks it up.
-    private(set) var token: String?
-    private(set) var server: URL?
-    private(set) var username: String?
+    var accounts: [AudiobookShelfAccount] = []
+    /// Tokens by account id.
+    var tokens: [String: String] = [:]
 
     /// What was last pushed per book, and the pushes in flight. In memory only: forgetting them
     /// costs one redundant request after a launch.
@@ -106,48 +104,9 @@ final class AudiobookShelfService {
         }
     }
 
-    func reload() {
-        token = Keychain.get(Self.tokenKey)
-        server = UserDefaults.standard.string(forKey: Defaults.server).flatMap(URL.init(string:))
-        username = UserDefaults.standard.string(forKey: Defaults.username)
-    }
-
     /// Whether the account is shared with the user's other devices: the same switch as the
     /// library and settings.
-    private var syncsAccount: Bool { SwiftDataController.isICloudSyncEnabled }
-    var isSignedIn: Bool { token != nil && server != nil }
-
-    var selectedLibrary: String? {
-        get { UserDefaults.standard.string(forKey: Defaults.library) }
-        set {
-            UserDefaults.standard.set(newValue, forKey: Defaults.library)
-            WatchSyncService.shared.sendServerAccount()
-        }
-    }
-
-    func signIn(server input: String, username: String, password: String) async throws {
-        guard let server = AudiobookShelfAPI.serverURL(from: input) else {
-            throw AudiobookShelfAPI.Failure.invalidServer
-        }
-        let token = try await AudiobookShelfAPI.signIn(server: server, username: username, password: password)
-        Keychain.set(token, for: Self.tokenKey, synchronizable: syncsAccount)
-        UserDefaults.standard.set(server.absoluteString, forKey: Defaults.server)
-        UserDefaults.standard.set(username, forKey: Defaults.username)
-        reload()
-        WatchSyncService.shared.sendServerAccount()
-    }
-
-    /// Forgets the account — on every device when it is synced, since the token lives in
-    /// iCloud Keychain. The server keeps the token, which is the legacy per-user API token and
-    /// not one this app created, so there is nothing to revoke.
-    func signOut() {
-        Keychain.set(nil, for: Self.tokenKey)
-        UserDefaults.standard.removeObject(forKey: Defaults.library)
-        reload()
-        WatchSyncService.shared.sendServerAccount()
-        AudiobookShelfCatalog.shared.forget()
-        AudiobookShelfImages.forget()
-    }
+    var syncsAccount: Bool { SwiftDataController.isICloudSyncEnabled }
 
     func download(_ item: AudiobookShelfAPI.Item) {
         download(id: item.id, title: item.title, author: item.author, size: item.size)
@@ -155,7 +114,7 @@ final class AudiobookShelfService {
 
     /// `size` stands in for the length a zipped download is sent without.
     func download(id: String, title: String, author: String?, size: Int64? = nil) {
-        guard let server, let token, downloads[id] == nil, !importing.contains(id) else { return }
+        guard let (server, token) = session(forItem: id), downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
@@ -224,7 +183,7 @@ final class AudiobookShelfService {
             // device and after a relaunch.
             let linked = Set(Self.links().filter { $0.itemID == item }.map(\.audiobookID))
             for book in books where !linked.contains(book.id) {
-                context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item))
+                Self.insertLink(audiobookID: book.id, itemID: item, serverID: self.account(forItem: item)?.id, context: context)
             }
             // One book per item is the normal case. An item the importer split into several
             // books keeps their own titles rather than all taking the item's.
@@ -249,9 +208,9 @@ final class AudiobookShelfService {
 
     /// Bumped whenever links are written: a SwiftData fetch is not observable, so views reading
     /// `libraryBooks` would otherwise miss the link a finished import adds.
-    private var linksVersion = 0
+    private(set) var linksVersion = 0
 
-    private static func links() -> [AudiobookShelfLinkModel] {
+    static func links() -> [AudiobookShelfLinkModel] {
         guard SwiftDataController.shared.isLoaded else { return [] }
         return (try? SwiftDataController.shared.context.fetch(FetchDescriptor<AudiobookShelfLinkModel>())) ?? []
     }
@@ -274,6 +233,10 @@ final class AudiobookShelfService {
     }
 
     @ObservationIgnored private var libraryBooksCache: (version: Int, books: [String: AudiobookModel])?
+    @ObservationIgnored var itemServersCache: (version: Int, servers: [String: String])?
+    /// The server the AudiobookShelf browser shows, for the screens it opens to know where to
+    /// ask. Nil: the first server.
+    var browsingAccountID: String?
 
     func finishBackgroundEvents() {
         backgroundCompletion?()

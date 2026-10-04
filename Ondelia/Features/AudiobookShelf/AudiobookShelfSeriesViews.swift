@@ -26,7 +26,7 @@ struct AudiobookShelfSeriesCard: View {
         NavigationLink(value: AudiobookShelfRoute.series(series)) {
             VStack(spacing: 12) {
                 HStack(spacing: 8) {
-                    Image(systemName: "books.vertical.fill")
+                    Image(systemName: series.isServerCollection ? "rectangle.stack.fill" : "books.vertical.fill")
                         .font(.system(size: 12, weight: .semibold))
                         .foregroundStyle(.tint)
                     Text(series.name)
@@ -66,7 +66,7 @@ struct AudiobookShelfSeriesCard: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.series(series.id))
+        .audiobookShelfDownloadAllMenu(.series(series), name: series.name)
     }
 
     private var countLabel: String {
@@ -78,7 +78,8 @@ struct AudiobookShelfSeriesCard: View {
 }
 
 /// A series' books in series order, fetched through the series filter: it is the one request
-/// whose books carry their sequence, which the "Book 3" labels and the order need.
+/// whose books carry their sequence, which the "Book 3" labels and the order need. A server
+/// collection's books came with it, in the collection's order.
 struct AudiobookShelfSeriesView: View {
     let series: AudiobookShelfAPI.Series
     let library: String
@@ -87,7 +88,7 @@ struct AudiobookShelfSeriesView: View {
     @State private var error: String?
 
     var body: some View {
-        AudiobookShelfBookGrid(items: books ?? [], showsSequence: true)
+        AudiobookShelfBookGrid(items: books ?? [], showsSequence: !series.isServerCollection)
             .overlay {
                 if let error, books == nil {
                     ContentUnavailableView(
@@ -106,8 +107,15 @@ struct AudiobookShelfSeriesView: View {
 
     private func load() async {
         guard books == nil else { return }
+        if series.isServerCollection {
+            books = series.books ?? []
+            return
+        }
         let service = AudiobookShelfService.shared
-        guard let server = service.server, let token = service.token else { return }
+        let account = service.account(forGroup: series.id)
+        guard let (server, token) = service.session(for: account) else { return }
+        // The series' own server library: the one passed in is the browser's.
+        let library = account.flatMap { AudiobookShelfCatalog.shared.library(of: $0.id) } ?? library
         do {
             books = try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: series.id)
         } catch {
@@ -141,7 +149,7 @@ struct AudiobookShelfAuthorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 let service = AudiobookShelfService.shared
-                guard books == nil, let server = service.server, let token = service.token else { return }
+                guard books == nil, let (server, token) = service.session(for: service.browsingAccount) else { return }
                 do {
                     books = try await AudiobookShelfAPI.authorItems(
                         server: server, token: token, library: library, author: author.id
@@ -245,6 +253,6 @@ struct AudiobookShelfCollapsedSeriesTile: View {
         }
         .buttonStyle(.plain)
         .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-        .audiobookShelfDownloadAllMenu(.series(series.id))
+        .audiobookShelfDownloadAllMenu(.series(AudiobookShelfAPI.Series(id: series.id, name: series.name)), name: series.name)
     }
 }

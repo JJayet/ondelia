@@ -20,6 +20,7 @@ extension PhoneSyncService {
         for summary in snapshot.books {
             upsert(summary, existing: byID[summary.id] ?? adoptTwin(of: summary), context: context)
             WatchServerAccount.shared.setLink(itemID: summary.serverItemID, for: summary.id)
+            if let item = summary.serverItemID { WatchServerAccount.shared.recordServer(summary.serverID, of: item) }
         }
 
         // A book the phone no longer lists is only dropped when the watch holds no audio for

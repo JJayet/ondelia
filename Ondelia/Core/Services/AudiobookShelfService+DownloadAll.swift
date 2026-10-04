@@ -3,7 +3,8 @@ import Foundation
 /// Downloading a whole series or everything by an author, from a long press on the shelf.
 extension AudiobookShelfService {
     enum DownloadGroup {
-        case series(String)
+        /// A server series, or a server collection, whose books came with it.
+        case series(AudiobookShelfAPI.Series)
         case author(String)
     }
 
@@ -11,11 +12,19 @@ extension AudiobookShelfService {
     /// device, downloading or importing. Each is imported when its download finishes, one at a
     /// time through the import queue, so they arrive in download order rather than series order.
     func downloadAll(_ group: DownloadGroup, library: String) async {
-        guard let server, let token else { return }
+        var account = browsingAccount
+        var library = library
+        if case .series(let series) = group, let owner = self.account(forGroup: series.id) {
+            account = owner
+            library = AudiobookShelfCatalog.shared.library(of: owner.id) ?? library
+        }
+        guard let (server, token) = session(for: account) else { return }
         do {
             let items = switch group {
-            case .series(let id):
-                try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: id)
+            case .series(let group) where group.isServerCollection:
+                group.books ?? []
+            case .series(let group):
+                try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: group.id)
             case .author(let id):
                 try await AudiobookShelfAPI.authorItems(server: server, token: token, library: library, author: id)
             }

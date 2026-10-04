@@ -1,6 +1,6 @@
 # Server audiobooks are shown alongside the Library, not added to it
 
-With "Show server audiobooks in Library" on, every server audiobook of the selected server library appears on the Library screen, in Search and in Collections as if it were part of the Library, but no record is created for it until it joins: on first stream, download, or the first listener action that needs one (added to a Collection or Up Next, bookmarked, marked finished). Creating records for the whole server library would push thousands of entries through iCloud to every device, fill the listening statistics with audiobooks never played, and leave records to reconcile whenever the server changes; the server already holds that catalogue, so Ondelia fetches it and blends it in memory.
+With "Show server audiobooks in Library" on, every server audiobook of each shown server's selected server library (ADR 0004) appears on the Library screen, in Search and in Collections as if it were part of the Library, but no record is created for it until it joins: on first stream, download, or the first listener action that needs one (added to a Collection or Up Next, bookmarked, marked finished). Creating records for the whole server library would push thousands of entries through iCloud to every device, fill the listening statistics with audiobooks never played, and leave records to reconcile whenever the server changes; the server already holds that catalogue, so Ondelia fetches it and blends it in memory.
 
 ## Consequences
 

@@ -21,14 +21,25 @@ struct AudiobookShelfAction: Equatable {
 
 extension View {
     /// Long press on a series or an author: download every book of it not on this device.
-    func audiobookShelfDownloadAllMenu(_ group: AudiobookShelfService.DownloadGroup) -> some View {
-        modifier(AudiobookShelfDownloadAllMenu(group: group))
+    /// Download All and Hide, on a server series or author.
+    func audiobookShelfDownloadAllMenu(_ group: AudiobookShelfService.DownloadGroup, name: String) -> some View {
+        modifier(AudiobookShelfDownloadAllMenu(group: group, name: name))
     }
 }
 
 private struct AudiobookShelfDownloadAllMenu: ViewModifier {
     let group: AudiobookShelfService.DownloadGroup
+    let name: String
     @Environment(\.audiobookShelfLibrary) private var library
+
+    /// Authors are only browsed, so they belong to the server the browser shows.
+    private var serverID: String? {
+        let service = AudiobookShelfService.shared
+        return switch group {
+        case .series(let group): service.account(forGroup: group.id)?.id
+        case .author: service.browsingAccount?.id
+        }
+    }
 
     func body(content: Content) -> some View {
         content.contextMenu {
@@ -40,6 +51,17 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
                     NSLocalizedString("Download All", comment: "AudiobookShelf: download every book of a series or author"),
                     systemImage: "arrow.down.circle"
                 )
+            }
+            if let serverID {
+                Divider()
+                Button(role: .destructive) {
+                    switch group {
+                    case .series(let group): AudiobookManager.shared.hideServerGroup(group, on: serverID)
+                    case .author(let id): AudiobookShelfHidden.shared.hide(.author, id, name: name, on: serverID)
+                    }
+                } label: {
+                    Label(NSLocalizedString("Hide", comment: "Hide a server audiobook, series or author"), systemImage: "eye.slash")
+                }
             }
         }
     }
@@ -211,7 +233,7 @@ struct AudiobookShelfCover: View {
     }
 
     private func load() async {
-        image = await AudiobookShelfImages.load(key: item) { server, token in
+        image = await AudiobookShelfImages.load(key: item, session: AudiobookShelfService.shared.session(forItem: item)) { server, token in
             AudiobookShelfAPI.coverRequest(server: server, token: token, item: item)
         }
     }
@@ -235,7 +257,12 @@ enum AudiobookShelfImages {
 
     static func cached(_ key: String) -> UIImage? { cache.object(forKey: key as NSString) }
 
-    static func load(key: String, request: (URL, String) -> URLRequest) async -> UIImage? {
+    /// `session`: the server to ask, and the token, when the image is on no disk.
+    static func load(
+        key: String,
+        session: (server: URL, token: String)?,
+        request: (URL, String) -> URLRequest
+    ) async -> UIImage? {
         if let hit = cached(key) { return hit }
         let file = file(key)
         // Off the main thread: a grid of covers decoding from disk at once stutters the scroll.
@@ -245,8 +272,7 @@ enum AudiobookShelfImages {
             cache.setObject(stored, forKey: key as NSString)
             return stored
         }
-        let service = AudiobookShelfService.shared
-        guard let server = service.server, let token = service.token,
+        guard let (server, token) = session,
               let (data, response) = try? await URLSession.shared.data(for: request(server, token)),
               (response as? HTTPURLResponse)?.statusCode == 200,
               let image = await Task.detached(operation: { UIImage(data: data)?.preparingForDisplay() }).value

@@ -185,7 +185,7 @@ struct LibraryView: View {
                     case .table: if isWide { tableModeContent } else { listModeContent }
                     }
                 }
-                .serverSeriesDestinations(library: catalog.library ?? "")
+                .serverSeriesDestinations(library: AudiobookShelfService.shared.primary?.library ?? "")
             }
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
