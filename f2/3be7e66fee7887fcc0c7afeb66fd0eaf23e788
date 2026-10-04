@@ -1,0 +1,20 @@
+Ondelia/App/MainTabView.swift
+  s_670286740487a4::t_d82b65219b98de 256-262
+  s_670286740487a4::t_b5ecda247b7b37 121-123,127,129
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "f23be7e66fee7887fcc0c7afeb66fd0eaf23e788",
+  "prompts": {},
+  "sessions": {
+    "s_670286740487a4": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "e5c57d18-b555-4f47-ac92-5e7dd7177ccc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
