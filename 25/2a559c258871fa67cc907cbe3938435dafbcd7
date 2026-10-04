@@ -1,0 +1,61 @@
+Ondelia/Core/Managers/AudiobookManager+ImportSingleFile.swift
+  s_21e80609d58c56::t_c6e217fcc600df 47,146
+Ondelia/Core/Models/SwiftData/DatabaseBackupService.swift
+  s_21e80609d58c56::t_08488b180a64f1 77,79-82,87-95,97-104,106-123
+Ondelia/Core/Models/SwiftData/SwiftDataController.swift
+  s_21e80609d58c56::t_08488b180a64f1 133
+Ondelia/Core/Managers/AudiobookManager+Inbox.swift
+  s_21e80609d58c56::t_5a6ba89f414402 29,31-33,36
+Ondelia/Core/Services/AudiobookShelfService+Progress.swift
+  s_21e80609d58c56::t_04f5ca006bd7e9 63
+  s_21e80609d58c56::t_70f53562225d35 60-62
+OndeliaTests/Core/Models/DatabaseBackupServiceTests.swift
+  s_21e80609d58c56::t_2df62473619e9a 47-78
+Ondelia/Core/Services/AudiobookShelfDownloader.swift
+  s_21e80609d58c56::t_38a33a77dd447a 7-8,21-27,29-31,34-36,59,65
+"OndeliaWatch Watch App/Audio/WatchAudioManager.swift"
+  s_21e80609d58c56::t_553cdb9baa37cb 56-59,66-68
+Ondelia/Core/Services/CUEParser.swift
+  s_21e80609d58c56::t_c6e217fcc600df 161-164,167-168
+OndeliaTests/Core/Services/CUEParserTests.swift
+  s_21e80609d58c56::t_11be223d6ae87e 44
+  s_21e80609d58c56::t_2df62473619e9a 43,45-57
+Ondelia/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_21e80609d58c56::t_789815a4b80192 86-88
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_21e80609d58c56::t_3f124cacb4f1ae 175
+  s_21e80609d58c56::t_38a33a77dd447a 90,146,150,167-171,191
+  s_21e80609d58c56::t_fd0845df354e54 117-118,122
+Ondelia/Core/Managers/AudiobookManager+Merge.swift
+  s_21e80609d58c56::t_c6e217fcc600df 143
+Ondelia/Core/Services/ZIPImporter.swift
+  s_21e80609d58c56::t_e4e9df61d5f0ef 128,130-133,135-139,141-143,146
+Ondelia/Core/Managers/AudiobookManager+Import.swift
+  s_21e80609d58c56::t_1a85252ec17d32 7-9,27,61,79,82-86,107,109,111,116
+OndeliaTests/Core/Services/ZIPImporterValidationTests.swift
+  s_21e80609d58c56::t_2df62473619e9a 16-18,38-44
+  s_21e80609d58c56::t_c8adb3bb508299 45
+Ondelia/Core/Managers/AudiobookManager.swift
+  s_21e80609d58c56::t_789815a4b80192 68-77,83,85
+  s_21e80609d58c56::t_1a85252ec17d32 38
+Ondelia/Core/Managers/AudiobookManager+ImportFolder.swift
+  s_21e80609d58c56::t_c6e217fcc600df 104
+OndeliaTests/Core/Services/AudiobookShelfAPITests.swift
+  s_21e80609d58c56::t_38a33a77dd447a 112,114,116,118-119
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "252a559c258871fa67cc907cbe3938435dafbcd7",
+  "prompts": {},
+  "sessions": {
+    "s_21e80609d58c56": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "0b01f6d2-4fbb-492a-9d55-33ad4e44da79",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
