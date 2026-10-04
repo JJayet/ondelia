@@ -161,4 +161,19 @@ extension LibraryView {
             AudiobookShelfBookTile(item: item, columns: gridColumns)
         }
     }
+
+    /// Only when the picks would hold at least one book.
+    var offersRecommendations: Bool {
+        Recommender.hasPicks(
+            books: visibleAudiobooks,
+            hasServerBooks: !catalog.unjoined(linked: AudiobookShelfService.shared.libraryBooks).isEmpty
+        )
+    }
+
+    var recommendationsButton: some View {
+        RecommendationsButton(
+            history: { visibleAudiobooks },
+            server: { catalog.unjoined(linked: AudiobookShelfService.shared.libraryBooks) }
+        )
+    }
 }

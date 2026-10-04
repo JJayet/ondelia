@@ -83,6 +83,9 @@ extension LibraryView {
             if catalog.isUnreachable {
                 ToolbarItem(placement: .topBarTrailing) { serverUnreachableButton }
             }
+            if offersRecommendations {
+                ToolbarItem(placement: .topBarTrailing) { recommendationsButton }
+            }
             importToolbarItem
         }
     }
