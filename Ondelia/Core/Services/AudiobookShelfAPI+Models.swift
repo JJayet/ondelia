@@ -28,9 +28,12 @@ extension AudiobookShelfAPI {
                 /// The series this book was fetched through, when it was: filtering by series
                 /// fills it. Expanded items list every series instead, and the first one is kept.
                 let series: SeriesSequence?
+                /// The publisher's blurb and the server's genres: what recommendations read.
+                let description: String?
+                let genres: [String]?
 
                 private enum CodingKeys: String, CodingKey {
-                    case title, authorName, authors, seriesName, series
+                    case title, authorName, authors, seriesName, series, description, genres
                 }
 
                 init(from decoder: any Decoder) throws {
@@ -41,6 +44,8 @@ extension AudiobookShelfAPI {
                     seriesName = try? container.decodeIfPresent(String.self, forKey: .seriesName)
                     series = (try? container.decodeIfPresent(SeriesSequence.self, forKey: .series))
                         ?? (try? container.decodeIfPresent([SeriesSequence].self, forKey: .series))?.first
+                    description = try? container.decodeIfPresent(String.self, forKey: .description)
+                    genres = try? container.decodeIfPresent([String].self, forKey: .genres)
                 }
 
                 /// For the catalogue's disk cache; reads back through `init(from:)`.
@@ -51,6 +56,8 @@ extension AudiobookShelfAPI {
                     try container.encodeIfPresent(authors, forKey: .authors)
                     try container.encodeIfPresent(seriesName, forKey: .seriesName)
                     try container.encodeIfPresent(series, forKey: .series)
+                    try container.encodeIfPresent(description, forKey: .description)
+                    try container.encodeIfPresent(genres, forKey: .genres)
                 }
             }
             let metadata: Metadata

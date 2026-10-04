@@ -15,13 +15,13 @@
         }
       }
     },
-    "Delete from Library" : {
-      "comment" : "Delete a downloaded server audiobook's entry, not only its audio",
+    "Finding your next listen…" : {
+      "comment" : "Recommendations: picking",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Supprimer de la bibliothèque"
+            "value" : "Recherche de votre prochaine écoute…"
           }
         }
       }
@@ -283,6 +283,23 @@
         }
       }
     },
+    "%@, like %@" : {
+      "comment" : "Recommendations: a shared genre, then a book the listener played",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@, like %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$@, comme %2$@"
+          }
+        }
+      }
+    },
     "%@×" : {
       "comment" : "Speed picker: playback rate multiplier",
       "localizations" : {
@@ -476,6 +493,23 @@
         }
       }
     },
+    "%d%% listened · %@ left" : {
+      "comment" : "Recommendations: why to continue a book",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$d%% listened · %2$@ left"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%1$d %% écouté · il reste %2$@"
+          }
+        }
+      }
+    },
     "%d%% of the series" : {
       "comment" : "Series progress",
       "localizations" : {
@@ -623,6 +657,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "1000 heures"
+          }
+        }
+      }
+    },
+    "A change from your usual authors" : {
+      "comment" : "Recommendations: no shared genre to name",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour changer de vos auteurs habituels"
           }
         }
       }
@@ -1563,7 +1608,7 @@
       }
     },
     "Continue" : {
-      "comment" : "Onboarding: next page button",
+      "comment" : "Onboarding: next page button\nRecommendations: the book in progress",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1789,6 +1834,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Supprimer la collection"
+          }
+        }
+      }
+    },
+    "Delete from Library" : {
+      "comment" : "Delete a downloaded server audiobook's entry, not only its audio",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer de la bibliothèque"
           }
         }
       }
@@ -2082,6 +2138,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Premier livre terminé"
+          }
+        }
+      }
+    },
+    "Recommended for You" : {
+      "comment" : "Recommendations screen title",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Recommandé pour vous"
           }
         }
       }
@@ -2729,6 +2796,17 @@
         }
       }
     },
+    "Listen to a book or two first: picks are based on what you played." : {
+      "comment" : "Recommendations: no listening history yet",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écoutez d'abord un livre ou deux : les suggestions partent de ce que vous avez écouté."
+          }
+        }
+      }
+    },
     "Listened" : {
       "comment" : "Chapter already heard\nSnapshot tile",
       "localizations" : {
@@ -3058,6 +3136,34 @@
         }
       }
     },
+    "Next in %@, after %@" : {
+      "comment" : "Recommendations: series name, then the volume finished",
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Next in %1$@, after %2$@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suite de %1$@, après %2$@"
+          }
+        }
+      }
+    },
+    "Next in a Series" : {
+      "comment" : "Recommendations: the next volume of a series",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suite d'une série"
+          }
+        }
+      }
+    },
     "Next: %@" : {
       "comment" : "Player: next queued book",
       "localizations" : {
@@ -3185,6 +3291,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Aucune correspondance"
+          }
+        }
+      }
+    },
+    "No Picks" : {
+      "comment" : "Recommendations: none could be made",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aucune suggestion"
           }
         }
       }
@@ -3349,6 +3466,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Rien dans la file d'attente"
+          }
+        }
+      }
+    },
+    "Nothing stood out this time. Try again." : {
+      "comment" : "Recommendations: the model picked nothing usable",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rien ne se démarque cette fois. Réessayez."
           }
         }
       }
@@ -3536,6 +3664,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les autres fichiers sont dans le dossier de la bibliothèque mais n'appartiennent à aucun livre : une importation interrompue, ou un livre supprimé sur un autre appareil."
+          }
+        }
+      }
+    },
+    "Other Picks" : {
+      "comment" : "Recommendations: ask again",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autres suggestions"
           }
         }
       }
@@ -4860,6 +4999,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Retour intelligent"
+          }
+        }
+      }
+    },
+    "Something Different" : {
+      "comment" : "Recommendations: the model's pick away from the usual",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quelque chose qui change un peu"
           }
         }
       }

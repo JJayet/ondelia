@@ -50,6 +50,13 @@ extension LibraryView {
                     .glassPill(height: 34)
                 }
 
+                if offersRecommendations {
+                    recommendationsButton
+                        .buttonStyle(.plain)
+                        .frame(width: 34, height: 34)
+                        .glassEffect(.regular, in: Circle())
+                }
+
                 serverUnreachableButton
                     .buttonStyle(.plain)
                     .frame(width: 34, height: 34)
