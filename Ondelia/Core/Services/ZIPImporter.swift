@@ -125,40 +125,25 @@ enum ZIPImporter {
     
     static func validateAudiobookContent(in directory: URL) -> URL? {
         let fileManager = FileManager.default
-        let audioExtensions = ["mp3", "m4a", "m4b", "aac", "wav", "flac"]
-        
+
         do {
-            let contents = try fileManager.contentsOfDirectory(at: directory, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey], options: [.skipsHiddenFiles])
-            
+            // Every audio file however deep, from the deepest folder holding them all: a wrapper
+            // folder still names the book, and sibling Disc 1 and Disc 2 folders both come along.
+            // Picking one subfolder imported one disc, and the cleanup deleted the rest.
+            let audioFiles = FolderImporter.audioFiles(in: directory)
             var targetDirectory = directory
-            var audioFiles: [URL] = []
-            
-            // Look for audio files directly in extracted directory
-            audioFiles = contents.filter { url in
-                audioExtensions.contains(url.pathExtension.lowercased())
-            }
-            
-            // If no audio files at root level, look one level deeper
-            if audioFiles.isEmpty {
-                let subdirectories = contents.filter { url in
-                    var isDirectory: ObjCBool = false
-                    fileManager.fileExists(atPath: url.path, isDirectory: &isDirectory)
-                    return isDirectory.boolValue
+            if let first = audioFiles.first {
+                var common = first.deletingLastPathComponent().standardizedFileURL.pathComponents
+                for file in audioFiles.dropFirst() {
+                    let parent = file.deletingLastPathComponent().standardizedFileURL.pathComponents
+                    common = Array(zip(common, parent).prefix { $0 == $1 }.map(\.0))
                 }
-                
-                for subdirectory in subdirectories {
-                    let subContents = try fileManager.contentsOfDirectory(at: subdirectory, includingPropertiesForKeys: [.isRegularFileKey, .fileSizeKey])
-                    let subAudioFiles = subContents.filter { url in
-                        audioExtensions.contains(url.pathExtension.lowercased())
-                    }
-                    
-                    if subAudioFiles.count > audioFiles.count {
-                        audioFiles = subAudioFiles
-                        targetDirectory = subdirectory
-                    }
+                let root = directory.standardizedFileURL.pathComponents
+                if common.count > root.count, common.starts(with: root) {
+                    targetDirectory = URL(fileURLWithPath: NSString.path(withComponents: common), isDirectory: true)
                 }
             }
-            
+
             // Validate audiobook criteria
             guard !audioFiles.isEmpty else {
                 Log.library.error("❌ ZIPImporter: No audio files found")

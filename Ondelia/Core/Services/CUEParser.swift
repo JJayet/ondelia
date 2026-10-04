@@ -158,12 +158,14 @@ enum CUEParser {
             return 0
         }
         
-        let minutes = Int(components[0]) ?? 0
-        let seconds = Int(components[1]) ?? 0
-        let frames = Int(components[2]) ?? 0
+        // Doubles, not Ints: a malformed file's minutes times 60 must not overflow and trap.
+        let minutes = TimeInterval(components[0]) ?? 0
+        let seconds = TimeInterval(components[1]) ?? 0
+        let frames = TimeInterval(components[2]) ?? 0
         
         // Convert to total seconds (75 frames = 1 second in CD audio)
-        let totalSeconds = TimeInterval(minutes * 60) + TimeInterval(seconds) + TimeInterval(frames) / 75.0
+        let totalSeconds = minutes * 60 + seconds + frames / 75.0
+        guard totalSeconds.isFinite, totalSeconds >= 0 else { return 0 }
         
         return totalSeconds
     }

@@ -4,6 +4,9 @@ import UIKit
 
 extension AudiobookManager {
     typealias ImportedHandler = @MainActor ([AudiobookModel]) -> Void
+    /// Told the inputs that ended with no book in the library, so a caller holding the only
+    /// copy of one keeps it.
+    typealias ImportCompletion = @Sendable (_ failed: [URL]) -> Void
 
     // MARK: - Import Operations
     /// Queues an import, and runs it when the library is ready and no other import is in flight.
@@ -21,7 +24,7 @@ extension AudiobookManager {
     func handleImportRequest(
         urls: [URL],
         mergesWithoutAsking: Bool = false,
-        completion: (@Sendable () -> Void)? = nil,
+        completion: ImportCompletion? = nil,
         onImported: ImportedHandler? = nil
     ) {
         guard swiftDataController.isLoaded, !isLoadingLibrary, !isImportRunning else {
@@ -55,7 +58,7 @@ extension AudiobookManager {
         }
     }
 
-    private nonisolated func processImport(unsortedURLs: [URL], completion: (@Sendable () -> Void)? = nil) {
+    private nonisolated func processImport(unsortedURLs: [URL], completion: ImportCompletion? = nil) {
         // Neither the document picker nor a directory listing promises an order, and import order
         // is the only record of it: titles come from file metadata and say nothing about sequence.
         let urls = unsortedURLs.sorted {
@@ -73,9 +76,14 @@ extension AudiobookManager {
                 manager.pendingMergeTitle = folderName
             }
 
+            var failed: [URL] = []
             for url in urls {
                 Log.library.debug("📂 Processing import: \(url.lastPathComponent)")
-                await MainActor.run { manager.currentImportFileName = url.lastPathComponent }
+                // Every import that ends with a book, new or already held, adds it to the batch.
+                let booksBefore = await MainActor.run {
+                    manager.currentImportFileName = url.lastPathComponent
+                    return manager.importBatch.count
+                }
 
                 // Start accessing security-scoped resource
                 let accessing = url.startAccessingSecurityScopedResource()
@@ -96,14 +104,16 @@ extension AudiobookManager {
                     }
                 }
 
-                await MainActor.run {
+                let booksAfter = await MainActor.run {
                     manager.importQueueCompleted += 1
+                    return manager.importBatch.count
                 }
+                if booksAfter == booksBefore { failed.append(url) }
             }
             // A merge is offered for one source: a lone folder or archive, or a pick of several
             // audio files. A mixed pick of files and folders has no single answer worth suggesting.
             await manager.finishImportBatch(offerMerge: isMultiFilePick || urls.count == 1)
-            completion?()
+            completion?(failed)
         }
     }
 
