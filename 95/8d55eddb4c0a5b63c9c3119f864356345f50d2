@@ -1,0 +1,55 @@
+Ondelia/Features/AudiobookShelf/AudiobookShelfLinkPickerView.swift
+  s_f1b944226b38e1::t_862a3a43967320 64
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_f1b944226b38e1::t_7f0ac0f4b1d8f8 8-9,119-126,159,172-173,175,181
+Ondelia/Core/Models/SwiftData/HiddenServerEntryModel.swift
+  s_f1b944226b38e1::t_510a865e842611 1-29
+Ondelia/Core/Managers/AudiobookManager+Fetch.swift
+  s_f1b944226b38e1::t_862a3a43967320 59
+Ondelia/Core/Models/AudiobookShelfAccount.swift
+  s_f1b944226b38e1::t_38d3b918ed3e0b 1-43
+Ondelia/Core/Models/SwiftData/IsoraSchema.swift
+  s_f1b944226b38e1::t_510a865e842611 62-71,73,77-78,85-86
+OndeliaTests/Core/Models/SchemaMigrationTests.swift
+  s_f1b944226b38e1::t_c16e756eaf664b 33-34,37,44
+Ondelia/Resources/Localizable.xcstrings
+  s_f1b944226b38e1::t_3f8b032d0a9d16 4-25
+OndeliaTests/Core/Services/AudiobookShelfAPITests.swift
+  s_f1b944226b38e1::t_156f1f9fb657d9 21-39
+  s_f1b944226b38e1::t_bd8d784baff9e0 122-141
+docs/specs/audiobookshelf-servers-hiding-collections.md
+  s_f1b944226b38e1::t_3a5dd28ab5d4db 44-48,50-51,55-56
+  s_f1b944226b38e1::t_e1c47416a51dec 93
+  s_f1b944226b38e1::t_87a41c57687429 1-12,17-35,39-43,49,52-54,57-77,79-80,82,86-92,94-159,161-169,171-184
+  s_f1b944226b38e1::t_6aecaa449af3dc 13-16,36-38,78,81,83-85,160,170
+Ondelia/Core/Services/AudiobookShelfService+Accounts.swift
+  s_f1b944226b38e1::t_0fa51fba61c29c 1-132
+Ondelia/Core/Services/SettingsSync.swift
+  s_f1b944226b38e1::t_862a3a43967320 25
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_f1b944226b38e1::t_862a3a43967320 59-61,109,186,213
+Ondelia/Core/Services/AudiobookShelfAPI.swift
+  s_f1b944226b38e1::t_c781a4c261e9ef 55-57,62-63,65-69
+Ondelia/Core/Services/AudiobookShelfService+Streaming.swift
+  s_f1b944226b38e1::t_862a3a43967320 118
+Ondelia/Core/Models/SwiftData/AudiobookShelfItemServerModel.swift
+  s_f1b944226b38e1::t_510a865e842611 1-19
+Ondelia.xcodeproj/project.pbxproj
+  s_f1b944226b38e1::t_510a865e842611 145-146,153
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "958d55eddb4c0a5b63c9c3119f864356345f50d2",
+  "prompts": {},
+  "sessions": {
+    "s_f1b944226b38e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3aa31729-5caf-4227-b5aa-3fa096e389cc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
