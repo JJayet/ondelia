@@ -5,6 +5,80 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.7 (1) — 2026-10-04
+
+### English
+
+Promotional text
+New: sign in to several AudiobookShelf servers and see all their books in one Library. Hide what you don't want, and browse your server collections.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,servers
+
+What's New
+
+Several servers
+
+- Sign in to as many AudiobookShelf servers as you like with Add Server, and see all their books together in your Library, Search and Collections.
+- Each server has its own settings: Show in Library, which server library to use, and Sign Out.
+- If one server is out of reach, only its books step aside; the others stay.
+- New optional Port field when you sign in.
+- Apple Watch can browse and stream from each of your servers.
+
+Hide what you don't want
+
+- Hide a server book, series or author from its long-press menu. Hiding an author hides all of their books.
+- Hidden & Shown, in each server's settings, lists everything with a switch to bring it back.
+- Hidden items stay hidden on all your devices, and nothing is removed from your server.
+
+Collections
+
+- Your AudiobookShelf collections now appear among your Collections.
+- Long-press a collection to Download All, Rename, Hide or Delete Collection.
+
+Library
+
+- A downloaded server book can Remove Download to free space and keep streaming, with its position and bookmarks. Delete from Library removes it entirely.
+
+### Français
+
+Texte promotionnel
+Nouveau : connectez plusieurs serveurs AudiobookShelf et retrouvez tous leurs livres dans une seule bibliothèque. Masquez ce qui vous gêne, parcourez vos collections.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,serveurs
+
+Nouveautés
+
+Plusieurs serveurs
+
+- Connectez autant de serveurs AudiobookShelf que vous voulez avec Ajouter un serveur, et retrouvez tous leurs livres ensemble dans la Bibliothèque, la Recherche et les Collections.
+- Chaque serveur a ses réglages : Afficher dans la bibliothèque, la bibliothèque du serveur à utiliser, et Se déconnecter.
+- Si un serveur ne répond pas, seuls ses livres disparaissent ; les autres restent.
+- Nouveau champ Port, facultatif, à la connexion.
+- L'Apple Watch parcourt et lit en streaming chacun de vos serveurs.
+
+Masquez ce qui vous gêne
+
+- Masquez un livre, une série ou un auteur du serveur depuis son menu (appui long). Masquer un auteur masque tous ses livres.
+- Masqués et affichés, dans les réglages de chaque serveur, liste tout avec un interrupteur pour le réafficher.
+- Ce qui est masqué l'est sur tous vos appareils, et rien n'est supprimé du serveur.
+
+Collections
+
+- Vos collections AudiobookShelf apparaissent désormais parmi vos Collections.
+- Appui long sur une collection : Tout télécharger, Renommer, Masquer ou Supprimer la collection.
+
+Bibliothèque
+
+- Un livre du serveur téléchargé propose Supprimer le téléchargement pour libérer de la place tout en continuant en streaming, avec sa position et ses signets. Supprimer de la bibliothèque le retire complètement.
+
 ## 1.6.1 (1) — 2026-10-03
 
 ### English
