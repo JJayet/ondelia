@@ -35,46 +35,12 @@ extension LibraryView {
                     .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
             }
 
-            // Collections: Hardcover series and hand-made ones, then the server series that
-            // are not one yet. Wide: one row of tiles.
-            if isWide, hasCollections {
-                collectionsRow
+            // Collections: one strip; See All pushes the rest.
+            if hasCollections {
+                collectionsStrip
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
-            } else {
-                if hasCollections {
-                    SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 2, trailing: 16))
-                }
-                ForEach(collectionGroups) { group in
-                    collectionCard(group)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                }
-                ForEach(displayOnlyServerCollections) { collection in
-                    // A NavigationLink row: List adds its own chevron beside the card's.
-                    AudiobookShelfSeriesCard(series: collection)
-                        .navigationLinkIndicatorVisibility(.hidden)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                }
-                serverSeriesToggle
-                    .listRowBackground(Color.clear)
-                    .listRowSeparator(.hidden)
-                    .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                ForEach(shownServerSeries) { series in
-                    // A NavigationLink row: List adds its own chevron beside the card's.
-                    AudiobookShelfSeriesCard(series: series)
-                        .navigationLinkIndicatorVisibility(.hidden)
-                        .listRowBackground(Color.clear)
-                        .listRowSeparator(.hidden)
-                        .listRowInsets(EdgeInsets(top: 6, leading: 16, bottom: 6, trailing: 16))
-                }
+                    .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
             }
 
             if !isShelfEmpty {
@@ -144,22 +110,8 @@ extension LibraryView {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
-                // Collections: Hardcover series and hand-made ones, then the server series that
-                // are not one yet. Wide: one row of tiles. Lazy: a server can have hundreds.
-                if isWide, hasCollections {
-                    collectionsRow.padding(.horizontal)
-                } else if hasCollections {
-                    LazyVStack(alignment: .leading, spacing: 12) {
-                        SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
-                        ForEach(collectionGroups) { group in
-                            collectionCard(group)
-                        }
-                        ForEach(displayOnlyServerCollections) { AudiobookShelfSeriesCard(series: $0) }
-                        serverSeriesToggle
-                        ForEach(shownServerSeries) { AudiobookShelfSeriesCard(series: $0) }
-                    }
-                    .padding(.horizontal)
-                }
+                // Collections: one strip; See All pushes the rest.
+                if hasCollections { collectionsStrip }
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {

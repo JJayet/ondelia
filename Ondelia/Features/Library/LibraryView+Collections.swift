@@ -2,9 +2,61 @@ import SwiftUI
 
 // MARK: - Collections on the shelf
 extension LibraryView {
-    func collectionCard(_ group: CollectionGroup) -> some View {
-        CollectionCardView(group: group) { collectionForDetail = group.collection }
-            .contextMenu { collectionMenu(group) }
+    /// The strip holds this many: the rest wait behind See All.
+    static let stripLimit = 8
+
+    /// One row of Collection tiles, in progress first, then recently played, and See All to the
+    /// Collections screen. Server collections and series with no Collection yet fill what room
+    /// is left: they have never been played.
+    var collectionsStrip: some View {
+        let groups = collectionGroups.sorted(by: CollectionGroup.byRecent).prefix(Self.stripLimit)
+        let server = displayOnlyServerCollections.prefix(Self.stripLimit - groups.count)
+        let tileWidth: CGFloat = isWide ? 200 : 150
+        let padding: CGFloat = isWide ? 24 : 16
+        return VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .firstTextBaseline, spacing: 9) {
+                Text(NSLocalizedString("Collections", comment: "Section title for collections"))
+                    .font(.system(size: 19, weight: .bold))
+                Text(verbatim: "\(collectionGroups.count + displayOnlyServerCollections.count)")
+                    .font(.system(size: 13))
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                Button(NSLocalizedString("See All", comment: "Library: open the Collections screen")) {
+                    withHapticFeedback { showsAllCollections = true }
+                }
+                .font(.system(size: 14, weight: .medium))
+                .foregroundStyle(.tint)
+                .buttonStyle(.plain)
+                .accessibilityIdentifier(AccessibilityIdentifiers.Library.seeAllCollections)
+            }
+            .padding(.horizontal, padding)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                LazyHStack(spacing: 11) {
+                    ForEach(groups) { group in
+                        CollectionTileView(group: group, onOpen: { collectionForDetail = group.collection }, width: tileWidth)
+                            .contextMenu { collectionMenu(group) }
+                    }
+                    ForEach(server) { AudiobookShelfSeriesTile(series: $0, width: tileWidth) }
+                }
+                .padding(.horizontal, padding)
+            }
+        }
+    }
+
+    /// The Collections screen: every Collection, unfiltered, and every server collection and
+    /// series with none yet.
+    var allCollections: some View {
+        CollectionsView(
+            groups: CollectionGroup.build(
+                collections: audiobookManager.collections,
+                audiobooks: visibleAudiobooks,
+                keepEmpty: true
+            ),
+            serverOnly: serverOnlyCollections,
+            onOpen: { collectionForDetail = $0.collection },
+            menu: collectionMenu
+        )
     }
 
     /// A Collection's long-press menu: download what is not on this device, rename, and

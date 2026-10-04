@@ -1,23 +1,18 @@
 import SwiftUI
 
-/// A collection as a compact tile for the wide library: a stack of covers, the name, the count
-/// and length, and a progress hairline. The full-width `CollectionCardView` stays for the phone.
+/// A collection as a compact tile: a stack of covers, the name, the count
+/// and length, and a progress hairline, on the Library's Collections strip.
 struct CollectionTileView: View {
     let group: CollectionGroup
     let onOpen: () -> Void
+    var width: CGFloat = 200
 
     var body: some View {
         Button {
             withHapticFeedback { onOpen() }
         } label: {
             VStack(alignment: .leading, spacing: 0) {
-                HStack(spacing: -38) {
-                    ForEach(Array(group.books.prefix(3)), id: \.id) { book in
-                        CoverArtView(audiobook: book, size: 62, cornerRadius: 9)
-                            .shadow(color: .black.opacity(0.4), radius: 6, x: -3, y: 4)
-                    }
-                }
-                .frame(height: 62, alignment: .leading)
+                CollectionCovers(sources: group.coverSources, size: 62, overlap: 38 / 62)
 
                 Text(group.name)
                     .font(.system(size: 14.5, weight: .semibold))
@@ -34,7 +29,7 @@ struct CollectionTileView: View {
                     .padding(.top, 9)
             }
             .padding(13)
-            .frame(width: 200, alignment: .leading)
+            .frame(width: width, alignment: .leading)
             .contentShape(Rectangle())
             .glassCard(cornerRadius: 17)
         }

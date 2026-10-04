@@ -4,6 +4,7 @@ import SwiftUI
 /// like `CollectionTileView`.
 struct AudiobookShelfSeriesTile: View {
     let series: AudiobookShelfAPI.Series
+    var width: CGFloat = 200
 
     private var books: [AudiobookShelfAPI.Item] { series.books ?? [] }
 
@@ -32,7 +33,7 @@ struct AudiobookShelfSeriesTile: View {
                 .padding(.top, 3)
             }
             .padding(13)
-            .frame(width: 200, alignment: .leading)
+            .frame(width: width, alignment: .leading)
             .contentShape(Rectangle())
             .glassCard(cornerRadius: 17)
         }

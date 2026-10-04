@@ -26,6 +26,12 @@ struct CollectionGroup: Identifiable {
         return books.reduce(0) { $0 + $1.currentPosition } / total
     }
 
+    /// Started and not finished: the strip and the "Recent" sort put these first.
+    var isInProgress: Bool { progressFraction > 0 && progressFraction < 1 }
+
+    /// When any of its books was last played.
+    var lastPlayed: Date { books.map(\.lastPlayed).max() ?? .distantPast }
+
     /// The book being listened to, if any: the first unfinished book with progress, else the
     /// first unfinished one.
     var currentBook: AudiobookModel? {
@@ -129,12 +135,18 @@ struct CollectionGroup: Identifiable {
         // Collections with something in progress first, then alphabetically, so the shelf opens
         // on what is actually being listened to.
         groups.sort { lhs, rhs in
-            let left = lhs.progressFraction > 0 && lhs.progressFraction < 1
-            let right = rhs.progressFraction > 0 && rhs.progressFraction < 1
-            guard left == right else { return left }
+            guard lhs.isInProgress == rhs.isInProgress else { return lhs.isInProgress }
             return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
         }
         return groups
+    }
+
+    /// In progress first, then most recently played: the Library's Collections strip and the
+    /// Collections screen's "Recent" sort.
+    static func byRecent(_ lhs: CollectionGroup, _ rhs: CollectionGroup) -> Bool {
+        guard lhs.isInProgress == rhs.isInProgress else { return lhs.isInProgress }
+        guard lhs.lastPlayed == rhs.lastPlayed else { return lhs.lastPlayed > rhs.lastPlayed }
+        return lhs.name.localizedStandardCompare(rhs.name) == .orderedAscending
     }
 
     /// `bookIDs` order for manual; otherwise the chosen key, ties broken by title.
@@ -184,5 +196,40 @@ struct CollectionGroup: Identifiable {
         default:
             return (lhs.title ?? "").localizedStandardCompare(rhs.title ?? "") == .orderedAscending
         }
+    }
+}
+
+extension CollectionGroup {
+    /// "3 volumes" or "3 of 6" for a series, "3 books" for a hand-made collection.
+    @MainActor
+    var countLabel: String {
+        if let total = serverSeries?.books?.count, total > books.count {
+            return String(
+                format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
+                books.count,
+                total
+            )
+        }
+        guard isSeries else {
+            return String(format: NSLocalizedString("%d books", comment: "Number of books in a collection"), books.count)
+        }
+        guard let total = catalogueCount, total > books.count else {
+            return String(format: NSLocalizedString("%d volumes", comment: "Number of books in a series"), books.count)
+        }
+        return String(
+            format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
+            books.count,
+            total
+        )
+    }
+
+    /// The author every book shares, or the first one's; nil when there is none.
+    var author: String? {
+        let authors = books.compactMap(\.author).filter { !$0.isEmpty }
+        return authors.first
+    }
+
+    var remaining: TimeInterval {
+        books.reduce(0) { $0 + max($1.duration - $1.currentPosition, 0) }
     }
 }

@@ -49,8 +49,8 @@ struct LibraryView: View {
     /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
     /// redraws the shelf.
     @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
-    /// Whether the folded "Server series" row is open. Per device, folded by default.
-    @AppStorage("library.showsServerSeries") var showsServerSeries = false
+    /// Whether the Collections screen is pushed, from the strip's See All.
+    @State var showsAllCollections = false
     let catalog = AudiobookShelfCatalog.shared
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
@@ -199,6 +199,7 @@ struct LibraryView: View {
         }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }
         .navigationDestination(item: $collectionForDetail) { collectionDetail($0) }
+        .navigationDestination(isPresented: $showsAllCollections) { allCollections }
         .onChange(of: audiobookManager.audiobooks.count, initial: true) { _, count in
             LongPressBookTip.bookCount = count
         }

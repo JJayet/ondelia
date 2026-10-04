@@ -1,4 +1,5 @@
 import Foundation
+import SwiftUI
 import Testing
 @testable import Isora
 
@@ -223,5 +224,31 @@ struct CollectionGroupTests {
         #expect(badge(1) == "#1")
         #expect(badge(1.5) == "#1\(separator)5")
         #expect(badge(nil) == nil)
+    }
+
+    @Test("The strip's order: in progress first, then most recently played")
+    func recentOrder() {
+        let finished = book("Done", at: 3600)
+        finished.lastPlayed = Date(timeIntervalSince1970: 300)
+        let started = book("Halfway", at: 1800)
+        started.lastPlayed = Date(timeIntervalSince1970: 100)
+        let fresh = book("Fresh")
+        fresh.lastPlayed = Date(timeIntervalSince1970: 200)
+        let groups = [
+            CollectionGroup(collection: CollectionModel(name: "Fresh"), books: [fresh]),
+            CollectionGroup(collection: CollectionModel(name: "Done"), books: [finished]),
+            CollectionGroup(collection: CollectionModel(name: "Halfway"), books: [started]),
+        ]
+
+        #expect(groups.sorted(by: CollectionGroup.byRecent).map(\.name) == ["Halfway", "Done", "Fresh"])
+    }
+
+    @Test("The Collections screen's scopes: hand-made, Hardcover series")
+    func scopes() {
+        let mine = CollectionGroup(collection: CollectionModel(name: "Road trip"), books: [])
+        let series = CollectionGroup(collection: CollectionModel(name: "Mistborn", hardcoverSeriesID: 1), books: [])
+
+        #expect(CollectionsView<EmptyView>.scope(of: mine) == .mine)
+        #expect(CollectionsView<EmptyView>.scope(of: series) == .series)
     }
 }
