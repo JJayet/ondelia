@@ -93,7 +93,8 @@ extension WatchSyncService {
             bookmarks: book.bookmarks.map {
                 BookmarkSummary(id: $0.id, timestamp: $0.timestamp, title: $0.title, dateCreated: $0.dateCreated)
             },
-            serverItemID: AudiobookShelfService.shared.itemID(for: book)
+            serverItemID: AudiobookShelfService.shared.itemID(for: book),
+            serverID: AudiobookShelfService.shared.serverID(for: book)
         )
     }
 

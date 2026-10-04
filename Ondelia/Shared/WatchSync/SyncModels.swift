@@ -44,6 +44,9 @@ struct BookSummary: Codable, Sendable, Equatable {
     /// The AudiobookShelf item the book is linked to, so the watch can stream it. Optional: an
     /// older phone build sends none.
     let serverItemID: String?
+    /// The `ServerAccount.id` of the server that item lives on. Nil from an older phone build:
+    /// the first server.
+    var serverID: String?
 
     init(
         id: UUID,
@@ -56,7 +59,8 @@ struct BookSummary: Codable, Sendable, Equatable {
         isFinished: Bool = false,
         chapters: [ChapterSummary] = [],
         bookmarks: [BookmarkSummary] = [],
-        serverItemID: String? = nil
+        serverItemID: String? = nil,
+        serverID: String? = nil
     ) {
         self.id = id
         self.title = title
@@ -69,6 +73,7 @@ struct BookSummary: Codable, Sendable, Equatable {
         self.chapters = chapters
         self.bookmarks = bookmarks
         self.serverItemID = serverItemID
+        self.serverID = serverID
     }
 }
 
@@ -132,15 +137,21 @@ enum SyncEvent: Codable, Sendable, Equatable {
     case transferProgress(bookID: UUID, chapterNumber: Int, fraction: Double)
     /// Playback started here: stop making noise over there.
     case pauseOtherSide
-    /// The phone's AudiobookShelf sign-in, so the watch can stream on its own. Nil: signed out.
+    /// The phone's first AudiobookShelf sign-in, for a watch on a build before several servers.
+    /// Nil: signed out.
     case serverAccount(ServerAccount?)
-    /// The watch streamed `itemID` as a book it created under `bookID`: it joins the Library.
-    case joined(bookID: UUID, itemID: String)
+    /// Every AudiobookShelf server the phone is signed in to, so the watch can stream on its own.
+    case serverAccounts([ServerAccount])
+    /// The watch streamed `itemID` from server `serverID` as a book it created under `bookID`:
+    /// it joins the Library. `serverID` is nil from a build before several servers.
+    case joined(bookID: UUID, itemID: String, serverID: String? = nil)
 }
 
 /// What the watch needs to talk to AudiobookShelf by itself. Sent through `transferUserInfo`,
 /// which WatchConnectivity encrypts; the watch keeps the token in its own keychain.
 struct ServerAccount: Codable, Sendable, Equatable {
+    /// `AudiobookShelfAccount.id`. Nil from a phone build before several servers.
+    var id: String?
     let server: URL
     let token: String
     /// The server library the phone has selected, the one the watch browses.

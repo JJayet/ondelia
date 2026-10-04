@@ -14,12 +14,16 @@ _Avoid_: Book, title, item
 Every audiobook this device keeps a record of: imported from files, downloaded from a server, or streamed from one at least once.
 _Avoid_: Shelf
 
+**Server**:
+An AudiobookShelf server the listener signed in to, known by its address and username. The listener can sign in to several; each has its own selected server library and can be shown in the Library or not.
+_Avoid_: Account, instance, source
+
 **Server library**:
 One of the libraries an AudiobookShelf server divides its audiobooks into. Always qualified; bare "Library" means this device's Library.
 _Avoid_: Library (unqualified), source
 
 **Server audiobook**:
-An audiobook on an AudiobookShelf server. It joins the Library when it is downloaded, first streamed or first acted on (added by the listener to a Collection or Up Next, bookmarked, marked finished), and stays linked to its server original. The listener can choose to see the server audiobooks of the selected server library alongside the Library; seeing one there does not make it join.
+An audiobook on an AudiobookShelf server. It joins the Library when it is downloaded, first streamed or first acted on (added by the listener to a Collection or Up Next, bookmarked, marked finished), and stays linked to its server original. The listener can choose to see the server audiobooks of each shown server's selected server library alongside the Library; seeing one there does not make it join.
 _Avoid_: Item, server book
 
 **Server link**:
@@ -27,8 +31,16 @@ The tie between a Library audiobook and its server audiobook. It is made when a 
 _Avoid_: Relink, match
 
 **Server series**:
-A series as an AudiobookShelf server groups its server audiobooks. While the listener sees server audiobooks alongside the Library, every server series of the selected server library appears among the Collections; it becomes a Collection once the Library holds one of its audiobooks, its members being whatever the server lists. Always qualified; bare "Series" means the Hardcover-backed Collection.
+A series as an AudiobookShelf server groups its server audiobooks. While the listener sees server audiobooks alongside the Library, every server series of each shown server library appears among the Collections; it becomes a Collection once the Library holds one of its audiobooks, its members being whatever the server lists. Always qualified; bare "Series" means the Hardcover-backed Collection.
 _Avoid_: Series (unqualified)
+
+**Server collection**:
+A collection as an AudiobookShelf server keeps it: a named, ordered list of its server audiobooks, edited on the server only. It appears and becomes a Collection the way a server series does.
+_Avoid_: Server playlist, shared collection
+
+**Hidden**:
+The state of a server audiobook, server series, server collection or author the listener chose not to see: it appears nowhere in Ondelia, on any of their devices, until shown again. Hiding an author hides their server audiobooks too; hiding a series or collection does not. Hiding never removes anything from the server or the Library.
+_Avoid_: Ignored, excluded, blocked
 
 **Streamed audiobook**:
 A Library audiobook whose audio stays on the server and plays over the network.
@@ -139,7 +151,7 @@ One read-through recorded on Hardcover, carrying its progress and dates. Each Fi
 _Avoid_: Listen, session
 
 **Declined series**:
-A Hardcover series or server series the listener removed as a Collection, which is never offered as a Collection again.
+A Hardcover series the listener removed as a Collection, which is never offered as a Collection again. Removing a server series Collection hides the server series instead.
 _Avoid_: Hidden series, ignored series
 
 ### Statistics

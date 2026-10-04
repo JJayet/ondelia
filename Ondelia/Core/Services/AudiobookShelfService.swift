@@ -114,7 +114,7 @@ final class AudiobookShelfService {
 
     /// `size` stands in for the length a zipped download is sent without.
     func download(id: String, title: String, author: String?, size: Int64? = nil) {
-        guard let server, let token, downloads[id] == nil, !importing.contains(id) else { return }
+        guard let (server, token) = session(forItem: id), downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
@@ -183,7 +183,7 @@ final class AudiobookShelfService {
             // device and after a relaunch.
             let linked = Set(Self.links().filter { $0.itemID == item }.map(\.audiobookID))
             for book in books where !linked.contains(book.id) {
-                Self.insertLink(audiobookID: book.id, itemID: item, serverID: self.primary?.id, context: context)
+                Self.insertLink(audiobookID: book.id, itemID: item, serverID: self.account(forItem: item)?.id, context: context)
             }
             // One book per item is the normal case. An item the importer split into several
             // books keeps their own titles rather than all taking the item's.
@@ -208,7 +208,7 @@ final class AudiobookShelfService {
 
     /// Bumped whenever links are written: a SwiftData fetch is not observable, so views reading
     /// `libraryBooks` would otherwise miss the link a finished import adds.
-    private var linksVersion = 0
+    private(set) var linksVersion = 0
 
     static func links() -> [AudiobookShelfLinkModel] {
         guard SwiftDataController.shared.isLoaded else { return [] }
@@ -233,6 +233,10 @@ final class AudiobookShelfService {
     }
 
     @ObservationIgnored private var libraryBooksCache: (version: Int, books: [String: AudiobookModel])?
+    @ObservationIgnored var itemServersCache: (version: Int, servers: [String: String])?
+    /// The server the AudiobookShelf browser shows, for the screens it opens to know where to
+    /// ask. Nil: the first server.
+    var browsingAccountID: String?
 
     func finishBackgroundEvents() {
         backgroundCompletion?()

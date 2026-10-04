@@ -200,7 +200,7 @@ extension AudiobookManager {
     func deleteCollection(_ collection: CollectionModel) {
         let catalog = AudiobookShelfCatalog.shared
         if let seriesID = collection.hardcoverSeriesID { declinedSeries.insert(seriesID) }
-        else if let series = catalog.seriesByCollection[collection.id], let serverID = catalog.serverID {
+        else if let series = catalog.seriesByCollection[collection.id], let serverID = catalog.serverID(forGroup: series.id) {
             hideServerGroup(series, on: serverID)
             return
         }

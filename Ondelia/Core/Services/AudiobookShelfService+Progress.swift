@@ -33,7 +33,7 @@ extension AudiobookShelfService {
 
     /// Pushes the book's position when it has moved enough. Called on every progress write.
     func pushProgress(for book: AudiobookModel) {
-        guard isSignedIn, let server, let token, let item = itemID(for: book),
+        guard let item = itemID(for: book), let (server, token) = session(forItem: item),
               book.duration > 0, !pushingProgress.contains(book.id) else { return }
         let position = min(max(book.currentPosition, 0), book.duration)
         let next = PushedProgress(position: position, isFinished: book.isFinished)
@@ -64,7 +64,7 @@ extension AudiobookShelfService {
     /// Takes the server's position before the book opens, when it is the newer one. Bounded by
     /// a short timeout: an unreachable server must not hold up playback of a downloaded book.
     func pullProgress(for book: AudiobookModel) async {
-        guard isSignedIn, let server, let token, let item = itemID(for: book) else { return }
+        guard let item = itemID(for: book), let (server, token) = session(forItem: item) else { return }
         let remote: AudiobookShelfAPI.MediaProgress?
         do {
             remote = try await AudiobookShelfAPI.progress(server: server, token: token, item: item, timeout: 4)

@@ -32,6 +32,15 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
     let name: String
     @Environment(\.audiobookShelfLibrary) private var library
 
+    /// Authors are only browsed, so they belong to the server the browser shows.
+    private var serverID: String? {
+        let service = AudiobookShelfService.shared
+        return switch group {
+        case .series(let group): service.account(forGroup: group.id)?.id
+        case .author: service.browsingAccount?.id
+        }
+    }
+
     func body(content: Content) -> some View {
         content.contextMenu {
             Button {
@@ -43,7 +52,7 @@ private struct AudiobookShelfDownloadAllMenu: ViewModifier {
                     systemImage: "arrow.down.circle"
                 )
             }
-            if let serverID = AudiobookShelfCatalog.shared.serverID {
+            if let serverID {
                 Divider()
                 Button(role: .destructive) {
                     switch group {
@@ -224,7 +233,7 @@ struct AudiobookShelfCover: View {
     }
 
     private func load() async {
-        image = await AudiobookShelfImages.load(key: item) { server, token in
+        image = await AudiobookShelfImages.load(key: item, session: AudiobookShelfService.shared.session(forItem: item)) { server, token in
             AudiobookShelfAPI.coverRequest(server: server, token: token, item: item)
         }
     }
@@ -248,7 +257,12 @@ enum AudiobookShelfImages {
 
     static func cached(_ key: String) -> UIImage? { cache.object(forKey: key as NSString) }
 
-    static func load(key: String, request: (URL, String) -> URLRequest) async -> UIImage? {
+    /// `session`: the server to ask, and the token, when the image is on no disk.
+    static func load(
+        key: String,
+        session: (server: URL, token: String)?,
+        request: (URL, String) -> URLRequest
+    ) async -> UIImage? {
         if let hit = cached(key) { return hit }
         let file = file(key)
         // Off the main thread: a grid of covers decoding from disk at once stutters the scroll.
@@ -258,8 +272,7 @@ enum AudiobookShelfImages {
             cache.setObject(stored, forKey: key as NSString)
             return stored
         }
-        let service = AudiobookShelfService.shared
-        guard let server = service.server, let token = service.token,
+        guard let (server, token) = session,
               let (data, response) = try? await URLSession.shared.data(for: request(server, token)),
               (response as? HTTPURLResponse)?.statusCode == 200,
               let image = await Task.detached(operation: { UIImage(data: data)?.preparingForDisplay() }).value

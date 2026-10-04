@@ -43,18 +43,54 @@ extension AudiobookShelfService {
     var server: URL? { primary?.server }
     var username: String? { primary?.username }
     var token: String? { primary.flatMap { tokens[$0.id] } }
-    var isSignedIn: Bool { token != nil }
+    /// Signed in to some server.
+    var isSignedIn: Bool { !tokens.isEmpty }
 
     func token(for account: AudiobookShelfAccount) -> String? { tokens[account.id] }
 
     var selectedLibrary: String? {
         get { primary?.library }
-        set {
-            guard !accounts.isEmpty else { return }
-            accounts[0].library = newValue
-            saveAccounts()
-            WatchSyncService.shared.sendServerAccount()
-        }
+        set { if let primary { setLibrary(newValue, for: primary.id) } }
+    }
+
+    func setLibrary(_ library: String?, for accountID: String) {
+        guard let index = accounts.firstIndex(where: { $0.id == accountID }), accounts[index].library != library else { return }
+        accounts[index].library = library
+        saveAccounts()
+        WatchSyncService.shared.sendServerAccount()
+    }
+
+    func setShowsInLibrary(_ shows: Bool, for accountID: String) {
+        guard let index = accounts.firstIndex(where: { $0.id == accountID }) else { return }
+        accounts[index].showsInLibrary = shows
+        saveAccounts()
+    }
+
+    func account(id: String?) -> AudiobookShelfAccount? {
+        id.flatMap { id in accounts.first { $0.id == id } }
+    }
+
+    /// The server the browser shows.
+    var browsingAccount: AudiobookShelfAccount? { account(id: browsingAccountID) ?? primary }
+
+    /// The server an item lives on: the catalogue knows the shown ones, the records the linked
+    /// ones, and the browser the one it shows; the first server otherwise.
+    func account(forItem itemID: String) -> AudiobookShelfAccount? {
+        account(id: AudiobookShelfCatalog.shared.serverID(forItem: itemID) ?? itemServers[itemID]) ?? browsingAccount
+    }
+
+    /// The server a series or collection lives on, the same way.
+    func account(forGroup groupID: String) -> AudiobookShelfAccount? {
+        account(id: AudiobookShelfCatalog.shared.serverID(forGroup: groupID)) ?? browsingAccount
+    }
+
+    /// Where to ask about an item, and with what token.
+    func session(forItem itemID: String) -> (server: URL, token: String)? {
+        account(forItem: itemID).flatMap { account in token(for: account).map { (account.server, $0) } }
+    }
+
+    func session(for account: AudiobookShelfAccount?) -> (server: URL, token: String)? {
+        account.flatMap { account in token(for: account).map { (account.server, $0) } }
     }
 
     /// Signs in, adding the server or refreshing its token when it is already known.
@@ -80,9 +116,11 @@ extension AudiobookShelfService {
         accounts.removeAll { $0.id == account.id }
         tokens[account.id] = nil
         saveAccounts()
+        if browsingAccountID == account.id { browsingAccountID = nil }
         WatchSyncService.shared.sendServerAccount()
-        AudiobookShelfCatalog.shared.forget()
-        AudiobookShelfImages.forget()
+        AudiobookShelfCatalog.shared.forget(account.id)
+        // Covers are cached by item, not by server: keep them while another server is in.
+        if accounts.isEmpty { AudiobookShelfImages.forget() }
     }
 
     /// Writes the accounts, and mirrors the first into the single-account keys for devices on an
@@ -103,6 +141,17 @@ extension AudiobookShelfService {
 
 // MARK: - Which server an item lives on
 extension AudiobookShelfService {
+    /// Server ids by item, from the records. Memoised per `linksVersion`, like `libraryBooks`.
+    var itemServers: [String: String] {
+        let version = linksVersion
+        if let cached = itemServersCache, cached.version == version { return cached.servers }
+        guard SwiftDataController.shared.isLoaded else { return [:] }
+        let records = (try? SwiftDataController.shared.context.fetch(FetchDescriptor<AudiobookShelfItemServerModel>())) ?? []
+        let servers = Dictionary(records.map { ($0.itemID, $0.serverID) }) { first, _ in first }
+        itemServersCache = (version, servers)
+        return servers
+    }
+
     /// Links a Library audiobook to a server item and records the item's server. Saving is the
     /// caller's.
     static func insertLink(audiobookID: UUID, itemID: String, serverID: String?, context: ModelContext) {
@@ -128,5 +177,6 @@ extension AudiobookShelfService {
             context.insert(AudiobookShelfItemServerModel(itemID: item, serverID: primary.id))
         }
         SwiftDataController.shared.save()
+        linksDidChange()
     }
 }

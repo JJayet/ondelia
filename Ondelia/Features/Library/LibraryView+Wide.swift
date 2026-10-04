@@ -84,6 +84,7 @@ extension LibraryView {
                 LazyHStack(spacing: 14) {
                     ForEach(collectionGroups) { group in
                         CollectionTileView(group: group) { collectionForDetail = group.collection }
+                            .contextMenu { collectionMenu(group) }
                     }
                     ForEach(displayOnlyServerCollections) { AudiobookShelfSeriesTile(series: $0) }
                     ForEach(shownServerSeries) { AudiobookShelfSeriesTile(series: $0) }

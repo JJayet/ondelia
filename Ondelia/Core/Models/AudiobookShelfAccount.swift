@@ -23,6 +23,12 @@ struct AudiobookShelfAccount: Codable, Hashable, Identifiable, Sendable {
 
     var tokenKey: String { "audiobookshelf.token.\(id)" }
 
+    /// "nas.local:13378", the way the listener tells their servers apart.
+    var displayName: String {
+        let host = server.host() ?? server.absoluteString
+        return server.port.map { "\(host):\($0)" } ?? host
+    }
+
     /// A UUID-shaped hash of the normalised server and the username. Scheme and host compare
     /// without case, a default port counts as none, a trailing slash is dropped.
     static func id(server: URL, username: String) -> String {

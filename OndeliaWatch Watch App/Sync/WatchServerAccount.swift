@@ -1,47 +1,104 @@
 import Foundation
 import SwiftData
 
-/// The AudiobookShelf sign-in the phone handed over, and what the watch does with it: stream a
-/// linked book, and make a book of a server audiobook the listener starts here.
+/// The AudiobookShelf sign-ins the phone handed over, and what the watch does with them: stream
+/// a linked book from its server, and make a book of a server audiobook the listener starts here.
 ///
-/// The token sits in this device's keychain; the server and the server library are not secrets.
+/// Tokens sit in this device's keychain; servers and server libraries are not secrets.
 @MainActor
 @Observable
 final class WatchServerAccount {
     static let shared = WatchServerAccount()
 
     private enum Keys {
+        static let accounts = "audiobookshelf.watch.accounts"
+        static let browsing = "audiobookshelf.watch.browsing"
+        /// Before several servers.
         static let server = "audiobookshelf.server"
         static let library = "audiobookshelf.library"
-        /// Not the phone's key: that item can reach this keychain through iCloud Keychain, and
-        /// clearing it here would sign every device out.
+        /// Not the phone's keys: those items can reach this keychain through iCloud Keychain, and
+        /// clearing them here would sign every device out.
         static let token = "watch.audiobookshelf.token"
+        static func token(_ key: String) -> String { "watch.audiobookshelf.token.\(key)" }
     }
 
-    private(set) var server: URL?
-    private(set) var token: String?
-    /// The server library the phone has selected, the only one the watch browses.
-    private(set) var library: String?
+    /// What is kept in defaults: everything but the token.
+    private struct Stored: Codable {
+        let id: String?
+        let server: URL
+        let library: String?
+    }
+
+    private(set) var accounts: [ServerAccount] = []
+    /// The server the Server screen browses; nil: the first.
+    var browsingKey: String? {
+        didSet { UserDefaults.standard.set(browsingKey, forKey: Keys.browsing) }
+    }
     /// Items being made into books, so a second tap does not make a twin.
     private var joining: Set<String> = []
 
-    var isSignedIn: Bool { server != nil && token != nil }
-    var canBrowse: Bool { isSignedIn && library != nil }
+    var browsing: ServerAccount? { accounts.first { Self.key($0) == browsingKey } ?? accounts.first }
+    var server: URL? { browsing?.server }
+    var token: String? { browsing?.token }
+    /// The server library the phone has selected on the browsed server.
+    var library: String? { browsing?.library }
+
+    var isSignedIn: Bool { !accounts.isEmpty }
+    var canBrowse: Bool { browsing?.library != nil }
+
+    /// The phone's id, or the address for an account from a phone build before several servers.
+    static func key(_ account: ServerAccount) -> String { account.id ?? account.server.absoluteString }
 
     private init() {
-        server = UserDefaults.standard.url(forKey: Keys.server)
-        library = UserDefaults.standard.string(forKey: Keys.library)
-        token = Keychain.get(Keys.token)
+        browsingKey = UserDefaults.standard.string(forKey: Keys.browsing)
+        if let data = UserDefaults.standard.data(forKey: Keys.accounts),
+           let stored = try? JSONDecoder().decode([Stored].self, from: data) {
+            accounts = stored.compactMap { entry in
+                let key = entry.id ?? entry.server.absoluteString
+                return Keychain.get(Keys.token(key)).map { ServerAccount(id: entry.id, server: entry.server, token: $0, library: entry.library) }
+            }
+        } else if let server = UserDefaults.standard.url(forKey: Keys.server), let token = Keychain.get(Keys.token) {
+            accounts = [ServerAccount(server: server, token: token, library: UserDefaults.standard.string(forKey: Keys.library))]
+        }
     }
 
-    /// What the phone sent; nil signs the watch out.
+    /// What the phone sent; empty signs the watch out.
+    func apply(_ next: [ServerAccount]) {
+        let kept = Set(next.map(Self.key))
+        for account in accounts where !kept.contains(Self.key(account)) {
+            Keychain.set(nil, for: Keys.token(Self.key(account)))
+        }
+        Keychain.set(nil, for: Keys.token)
+        for account in next { Keychain.set(account.token, for: Keys.token(Self.key(account))) }
+        let stored = next.map { Stored(id: $0.id, server: $0.server, library: $0.library) }
+        UserDefaults.standard.set(try? JSONEncoder().encode(stored), forKey: Keys.accounts)
+        accounts = next
+    }
+
+    /// From a phone build before several servers: one account or none.
     func apply(_ account: ServerAccount?) {
-        Keychain.set(account?.token, for: Keys.token)
-        UserDefaults.standard.set(account?.server, forKey: Keys.server)
-        UserDefaults.standard.set(account?.library, forKey: Keys.library)
-        server = account?.server
-        token = account?.token
-        library = account?.library
+        // A phone that sends the list sends this too, for older watches: the list wins.
+        guard accounts.allSatisfy({ $0.id == nil }) else { return }
+        apply(account.map { [$0] } ?? [])
+    }
+
+    /// The server an item lives on: the one the phone said, or the browsed one.
+    func account(forItem itemID: String) -> ServerAccount? {
+        var records = FetchDescriptor<AudiobookShelfItemServerModel>(predicate: #Predicate { $0.itemID == itemID })
+        records.fetchLimit = 1
+        let serverID = (try? context.fetch(records))?.first?.serverID
+        return accounts.first { $0.id != nil && $0.id == serverID } ?? browsing
+    }
+
+    func recordServer(_ serverID: String?, of itemID: String) {
+        guard let serverID else { return }
+        var records = FetchDescriptor<AudiobookShelfItemServerModel>(predicate: #Predicate { $0.itemID == itemID })
+        records.fetchLimit = 1
+        if let existing = (try? context.fetch(records))?.first {
+            existing.serverID = serverID
+        } else {
+            context.insert(AudiobookShelfItemServerModel(itemID: itemID, serverID: serverID))
+        }
     }
 
     // MARK: - Links
@@ -79,12 +136,14 @@ final class WatchServerAccount {
     // MARK: - Streaming
 
     func canStream(_ book: AudiobookModel) -> Bool {
-        isSignedIn && itemID(for: book) != nil
+        guard let item = itemID(for: book) else { return false }
+        return account(forItem: item) != nil
     }
 
     /// The book's timeline on the server, nil when it cannot be streamed right now.
     func streamTracks(for book: AudiobookModel) async -> [AudiobookTrack]? {
-        guard let server, let token, let item = itemID(for: book) else { return nil }
+        guard let item = itemID(for: book), let account = account(forItem: item) else { return nil }
+        let (server, token) = (account.server, account.token)
         do {
             let playback = try await AudiobookShelfAPI.playbackItem(server: server, token: token, item: item)
             let headers = ["Authorization": "Bearer \(token)"]
@@ -106,7 +165,8 @@ final class WatchServerAccount {
     /// about, so it joins the Library under the same id.
     func join(_ item: AudiobookShelfAPI.Item) async throws -> AudiobookModel? {
         if let existing = book(forItem: item.id) { return existing }
-        guard let server, let token else { throw AudiobookShelfAPI.Failure.http(401) }
+        guard let account = browsing else { throw AudiobookShelfAPI.Failure.http(401) }
+        let (server, token) = (account.server, account.token)
         guard !joining.contains(item.id) else { return nil }
         joining.insert(item.id)
         defer { joining.remove(item.id) }
@@ -134,9 +194,10 @@ final class WatchServerAccount {
             return row
         }
         context.insert(AudiobookShelfLinkModel(audiobookID: book.id, itemID: item.id))
+        recordServer(account.id, of: item.id)
         WatchLibraryStore.save()
         PhoneSyncService.shared.bookOrder.insert(book.id, at: 0)
-        PhoneSyncService.shared.send(SyncEvent.joined(bookID: book.id, itemID: item.id))
+        PhoneSyncService.shared.send(SyncEvent.joined(bookID: book.id, itemID: item.id, serverID: account.id))
         return book
     }
 }

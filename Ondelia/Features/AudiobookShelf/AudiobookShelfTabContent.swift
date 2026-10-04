@@ -7,7 +7,7 @@ struct AudiobookShelfTabContent: View {
     let library: String
 
     private var hidden: AudiobookShelfHidden { .shared }
-    private var serverID: String? { AudiobookShelfService.shared.primary?.id }
+    private var serverID: String? { AudiobookShelfService.shared.browsingAccount?.id }
 
     /// Hidden entries are left out, so the last one shown asks for the next page rather than
     /// the pager's last, which may be hidden.
@@ -125,7 +125,8 @@ struct AudiobookShelfAuthorRow: View {
         .task(id: author.id) {
             // Most authors have no portrait; asking only for those that do saves a 404 each.
             guard author.imagePath != nil else { return }
-            image = await AudiobookShelfImages.load(key: cacheKey) { server, token in
+            let service = AudiobookShelfService.shared
+            image = await AudiobookShelfImages.load(key: cacheKey, session: service.session(for: service.browsingAccount)) { server, token in
                 AudiobookShelfAPI.authorImageRequest(server: server, token: token, author: author.id)
             }
         }
@@ -150,7 +151,7 @@ struct AudiobookShelfSearchResultsView: View {
 
     /// Without what the listener hid.
     private var results: AudiobookShelfAPI.SearchResults {
-        AudiobookShelfHidden.shared.filter(found, on: AudiobookShelfService.shared.primary?.id)
+        AudiobookShelfHidden.shared.filter(found, on: AudiobookShelfService.shared.browsingAccount?.id)
     }
 
     var body: some View {

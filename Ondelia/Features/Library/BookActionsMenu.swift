@@ -107,7 +107,13 @@ struct BookActionsMenu: View {
             Button(role: .destructive) {
                 actions.delete(audiobook)
             } label: {
-                Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
+                // Beside Remove Download, plain "Delete" reads like the same thing: this one also
+                // drops the entry, its position and bookmarks.
+                if item != nil {
+                    Label(NSLocalizedString("Delete from Library", comment: "Delete a downloaded server audiobook's entry, not only its audio"), systemImage: "trash")
+                } else {
+                    Label(NSLocalizedString("Delete", comment: "Delete button"), systemImage: "trash")
+                }
             }
             // The destructive role reddens the title; the glyph still follows the app accent.
             .tint(.red)

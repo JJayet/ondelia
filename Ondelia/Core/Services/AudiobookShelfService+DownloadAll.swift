@@ -12,7 +12,13 @@ extension AudiobookShelfService {
     /// device, downloading or importing. Each is imported when its download finishes, one at a
     /// time through the import queue, so they arrive in download order rather than series order.
     func downloadAll(_ group: DownloadGroup, library: String) async {
-        guard let server, let token else { return }
+        var account = browsingAccount
+        var library = library
+        if case .series(let series) = group, let owner = self.account(forGroup: series.id) {
+            account = owner
+            library = AudiobookShelfCatalog.shared.library(of: owner.id) ?? library
+        }
+        guard let (server, token) = session(for: account) else { return }
         do {
             let items = switch group {
             case .series(let group) where group.isServerCollection:

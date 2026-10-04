@@ -22,14 +22,13 @@ extension AudiobookManager {
     /// Collection with its last member (`removeFromAllCollections`).
     func reconcileServerSeriesCollections() {
         let catalog = AudiobookShelfCatalog.shared
-        guard swiftDataController.isLoaded, catalog.isActive, catalog.status == .ready else { return }
+        guard swiftDataController.isLoaded, catalog.isActive, catalog.isReady else { return }
         mergeDuplicateSeriesCollections()
         let linked = AudiobookShelfService.shared.libraryBooks
         migrateDeclinedServerSeries()
         let declined = declinedServerSeries
-        let hidden = AudiobookShelfHidden.shared
         var changed = false
-        for series in catalog.groups where !hidden.isHidden(series.hiddenKind, series.id, on: catalog.serverID) {
+        for series in catalog.groups where !catalog.isHidden(series) {
             let id = AudiobookShelfCatalog.collectionID(for: series)
             let members = (series.books ?? []).compactMap { linked[$0.id]?.id }
             guard !members.isEmpty else { continue }
@@ -53,12 +52,11 @@ extension AudiobookManager {
     /// catalogue says which series each id stands for.
     private func migrateDeclinedServerSeries() {
         let catalog = AudiobookShelfCatalog.shared
-        guard let serverID = catalog.serverID else { return }
         var declined = declinedServerSeries
         guard !declined.isEmpty else { return }
         for series in catalog.series {
             let id = AudiobookShelfCatalog.collectionID(forSeries: series.id).uuidString
-            guard declined.remove(id) != nil else { continue }
+            guard let serverID = catalog.serverID(forGroup: series.id), declined.remove(id) != nil else { continue }
             AudiobookShelfHidden.shared.hide(.series, series.id, name: series.name, on: serverID)
         }
         declinedServerSeries = declined

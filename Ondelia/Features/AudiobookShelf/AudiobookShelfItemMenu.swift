@@ -53,7 +53,7 @@ struct AudiobookShelfItemMenu: View {
                 Label(NSLocalizedString("Stream", comment: "AudiobookShelf: stream item button"), systemImage: "play.circle")
             }
         }
-        if !isOnDevice, let serverID = AudiobookShelfCatalog.shared.serverID {
+        if !isOnDevice, let serverID = service.account(forItem: item.id)?.id {
             Divider()
             Button(role: .destructive) {
                 AudiobookShelfHidden.shared.hide(.book, item.id, name: item.title, on: serverID)

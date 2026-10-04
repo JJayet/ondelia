@@ -112,7 +112,10 @@ struct AudiobookShelfSeriesView: View {
             return
         }
         let service = AudiobookShelfService.shared
-        guard let server = service.server, let token = service.token else { return }
+        let account = service.account(forGroup: series.id)
+        guard let (server, token) = service.session(for: account) else { return }
+        // The series' own server library: the one passed in is the browser's.
+        let library = account.flatMap { AudiobookShelfCatalog.shared.library(of: $0.id) } ?? library
         do {
             books = try await AudiobookShelfAPI.seriesItems(server: server, token: token, library: library, series: series.id)
         } catch {
@@ -146,7 +149,7 @@ struct AudiobookShelfAuthorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .task {
                 let service = AudiobookShelfService.shared
-                guard books == nil, let server = service.server, let token = service.token else { return }
+                guard books == nil, let (server, token) = service.session(for: service.browsingAccount) else { return }
                 do {
                     books = try await AudiobookShelfAPI.authorItems(
                         server: server, token: token, library: library, author: author.id

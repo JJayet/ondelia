@@ -16,6 +16,16 @@ struct WatchServerBrowseView: View {
 
     var body: some View {
         List {
+            if account.accounts.count > 1 {
+                Picker(String(localized: "Server"), selection: Binding(
+                    get: { account.browsing.map(WatchServerAccount.key) ?? "" },
+                    set: { account.browsingKey = $0 }
+                )) {
+                    ForEach(account.accounts, id: \.server) { server in
+                        Text(server.server.host() ?? server.server.absoluteString).tag(WatchServerAccount.key(server))
+                    }
+                }
+            }
             ForEach(results ?? items) { item in
                 Button {
                     Task { await open(item) }
@@ -36,7 +46,13 @@ struct WatchServerBrowseView: View {
         }
         .navigationTitle(Text(String(localized: "Server")))
         .searchable(text: $query)
-        .task { await loadPage() }
+        .task(id: account.browsingKey) {
+            // Another server: start its list over.
+            items = []
+            total = nil
+            results = nil
+            await loadPage()
+        }
         .task(id: query) { await search() }
         .navigationDestination(item: $opened) { WatchPlayerView(book: $0) }
     }

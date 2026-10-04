@@ -8,13 +8,15 @@ extension WatchSyncService {
     /// activation and whenever the account or the selected server library changes.
     func sendServerAccount() {
         let shelf = AudiobookShelfService.shared
-        let account = shelf.server.flatMap { server in
-            shelf.token.map { ServerAccount(server: server, token: $0, library: shelf.selectedLibrary) }
+        let accounts = shelf.accounts.compactMap { account in
+            shelf.token(for: account).map { ServerAccount(id: account.id, server: account.server, token: $0, library: account.library) }
         }
-        // Every foreground reloads the account; only a change is worth a transfer.
-        guard session?.activationState == .activated, sentServerAccount != .some(account) else { return }
-        sentServerAccount = .some(account)
-        send(.serverAccount(account))
+        // Every foreground reloads the accounts; only a change is worth a transfer.
+        guard session?.activationState == .activated, sentServerAccounts != accounts else { return }
+        sentServerAccounts = accounts
+        send(.serverAccounts(accounts))
+        // A watch on an older build understands only the first.
+        send(.serverAccount(accounts.first))
     }
 
     /// Watch book ids that turned out to be a book the Library already held, mapped to it.
@@ -35,8 +37,13 @@ extension WatchSyncService {
     /// The watch streamed a server audiobook under an id it made up: the audiobook joins the
     /// Library under that id, or, when the Library already links the item, the id becomes an
     /// alias of that book. The watch's events for it wait until either is done.
-    func watchJoined(bookID: UUID, itemID: String) {
+    func watchJoined(bookID: UUID, itemID: String, serverID: String?) {
         let shelf = AudiobookShelfService.shared
+        // Where to fetch it from: the watch browsed that server.
+        if let serverID {
+            AudiobookShelfService.recordServer(serverID, of: itemID, context: SwiftDataController.shared.context)
+            shelf.linksDidChange()
+        }
         if let existing = shelf.libraryBooks[itemID] {
             if existing.id != bookID { addAlias(from: bookID, to: existing.id) }
             pushSnapshot()
@@ -70,7 +77,7 @@ extension SyncEvent {
              let .chapterRequested(bookID, _), let .chapterDeleted(bookID, _), let .bookCleared(bookID),
              let .watchInventory(bookID, _), let .transferProgress(bookID, _, _):
             return bookID
-        case .pauseOtherSide, .serverAccount, .joined:
+        case .pauseOtherSide, .serverAccount, .serverAccounts, .joined:
             return nil
         }
     }

@@ -139,4 +139,22 @@ struct SyncModelsTests {
         #expect(TransferMetadata(dictionary: [:]) == nil)
         #expect(TransferMetadata(dictionary: [SyncKeys.metadata: "not data"]) == nil)
     }
+
+    @Test("Several servers: the list round-trips, and a join from an older watch still decodes")
+    func severalServers() throws {
+        let accounts = [
+            ServerAccount(id: "a", server: try #require(URL(string: "http://nas:13378")), token: "t1", library: "lib"),
+            ServerAccount(id: "b", server: try #require(URL(string: "https://abs.example.com")), token: "t2", library: nil)
+        ]
+        #expect(try roundTrip(SyncEvent.serverAccounts(accounts)) == .serverAccounts(accounts))
+        let join = SyncEvent.joined(bookID: UUID(), itemID: "li_a", serverID: "b")
+        #expect(try roundTrip(join) == join)
+
+        // What a watch before several servers sends: no server.
+        let older = SyncEvent.joined(bookID: UUID(), itemID: "li_a")
+        let data = try SyncCodec.encode(older)
+        #expect(try SyncCodec.decode(SyncEvent.self, from: data) == older)
+        let legacy = try JSONSerialization.jsonObject(with: data)
+        #expect(String(describing: legacy).contains("serverID") == false)
+    }
 }

@@ -108,10 +108,11 @@ struct AudiobookShelfHiddenView: View {
         let catalog = AudiobookShelfCatalog.shared
         let server = account.server
         do {
-            var items = catalog.items
-            var series = catalog.series
-            var collections = catalog.collections
-            if catalog.serverID != account.id || catalog.library != library || items.isEmpty {
+            let part = catalog.parts[account.id]
+            var items = part?.items ?? []
+            var series = part?.series ?? []
+            var collections = part?.collections ?? []
+            if part?.library != library || items.isEmpty {
                 async let fetchedItems = AudiobookShelfAPI.allItems(server: server, token: token, library: library)
                 async let fetchedSeries = AudiobookShelfAPI.allSeries(server: server, token: token, library: library)
                 async let fetchedCollections = try? AudiobookShelfAPI.collections(server: server, token: token, library: library)

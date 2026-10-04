@@ -22,6 +22,8 @@ extension PhoneSyncService {
             WatchAudioManager.shared.pause()
         case let .serverAccount(account):
             WatchServerAccount.shared.apply(account)
+        case let .serverAccounts(accounts):
+            WatchServerAccount.shared.apply(accounts)
         case .bookmarkAdded, .chapterRequested, .chapterDeleted, .watchInventory, .listened, .joined:
             // Sent by the watch, never to it.
             break

@@ -35,7 +35,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
     /// Events about a book the watch made while streaming, held until the Library entry exists.
     var joinBuffers: [UUID: [SyncEvent]] = [:]
     /// The sign-in last handed to the watch this launch; `.some(nil)` is a sign-out.
-    var sentServerAccount: ServerAccount??
+    var sentServerAccounts: [ServerAccount]?
 
     private override init() { super.init() }
 

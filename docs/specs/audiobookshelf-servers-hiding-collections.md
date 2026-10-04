@@ -1,6 +1,6 @@
 # Spec: several servers, hiding, server collections, Collections screen
 
-Status: draft · 2026-10-04
+Status: implemented except the Collections screen (#28) · 2026-10-04. Issue #29.
 
 ## Decisions taken
 
@@ -75,7 +75,7 @@ Duplicates (two devices hide the same thing) are harmless; unhide deletes every 
 
 | Kind | Effect |
 |---|---|
-| Book | Gone from the Library blend and Search. In server series/collection detail it shows as a greyed "Hidden" row, so series order stays readable. |
+| Book | Gone from the Library blend, Search and the AudiobookShelf browser. Opening a server series still lists it: that screen shows the series as the server has it. |
 | Series | Gone from Collections. Its books stay unless hidden themselves. |
 | Collection | Gone from Collections (Phase 3). |
 | Author | Gone from the Authors browse list and Search, and **all their books are hidden** too. |
@@ -135,8 +135,9 @@ way into the Library, not a separate place. Revisit if usage says otherwise.
 - Treated like a server series (ADR 0002): drawn from the catalogue, stored as a Collection
   only once the Library holds one of its audiobooks. Id:
   `collectionID(forServerCollection:)` hashing `"audiobookshelf-collection:<id>"`.
-- Read-only: order is the server's; no reorder, add or remove in Ondelia. The detail shows
-  "Edited on the server". Auto-continue works as for server series.
+- Not written back: members are the server's. Once stored as a Collection it behaves like a
+  stored server series (the listener's order, new members on the end). Auto-continue works.
+- Listed unfolded, above the folded server series: a server has few, chosen by hand.
 - Playlists: out of scope.
 
 Tests: decoding, id derivation, read-only actions hidden.

@@ -34,9 +34,9 @@ extension WatchSyncService {
         case .pauseOtherSide:
             guard GlobalAudioManager.shared.isPlaying() else { return }
             GlobalAudioManager.shared.pausePlayback()
-        case let .joined(bookID, itemID):
-            watchJoined(bookID: bookID, itemID: itemID)
-        case .serverAccount:
+        case let .joined(bookID, itemID, serverID):
+            watchJoined(bookID: bookID, itemID: itemID, serverID: serverID)
+        case .serverAccount, .serverAccounts:
             // Sent by the phone, never to it.
             break
         }
