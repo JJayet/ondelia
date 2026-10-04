@@ -21,6 +21,7 @@ OndeliaTests/Core/Services/CollectionGroupTests.swift
 Ondelia/Resources/Localizable.xcstrings
   s_670286740487a4::t_0891da46243ca5 1514,1877-1883
   s_670286740487a4::t_083991ddb94eb5 342-352,1436,1457-1467,1490-1513,1515-1557,1884-1887,3110-3131,3559-3569,3922,4079-4089,4468-4478,4545-4555,4633-4654,4712,5060-5070,5873-5883
+  s_670286740487a4::t_c4865679512776 156,2100
 Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesTile.swift
   s_670286740487a4::t_cff6a5af14131d 7,36
 Ondelia/Features/Library/LibraryView+Server.swift
