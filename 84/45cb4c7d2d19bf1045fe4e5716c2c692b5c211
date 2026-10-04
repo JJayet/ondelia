@@ -1,0 +1,110 @@
+Ondelia/Core/Services/Watch/WatchSyncService.swift
+  s_f1b944226b38e1::t_4d0ea579ff8d46 38
+Ondelia/Features/AudiobookShelf/AudiobookShelfServerView.swift
+  s_f1b944226b38e1::t_fc77dc75b58686 64-69
+  s_f1b944226b38e1::t_93647777d0eab4 1-63,70-98
+Ondelia/Core/Services/Watch/WatchSyncService+Server.swift
+  s_f1b944226b38e1::t_4d0ea579ff8d46 11-12,14-19,40,42-46,80
+OndeliaTests/Core/Services/Watch/SyncModelsTests.swift
+  s_f1b944226b38e1::t_408fb912ed9eb6 142-159
+"OndeliaWatch Watch App/Views/WatchServerBrowseView.swift"
+  s_f1b944226b38e1::t_e96c7f2d77ce75 19-28,49-55
+Ondelia/Core/Services/AudiobookShelfService+Progress.swift
+  s_f1b944226b38e1::t_f129babe15b894 36,67
+Ondelia/Core/Services/AudiobookShelfService+DownloadAll.swift
+  s_f1b944226b38e1::t_7fc1905808439f 15-21
+Ondelia/Core/Managers/AudiobookManager+Collections.swift
+  s_f1b944226b38e1::t_6fe1daaf38d9ec 203
+Ondelia/Features/AudiobookShelf/AudiobookShelfLinkPickerView.swift
+  s_f1b944226b38e1::t_f129babe15b894 64
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Snapshot.swift"
+  s_f1b944226b38e1::t_3dfbe0e2bb8afd 23
+Ondelia/Features/AudiobookShelf/AudiobookShelfShelfView.swift
+  s_f1b944226b38e1::t_e6304fa30aa62c 58-65,68,102,126-146,148,151,169,184,187
+Ondelia.xcodeproj/project.pbxproj
+  s_f1b944226b38e1::t_42f4d1558c09fc 141
+CONTEXT.md
+  s_f1b944226b38e1::t_3af8a5c5380ade 17-20,26,34,37-44,154
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Events.swift"
+  s_f1b944226b38e1::t_3dfbe0e2bb8afd 25-26
+docs/adr/0002-server-audiobooks-shown-not-joined.md
+  s_f1b944226b38e1::t_3af8a5c5380ade 3
+Ondelia/Features/Library/BookActionsMenu.swift
+  s_f1b944226b38e1::t_1ebc6a6a615338 110-116
+Ondelia/Core/Models/AudiobookShelfAccount.swift
+  s_f1b944226b38e1::t_e6304fa30aa62c 26-31
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_f1b944226b38e1::t_f031b5b1c429f5 41,82,84-86,88-93
+  s_f1b944226b38e1::t_c037d0ab395f26 3,12-13,15-16,25,27-40,42-43,46,48,50
+Ondelia/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_f1b944226b38e1::t_4d0ea579ff8d46 37-39
+Ondelia/Shared/WatchSync/SyncModels.swift
+  s_f1b944226b38e1::t_7349d5fd903e3b 47-49,62-63,76,140-141,143-147,153-154
+Ondelia/Core/Services/AudiobookShelfService+Streaming.swift
+  s_f1b944226b38e1::t_f129babe15b894 19-20,22-23,36,90,120
+Ondelia/Features/AudiobookShelf/AudiobookShelfTabContent.swift
+  s_f1b944226b38e1::t_0ab469c7ba48c0 10,128-129,154
+Ondelia/Core/Services/AudiobookShelfCatalog+Sorted.swift
+  s_f1b944226b38e1::t_3ccbf8962e2657 1-35
+Ondelia/Features/AudiobookShelf/AudiobookShelfSignInSections.swift
+  s_f1b944226b38e1::t_f4882c8a8f37c0 1-101
+Ondelia/Core/Services/AudiobookShelfService+Accounts.swift
+  s_f1b944226b38e1::t_5c82f83f1a26dc 53-93,144-154,180
+  s_f1b944226b38e1::t_f031b5b1c429f5 46-47,119,121-123
+Ondelia/Resources/Localizable.xcstrings
+  s_f1b944226b38e1::t_ac539411a36bd5 4-5,7-8,13,29-31,33-34,39,707-717,1433-1443,1620-1630,1829-1839,1851-1861,1984-1994,2006-2016,2061-2078,2265-2331,2666-2687,3280-3290,3411-3421,3433-3434,3439,3740-3761,4025-4035,4529-4561,4614,4635-4645,4657-4667,5009-5030,5075-5085,5252-5273,5526-5536,5767-5777,5879
+  s_f1b944226b38e1::t_1ebc6a6a615338 18-19,24
+Ondelia/Core/Services/AudiobookShelfCatalog+Filters.swift
+  s_f1b944226b38e1::t_02588781136d6b 1-52
+docs/adr/0004-several-servers-blended.md
+  s_f1b944226b38e1::t_3af8a5c5380ade 1-19
+Ondelia/Features/AudiobookShelf/AudiobookShelfHiddenView.swift
+  s_f1b944226b38e1::t_0c7d8bfb544b43 111-115
+"OndeliaWatch Watch App/Sync/WatchServerAccount.swift"
+  s_f1b944226b38e1::t_3dfbe0e2bb8afd 4-5,7,14-16,19-20,22,25-36,40-50,53-62,65-78,80-101,139-140,145-146,168-169,197,200
+Ondelia/Core/Services/AudiobookShelfCatalog.swift
+  s_f1b944226b38e1::t_d3950adf9c1fb0 5-11,24-39,41,45-51,58,60-62,64-67,70-72,74-76,78-79,81-82,84-91,93,95-98,100-102,104-114,116-123,125,128-131,133,138-139,142-143,145,148,153-154,158-161,165-184,187-193,196-203,206-210,213-215,218-221,223,227-232,235-247
+docs/specs/audiobookshelf-servers-hiding-collections.md
+  s_f1b944226b38e1::t_71a3c29e7122c6 3,78,138-140
+Ondelia/Features/Library/LibraryView.swift
+  s_f1b944226b38e1::t_7fc1905808439f 188
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_f1b944226b38e1::t_7257c0cfc11d68 87
+Ondelia/Core/Managers/AudiobookManager+ServerSeries.swift
+  s_f1b944226b38e1::t_6fe1daaf38d9ec 25,31,59
+Ondelia/Features/Library/LibraryView+Server.swift
+  s_f1b944226b38e1::t_62daf2c9e97909 98-99,102-103
+Ondelia/Features/Library/LibraryView+Collections.swift
+  s_f1b944226b38e1::t_7257c0cfc11d68 7-49
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesViews.swift
+  s_f1b944226b38e1::t_5f4c47e7ea66af 152
+  s_f1b944226b38e1::t_7fc1905808439f 115-118
+Ondelia/Features/AudiobookShelf/AudiobookShelfItemMenu.swift
+  s_f1b944226b38e1::t_6fe1daaf38d9ec 56
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_f1b944226b38e1::t_5c82f83f1a26dc 211,236-239
+  s_f1b944226b38e1::t_f129babe15b894 117,186
+Ondelia/Features/AudiobookShelf/AudiobookShelfBookTile.swift
+  s_f1b944226b38e1::t_786326e3e37b7b 236,260-265,275
+  s_f1b944226b38e1::t_6fe1daaf38d9ec 35-43,55
+Ondelia/Core/Services/Watch/WatchSyncService+Snapshot.swift
+  s_f1b944226b38e1::t_4d0ea579ff8d46 96-97
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_f1b944226b38e1::t_efc3747cc126e9 59,61
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "8445cb4c7d2d19bf1045fe4e5716c2c692b5c211",
+  "prompts": {},
+  "sessions": {
+    "s_f1b944226b38e1": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "3aa31729-5caf-4227-b5aa-3fa096e389cc",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
