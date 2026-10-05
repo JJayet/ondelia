@@ -41,7 +41,7 @@ struct HardcoverSettingsView: View {
             Section {
                 Toggle(isOn: $autoMatch) {
                     Label(
-                        NSLocalizedString("Match Imported Books", comment: "Hardcover auto-match toggle"),
+                        NSLocalizedString("Match New Books", comment: "Hardcover auto-match toggle"),
                         systemImage: "wand.and.sparkles"
                     )
                     .foregroundStyle(Color.primaryText)
@@ -58,7 +58,7 @@ struct HardcoverSettingsView: View {
                 Text(NSLocalizedString("Automation", comment: "Hardcover settings section: automation"))
             } footer: {
                 Text(NSLocalizedString(
-                    "Imported books are matched to their closest Hardcover result. A book that matches the same result as another book in the same import is left unmatched.",
+                    "Imported books, and server books as they join your Library, are matched to their closest Hardcover result. A book that matches the same result as another book in the same import is left unmatched.",
                     comment: "Hardcover automation section footer"
                 ))
             }

@@ -63,7 +63,7 @@ extension AudiobookManager {
                 if existing.name != series.name { existing.name = series.name; changed = true }
                 let added = ordered.filter { !existing.bookIDs.contains($0) }
                 if !added.isEmpty { existing.bookIDs += added; changed = true }
-            } else if declined.contains(seriesID) {
+            } else if declined.contains(seriesID) || serverSeriesShowAll(series.books) {
                 continue
             } else if Self.autoSeriesCollections {
                 swiftDataController.context.insert(
