@@ -76,25 +76,6 @@ extension LibraryView {
     }
 
     @ViewBuilder
-    var collectionsRow: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            SectionLabel(NSLocalizedString("Collections", comment: "Section title for collections"))
-            serverSeriesToggle
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 14) {
-                    ForEach(collectionGroups) { group in
-                        CollectionTileView(group: group) { collectionForDetail = group.collection }
-                            .contextMenu { collectionMenu(group) }
-                    }
-                    ForEach(displayOnlyServerCollections) { AudiobookShelfSeriesTile(series: $0) }
-                    ForEach(shownServerSeries) { AudiobookShelfSeriesTile(series: $0) }
-                }
-            }
-            .clipped()
-        }
-    }
-
-    @ViewBuilder
     var tableModeContent: some View {
         VStack(spacing: 12) {
             LibraryHeaderView(
@@ -126,7 +107,7 @@ extension LibraryView {
                     groups: collectionGroups,
                     uncollected: uncollectedBooks,
                     server: shelfServerItems,
-                    serverSeries: displayOnlyServerCollections + displayOnlySeries,
+                    serverSeries: displayOnlyServerCollections,
                     onOpenBook: tapBook,
                     onOpenCollection: { collectionForDetail = $0.collection },
                     onOpenServer: { AudiobookShelfService.shared.play($0, local: nil) { playAndPresent($0) } }

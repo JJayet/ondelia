@@ -19,68 +19,24 @@ extension LibraryView {
         LibraryEntry.merged(shelfBooks, shelfServerItems, by: sortOption)
     }
 
-    /// Server series with no Collection of their own yet, by name: drawn from the catalogue
-    /// after the Collections, never stored (ADR 0002). One gets a Collection when one of its
-    /// books joins the Library. Only where server audiobooks themselves are listed.
-    var displayOnlySeries: [AudiobookShelfAPI.Series] {
-        guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
+    /// Server collections, then server series, with no Collection of their own yet, by name:
+    /// drawn from the catalogue, never stored (ADR 0002). One gets a Collection when one of its
+    /// books joins the Library. The Collections screen lists them all, the filter aside.
+    var serverOnlyCollections: [AudiobookShelfAPI.Series] {
         let stored = Set(audiobookManager.collections.map(\.id))
-        return catalog.seriesByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(for: $0)) }
+        return (catalog.collectionsByName + catalog.seriesByName)
+            .filter { !stored.contains(AudiobookShelfCatalog.collectionID(for: $0)) }
     }
 
-    /// Server collections with no Collection of their own yet, the same way. Not folded like the
-    /// series: a server has few, chosen by hand.
+    /// The same, as the Library's filter lets them through: only where server audiobooks
+    /// themselves are listed.
     var displayOnlyServerCollections: [AudiobookShelfAPI.Series] {
         guard !selecting, filterOption == .all || filterOption == .notStarted else { return [] }
-        let stored = Set(audiobookManager.collections.map(\.id))
-        return catalog.collectionsByName.filter { !stored.contains(AudiobookShelfCatalog.collectionID(for: $0)) }
-    }
-
-    /// The series behind the folded "Server series" row, once it is opened.
-    var shownServerSeries: [AudiobookShelfAPI.Series] { showsServerSeries ? displayOnlySeries : [] }
-
-    /// Folds the server series into one row: a server can have hundreds, which would push the
-    /// Library's own books a long scroll down. Tapping opens or closes it.
-    @ViewBuilder
-    var serverSeriesToggle: some View {
-        if !displayOnlySeries.isEmpty {
-            Button {
-                withHapticFeedback {
-                    withAnimation(.easeInOut(duration: 0.25)) { showsServerSeries.toggle() }
-                }
-            } label: {
-                HStack(spacing: 8) {
-                    Image(systemName: "books.vertical.fill")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.tint)
-                    Text(NSLocalizedString("Server series", comment: "Library: folded row of server series"))
-                        .font(.system(size: 15, weight: .semibold))
-                    Text(verbatim: "\(displayOnlySeries.count)")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 8)
-                        .frame(height: 20)
-                        .background(.quaternary, in: Capsule())
-                    Spacer(minLength: 0)
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 12, weight: .semibold))
-                        .foregroundStyle(.tertiary)
-                        .rotationEffect(.degrees(showsServerSeries ? 90 : 0))
-                }
-                .padding(.horizontal, 16)
-                .frame(height: 46)
-                .contentShape(Rectangle())
-                .glassCard(cornerRadius: 18)
-            }
-            .buttonStyle(.plain)
-            .accessibilityValue(showsServerSeries
-                ? NSLocalizedString("Expanded", comment: "Accessibility: folded row is open")
-                : NSLocalizedString("Collapsed", comment: "Accessibility: folded row is closed"))
-        }
+        return serverOnlyCollections
     }
 
     var hasCollections: Bool {
-        !collectionGroups.isEmpty || !displayOnlySeries.isEmpty || !displayOnlyServerCollections.isEmpty
+        !collectionGroups.isEmpty || !displayOnlyServerCollections.isEmpty
     }
 
     /// No book at all, of the Library's or the server's: the empty state's cue.

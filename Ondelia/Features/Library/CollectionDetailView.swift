@@ -64,9 +64,11 @@ struct CollectionDetailView: View {
         VStack(spacing: 8) {
             ZStack {
                 // First book on top, each next one a step behind it.
-                ForEach(Array(group.books.prefix(3).enumerated()), id: \.element.id) { index, book in
-                    let spread = Double(index) - Double(min(group.books.count, 3) - 1) / 2
-                    CoverArtView(audiobook: book, size: 118, cornerRadius: 18)
+                // Server books too: a server series may hold one Library book among many.
+                let covers = group.coverSources
+                ForEach(Array(covers.enumerated()), id: \.element.id) { index, source in
+                    let spread = Double(index) - Double(covers.count - 1) / 2
+                    CollectionCover(source: source, size: 118, cornerRadius: 18)
                         .rotationEffect(.degrees(spread * 12))
                         .offset(x: spread * 62, y: abs(spread) * 6)
                         .shadow(color: .black.opacity(0.35), radius: 14, y: 8)

@@ -49,7 +49,6 @@ extension AudiobookShelfService {
         pushedProgress[book.id] = next
         let (id, duration, isFinished) = (book.id, book.duration, book.isFinished)
         Task {
-            defer { pushingProgress.remove(id) }
             do {
                 try await AudiobookShelfAPI.updateProgress(
                     server: server, token: token, item: item,
@@ -58,6 +57,10 @@ extension AudiobookShelfService {
             } catch {
                 Log.library.error("AudiobookShelf: progress push failed: \(error.localizedDescription)")
             }
+            pushingProgress.remove(id)
+            // A write that came in while this one was in flight was turned away above. Paused,
+            // or marked finished, there may be no later write to carry it, so it goes now.
+            if !book.isDeleted, book.modelContext != nil { pushProgress(for: book) }
         }
     }
 

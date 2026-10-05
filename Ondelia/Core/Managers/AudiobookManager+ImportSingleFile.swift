@@ -44,7 +44,7 @@ extension AudiobookManager {
                         : metadata.duration
                     let chapter = ChapterModel(
                         title: track.title,
-                        chapterNumber: Int16(track.number),
+                        chapterNumber: Int16(clamping: track.number),
                         startTime: track.startTime,
                         endTime: endTime
                     )
@@ -143,7 +143,7 @@ extension AudiobookManager {
                 for chapterInfo in chapterInfos {
                     let chapter = ChapterModel(
                         title: chapterInfo.title,
-                        chapterNumber: Int16(chapterInfo.chapterNumber),
+                        chapterNumber: Int16(clamping: chapterInfo.chapterNumber),
                         startTime: chapterInfo.startTime,
                         endTime: chapterInfo.endTime
                     )

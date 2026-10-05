@@ -130,6 +130,7 @@ final class SwiftDataController {
             isStoredInMemoryOnly: inMemory,
             cloudKitDatabase: cloudKit
         )
+        if !inMemory { DatabaseBackupService.applyStagedRestore(storeURL: modelConfiguration.url) }
         do {
             return try ModelContainer(
                 for: schema,

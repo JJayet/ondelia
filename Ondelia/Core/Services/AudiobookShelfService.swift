@@ -87,7 +87,7 @@ final class AudiobookShelfService {
         session.getAllTasks { tasks in
             let running = tasks.compactMap { task -> (String, DownloadProgress)? in
                 guard task.state == .running || task.state == .suspended,
-                      let (id, title) = AudiobookShelfDownloader.parse(task.taskDescription)
+                      let (id, _, title) = AudiobookShelfDownloader.parse(task.taskDescription)
                 else { return nil }
                 let expected = task.countOfBytesExpectedToReceive
                 return (id, DownloadProgress(
@@ -114,11 +114,12 @@ final class AudiobookShelfService {
 
     /// `size` stands in for the length a zipped download is sent without.
     func download(id: String, title: String, author: String?, size: Int64? = nil) {
-        guard let (server, token) = session(forItem: id), downloads[id] == nil, !importing.contains(id) else { return }
+        let owner = account(forItem: id)
+        guard let (server, token) = session(for: owner), downloads[id] == nil, !importing.contains(id) else { return }
         let task = session.downloadTask(
             with: AudiobookShelfAPI.downloadRequest(server: server, token: token, item: id)
         )
-        task.taskDescription = AudiobookShelfDownloader.describe(id: id, title: title)
+        task.taskDescription = AudiobookShelfDownloader.describe(id: id, account: owner?.id, title: title)
         downloads[id] = DownloadProgress(title: title, author: author, expected: size)
         task.resume()
     }
@@ -142,11 +143,11 @@ final class AudiobookShelfService {
         downloads[id] = next
     }
 
-    func downloadFinished(id: String, result: Result<URL, any Error>) {
+    func downloadFinished(id: String, account: String? = nil, result: Result<URL, any Error>) {
         let finished = downloads.removeValue(forKey: id)
         switch result {
         case .success(let file):
-            importDownload(file, item: id, title: finished?.title, author: finished?.author)
+            importDownload(file, item: id, account: account, title: finished?.title, author: finished?.author)
         case .failure(let error as URLError) where error.code == .cancelled:
             break
         case .failure(let error):
@@ -163,11 +164,15 @@ final class AudiobookShelfService {
     ///
     /// The server's title and author replace what the files say: AudiobookShelf is where the
     /// reader curates them, and a file without tags is otherwise named after its folder.
-    private func importDownload(_ file: URL, item: String, title: String? = nil, author: String? = nil) {
+    /// `account` is the one the download was asked of; nil for a download a previous launch
+    /// kept but did not import, which falls back to the item's owner as known now.
+    private func importDownload(
+        _ file: URL, item: String, account: String? = nil, title: String? = nil, author: String? = nil
+    ) {
         let folder = file.deletingLastPathComponent()
         importing.insert(item)
         // One server item is one book: a folder of chapters merges without asking.
-        AudiobookManager.shared.handleImportRequest(urls: [file], mergesWithoutAsking: true) {
+        AudiobookManager.shared.handleImportRequest(urls: [file], mergesWithoutAsking: true) { _ in
             try? FileManager.default.removeItem(at: folder)
         } onImported: { imported in
             let context = SwiftDataController.shared.context
@@ -183,7 +188,7 @@ final class AudiobookShelfService {
             // device and after a relaunch.
             let linked = Set(Self.links().filter { $0.itemID == item }.map(\.audiobookID))
             for book in books where !linked.contains(book.id) {
-                Self.insertLink(audiobookID: book.id, itemID: item, serverID: self.account(forItem: item)?.id, context: context)
+                Self.insertLink(audiobookID: book.id, itemID: item, serverID: account ?? self.account(forItem: item)?.id, context: context)
             }
             // One book per item is the normal case. An item the importer split into several
             // books keeps their own titles rather than all taking the item's.

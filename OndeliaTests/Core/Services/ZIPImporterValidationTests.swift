@@ -13,7 +13,9 @@ struct ZIPImporterValidationTests {
         let folder = URL.temporaryDirectory.appending(path: UUID().uuidString)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)
         for (name, size) in files {
-            try Data(count: size).write(to: folder.appending(path: name))
+            let file = folder.appending(path: name)
+            try FileManager.default.createDirectory(at: file.deletingLastPathComponent(), withIntermediateDirectories: true)
+            try Data(count: size).write(to: file)
         }
         return folder
     }
@@ -32,5 +34,13 @@ struct ZIPImporterValidationTests {
         defer { for url in [cover, empty] { try? FileManager.default.removeItem(at: url) } }
         #expect(ZIPImporter.validateAudiobookContent(in: cover) == nil)
         #expect(ZIPImporter.validateAudiobookContent(in: empty) == nil)
+    }
+
+    @Test("Sibling disc folders are all kept, from the folder that wraps them")
+    func multiDisc() throws {
+        let root = try folder(["Book/Disc 1/01.mp3": 1_000, "Book/Disc 2/01.mp3": 1_000, "Book/cover.jpg": 10])
+        defer { try? FileManager.default.removeItem(at: root) }
+        let book = root.appending(path: "Book")
+        #expect(ZIPImporter.validateAudiobookContent(in: root)?.standardizedFileURL.path == book.standardizedFileURL.path)
     }
 }

@@ -140,7 +140,7 @@ extension AudiobookManager {
         for item in merged.chapters {
             let chapter = ChapterModel(
                 title: item.title,
-                chapterNumber: Int16(item.chapterNumber),
+                chapterNumber: Int16(clamping: item.chapterNumber),
                 startTime: item.startTimeInBook,
                 endTime: item.startTimeInBook + item.duration
             )

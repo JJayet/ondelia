@@ -40,4 +40,19 @@ struct CUEParserTests {
     func missingFile() {
         #expect(CUEParser.parseCUEFile(at: URL(fileURLWithPath: "/nonexistent/file.cue")) == nil)
     }
+
+    @Test("An out-of-range time does not trap")
+    func outOfRangeNumbers() throws {
+        let url = URL.temporaryDirectory.appending(path: "\(UUID().uuidString).cue")
+        defer { try? FileManager.default.removeItem(at: url) }
+        try """
+        FILE "book.mp3" MP3
+          TRACK 32768 AUDIO
+            TITLE "Huge"
+            INDEX 01 9223372036854775807:00:00
+        """.write(to: url, atomically: true, encoding: .utf8)
+        let cue = try #require(CUEParser.parseCUEFile(at: url))
+        let track = try #require(cue.tracks.first)
+        #expect(track.startTime.isFinite)
+    }
 }

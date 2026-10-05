@@ -83,7 +83,9 @@ extension WatchSyncService {
         AudiobookManager.shared.createBookmark(
             for: book,
             at: bookmark.timestamp,
-            title: bookmark.title ?? String(localized: "Bookmark")
+            title: bookmark.title ?? String(localized: "Bookmark"),
+            id: bookmark.id,
+            dateCreated: bookmark.dateCreated ?? Date()
         )
     }
 

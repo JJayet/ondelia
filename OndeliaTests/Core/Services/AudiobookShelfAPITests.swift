@@ -109,11 +109,14 @@ struct AudiobookShelfAPITests {
         #expect(Progress(received: 300, expected: 200).fraction == 1)
     }
 
-    @Test("A task description round-trips id and title, and a bare id still parses")
+    @Test("A task description round-trips id, account and title, and older ones still parse")
     func taskDescription() {
-        let described = AudiobookShelfDownloader.describe(id: "li_a", title: "Dune\nMessiah")
+        let described = AudiobookShelfDownloader.describe(id: "li_a", account: "acc", title: "Dune\nMessiah")
         #expect(AudiobookShelfDownloader.parse(described)?.id == "li_a")
+        #expect(AudiobookShelfDownloader.parse(described)?.account == "acc")
         #expect(AudiobookShelfDownloader.parse(described)?.title == "Dune\nMessiah")
+        #expect(AudiobookShelfDownloader.parse("li_a\nDune")?.account == nil)
+        #expect(AudiobookShelfDownloader.parse("li_a\nDune")?.title == "Dune")
         #expect(AudiobookShelfDownloader.parse("li_a")?.id == "li_a")
         #expect(AudiobookShelfDownloader.parse("li_a")?.title == "")
         #expect(AudiobookShelfDownloader.parse(nil) == nil)

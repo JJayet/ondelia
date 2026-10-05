@@ -74,22 +74,54 @@ enum DatabaseBackupService {
         .sorted { $0.date > $1.date }
     }
 
-    /// Puts a backup back in place of the live store.
+    /// Stages a backup to replace the live store at the next launch.
     ///
-    /// The container is already open on the old file, so nothing here can hand the app a
-    /// working store: the caller has to tell the user to relaunch.
+    /// The container is already open on the live file. Swapping the file under it lets SQLite
+    /// write the old store's journal beside the new one, so the swap waits for the next launch,
+    /// before anything opens the store: see `applyStagedRestore`. The caller tells the user to
+    /// relaunch.
     static func restore(_ backup: URL, storeURL: URL) throws {
         let fileManager = FileManager.default
         let source = backup.appendingPathComponent(storeURL.lastPathComponent)
         guard validate(source) else { throw RestoreError.unreadableBackup }
+        let staged = stagedRestoreURL(for: storeURL)
+        try? fileManager.removeItem(at: staged)
+        try fileManager.copyItem(at: source, to: staged)
+        Log.store.debug("✅ DatabaseBackupService: Staged \(backup.lastPathComponent) for the next launch")
+    }
 
+    static func stagedRestoreURL(for storeURL: URL) -> URL {
+        URL(fileURLWithPath: storeURL.path + ".restore")
+    }
+
+    /// Puts a staged backup in place of the store. Called before the store opens.
+    ///
+    /// The live files are moved aside, not deleted, and moved back when the swap fails, so a
+    /// failure leaves the library as it was. They stay aside until the next restore.
+    static func applyStagedRestore(storeURL: URL) {
+        let fileManager = FileManager.default
+        let staged = stagedRestoreURL(for: storeURL)
+        guard fileManager.fileExists(atPath: staged.path) else { return }
         // The journal files describe the store being replaced, so they go with it.
-        for suffix in ["", "-wal", "-shm"] {
-            let url = URL(fileURLWithPath: storeURL.path + suffix)
-            try? fileManager.removeItem(at: url)
+        let suffixes = ["", "-wal", "-shm"]
+        let live = suffixes.map { URL(fileURLWithPath: storeURL.path + $0) }
+        let aside = suffixes.map { URL(fileURLWithPath: storeURL.path + ".replaced" + $0) }
+        for url in aside { try? fileManager.removeItem(at: url) }
+        do {
+            for (from, to) in zip(live, aside) where fileManager.fileExists(atPath: from.path) {
+                try fileManager.moveItem(at: from, to: to)
+            }
+            try fileManager.moveItem(at: staged, to: storeURL)
+            Log.store.debug("✅ DatabaseBackupService: Restored the staged backup")
+        } catch {
+            for (from, to) in zip(aside, live) where fileManager.fileExists(atPath: from.path) {
+                try? fileManager.removeItem(at: to)
+                try? fileManager.moveItem(at: from, to: to)
+            }
+            // Dropped rather than retried at every launch; the backup itself is untouched.
+            try? fileManager.removeItem(at: staged)
+            Log.store.error("❌ DatabaseBackupService: Restore failed, library kept: \(error)")
         }
-        try fileManager.copyItem(at: source, to: storeURL)
-        Log.store.debug("✅ DatabaseBackupService: Restored \(backup.lastPathComponent)")
     }
 
     enum RestoreError: LocalizedError {

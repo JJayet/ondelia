@@ -31,6 +31,8 @@ enum AccessibilityIdentifiers {
         static let resumeButton = "book_detail_resume_button"
         /// The book-actions menu button on the book detail screen's header.
         static let bookActionsMenu = "library.bookActionsMenu"
+        /// The Collections strip's See All, which pushes the Collections screen.
+        static let seeAllCollections = "library.seeAllCollections"
     }
     
     // MARK: - Mini Player

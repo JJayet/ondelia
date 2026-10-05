@@ -4,8 +4,8 @@ import Foundation
 /// downloading while the app is suspended, and finishes even if the system terminates it.
 ///
 /// Holds no state: every event is forwarded to `AudiobookShelfService` on the main actor.
-/// Each task's `taskDescription` carries the AudiobookShelf item id and title — never the
-/// token, since the system persists task descriptions across launches.
+/// Each task's `taskDescription` carries the AudiobookShelf item id, account id and title —
+/// never the token, since the system persists task descriptions across launches.
 final class AudiobookShelfDownloader: NSObject, URLSessionDownloadDelegate, Sendable {
     static let sessionIdentifier = "io.jayet.Isora.audiobookshelf"
 
@@ -18,15 +18,22 @@ final class AudiobookShelfDownloader: NSObject, URLSessionDownloadDelegate, Send
         return URLSession(configuration: configuration, delegate: AudiobookShelfDownloader(), delegateQueue: nil)
     }
 
-    /// "id\ntitle". The title is there so the library can name a download a previous launch
-    /// started; ids never contain a newline.
-    static func describe(id: String, title: String) -> String { "\(id)\n\(title)" }
+    /// "id\taccount\ntitle". The title is there so the library can name a download a previous
+    /// launch started. The account is the one the download was asked of: the item's owner is
+    /// otherwise looked up again when it finishes, by which time the browser may show another
+    /// server. Ids never contain a tab or a newline.
+    static func describe(id: String, account: String?, title: String) -> String {
+        "\(id)\t\(account ?? "")\n\(title)"
+    }
 
-    /// A task started before titles were stored has the bare id, and an empty title.
-    static func parse(_ description: String?) -> (id: String, title: String)? {
+    /// A task started before titles were stored has the bare id, and an empty title; one
+    /// started before accounts were stored has no account.
+    static func parse(_ description: String?) -> (id: String, account: String?, title: String)? {
         guard let description, !description.isEmpty else { return nil }
         let parts = description.split(separator: "\n", maxSplits: 1, omittingEmptySubsequences: false)
-        return (String(parts[0]), parts.count > 1 ? String(parts[1]) : "")
+        let ids = parts[0].split(separator: "\t", maxSplits: 1, omittingEmptySubsequences: false)
+        let account = ids.count > 1 && !ids[1].isEmpty ? String(ids[1]) : nil
+        return (String(ids[0]), account, parts.count > 1 ? String(parts[1]) : "")
     }
 
     func urlSession(
@@ -49,13 +56,13 @@ final class AudiobookShelfDownloader: NSObject, URLSessionDownloadDelegate, Send
         downloadTask: URLSessionDownloadTask,
         didFinishDownloadingTo location: URL
     ) {
-        guard let id = Self.parse(downloadTask.taskDescription)?.id else { return }
+        guard let (id, account, _) = Self.parse(downloadTask.taskDescription) else { return }
         // Must happen before returning: the system deletes `location` right after.
         let result = Result {
             try AudiobookShelfAPI.keepDownload(at: location, response: downloadTask.response, item: id)
         }
         Task { @MainActor in
-            AudiobookShelfService.shared.downloadFinished(id: id, result: result)
+            AudiobookShelfService.shared.downloadFinished(id: id, account: account, result: result)
         }
     }
 

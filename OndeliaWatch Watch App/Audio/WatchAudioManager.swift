@@ -53,12 +53,19 @@ final class WatchAudioManager {
     func load(_ book: AudiobookModel) async {
         guard currentBook?.id != book.id else { return }
         persistProgress()
+        stopTicker()
+        // The previous book's tracks go before the switch: a failed load would otherwise play
+        // them under this book and write their position into it.
+        player.tearDown()
         currentBook = book
         waitingForChapter = nil
         lastChapterNumber = nil
         installCallbacks()
         guard await loadTracks(for: book) else {
             Log.audio.error("❌ WatchAudioManager: nothing playable for this book")
+            // Not current, so asking for it again tries again.
+            currentBook = nil
+            updateNowPlaying()
             return
         }
         player.setPlaybackRate(book.speed)

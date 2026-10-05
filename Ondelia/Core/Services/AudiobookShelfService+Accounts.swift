@@ -24,8 +24,14 @@ extension AudiobookShelfService {
         } else {
             accounts = []
         }
+        // The accounts can arrive from another device (`SettingsSync`) before this one moved its
+        // own single-account sign-in over: that account's token is still under the old key.
+        let legacyID = Self.legacyAccount(defaults: defaults)?.id
         tokens = Dictionary(uniqueKeysWithValues: accounts.compactMap { account in
-            Keychain.get(account.tokenKey).map { (account.id, $0) }
+            if let token = Keychain.get(account.tokenKey) { return (account.id, token) }
+            guard account.id == legacyID, let token = Keychain.get(Self.legacyTokenKey) else { return nil }
+            Keychain.set(token, for: account.tokenKey, synchronizable: syncsAccount)
+            return (account.id, token)
         })
     }
 
@@ -113,6 +119,8 @@ extension AudiobookShelfService {
     func signOut(_ account: AudiobookShelfAccount? = nil) {
         guard let account = account ?? primary else { return }
         Keychain.set(nil, for: account.tokenKey)
+        // A device on an older version reads the first server's token there.
+        if account.id == primary?.id { Keychain.set(nil, for: Self.legacyTokenKey) }
         accounts.removeAll { $0.id == account.id }
         tokens[account.id] = nil
         saveAccounts()
@@ -135,7 +143,13 @@ extension AudiobookShelfService {
         } else {
             defaults.removeObject(forKey: Defaults.library)
         }
-        Keychain.set(token, for: Self.legacyTokenKey, synchronizable: syncsAccount)
+        // Never cleared just because this device has no token for the first server yet: the
+        // key may hold the only copy of it, and a delete reaches every device through iCloud.
+        if let token {
+            Keychain.set(token, for: Self.legacyTokenKey, synchronizable: syncsAccount)
+        } else if accounts.isEmpty {
+            Keychain.set(nil, for: Self.legacyTokenKey)
+        }
     }
 }
 

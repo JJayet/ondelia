@@ -118,12 +118,15 @@ struct MainTabView: View {
             if horizontalSizeClass == .regular {
             TabSection(NSLocalizedString("Collections", comment: "Section title for collections")) {
                 ForEach(audiobookManager.collections, id: \.id) { collection in
+                    // A server series or collection counts the server's books, not only the
+                    // Library's: one joined book of sixteen reads as 16.
+                    let server = AudiobookShelfCatalog.shared.seriesByCollection[collection.id]
                     Tab(value: "collection:\(collection.id.uuidString)") {
                         LibraryView(collection: collection)
                     } label: {
-                        Label(collection.name, systemImage: collection.isSeries ? "books.vertical" : "folder")
+                        Label(collection.name, systemImage: Self.sidebarIcon(collection, server: server))
                     }
-                    .badge(collection.bookIDs.count)
+                    .badge(max(collection.bookIDs.count, server?.books?.count ?? 0))
                 }
             }
             .tabPlacement(.sidebarOnly)
@@ -250,6 +253,13 @@ struct MainTabView: View {
 }
 
 extension MainTabView {
+    /// A series, Hardcover's or a server's, gets the shelf of books; a server collection the
+    /// stack its Library card shows; a hand-made collection the folder.
+    static func sidebarIcon(_ collection: CollectionModel, server: AudiobookShelfAPI.Series?) -> String {
+        if let server { return server.isServerCollection ? "rectangle.stack" : "books.vertical" }
+        return collection.isSeries ? "books.vertical" : "folder"
+    }
+
     // ponytail: view-tree walk by accessibility identifier; drop when TabView offers a switch.
     static func hideSidebarToggle() {
         for scene in UIApplication.shared.connectedScenes.compactMap({ $0 as? UIWindowScene }) {

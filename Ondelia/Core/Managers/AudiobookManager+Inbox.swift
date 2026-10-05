@@ -26,12 +26,14 @@ extension AudiobookManager {
         Log.library.debug("📥 AudiobookManager: Found \(waiting.count) file(s) in the Inbox")
         for url in waiting { inboxHandedOff.insert(url.lastPathComponent) }
 
-        handleImportRequest(urls: waiting) { [weak self] in
+        handleImportRequest(urls: waiting) { [weak self] failed in
             // The copies in the library are the ones that count; the Inbox is a drop box, and
-            // leaving files there imports them again on the next launch.
+            // leaving files there imports them again on the next launch. A file that did not
+            // import is the only copy of what was shared: it stays, handed off until then so
+            // that every foreground does not fail it again.
             Task { @MainActor [weak self] in
                 guard let self = self else { return }
-                for url in waiting {
+                for url in waiting where !failed.contains(url) {
                     try? FileManager.default.removeItem(at: url)
                     self.inboxHandedOff.remove(url.lastPathComponent)
                 }

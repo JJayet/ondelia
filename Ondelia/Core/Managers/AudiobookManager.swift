@@ -35,7 +35,7 @@ final class AudiobookManager {
     var mergePrompt: MergePrompt?
     
     var pendingImports: [(
-        urls: [URL], mergesWithoutAsking: Bool, completion: (@Sendable () -> Void)?, onImported: ImportedHandler?
+        urls: [URL], mergesWithoutAsking: Bool, completion: ImportCompletion?, onImported: ImportedHandler?
     )] = []
     /// Told which books the running import produced, once its merge offer has been answered.
     var onImported: ImportedHandler?
@@ -65,14 +65,24 @@ final class AudiobookManager {
     }
     
     @MainActor
-    func createBookmark(for audiobook: AudiobookModel, at timestamp: TimeInterval, title: String, note: String? = nil) {
+    /// `id` and `dateCreated` are the watch's, for a bookmark made there: the id is how a
+    /// replayed event is recognised as one already applied.
+    func createBookmark(
+        for audiobook: AudiobookModel,
+        at timestamp: TimeInterval,
+        title: String,
+        note: String? = nil,
+        id: UUID = UUID(),
+        dateCreated: Date = Date()
+    ) {
         let context = swiftDataController.context
         let bookmark = BookmarkModel(
             title: title,
             note: note,
             timestamp: timestamp,
-            dateCreated: Date()
+            dateCreated: dateCreated
         )
+        bookmark.id = id
         
         bookmark.audiobook = audiobook
         context.insert(bookmark)
