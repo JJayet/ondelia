@@ -48,6 +48,21 @@ extension AudiobookManager {
         }
     }
 
+    /// Whether server series already show every one of `books`. A Hardcover series Collection
+    /// for them would then list the series twice, and call the volumes it holds on the server
+    /// missing. Also true while the catalogue that would say so is incomplete and one of them
+    /// came from a server: the Hardcover Collection waits rather than duplicate a server one.
+    func serverSeriesShowAll(_ books: [AudiobookModel]) -> Bool {
+        let catalog = AudiobookShelfCatalog.shared
+        let service = AudiobookShelfService.shared
+        guard !catalog.shownAccounts.isEmpty else { return false }
+        guard catalog.isReady, !catalog.isUnreachable else {
+            return books.contains { service.itemID(for: $0) != nil }
+        }
+        let shown = Set(catalog.series.filter { !catalog.isHidden($0) }.flatMap { $0.books ?? [] }.map(\.id))
+        return books.allSatisfy { book in service.itemID(for: book).map(shown.contains) ?? false }
+    }
+
     /// Server series Collections deleted before hiding existed become hidden series, once the
     /// catalogue says which series each id stands for.
     private func migrateDeclinedServerSeries() {
