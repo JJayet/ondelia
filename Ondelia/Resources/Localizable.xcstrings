@@ -2580,13 +2580,13 @@
         }
       }
     },
-    "Imported books are matched to their closest Hardcover result. A book that matches the same result as another book in the same import is left unmatched." : {
+    "Imported books, and server books as they join your Library, are matched to their closest Hardcover result. A book that matches the same result as another book in the same import is left unmatched." : {
       "comment" : "Hardcover automation section footer",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Les livres importés sont associés au résultat Hardcover le plus proche. Un livre qui correspond au même résultat qu’un autre livre du même import reste non associé."
+            "value" : "Les livres importés, et ceux du serveur dès qu’ils rejoignent la bibliothèque, sont associés au résultat Hardcover le plus proche. Un livre qui correspond au même résultat qu’un autre livre du même import reste non associé."
           }
         }
       }
@@ -2954,13 +2954,13 @@
         }
       }
     },
-    "Match Imported Books" : {
+    "Match New Books" : {
       "comment" : "Hardcover auto-match toggle",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
             "state" : "translated",
-            "value" : "Associer les livres importés"
+            "value" : "Associer les nouveaux livres"
           }
         }
       }
