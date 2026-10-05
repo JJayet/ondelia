@@ -5,6 +5,82 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.8 (1) — 2026-10-05
+
+### English
+
+Promotional text
+New: a Collections screen to filter, search and sort all your collections, a Collections strip on your Library, and Hardcover matching for server books.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,collections
+
+What's New
+
+Collections
+
+- A new Collections strip on your Library shows the collections you're listening to first, then the ones you played recently. See All opens the new Collections screen.
+- On the Collections screen, filter by All, Mine, Series or Server, search, sort by Name, Recent or Progress, and switch between List and Grid.
+- Server series and collections you have no book of yet come last, under On the server, none here.
+- A collection's covers now include its server books you haven't added yet.
+
+Hardcover
+
+- Match New Books now also matches server books once they're in your Library, so listening to them updates your Hardcover progress.
+- A series you listen to from your server no longer appears twice, with its other books shown as missing.
+
+Fixes
+
+- A file shared to Ondelia that can't be imported is kept, so it can be tried again.
+- Restore Backup now finishes when you reopen the app, and keeps your current library if anything goes wrong.
+- On Apple Watch, a book that fails to load no longer plays the previous one in its place.
+- Bookmarks made on Apple Watch are no longer duplicated.
+- A server download stays linked to the server it came from, even if you browse another server meanwhile.
+- Your last position, and a book marked as finished, now always reach AudiobookShelf.
+- ZIP files with several disc folders now import every disc.
+- A damaged CUE file can no longer crash an import.
+- A device no longer shows you signed out of AudiobookShelf when your servers sync from another device.
+
+### Français
+
+Texte promotionnel
+Nouveau : un écran Collections pour filtrer, chercher et trier vos collections, un bandeau Collections dans la bibliothèque, et Hardcover pour les livres du serveur.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,collections
+
+Nouveautés
+
+Collections
+
+- Un nouveau bandeau Collections dans la bibliothèque montre d'abord les collections en cours, puis celles écoutées récemment. Tout afficher ouvre le nouvel écran Collections.
+- Dans l'écran Collections, filtrez par Toutes, Miennes, Séries ou Serveur, cherchez, triez par Nom, Récentes ou Progression, et passez de Liste à Grille.
+- Les séries et collections du serveur dont vous n'avez encore aucun livre viennent en dernier, sous Sur le serveur, rien ici.
+- Les couvertures d'une collection incluent désormais ses livres du serveur pas encore ajoutés.
+
+Hardcover
+
+- Associer les nouveaux livres associe désormais aussi les livres du serveur dès qu'ils rejoignent la bibliothèque : les écouter met à jour votre progression Hardcover.
+- Une série écoutée depuis votre serveur n'apparaît plus deux fois, avec ses autres livres affichés comme manquants.
+
+Corrections
+
+- Un fichier partagé vers Ondelia qui ne peut pas être importé est conservé, pour réessayer.
+- Restaurer une sauvegarde se termine désormais à la réouverture de l'app, et garde votre bibliothèque actuelle en cas de problème.
+- Sur l'Apple Watch, un livre qui ne se charge pas ne lit plus le précédent à sa place.
+- Les signets créés sur l'Apple Watch ne sont plus dupliqués.
+- Un téléchargement reste lié au serveur d'où il vient, même si vous parcourez un autre serveur entre-temps.
+- Votre dernière position, et un livre marqué comme terminé, parviennent désormais toujours à AudiobookShelf.
+- Les fichiers ZIP contenant plusieurs dossiers de disques importent désormais tous les disques.
+- Un fichier CUE endommagé ne peut plus faire planter un import.
+- Un appareil ne vous affiche plus déconnecté d'AudiobookShelf quand vos serveurs se synchronisent depuis un autre appareil.
+
 ## 1.7 (1) — 2026-10-04
 
 ### English
