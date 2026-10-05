@@ -183,6 +183,9 @@ final class AudiobookShelfService {
                !AudiobookManager.shared.hasFile(streamed) {
                 Self.adopt(book, into: streamed, context: context)
                 books = [streamed]
+                // The import matches the entry it made, which is gone: a book streamed before
+                // joining was matched is matched now.
+                Task { await HardcoverService.shared.autoMatch([streamed]) }
             }
             // Remembered on the book, so the browser can say it is in the library on every
             // device and after a relaunch.

@@ -121,6 +121,8 @@ extension AudiobookShelfService {
         SwiftDataController.shared.save()
         linksDidChange()
         AudiobookManager.shared.fetchAudiobooks()
+        // Joining is this book's import: matched to Hardcover like one. No-op unless auto-match is on.
+        Task { await HardcoverService.shared.autoMatch([book]) }
         return book
     }
 

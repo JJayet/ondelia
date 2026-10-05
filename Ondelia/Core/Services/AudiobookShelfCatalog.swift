@@ -160,6 +160,8 @@ final class AudiobookShelfCatalog {
         statuses[serverID] = .ready
         await merge()
         AudiobookManager.shared.reconcileServerSeriesCollections()
+        // It waits on the catalogue for books from a server: see `serverSeriesShowAll`.
+        AudiobookManager.shared.reconcileSeriesCollections()
     }
 
     /// Rebuilds the merged lists from the servers that answer, sorting off the main thread.
