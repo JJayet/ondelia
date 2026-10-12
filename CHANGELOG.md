@@ -5,6 +5,46 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.8.1 (1) — 2026-10-12
+
+### English
+
+Promotional text
+Fixes for Collections and transcripts: back always returns where you came from, and the transcript shows the chapter you're listening to.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,collections
+
+What's New
+
+Fixes
+
+- On the Collections screen, a server collection you have no book of yet now opens itself rather than another collection.
+- Back from a collection, or from a book opened in one, now returns to the screen you came from.
+- The transcript's title now names the chapter you're listening to in long chapters, rather than the first one.
+
+### Français
+
+Texte promotionnel
+Corrections pour les Collections et les transcriptions : le retour revient toujours où vous étiez, et la transcription affiche le chapitre en cours.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,collections
+
+Nouveautés
+
+Corrections
+
+- Dans l'écran Collections, une collection du serveur dont vous n'avez aucun livre ouvre désormais la bonne collection, et non une autre.
+- Le retour depuis une collection, ou depuis un livre ouvert dans une collection, revient désormais à l'écran d'où vous veniez.
+- Dans les longs chapitres, le titre de la transcription indique désormais le chapitre en cours d'écoute, et non le premier.
+
 ## 1.8 (1) — 2026-10-05
 
 ### English
