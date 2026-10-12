@@ -8,10 +8,10 @@ struct LibraryView: View {
     let audiobookManager: AudiobookManager
     @Environment(\.playerRouter) private var playerRouter
     private let themeManager = ThemeManager.shared
-    /// The book whose detail screen is pushed, if any.
+    /// The book and the collection whose screens are pushed, if any, and a book opened from a collection.
     @State var audiobookForDetail: AudiobookModel?
-    /// The collection whose screen is pushed, if any.
     @State var collectionForDetail: CollectionModel?
+    @State var bookFromCollection: AudiobookModel?
     @State var audiobookForHardcover: AudiobookModel?
     @State var audiobookForServerLink: AudiobookModel?
     @State var audiobookToRename: AudiobookModel?
@@ -49,8 +49,9 @@ struct LibraryView: View {
     /// Server audiobooks shown beside the Library's own (ADR 0002). Held here so flipping it
     /// redraws the shelf.
     @AppStorage(AudiobookShelfCatalog.enabledKey) var blendsServer = false
-    /// Whether the Collections screen is pushed, from the strip's See All.
+    /// Whether the Collections screen is pushed, from the strip's See All, and what it opened.
     @State var showsAllCollections = false
+    @State var collectionFromAll: CollectionModel?
     let catalog = AudiobookShelfCatalog.shared
     /// Selection mode: taps toggle books instead of opening them, and the toolbar offers
     /// mark-read / mark-unread / delete for the whole selection.
@@ -70,7 +71,6 @@ struct LibraryView: View {
     init(collection: CollectionModel? = nil) {
         self.init(audiobookManager: AudiobookManager.shared, collection: collection)
     }
-
 
     var filteredAudiobooks: [AudiobookModel] {
         let source = visibleAudiobooks

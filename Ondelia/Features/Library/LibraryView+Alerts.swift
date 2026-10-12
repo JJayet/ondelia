@@ -101,6 +101,9 @@ extension LibraryView {
                 if audiobookForDetail?.id == audiobook.id {
                     audiobookForDetail = nil
                 }
+                if bookFromCollection?.id == audiobook.id {
+                    bookFromCollection = nil
+                }
             }
 
         case .confirmDeleteMany(let books):

@@ -33,6 +33,7 @@ enum AccessibilityIdentifiers {
         static let audiobookCell = "library_audiobook_cell"
         /// The play/resume button on a book's detail screen.
         static let resumeButton = "book_detail_resume_button"
+        static let seeAllCollections = "library.seeAllCollections"
     }
     
     // MARK: - Mini Player

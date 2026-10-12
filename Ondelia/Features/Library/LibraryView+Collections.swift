@@ -83,9 +83,12 @@ extension LibraryView {
                 keepEmpty: true
             ),
             serverOnly: serverOnlyCollections,
-            onOpen: { collectionForDetail = $0.collection },
+            onOpen: { collectionFromAll = $0.collection },
             menu: collectionMenu
         )
+        // On the screen, not the shelf: two state-driven destinations on the shelf stack in no
+        // set order, so the Collection could land under the Collections screen or replace it.
+        .navigationDestination(item: $collectionFromAll) { collectionDetail($0) }
     }
 
     /// A Collection's long-press menu: download what is not on this device, rename, and
@@ -134,7 +137,7 @@ extension LibraryView {
         CollectionDetailView(
             collection: collection,
             bookActions: bookActions,
-            onSelectBook: { audiobookForDetail = $0 },
+            onSelectBook: { bookFromCollection = $0 },
             onRename: { collection in
                 collectionToRename = collection
                 newCollectionName = collection.name
@@ -142,9 +145,12 @@ extension LibraryView {
             },
             onDelete: { collection in
                 collectionForDetail = nil
+                collectionFromAll = nil
                 audiobookManager.deleteCollection(collection)
             }
         )
+        // On the collection's screen, like the Collections screen's own: see `allCollections`.
+        .navigationDestination(item: $bookFromCollection) { BookDetailView(audiobook: $0, actions: bookActions) }
     }
 
     func openCollectionPicker(for books: [AudiobookModel]) {

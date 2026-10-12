@@ -48,6 +48,9 @@ extension LibraryView {
         if let shown = audiobookForDetail, books.contains(where: { $0.id == shown.id }) {
             audiobookForDetail = nil
         }
+        if let shown = bookFromCollection, books.contains(where: { $0.id == shown.id }) {
+            bookFromCollection = nil
+        }
         endSelecting()
     }
 
