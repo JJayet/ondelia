@@ -331,10 +331,40 @@
     "%d books" : {
       "comment" : "AudiobookShelf: number of books in a series or by an author\nCarPlay collection row: number of books\nNumber of books in a collection",
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d book"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d books"
+                }
+              }
+            }
+          }
+        },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d livre"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d livres"
+                }
+              }
+            }
           }
         }
       }
@@ -346,6 +376,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d livres · %d sur cet appareil"
+          }
+        }
+      }
+    },
+    "%d books · %d results" : {
+      "comment" : "Search: books searched and how many matched",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres · %d résultats"
           }
         }
       }
@@ -673,7 +714,7 @@
       }
     },
     "About" : {
-      "comment" : "Settings section: About",
+      "comment" : "Book detail: summary and details tab\nSettings section: About",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -942,7 +983,7 @@
       }
     },
     "Authors" : {
-      "comment" : "AudiobookShelf shelf tab: authors",
+      "comment" : "AudiobookShelf shelf tab: authors\nSearch: authors section",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2653,6 +2694,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "en cours · ch. %d sur %d"
+          }
+        }
+      }
+    },
+    "In the Series" : {
+      "comment" : "Book detail: the other books of its collection",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans la série"
           }
         }
       }
@@ -4419,6 +4471,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Reprendre à %@"
+          }
+        }
+      }
+    },
+    "resume here · %@" : {
+      "comment" : "Book detail: the chapter playback resumes in, and where",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reprise ici · %@"
           }
         }
       }

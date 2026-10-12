@@ -312,6 +312,8 @@ struct WideChapterRow: View {
     let state: State
     /// The current row says "paused" and its bars rest while playback is paused.
     let isPlaying: Bool
+    /// Replaces the current row's "in progress" line, for a book that is not the one playing.
+    var currentLabel: String?
     let onTap: () -> Void
 
     private var isCurrent: Bool { if case .current = state { return true }; return false }
@@ -337,7 +339,12 @@ struct WideChapterRow: View {
                         .font(.system(size: 16, weight: isCurrent ? .semibold : .regular))
                         .foregroundStyle(isHeard ? AnyShapeStyle(.secondary) : AnyShapeStyle(.primary))
                         .lineLimit(1)
-                    if case .current(let remaining, _) = state {
+                    if let currentLabel, isCurrent {
+                        Text(currentLabel)
+                            .font(.system(size: 13))
+                            .monospacedDigit()
+                            .foregroundStyle(.tint)
+                    } else if case .current(let remaining, _) = state {
                         Text(String(
                             format: isPlaying
                                 ? NSLocalizedString("in progress · -%@", comment: "Chapter table: playing row, time left in the chapter")

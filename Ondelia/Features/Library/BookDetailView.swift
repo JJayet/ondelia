@@ -7,38 +7,50 @@ struct BookDetailView: View {
     let actions: BookActions
 
     @Environment(\.playerRouter) private var playerRouter
-    private let audioManager = GlobalAudioManager.shared
+    let audioManager = GlobalAudioManager.shared
 
-    @State private var showingChapters = false
-    @State private var showingBookmarks = false
-    @State private var fileBytes: Int64?
+    @State var showingChapters = false
+    @State var showingBookmarks = false
+    @State var fileBytes: Int64?
     @State var seriesOptions: [HardcoverAPI.SeriesRef] = []
     @State var showingSeriesPicker = false
+    /// The right half's tab around the iPhone Duo's fold (BookDetailView+Fold.swift).
+    @State var foldTab = BookDetailTab.chapters
 
-    private var chapters: [ChapterModel] { audiobook.sortedChapters }
+    var chapters: [ChapterModel] { audiobook.sortedChapters }
 
-    private var remaining: TimeInterval {
+    var remaining: TimeInterval {
         max(audiobook.duration - audiobook.currentPosition, 0)
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 0) {
-                header
+        // iPhone Duo around its fold (design 13): the sheet and its actions on the left, and
+        // on the right what you look through, as tabs instead of sheets.
+        FoldSplit {
+            foldSheet
+        } secondary: {
+            foldTabs
+        } fallback: {
+            ScrollView {
+                VStack(spacing: 0) {
+                    header
 
-                VStack(spacing: 14) {
-                    titleBlock
-                    chips
-                    progressCard
-                    metaLine
-                    summary
+                    VStack(spacing: 14) {
+                        titleBlock
+                        chips()
+                        progressCard()
+                        metaLine
+                        summary
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.top, 18)
+                    .padding(.bottom, 30)
+                    .frame(maxWidth: 640)
+                    .frame(maxWidth: .infinity)
                 }
-                .padding(.horizontal, 16)
-                .padding(.top, 18)
-                .padding(.bottom, 30)
-                .frame(maxWidth: 640)
-                .frame(maxWidth: .infinity)
             }
+            // Under the bar: the blurred cover is the header's light.
+            .ignoresSafeArea(edges: .top)
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: audiobook), intensity: 1))
         // The blurb, genres, moods and content warnings come from Hardcover the first time this
@@ -50,7 +62,6 @@ struct BookDetailView: View {
             fileBytes = await Task.detached { StorageUsage.bytes(at: url) }.value
         }
         .scrollContentBackground(.hidden)
-        .ignoresSafeArea(edges: .top)
         // The bar stays, transparent: hiding it also disables the swipe-back gesture. The
         // system back button reads as a glass circle over the artwork, so no custom one.
         .navigationTitle("")
@@ -83,7 +94,7 @@ struct BookDetailView: View {
         }
     }
 
-    private var currentChapter: ChapterModel? {
+    var currentChapter: ChapterModel? {
         let position = audiobook.currentPosition
         return chapters.last { position >= $0.startTime }
     }
@@ -165,7 +176,7 @@ struct BookDetailView: View {
         AudiobookManager.shared.swiftDataController.save()
     }
 
-    private var chips: some View {
+    func chips(alignment: Alignment = .center) -> some View {
         HStack(spacing: 8) {
             DetailChip(text: audiobook.duration.hoursMinutesFormatted)
 
@@ -200,14 +211,14 @@ struct BookDetailView: View {
                 ) { seriesPickerButtons }
             }
         }
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: alignment)
     }
 
     // MARK: - Size and publication
 
     /// "743 MB · Published 15 March 2021", under the player card. Chips ran out of room for it.
     @ViewBuilder
-    private var metaLine: some View {
+    var metaLine: some View {
         let parts: [String] = [
             fileBytes.flatMap { $0 > 0 ? $0.formatted(.byteCount(style: .file)) : nil },
             audiobook.hardcover?.releaseDate.map {
@@ -229,7 +240,7 @@ struct BookDetailView: View {
     // MARK: - Summary
 
     @ViewBuilder
-    private var summary: some View {
+    var summary: some View {
         if let text = audiobook.hardcover?.summary, !text.isEmpty {
             Text(text)
                 .font(.system(size: 13.5))
@@ -241,116 +252,7 @@ struct BookDetailView: View {
         }
     }
 
-    // MARK: - Progress
-
-    private var progressCard: some View {
-        VStack(spacing: 0) {
-            HStack(alignment: .firstTextBaseline) {
-                Text(
-                    String(
-                        format: NSLocalizedString("%d%% listened", comment: "Percent of the book heard"),
-                        Int(audiobook.progressFraction * 100)
-                    )
-                )
-                .font(.system(size: 13.5, weight: .semibold))
-
-                Spacer()
-
-                Text(
-                    String(
-                        format: NSLocalizedString("%@ left", comment: "Remaining listening time"),
-                        remaining.hoursMinutesFormatted
-                    )
-                )
-                .font(.system(size: 12.5))
-                .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 10)
-
-            ProgressLine(value: audiobook.progressFraction, height: 6)
-
-            if AudiobookManager.shared.hasFile(audiobook) {
-                resumeButton
-            } else if AudiobookShelfService.shared.canStream(audiobook) {
-                // Plays from the server; the download keeps this entry and its position.
-                resumeButton
-                AudiobookShelfDownloadButton(book: audiobook)
-                    .padding(.top, 10)
-            } else {
-                Label(
-                    NSLocalizedString("Not on this device", comment: "Missing audio badge"),
-                    systemImage: "icloud.and.arrow.down"
-                )
-                .font(.system(size: 15.5, weight: .semibold))
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-                .glassEffect(.regular, in: Capsule())
-                .padding(.top, 16)
-
-                Text(NSLocalizedString(
-                    "Import the same audio file on this device to play it here.",
-                    comment: "Missing audio explanation"
-                ))
-                .font(.system(size: 12.5))
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-                .padding(.top, 8)
-            }
-
-            HStack(spacing: 10) {
-                Button { withHapticFeedback { showingChapters = true } } label: {
-                    secondaryLabel(NSLocalizedString("Chapters", comment: "Chapter list sheet title"))
-                }
-                .buttonStyle(.plain)
-                .disabled(chapters.isEmpty)
-
-                Button { withHapticFeedback { showingBookmarks = true } } label: {
-                    secondaryLabel(NSLocalizedString("Bookmarks", comment: "Bookmarks button title"))
-                }
-                .buttonStyle(.plain)
-            }
-            .padding(.top, 10)
-
-            WatchSendRowView(audiobook: audiobook)
-                .padding(.top, 10)
-        }
-        .padding(18)
-        .glassCard(cornerRadius: 28)
-    }
-
-    private var resumeButton: some View {
-        Button(action: play) {
-            HStack(spacing: 9) {
-                Image(systemName: "play.fill").font(.system(size: 14, weight: .bold))
-                Text(
-                    audiobook.currentPosition > 0
-                        ? String(
-                            format: NSLocalizedString("Resume at %@", comment: "Resume playback at a timestamp"),
-                            audiobook.currentPosition.clockFormatted
-                        )
-                        : NSLocalizedString("Play", comment: "Play playback accessibility label")
-                )
-                .font(.system(size: 15.5, weight: .semibold))
-            }
-            .foregroundStyle(.black)
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(.tint, in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .padding(.top, 16)
-        .accessibilityIdentifier(AccessibilityIdentifiers.Library.resumeButton)
-    }
-
-    private func secondaryLabel(_ title: String) -> some View {
-        Text(title)
-            .font(.system(size: 13.5, weight: .semibold))
-            .frame(maxWidth: .infinity)
-            .frame(height: 44)
-            .glassEffect(.regular, in: Capsule())
-    }
-
-    private func play() {
+    func play() {
         withHapticFeedback(.medium) {}
         audioManager.loadAudiobook(audiobook)
         audioManager.startPlaybackAfterOpeningBook()

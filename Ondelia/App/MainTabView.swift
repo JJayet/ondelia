@@ -115,8 +115,8 @@ struct MainTabView: View {
                 value: "search",
                 role: .search
             ) {
+                // Searchable inside: around the iPhone Duo's fold the view draws its own field.
                 SearchView(query: $searchText)
-                    .searchable(text: $searchText)
             }
 
             // One sidebar entry per collection, opening straight onto it.
