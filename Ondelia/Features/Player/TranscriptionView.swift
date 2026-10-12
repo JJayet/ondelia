@@ -34,6 +34,9 @@ struct TranscriptionView: View {
     @State private var searchText = ""
     @State private var highlightedRange: Range<String.Index>?
     @State private var showingLanguagePicker = false
+    /// The chapter under the playhead, refreshed with the window: a window is not a chapter, so
+    /// a long chapter two would otherwise be titled from the track (chapter one).
+    @State private var chapter: ChapterModel?
 
     /// The book's chosen language. Stored per book; changing it re-keys the request, and the
     /// cache is keyed by language too, so the old transcript cannot come back in its place.
@@ -67,6 +70,12 @@ struct TranscriptionView: View {
     }
 
     private var chapterTitle: String {
+        if let chapter {
+            return chapter.title ?? String(
+                format: NSLocalizedString("Chapter %d", comment: "Default chapter title with number"),
+                chapter.chapterNumber
+            )
+        }
         guard let request else {
             return NSLocalizedString("Transcription", comment: "Default chapter title for transcription")
         }
@@ -187,6 +196,11 @@ struct TranscriptionView: View {
 
     private func updateRequest() {
         let time = audio.getCurrentTime()
+        // Same rule as the player's title, so both name the same chapter.
+        let chapters = audiobook.sortedChapters
+        let current = chapters.first { time >= $0.startTime && time < $0.endTime }
+            ?? chapters.last { time >= $0.startTime }
+        if current?.id != chapter?.id { chapter = current }
         let language = TranscriptionRequest.storedLanguage(for: audiobook.id)
         guard let next = makeRequest(at: time, language: language) else { return }
         // Same window, unless its audio moved: a streamed book that finished downloading.
