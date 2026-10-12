@@ -11,6 +11,7 @@ struct CollectionsView<MenuContent: View>: View {
 
     @State private var scope: Scope = .all
     @State private var query = ""
+    @State private var openedServerSeries: AudiobookShelfAPI.Series?
     @AppStorage("collections.sort") private var sort: Sort = .recent
     @AppStorage("collections.viewMode") private var viewMode: LibraryView.ViewMode = .list
     /// The Library's grid density, so a collection is the size of a book beside it.
@@ -105,6 +106,13 @@ struct CollectionsView<MenuContent: View>: View {
             placement: .navigationBarDrawer(displayMode: .always),
             prompt: NSLocalizedString("Search Collections", comment: "Collections screen: search field prompt")
         )
+        // State, not a value link: this screen is a state-driven destination, and a value pushed
+        // from it lands under it on the stack, with the state-driven screens pushed again on top.
+        .navigationDestination(item: $openedServerSeries) { series in
+            let library = AudiobookShelfService.shared.primary?.library ?? ""
+            AudiobookShelfSeriesView(series: series, library: library)
+                .environment(\.audiobookShelfLibrary, library)
+        }
     }
 
     private var sortBar: some View {
@@ -153,7 +161,9 @@ struct CollectionsView<MenuContent: View>: View {
             }
             serverOnlyLabel
             ForEach(shownServerOnly) { series in
-                NavigationLink(value: AudiobookShelfRoute.series(series)) {
+                Button {
+                    withHapticFeedback { openedServerSeries = series }
+                } label: {
                     ServerOnlyCollectionRowView(series: series)
                 }
                 .buttonStyle(.plain)
@@ -177,7 +187,9 @@ struct CollectionsView<MenuContent: View>: View {
             }
             if !shownServerOnly.isEmpty {
                 Section {
-                    ForEach(shownServerOnly) { ServerOnlyCollectionGridItemView(series: $0, columns: gridColumns) }
+                    ForEach(shownServerOnly) { series in
+                        ServerOnlyCollectionGridItemView(series: series, columns: gridColumns) { openedServerSeries = series }
+                    }
                 } header: {
                     serverOnlyLabel
                 }

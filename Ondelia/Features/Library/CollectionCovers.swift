@@ -118,9 +118,12 @@ struct CollectionGridItemView: View {
 struct ServerOnlyCollectionGridItemView: View {
     let series: AudiobookShelfAPI.Series
     var columns = 2
+    let onOpen: () -> Void
 
     var body: some View {
-        NavigationLink(value: AudiobookShelfRoute.series(series)) {
+        Button {
+            withHapticFeedback { onOpen() }
+        } label: {
             CollectionGridCell(
                 covers: series.coverSources,
                 name: series.name,
@@ -134,7 +137,6 @@ struct ServerOnlyCollectionGridItemView: View {
             .opacity(0.7)
         }
         .buttonStyle(.plain)
-        .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
         .audiobookShelfDownloadAllMenu(.series(series), name: series.name)
     }
 }
