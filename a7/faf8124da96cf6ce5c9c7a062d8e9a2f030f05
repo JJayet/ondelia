@@ -1,0 +1,41 @@
+Ondelia/Features/Search/SearchView+Fold.swift
+  s_50659d486078cc::t_cd408edc50a86b 1-151,164-175,183-187,189-193,195-196,198-217
+  s_50659d486078cc::t_780fc24a78e222 152-163,176-182,188,194,197
+Ondelia/Features/Library/BookDetailView+Fold.swift
+  s_50659d486078cc::t_466d5817969edd 1-194
+OndeliaTests/Features/Search/SearchAuthorNamesTests.swift
+  s_50659d486078cc::t_556b693ad6f17a 1-14
+Ondelia/Features/Library/BookDetailView+Progress.swift
+  s_50659d486078cc::t_054953f611d3ed 1-114
+Ondelia/App/MainTabView.swift
+  s_50659d486078cc::t_25269a13a9dd6c 118
+Ondelia/Features/Library/BookDetailView.swift
+  s_50659d486078cc::t_537a709931b46a 10,14,17-18,20,27-49,52-53,97,179,214,221,243,255
+  s_50659d486078cc::t_054953f611d3ed 12-13,22
+Ondelia/Resources/Localizable.xcstrings
+  s_50659d486078cc::t_0dade1c119a44e 383-393
+  s_50659d486078cc::t_780fc24a78e222 334-351,353-367
+  s_50659d486078cc::t_bb18037a5331c2 2701-2711,4478-4486,4488
+  s_50659d486078cc::t_49c3bfb07e70b6 717,986,4487
+Ondelia/Features/Player/PlayerView+Wide.swift
+  s_50659d486078cc::t_537a709931b46a 315-316,342-347
+Ondelia/Features/Search/SearchView.swift
+  s_50659d486078cc::t_780fc24a78e222 18-19,34,36-37,130
+  s_50659d486078cc::t_25269a13a9dd6c 11-12,14-17,23,25,27-32,35,74,81-89,91-107,110,114-115,136-174,179-182,205,225,233,255,262-271,282
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "a7faf8124da96cf6ce5c9c7a062d8e9a2f030f05",
+  "prompts": {},
+  "sessions": {
+    "s_50659d486078cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e9ef37-3bde-4c6c-8908-de553b69321d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
