@@ -1,0 +1,89 @@
+Ondelia/Shared/MiniPlayerBar.swift
+  s_50659d486078cc::t_fa10b68ff9832e 8-9,27
+Ondelia/Features/Library/CollectionDetailView.swift
+  s_50659d486078cc::t_4fd081f1d18a12 91-95
+  s_50659d486078cc::t_ec473c6bac6b6a 12-14,31-44,46-48,71-79
+  s_50659d486078cc::t_58d3a4fde5aec5 17,49-66,68-70,80-88
+  s_50659d486078cc::t_7fa1b94ab1310e 96
+Ondelia/Features/Library/LibraryView.swift
+  s_50659d486078cc::t_9bdd528afcfe93 63
+  s_50659d486078cc::t_dea5b5207949be 171-177
+Ondelia/Features/Settings/SettingsView.swift
+  s_50659d486078cc::t_2dafb0a08e9358 30-46,94,96-99
+  s_50659d486078cc::t_56461a49267a89 47-48,95,100-101
+  s_50659d486078cc::t_85486d6a11eafd 102-103
+Ondelia/Features/Library/CollectionDetailView+Header.swift
+  s_50659d486078cc::t_1ed5b39dc2aa5d 1-45
+Ondelia/App/MainTabView.swift
+  s_50659d486078cc::t_c5cf96fe0bf37a 15-16,26-27,51-53
+OndeliaTests/Core/Services/CollectionGroupTests.swift
+  s_50659d486078cc::t_a5e797c3ba5cfe 251-252
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesSheet.swift
+  s_50659d486078cc::t_b1ed4df3d7a527 1-147
+Ondelia/Features/Library/ContinueReadingSection.swift
+  s_50659d486078cc::t_99dfcbf6de6ed8 59-60,76-77,86,88
+Ondelia/Features/Library/LibraryView+Collections.swift
+  s_50659d486078cc::t_ec473c6bac6b6a 110-111,160,174-175
+  s_50659d486078cc::t_853a5d701fd8d7 18-19,39-74
+  s_50659d486078cc::t_a29a15c2d16c0a 75
+Ondelia/Features/Player/ChaptersListView.swift
+  s_50659d486078cc::t_cd7ab394d2567c 102-103,116,124
+  s_50659d486078cc::t_744a74dd3a41e7 61
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_50659d486078cc::t_9bdd528afcfe93 17-19,27
+  s_50659d486078cc::t_5d8f9b759e0c0d 20-26
+Ondelia/Features/Player/PlayerView+Wide.swift
+  s_50659d486078cc::t_cd7ab394d2567c 118-120,194-195,313-314,325,342-344
+  s_50659d486078cc::t_8b6aa289ecfb03 11
+  s_50659d486078cc::t_e3de625be638cb 83,103,115,174
+Ondelia/Shared/MiniPlayerBar+Wide.swift
+  s_50659d486078cc::t_aa9a4dd4df6497 57,59-66,68,70-78,80-81,83
+  s_50659d486078cc::t_fa10b68ff9832e 23-24,56
+Ondelia/Features/Statistics/StatisticsView.swift
+  s_50659d486078cc::t_78af52c25f40c8 14-42,57-71
+  s_50659d486078cc::t_26cbc1ac650219 72-73
+Ondelia/Features/Library/LibraryView+Fold.swift
+  s_50659d486078cc::t_853a5d701fd8d7 1-44
+Ondelia/Features/Library/CollectionsView.swift
+  s_50659d486078cc::t_04145d543c2190 6-9,14-15,25-27,85-92,94-102,104-113,115-121,135-158,195,200-207,234
+Ondelia/Shared/FoldSplit.swift
+  s_50659d486078cc::t_9bdd528afcfe93 20-22
+  s_50659d486078cc::t_c5cf96fe0bf37a 83-84
+  s_50659d486078cc::t_f647120e0f2203 1-19,23-82,85-95
+Ondelia/Features/Player/PlayerView+Layout.swift
+  s_50659d486078cc::t_e3de625be638cb 23-31
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesViews.swift
+  s_50659d486078cc::t_0bd65829fe22af 89-90,93-116,128-129,211-212,215-216,221-222
+Ondelia/Features/Player/PlayerView+Fold.swift
+  s_50659d486078cc::t_e3de625be638cb 1-9,11-33,35-57
+  s_50659d486078cc::t_8b6aa289ecfb03 10,34
+Ondelia/Resources/Localizable.xcstrings
+  s_50659d486078cc::t_0bd65829fe22af 276-286,3834-3840
+  s_50659d486078cc::t_78ab3f651a26dc 3722-3732,3841-3844
+Ondelia/Features/Library/CollectionTileView.swift
+  s_50659d486078cc::t_99dfcbf6de6ed8 8-9,34
+Ondelia/Features/Statistics/MilestonesRowView.swift
+  s_50659d486078cc::t_78af52c25f40c8 7-8,18-25,33-36
+  s_50659d486078cc::t_88d97caabce35f 37-38
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_50659d486078cc::t_dea5b5207949be 44-45,47,50,58,66,127,131,136,141
+  s_50659d486078cc::t_853a5d701fd8d7 18-42
+Ondelia/Features/AudiobookShelf/AudiobookShelfSeriesTile.swift
+  s_50659d486078cc::t_99dfcbf6de6ed8 7-8,38
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "46a147a32cff7faaa50c3ba1e6d492fed4cf2099",
+  "prompts": {},
+  "sessions": {
+    "s_50659d486078cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e9ef37-3bde-4c6c-8908-de553b69321d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
