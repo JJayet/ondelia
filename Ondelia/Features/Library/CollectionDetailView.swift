@@ -9,8 +9,12 @@ struct CollectionDetailView: View {
     let onSelectBook: (AudiobookModel) -> Void
     let onRename: (CollectionModel) -> Void
     let onDelete: (CollectionModel) -> Void
+    /// The right half of the Collections screen on iPhone Duo (design 10b): the screen's bar
+    /// is the list's, so the label and the menu sit in the pane.
+    var embedded = false
 
     @Environment(\.playerRouter) private var playerRouter
+    @Environment(\.isFoldSplit) private var isFoldSplit
     @AppStorage(CollectionGroup.showMissingKey) var showMissing = true
     let manager = AudiobookManager.shared
     private let audioManager = GlobalAudioManager.shared
@@ -24,38 +28,72 @@ struct CollectionDetailView: View {
     }
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 14) {
-                hero
-                TipView(AutoContinueTip())
-                progressCard
+        if embedded {
+            content
+        } else {
+            content
+                .navigationTitle("")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbarBackground(.hidden, for: .navigationBar)
+                .toolbar {
+                    // The bar's centre is the fold: the label moves into the left half there.
+                    if !isFoldSplit {
+                        ToolbarItem(placement: .principal) { kindLabel }
+                    }
+                    ToolbarItem(placement: .topBarTrailing) { moreMenu }
+                }
+        }
+    }
+
+    private var content: some View {
+        // iPhone Duo around its fold (design 9b): the stack, progress and resume on the left,
+        // the books on the right.
+        FoldSplit {
+            ScrollView {
+                VStack(spacing: 14) {
+                    kindLabel
+                    hero
+                    TipView(AutoContinueTip())
+                    progressCard
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 30)
+            }
+        } secondary: {
+            ScrollView {
                 booksSection
+                    .padding(.horizontal, 16)
+                    .padding(.bottom, 30)
             }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 30)
-            .frame(maxWidth: 640)
-            .frame(maxWidth: .infinity)
+        } fallback: {
+            ScrollView {
+                VStack(spacing: 14) {
+                    if embedded {
+                        HStack {
+                            kindLabel
+                            Spacer()
+                            moreMenu
+                                .frame(width: 40, height: 40)
+                                .glassEffect(.regular, in: Circle())
+                        }
+                    }
+                    hero
+                    TipView(AutoContinueTip())
+                    progressCard
+                    booksSection
+                }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 30)
+                .frame(maxWidth: 640)
+                .frame(maxWidth: .infinity)
+            }
         }
-        .background(TintedBackground(tint: CoverTintCache.tint(for: group.books.first), intensity: 1))
+        // Embedded, the Collections screen's backdrop runs under both halves: a second one here
+        // drew a seam beside the fold instead of on it.
+        .background {
+            if !embedded { TintedBackground(tint: CoverTintCache.tint(for: group.books.first), intensity: 1) }
+        }
         .scrollContentBackground(.hidden)
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
-        .toolbarBackground(.hidden, for: .navigationBar)
-        .toolbar {
-            ToolbarItem(placement: .principal) {
-                Text((group.isSeries
-                    ? NSLocalizedString("Series", comment: "Collection detail header: a Hardcover series")
-                    : NSLocalizedString("Collection", comment: "Collection detail header: hand-made")).uppercased())
-                    .font(.system(size: 11, weight: .semibold))
-                    .tracking(1.5)
-                    .foregroundStyle(.secondary)
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Menu { menuItems } label: { Image(systemName: "ellipsis") }
-                    .simultaneousGesture(TapGesture().onEnded { withHapticFeedback {} })
-                    .accessibilityLabel(NSLocalizedString("More", comment: "Book actions menu"))
-            }
-        }
     }
 
     // MARK: - Hero
@@ -236,31 +274,5 @@ struct CollectionDetailView: View {
         audioManager.loadAudiobook(book)
         audioManager.startPlaybackAfterOpeningBook()
         playerRouter?.present(book)
-    }
-
-    @ViewBuilder
-    private var menuItems: some View {
-        Menu {
-            ForEach(CollectionSort.allCases.filter { $0 != .seriesPosition || group.isSeries }, id: \.rawValue) { sort in
-                Button { withHapticFeedback { manager.setSort(sort, for: collection) } } label: {
-                    if collection.sort == sort {
-                        Label(sort.displayName, systemImage: "checkmark")
-                    } else {
-                        Text(sort.displayName)
-                    }
-                }
-            }
-        } label: {
-            Label(NSLocalizedString("Sort by", comment: "Search sort picker label"), systemImage: "arrow.up.arrow.down")
-        }
-        if !group.isSeries {
-            Button { onRename(collection) } label: {
-                Label(NSLocalizedString("Rename", comment: "Rename button"), systemImage: "pencil")
-            }
-        }
-        Button(role: .destructive) { onDelete(collection) } label: {
-            Label(NSLocalizedString("Delete Collection", comment: "Delete a collection, keeping its books"), systemImage: "trash")
-        }
-        .tint(.red)
     }
 }

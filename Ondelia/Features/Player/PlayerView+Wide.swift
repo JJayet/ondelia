@@ -8,7 +8,7 @@ extension PlayerView {
     @ViewBuilder
     var wideLayout: some View {
         VStack(spacing: 0) {
-            wideTopBar
+            wideTopBar.padding(.horizontal, 24)
 
             HStack(alignment: .top, spacing: 32) {
                 CoverArtView(audiobook: audiobook, size: 222, cornerRadius: 22)
@@ -80,7 +80,7 @@ extension PlayerView {
 
     /// The breadcrumb only: "Series · Mistborn". Closing lives in the transport bar.
     @ViewBuilder
-    private var wideTopBar: some View {
+    var wideTopBar: some View {
         HStack {
             if let collection = owningCollection {
                 Text("\(collection.isSeries ? NSLocalizedString("Series", comment: "Collection kind: Hardcover series") : NSLocalizedString("Collections", comment: "Section title for collections")) · \(collection.name)")
@@ -91,7 +91,6 @@ extension PlayerView {
         }
         .frame(height: 38)
         .padding(.top, 12)
-        .padding(.horizontal, 24)
     }
 
     private var owningCollection: CollectionModel? {
@@ -101,7 +100,7 @@ extension PlayerView {
     /// "Mistborn · Volume 1" over the title, when the book belongs somewhere. Same rule as the
     /// collection screen: Hardcover's number in a series, the row's place in a hand-made
     /// collection, where Hardcover's number is from some other series.
-    private var eyebrow: String? {
+    var eyebrow: String? {
         guard let collection = owningCollection else { return nil }
         let number: Int? = collection.isSeries
             ? audiobook.hardcover?.seriesPosition.map { Int($0.rounded()) }
@@ -113,16 +112,12 @@ extension PlayerView {
     // MARK: Identity
 
     @ViewBuilder
-    private var metaChips: some View {
+    var metaChips: some View {
         HStack(spacing: 9) {
             metaChip(audiobook.duration.hoursMinutesFormatted)
-            if !chapters.isEmpty {
-                metaChip(String(format: NSLocalizedString("%d chapters", comment: "Number of chapters"), chapters.count))
-            }
-            // On this device is the normal case; only the opposite is news.
-            if AudiobookShelfService.shared.canStream(audiobook) {
-                metaChip(NSLocalizedString("Streaming", comment: "Player: the book plays from the AudiobookShelf server"), dot: .green)
-            } else if !audiobookManager.hasFile(audiobook) {
+            // The chapter count is in the table's tally. On this device is the normal case and
+            // streaming plays anyway; only a book that cannot play is news.
+            if !AudiobookShelfService.shared.canStream(audiobook), !audiobookManager.hasFile(audiobook) {
                 metaChip(NSLocalizedString("Not on this device", comment: "Missing audio badge"), dot: .secondary)
             }
         }
@@ -176,7 +171,7 @@ extension PlayerView {
     }
 
     @ViewBuilder
-    private var chapterTable: some View {
+    var chapterTable: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline, spacing: 12) {
                 Text(NSLocalizedString("Chapters", comment: "Chapter list sheet title"))
@@ -196,7 +191,8 @@ extension PlayerView {
                             WideChapterRow(
                                 chapter: chapter,
                                 title: chapterTitle(chapter),
-                                state: rowState(index: index, chapter: chapter)
+                                state: rowState(index: index, chapter: chapter),
+                                isPlaying: isPlaying
                             ) {
                                 audioManager.seek(to: chapter.startTime)
                                 audioManager.startPlayback()
@@ -314,6 +310,8 @@ struct WideChapterRow: View {
     let chapter: ChapterModel
     let title: String
     let state: State
+    /// The current row says "paused" and its bars rest while playback is paused.
+    let isPlaying: Bool
     let onTap: () -> Void
 
     private var isCurrent: Bool { if case .current = state { return true }; return false }
@@ -324,7 +322,7 @@ struct WideChapterRow: View {
             HStack(spacing: 18) {
                 Group {
                     if isCurrent {
-                        PlayingBars()
+                        PlayingBars(animated: isPlaying)
                     } else {
                         Text(verbatim: "\(chapter.chapterNumber)")
                             .font(.system(size: 14.5))
@@ -341,7 +339,9 @@ struct WideChapterRow: View {
                         .lineLimit(1)
                     if case .current(let remaining, _) = state {
                         Text(String(
-                            format: NSLocalizedString("in progress · -%@", comment: "Chapter table: playing row, time left in the chapter"),
+                            format: isPlaying
+                                ? NSLocalizedString("in progress · -%@", comment: "Chapter table: playing row, time left in the chapter")
+                                : NSLocalizedString("paused · -%@", comment: "Chapter table: current row while paused, time left in the chapter"),
                             remaining.clockFormatted
                         ))
                         .font(.system(size: 13))

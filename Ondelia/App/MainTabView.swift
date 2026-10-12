@@ -12,6 +12,8 @@ struct MainTabView: View {
     @State private var selectedTab = "library"
     @State private var searchText: String = ""
     @State private var showingImporter = false
+    /// iPhone Duo laid out around its fold: the mini player is a row of the left half then.
+    @State private var isFoldSplit = false
     @Namespace private var namespace
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -21,6 +23,8 @@ struct MainTabView: View {
         // Applied once here: sheets and covers presented from the tabs inherit both, so no
         // other view sets them.
         themedTabs
+            .onGeometryChange(for: Bool.self) { FoldDivision.band(in: $0) != nil } action: { isFoldSplit = $0 }
+            .environment(\.isFoldSplit, isFoldSplit)
             .preferredColorScheme(themeManager.currentTheme.colorScheme)
             .tint(themeManager.accentColor.color)
             .overlay(alignment: .top) {
@@ -44,8 +48,9 @@ struct MainTabView: View {
     @ViewBuilder
     private var themedTabs: some View {
         // Accessory modifier reserves an empty bar even with no content, so apply it only when
-        // there is a mini player to put in it — a stopped book leaves one behind.
-        if let book = globalAudioManager.currentAudiobook, globalAudioManager.showMiniPlayer {
+        // there is a mini player to put in it — a stopped book leaves one behind. Around the
+        // fold the system would centre it on the crease; `FoldSplit` docks it instead.
+        if let book = globalAudioManager.currentAudiobook, globalAudioManager.showMiniPlayer, !isFoldSplit {
             tabs
                 .tabViewBottomAccessory {
                     MiniPlayerBar(namespace: namespace)

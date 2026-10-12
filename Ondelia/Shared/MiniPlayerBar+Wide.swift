@@ -20,7 +20,8 @@ extension MiniPlayerBar {
                     .foregroundStyle(.secondary)
                     .lineLimit(1)
             }
-            .frame(width: 220, alignment: .leading)
+            // Docked, the half has no room for the fixed column nor the menus after the skips.
+            .frame(width: docked ? nil : 220, alignment: .leading)
 
             Spacer(minLength: 8)
 
@@ -52,33 +53,35 @@ extension MiniPlayerBar {
                 audio.skipForward()
             }
 
-            Spacer(minLength: 8)
+            if !docked {
+                Spacer(minLength: 8)
 
-            Menu {
-                ForEach(PlaybackSpeed.choices, id: \.self) { speed in
-                    Button(PlaybackSpeed.displayName(speed)) { audio.setPlaybackRate(speed) }
-                }
-            } label: {
-                Text(PlaybackSpeed.displayName(audio.getPlaybackRate()))
-                    .monospacedDigit()
-                    .glassPill(height: 36)
-            }
-            .accessibilityLabel(NSLocalizedString("Playback speed", comment: "Playback speed accessibility label"))
-
-            Menu {
-                SleepTimerMenuItems()
-            } label: {
-                HStack(spacing: 6) {
-                    Image(systemName: audio.sleepTimeRemaining > 0 ? "moon.fill" : "moon")
-                        .font(.system(size: 14, weight: .medium))
-                    if audio.sleepTimeRemaining > 0 {
-                        Text(audio.sleepTimeRemaining.clockFormatted).monospacedDigit()
+                Menu {
+                    ForEach(PlaybackSpeed.choices, id: \.self) { speed in
+                        Button(PlaybackSpeed.displayName(speed)) { audio.setPlaybackRate(speed) }
                     }
+                } label: {
+                    Text(PlaybackSpeed.displayName(audio.getPlaybackRate()))
+                        .monospacedDigit()
+                        .glassPill(height: 36)
                 }
-                .foregroundStyle(audio.sleepTimeRemaining > 0 ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
-                .glassPill(height: 36, tinted: audio.sleepTimeRemaining > 0)
+                .accessibilityLabel(NSLocalizedString("Playback speed", comment: "Playback speed accessibility label"))
+
+                Menu {
+                    SleepTimerMenuItems()
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: audio.sleepTimeRemaining > 0 ? "moon.fill" : "moon")
+                            .font(.system(size: 14, weight: .medium))
+                        if audio.sleepTimeRemaining > 0 {
+                            Text(audio.sleepTimeRemaining.clockFormatted).monospacedDigit()
+                        }
+                    }
+                    .foregroundStyle(audio.sleepTimeRemaining > 0 ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))
+                    .glassPill(height: 36, tinted: audio.sleepTimeRemaining > 0)
+                }
+                .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
             }
-            .accessibilityLabel(NSLocalizedString("Sleep Timer", comment: "Sleep timer accessibility label"))
         }
         .buttonStyle(.plain)
         .padding(.horizontal, 14)

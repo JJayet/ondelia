@@ -5,6 +5,8 @@ struct MiniPlayerBar: View {
     let audio = GlobalAudioManager.shared
     /// The zoom into the full player flies from here.
     let namespace: Namespace.ID
+    /// A row of the left half on iPhone Duo (see `FoldSplit`) rather than the tab accessory.
+    var docked = false
 
     /// The system moves the accessory into the minimized tab bar when the user scrolls down.
     /// That strip is one tab-bar row tall: cover, title and play/pause fit, nothing else does.
@@ -22,7 +24,7 @@ struct MiniPlayerBar: View {
         // the hidden inline copy: the player shrank into the bottom-left corner.
         if isInline {
             bar
-        } else if horizontalSizeClass == .regular {
+        } else if horizontalSizeClass == .regular || docked {
             // Regular width: the accessory is the pane's transport (MiniPlayerBar+Wide.swift),
             // and the player opens as a tab rather than flying out of here.
             wideBar

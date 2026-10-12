@@ -273,6 +273,17 @@
         }
       }
     },
+    "%@. The books stay on the server until you download them." : {
+      "comment" : "Server series: total download size, and what downloading means",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Les livres restent sur le serveur tant que vous ne les téléchargez pas."
+          }
+        }
+      }
+    },
     "%@×" : {
       "comment" : "Speed picker: playback rate multiplier",
       "localizations" : {
@@ -362,7 +373,7 @@
       }
     },
     "%d chapters" : {
-      "comment" : "Chapter count chip\nNumber of chapters",
+      "comment" : "Chapter count chip",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -920,7 +931,7 @@
       }
     },
     "Author" : {
-      "comment" : "Sort by author",
+      "comment" : "Sort by author\nSort option: by author",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1455,7 +1466,7 @@
       }
     },
     "Collection · server" : {
-      "comment" : "Collections screen: a collection from an AudiobookShelf server",
+      "comment" : "Collections screen row: a server collection\nCollections screen: a collection from an AudiobookShelf server",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2009,7 +2020,7 @@
       }
     },
     "Duration" : {
-      "comment" : "Table column: duration",
+      "comment" : "Sort option: by duration\nTable column: duration",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -3708,6 +3719,17 @@
         }
       }
     },
+    "paused · -%@" : {
+      "comment" : "Chapter table: current row while paused, time left in the chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en pause · -%@"
+          }
+        }
+      }
+    },
     "Pick a book in the library to start listening." : {
       "comment" : "Now Playing pane: hint when no book is loaded",
       "localizations" : {
@@ -3805,6 +3827,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "File d'attente"
+          }
+        }
+      }
+    },
+    "Play the First" : {
+      "comment" : "Server series: play its first book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouter le premier"
           }
         }
       }
@@ -4642,7 +4675,7 @@
       }
     },
     "Series · server" : {
-      "comment" : "Collections screen: a series from an AudiobookShelf server",
+      "comment" : "Collections screen row: a server series\nCollections screen: a series from an AudiobookShelf server",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5212,6 +5245,7 @@
     },
     "Streaming" : {
       "comment" : "Player: the book plays from the AudiobookShelf server",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5564,7 +5598,7 @@
       }
     },
     "Title" : {
-      "comment" : "Sort by title",
+      "comment" : "Sort by title\nSort option: by title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {

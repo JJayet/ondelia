@@ -4,6 +4,8 @@ import SwiftUI
 struct MilestonesRowView: View {
     let statistics: ReadingStatistics
     let stats: ListeningStats
+    /// Three columns instead of the scrolling row, which on iPhone Duo would run into the fold.
+    var grid = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -13,17 +15,25 @@ struct MilestonesRowView: View {
                     .foregroundStyle(.tint)
                 SectionLabel(NSLocalizedString("Milestones", comment: "Statistics: badges row"))
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 14) {
-                    ForEach(Milestone.all) { milestone in
-                        badge(milestone, progress: statistics.progress(of: milestone, in: stats))
-                    }
+            if grid {
+                LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .top), count: 3), spacing: 14) {
+                    badges
                 }
-                .padding(.horizontal, 2)
+            } else {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(alignment: .top, spacing: 14) { badges }
+                        .padding(.horizontal, 2)
+                }
             }
         }
         .padding(18)
         .glassCard()
+    }
+
+    private var badges: some View {
+        ForEach(Milestone.all) { milestone in
+            badge(milestone, progress: statistics.progress(of: milestone, in: stats))
+        }
     }
 
     private func badge(_ milestone: Milestone, progress: Int) -> some View {

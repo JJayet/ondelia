@@ -14,13 +14,17 @@ extension LibraryView {
             HStack(alignment: .firstTextBaseline, spacing: 14) {
                 Text(screenTitle)
                     .font(.system(size: 34, weight: .bold))
-                Text(String(
-                    format: NSLocalizedString("%d books · %d on this device", comment: "Wide library subtitle"),
-                    shelfBooks.count,
-                    shelfBooks.filter { audiobookManager.hasFile($0) }.count
-                ))
-                .font(.system(size: 15))
-                .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                // Half a screen beside the fold: the count would push the title onto two lines.
+                if !isFoldSplit {
+                    Text(String(
+                        format: NSLocalizedString("%d books · %d on this device", comment: "Wide library subtitle"),
+                        shelfBooks.count,
+                        shelfBooks.filter { audiobookManager.hasFile($0) }.count
+                    ))
+                    .font(.system(size: 15))
+                    .foregroundStyle(.secondary)
+                }
             }
 
             Spacer(minLength: 0)

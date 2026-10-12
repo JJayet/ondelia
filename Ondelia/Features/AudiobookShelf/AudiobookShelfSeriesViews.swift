@@ -86,9 +86,34 @@ struct AudiobookShelfSeriesView: View {
 
     @State private var books: [AudiobookShelfAPI.Item]?
     @State private var error: String?
+    @State private var order: AudiobookShelfSeriesOrder?
+    @Environment(\.isFoldSplit) private var isFoldSplit
 
     var body: some View {
-        AudiobookShelfBookGrid(items: books ?? [], showsSequence: !series.isServerCollection)
+        // iPhone Duo around its fold (design 11b): the sheet on the left, the grid in three
+        // columns on the right, scrolling on its own.
+        FoldSplit {
+            AudiobookShelfSeriesSheet(series: series, books: books ?? [], library: library, order: $order)
+        } secondary: {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 12) {
+                    SectionLabel(String(
+                        format: NSLocalizedString("%d books", comment: "AudiobookShelf: number of books in a series or by an author"),
+                        books?.count ?? 0
+                    ))
+                    AudiobookShelfBookGridContent(
+                        items: order?.sorted(books ?? []) ?? books ?? [],
+                        showsSequence: !series.isServerCollection && order == nil,
+                        columns: 3
+                    )
+                }
+                .padding(16)
+            }
+            .environment(\.audiobookShelfLibraryBooks, AudiobookShelfService.shared.libraryBooks)
+        } fallback: {
+            AudiobookShelfBookGrid(items: books ?? [], showsSequence: !series.isServerCollection)
+        }
+        .background(TintedBackground(intensity: 0.6))
             .overlay {
                 if let error, books == nil {
                     ContentUnavailableView(
@@ -100,7 +125,8 @@ struct AudiobookShelfSeriesView: View {
                     ProgressView()
                 }
             }
-            .navigationTitle(series.name)
+            // The bar's centre is the fold: the name heads the left half there.
+            .navigationTitle(isFoldSplit ? "" : series.name)
             .navigationBarTitleDisplayMode(.inline)
             .task { await load() }
     }
@@ -182,14 +208,18 @@ struct AudiobookShelfBookGrid: View {
 struct AudiobookShelfBookGridContent: View {
     let items: [AudiobookShelfAPI.Item]
     var showsSequence = false
+    /// A fixed column count, for a half screen; nil follows the library's grid density.
+    var columns: Int?
     var onReachEnd: ((AudiobookShelfAPI.Item) -> Void)?
 
-    @AppStorage("library.gridColumns") private var gridColumns = 2
+    @AppStorage("library.gridColumns") private var storedColumns = 2
+    private var gridColumns: Int { columns ?? storedColumns }
 
     var body: some View {
         let spacing: CGFloat = gridColumns >= 4 ? 10 : 16
         LazyVGrid(
-            columns: [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: spacing)],
+            columns: columns.map { Array(repeating: GridItem(.flexible(), spacing: spacing), count: $0) }
+                ?? [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: spacing)],
             spacing: spacing
         ) {
             ForEach(items) { item in

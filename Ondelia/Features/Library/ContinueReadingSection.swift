@@ -56,6 +56,8 @@ struct ContinueReadingSection: View {
     /// Regular width: one card in evidence and the others as small rows beside it, instead of
     /// three equal cards competing (design 7a).
     var wide = false
+    /// With `wide`: the other entries under the card instead of beside it, for a half screen.
+    var stacked = false
     let onSelect: (AudiobookModel) -> Void
 
     var body: some View {
@@ -71,7 +73,8 @@ struct ContinueReadingSection: View {
             if wide, let first = entries.first {
                 // Capped: on a wide Mac window a hero the width of the shelf was a bar of
                 // empty glass with a play button at the far end.
-                HStack(alignment: .top, spacing: 20) {
+                let layout = stacked ? AnyLayout(VStackLayout(spacing: 9)) : AnyLayout(HStackLayout(alignment: .top, spacing: 20))
+                layout {
                     ContinueReadingHeroView(entry: first) { onSelect(first.book) }
                         .frame(maxWidth: 760)
                     if entries.count > 1 {
@@ -80,9 +83,9 @@ struct ContinueReadingSection: View {
                                 ContinueReadingCompactRow(entry: entry) { onSelect(entry.book) }
                             }
                         }
-                        .frame(width: 266)
+                        .frame(width: stacked ? nil : 266)
                     }
-                    Spacer(minLength: 0)
+                    if !stacked { Spacer(minLength: 0) }
                 }
                 .padding(.horizontal, headerPadding)
             } else if entries.count == 1, let entry = entries.first {

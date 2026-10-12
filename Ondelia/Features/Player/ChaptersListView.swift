@@ -58,7 +58,7 @@ struct ChapterRowView: View {
                 // The playing chapter trades its number for the design's three-bar meter.
                 Group {
                     if isCurrent {
-                        PlayingBars()
+                        PlayingBars(animated: GlobalAudioManager.shared.playbackState == .playing)
                     } else {
                         Text(verbatim: "\(chapter.chapterNumber)")
                             .font(.system(size: 12.5))
@@ -99,6 +99,8 @@ struct ChapterRowView: View {
 
 /// Three bars breathing at different rates — the "this one is playing" mark in the design.
 struct PlayingBars: View {
+    /// False rests the bars: playback is paused.
+    var animated = true
     @State private var animating = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
@@ -111,7 +113,7 @@ struct PlayingBars: View {
                     .fill(.tint)
                     .frame(width: 2.5, height: animating ? bar.1 : bar.0)
                     .animation(
-                        reduceMotion
+                        reduceMotion || !animated
                             ? nil
                             : .easeInOut(duration: 0.45).repeatForever(autoreverses: true).delay(bar.2),
                         value: animating
@@ -119,7 +121,7 @@ struct PlayingBars: View {
             }
         }
         .frame(height: 14, alignment: .bottom)
-        .onAppear { animating = true }
+        .onChange(of: animated, initial: true) { _, animated in animating = animated }
         .accessibilityHidden(true)
     }
 }

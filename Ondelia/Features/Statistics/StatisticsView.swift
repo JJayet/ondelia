@@ -11,27 +11,36 @@ struct StatisticsView: View {
         // Computed once per body: every card below slices the same sessions.
         let stats = statistics.stats
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 16) {
-                    streakCard
-                    MilestonesRowView(statistics: statistics, stats: stats)
-                    snapshot(stats)
-                    HeatmapCard(stats: stats)
-                    TimeOfDayCard(stats: stats)
-                    YearlyMixCard(stats: stats)
-                    CompletedCard(stats: stats, legacyBooks: statistics.booksCompleted - stats.booksCompleted)
-                    RankedListCard(title: NSLocalizedString("Top Authors", comment: "Statistics card"), symbol: "person.2", rows: stats.topAuthors)
-                    RankedListCard(title: NSLocalizedString("Top Narrators", comment: "Statistics card"), symbol: "waveform", rows: stats.topNarrators)
-                    RankedListCard(
-                        title: NSLocalizedString("Genres", comment: "Statistics card"),
-                        symbol: "sparkles",
-                        rows: stats.genres,
-                        empty: NSLocalizedString("Link books to Hardcover to see genres.", comment: "Statistics: genre card empty state")
-                    )
+            // iPhone Duo around its fold (design 9d): the streak and the totals on the left, the
+            // badges as a grid and the cards on the right.
+            FoldSplit {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        streakCard
+                        snapshot(stats)
+                    }
+                    .padding(16)
                 }
-                .padding(16)
-                .frame(maxWidth: 640)
-                .frame(maxWidth: .infinity)
+            } secondary: {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        MilestonesRowView(statistics: statistics, stats: stats, grid: true)
+                        detailCards(stats)
+                    }
+                    .padding(16)
+                }
+            } fallback: {
+                ScrollView {
+                    VStack(spacing: 16) {
+                        streakCard
+                        MilestonesRowView(statistics: statistics, stats: stats)
+                        snapshot(stats)
+                        detailCards(stats)
+                    }
+                    .padding(16)
+                    .frame(maxWidth: 640)
+                    .frame(maxWidth: .infinity)
+                }
             }
             .background(TintedBackground(intensity: 0.7))
             .scrollContentBackground(.hidden)
@@ -43,6 +52,23 @@ struct StatisticsView: View {
             // A tab stays alive while a book plays, so the ring has to follow the month.
             .onChange(of: statistics.monthlyGoalProgress) { _, progress in ringProgress = progress }
         }
+    }
+
+    /// One card per way of slicing the log, under the streak, badges and snapshot.
+    @ViewBuilder
+    private func detailCards(_ stats: ListeningStats) -> some View {
+        HeatmapCard(stats: stats)
+        TimeOfDayCard(stats: stats)
+        YearlyMixCard(stats: stats)
+        CompletedCard(stats: stats, legacyBooks: statistics.booksCompleted - stats.booksCompleted)
+        RankedListCard(title: NSLocalizedString("Top Authors", comment: "Statistics card"), symbol: "person.2", rows: stats.topAuthors)
+        RankedListCard(title: NSLocalizedString("Top Narrators", comment: "Statistics card"), symbol: "waveform", rows: stats.topNarrators)
+        RankedListCard(
+            title: NSLocalizedString("Genres", comment: "Statistics card"),
+            symbol: "sparkles",
+            rows: stats.genres,
+            empty: NSLocalizedString("Link books to Hardcover to see genres.", comment: "Statistics: genre card empty state")
+        )
     }
 
     private var streakCard: some View {
