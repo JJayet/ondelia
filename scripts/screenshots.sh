@@ -8,7 +8,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-DEVICES=${DEVICES-"iPhone 18 Pro Max|iPad Pro 13-inch (M5)"}
+# The iPhone Duo shoots whatever pose Device Hub left it in: half-open it first for the fold layouts.
+DEVICES=${DEVICES-"iPhone 18 Pro Max|iPad Pro 13-inch (M5)|iPhone Duo"}
 WATCH_DEVICES=${WATCH_DEVICES-"Apple Watch Series 11 (46mm)|Apple Watch Ultra 4 (49mm)"}
 LANGS=${LANGS:-"en fr"}
 DARK=${DARK:-0}
@@ -45,8 +46,9 @@ shoot() {
     jq -r '.. | objects | select(has("exportedFileName")) | "\(.exportedFileName)\t\(.suggestedHumanReadableName)"' "$WORK/export/manifest.json" |
       while IFS=$'\t' read -r file human; do
         mv "$WORK/export/$file" "$dest/${human%%_*}.png"
-        # iPad shoots landscape, but XCUIScreen saves the pixels portrait, rotated a quarter turn.
-        [[ $device == iPad* ]] && sips -r 270 "$dest/${human%%_*}.png" >/dev/null
+        # iPad shoots landscape, but XCUIScreen saves portrait pixels with an orientation tag
+        # that sips ignores. Bake the tag into the pixels (ImageMagick: brew install imagemagick).
+        [[ $device == iPad* ]] && magick "$dest/${human%%_*}.png" -auto-orient -strip "$dest/${human%%_*}.png"
       done
     rm -rf "$WORK/export"
     ls "$dest"
