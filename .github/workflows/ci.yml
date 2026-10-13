@@ -19,6 +19,9 @@ jobs:
     # Same Xcode as development: CI on Xcode 26 rejected code Xcode 27 accepts.
     runs-on: xcode-27
     timeout-minutes: 60
+    # The image defaults to 27.0; the fold layout needs the iOS 27.1 SDK.
+    env:
+      DEVELOPER_DIR: /Applications/Xcode_27.1.app/Contents/Developer
 
     steps:
       - name: Check out repository
