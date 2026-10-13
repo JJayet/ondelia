@@ -25,7 +25,7 @@ enum SettingsSync {
         AudiobookShelfService.accountsKey,
         AudiobookShelfService.Defaults.server, AudiobookShelfService.Defaults.username,
         AudiobookShelfService.Defaults.library, AudiobookShelfCatalog.enabledKey,
-        AudiobookShelfService.Defaults.tapAction
+        AudiobookShelfService.Defaults.tapAction, AudiobookShelfService.Defaults.hidesFinished
     ]
 
     /// Set by the listener and never pushed on their own: `publish` sends the listener's change,

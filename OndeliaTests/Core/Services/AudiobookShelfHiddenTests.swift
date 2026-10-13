@@ -22,4 +22,23 @@ struct AudiobookShelfHiddenTests {
         #expect(hidden.isHidden(.series, "se_1", on: "s1"))
         #expect(!hidden.isHidden(item: "li_c", authors: nil, on: "s1"))
     }
+
+    @Test("A book finished on its server is hidden while the setting is on, which it is by default")
+    func finishedHidden() {
+        let service = AudiobookShelfService.shared
+        let defaults = UserDefaults.standard
+        let key = AudiobookShelfService.Defaults.hidesFinished
+        let saved = (defaults.object(forKey: key), service.finishedItems)
+        defer {
+            defaults.set(saved.0, forKey: key)
+            service.finishedItems = saved.1
+        }
+        service.finishedItems = ["s1": ["li_done"]]
+        defaults.removeObject(forKey: key)
+        #expect(service.hidesFinished("li_done", on: "s1"))
+        #expect(!service.hidesFinished("li_done", on: "s2"))
+        #expect(!service.hidesFinished("li_open", on: "s1"))
+        defaults.set(false, forKey: key)
+        #expect(!service.hidesFinished("li_done", on: "s1"))
+    }
 }

@@ -31,9 +31,18 @@ extension AudiobookShelfService {
         return moved >= progressPushInterval
     }
 
+    /// Off while the screenshots seed made-up listening onto a real account.
+    static var syncsListening: Bool {
+        #if DEBUG
+        !ProcessInfo.processInfo.arguments.contains("--seed-showcase")
+        #else
+        true
+        #endif
+    }
+
     /// Pushes the book's position when it has moved enough. Called on every progress write.
     func pushProgress(for book: AudiobookModel) {
-        guard let item = itemID(for: book), let (server, token) = session(forItem: item),
+        guard Self.syncsListening, let item = itemID(for: book), let (server, token) = session(forItem: item),
               book.duration > 0, !pushingProgress.contains(book.id) else { return }
         let position = min(max(book.currentPosition, 0), book.duration)
         let next = PushedProgress(position: position, isFinished: book.isFinished)
@@ -49,6 +58,9 @@ extension AudiobookShelfService {
         pushedProgress[book.id] = next
         let (id, duration, isFinished) = (book.id, book.duration, book.isFinished)
         Task {
+            // Sessions first: the server may take their position as the item's, and the
+            // progress below, finished or not, has to be the last word.
+            await sendSessions(for: book, item: item, server: server, token: token)
             do {
                 try await AudiobookShelfAPI.updateProgress(
                     server: server, token: token, item: item,
@@ -67,7 +79,7 @@ extension AudiobookShelfService {
     /// Takes the server's position before the book opens, when it is the newer one. Bounded by
     /// a short timeout: an unreachable server must not hold up playback of a downloaded book.
     func pullProgress(for book: AudiobookModel) async {
-        guard let item = itemID(for: book), let (server, token) = session(forItem: item) else { return }
+        guard Self.syncsListening, let item = itemID(for: book), let (server, token) = session(forItem: item) else { return }
         let remote: AudiobookShelfAPI.MediaProgress?
         do {
             remote = try await AudiobookShelfAPI.progress(server: server, token: token, item: item, timeout: 4)

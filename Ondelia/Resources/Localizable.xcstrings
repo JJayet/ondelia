@@ -2580,6 +2580,28 @@
         }
       }
     },
+    "Hide Finished Books" : {
+      "comment" : "AudiobookShelf setting: leave server books finished on the server out of the shelves",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les livres terminés"
+          }
+        }
+      }
+    },
+    "Hide Finished Books leaves out the books your server has as finished." : {
+      "comment" : "AudiobookShelf settings footer: hide finished books",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les livres terminés écarte les livres que votre serveur indique comme terminés."
+          }
+        }
+      }
+    },
     "Hiding an author also hides all of their books." : {
       "comment" : "Hidden & Shown footer for authors",
       "localizations" : {

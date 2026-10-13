@@ -6,6 +6,7 @@ struct AudiobookShelfSettingsView: View {
 
     @AppStorage(AudiobookShelfCatalog.enabledKey) private var showsInLibrary = false
     @AppStorage(AudiobookShelfService.Defaults.tapAction) private var tapAction = AudiobookShelfService.TapAction.stream
+    @AppStorage(AudiobookShelfService.Defaults.hidesFinished) private var hidesFinished = true
     @Environment(\.isFoldSplit) private var isFoldSplit
 
     /// Around the fold, what the right half shows.
@@ -110,10 +111,14 @@ struct AudiobookShelfSettingsView: View {
                 NSLocalizedString("Show server audiobooks in Library", comment: "AudiobookShelf setting: blend server books into the Library"),
                 isOn: $showsInLibrary
             )
+            Toggle(
+                NSLocalizedString("Hide Finished Books", comment: "AudiobookShelf setting: leave server books finished on the server out of the shelves"),
+                isOn: $hidesFinished
+            )
         } header: {
             Text(NSLocalizedString("Library", comment: "AudiobookShelf library picker"))
         } footer: {
-            Text(showsInLibrary
+            let shelf = showsInLibrary
                 ? NSLocalizedString(
                     "Every book of your server library appears in Library, Search and Collections. Tap one to stream it; long-press to download it.",
                     comment: "AudiobookShelf settings footer, server books shown in the Library"
@@ -121,7 +126,12 @@ struct AudiobookShelfSettingsView: View {
                 : NSLocalizedString(
                     "Your server's books are in Library, under AudiobookShelf. Tap one to download it; downloaded books play offline.",
                     comment: "AudiobookShelf settings: where the server books are"
-                ))
+                )
+            let finished = NSLocalizedString(
+                "Hide Finished Books leaves out the books your server has as finished.",
+                comment: "AudiobookShelf settings footer: hide finished books"
+            )
+            Text(verbatim: "\(shelf) \(finished)")
         }
 
         Section {

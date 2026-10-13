@@ -61,8 +61,11 @@ final class AudiobookShelfHidden {
         return Self.names(in: authors).contains { hidden.contains($0) }
     }
 
+    /// A server book, as the shelves, Search and Collections show it: also hidden once finished,
+    /// when the listener asked for that. Library books are not: they are theirs to finish.
     func isHidden(_ item: AudiobookShelfAPI.Item, on serverID: String?) -> Bool {
-        isHidden(item: item.id, authors: item.author, on: serverID)
+        AudiobookShelfService.shared.hidesFinished(item.id, on: serverID)
+            || isHidden(item: item.id, authors: item.author, on: serverID)
     }
 
     /// Hidden by one of its authors rather than on its own: showing it again means showing them.
