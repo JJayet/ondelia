@@ -9,7 +9,13 @@ final class ScreenshotUITests: AudiobookUITestCase {
         // iCloud off: the store must be local so the seed is what the screen shows.
         var arguments = ["--reset-state", "--seed-showcase", "-sync.iCloud", "NO"]
         if ProcessInfo.processInfo.environment["SCREENSHOT_DARK"] == "1" { arguments += ["-selectedTheme", "2"] }
+        // Streamed books are only on the shelf with their server; the last value of a key wins.
+        if extraLaunchEnvironment["SHOWCASE_SERVER"]?.isEmpty == false { arguments += ["-audiobookshelf.showInLibrary", "YES"] }
         return arguments
+    }
+    /// The AudiobookShelf account whose collections make the shelf, when `screenshots.sh` has one.
+    override var extraLaunchEnvironment: [String: String] {
+        ProcessInfo.processInfo.environment.filter { $0.key.hasPrefix("SHOWCASE_") }
     }
 
     /// App Store iPad shots are landscape: the sidebar layout is the point of the pane.
@@ -20,7 +26,8 @@ final class ScreenshotUITests: AudiobookUITestCase {
 
     func testCaptureScreens() throws {
         libraryTab.tap()
-        XCTAssertTrue(audiobookRows.firstMatch.waitForExistence(timeout: 10))
+        // A server shelf streams in its covers and chapters first.
+        XCTAssertTrue(audiobookRows.firstMatch.waitForExistence(timeout: 60))
         snap("01-library")
 
         audiobookRows.firstMatch.tap()

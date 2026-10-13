@@ -4,6 +4,8 @@
 #   DEVICES="iPhone 17 Pro Max" LANGS=en scripts/screenshots.sh
 #   WATCH_DEVICES="" scripts/screenshots.sh         # phone and iPad only
 #   DARK=1 scripts/screenshots.sh                   # dark appearance (iPhone/iPad)
+#   SHOWCASE_SERVER=https://host SHOWCASE_USER=u SHOWCASE_PASSWORD=p scripts/screenshots.sh
+#                                                   # shelf from the account's AudiobookShelf collections
 # Output: Screenshots/<lang>/<device>/<name>.png
 set -euo pipefail
 cd "$(dirname "$0")/.."
@@ -37,6 +39,8 @@ shoot() {
     echo "▶ $device · $lang"
     # TEST_RUNNER_ variables reach the test process only from the environment, not as arguments.
     TEST_RUNNER_SCREENSHOT_LANGUAGE="$lang" TEST_RUNNER_SCREENSHOT_DARK="$DARK" \
+    TEST_RUNNER_SHOWCASE_SERVER="${SHOWCASE_SERVER-}" TEST_RUNNER_SHOWCASE_USER="${SHOWCASE_USER-}" \
+    TEST_RUNNER_SHOWCASE_PASSWORD="${SHOWCASE_PASSWORD-}" \
     xcodebuild test -project Ondelia.xcodeproj -scheme "$scheme" \
       -destination "id=$udid" -only-testing:"$test" \
       -resultBundlePath "$result" -parallel-testing-enabled NO -quiet

@@ -44,7 +44,13 @@ enum UITestBootstrap {
         }
 
         if arguments.contains("--seed-showcase") {
-            try seedShowcase(context: context)
+            if let account = showcaseAccount {
+                for session in try context.fetch(FetchDescriptor<ListeningSessionModel>()) { context.delete(session) }
+                try context.save()
+                Task { await seedShowcase(from: account) }
+            } else {
+                try seedShowcase(context: context)
+            }
             return
         }
 
