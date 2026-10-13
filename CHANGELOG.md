@@ -5,6 +5,66 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.9 (1) — 2026-10-12
+
+### English
+
+Promotional text
+New on iPhone Duo: every screen splits around the fold, nothing on the crease. Plus a two-column Settings, list and detail Collections, and a clearer Search.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+iPhone Duo
+
+- Half open, every screen becomes two halves either side of the fold, and nothing sits on the crease. The layout stays put when you open it flat.
+- The mini player moves to the bottom of the left half.
+- Library: resume, your queue and four Collections on the left, your books on the right.
+- Player: the controls on the left, the chapters on the right.
+- Book details: the cover and Resume on the left; Chapters, Bookmarks and About as tabs on the right.
+- Collections: the list on the left, the Collection you pick on the right.
+- Search: the field, filters and recent searches on the left, the results on the right, authors first.
+- Settings, Statistics and server collections share the screen the same way.
+
+Improvements
+
+- The chapter you're on now says "paused" while playback is paused.
+- "1 book" instead of "1 books".
+
+### Français
+
+Texte promotionnel
+Nouveau sur iPhone Duo : chaque écran se partage autour du pli, rien sur la charnière. Et des Réglages sur deux colonnes, des Collections en liste et détail.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+iPhone Duo
+
+- À demi ouvert, chaque écran se partage en deux moitiés de part et d'autre du pli, et rien ne se trouve sur la charnière. La disposition reste la même une fois l'appareil ouvert à plat.
+- Le mini-lecteur passe en bas de la moitié gauche.
+- Bibliothèque : la reprise, votre file d'attente et quatre Collections à gauche, vos livres à droite.
+- Lecteur : les commandes à gauche, les chapitres à droite.
+- Fiche du livre : la pochette et Reprendre à gauche ; Chapitres, Signets et À propos en onglets à droite.
+- Collections : la liste à gauche, la Collection choisie à droite.
+- Recherche : le champ, les filtres et les recherches récentes à gauche, les résultats à droite, les auteurs en premier.
+- Réglages, Statistiques et collections du serveur se partagent l'écran de la même façon.
+
+Améliorations
+
+- Le chapitre en cours indique désormais « en pause » quand la lecture est en pause.
+- « 1 livre » au lieu de « 1 livres ».
+
 ## 1.8.1 (1) — 2026-10-12
 
 ### English
