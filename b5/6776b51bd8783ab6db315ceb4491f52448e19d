@@ -1,0 +1,20 @@
+scripts/screenshots.sh
+  s_50659d486078cc::t_7877e947fd0d8d 11-12
+  s_50659d486078cc::t_e2bcf2bc87ebc7 49-51
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "b56776b51bd8783ab6db315ceb4491f52448e19d",
+  "prompts": {},
+  "sessions": {
+    "s_50659d486078cc": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "d4e9ef37-3bde-4c6c-8908-de553b69321d",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
