@@ -6,6 +6,10 @@ import SwiftUI
 /// The system session catches the `ondelia://oauth/hardcover/callback` redirect itself, so
 /// nothing reaches `onOpenURL`.
 struct HardcoverSignInButton: View {
+    /// Shorter where the row around it already names Hardcover.
+    var title = NSLocalizedString("Sign in with Hardcover", comment: "Hardcover sign-in button")
+    /// A list row's width; off, the button is as wide as its label.
+    var fillsWidth = true
     var onSignedIn: () -> Void = {}
 
     @Environment(\.webAuthenticationSession) private var webAuthenticationSession
@@ -18,11 +22,8 @@ struct HardcoverSignInButton: View {
             Task { await signIn() }
         } label: {
             HStack {
-                Label(
-                    NSLocalizedString("Sign in with Hardcover", comment: "Hardcover sign-in button"),
-                    systemImage: "person.crop.circle.badge.checkmark"
-                )
-                Spacer()
+                Label(title, systemImage: "person.crop.circle.badge.checkmark")
+                if fillsWidth { Spacer() }
                 if isSigningIn { ProgressView() }
             }
         }

@@ -4,6 +4,9 @@ import SwiftUI
 /// what is hidden, and signing out.
 struct AudiobookShelfServerView: View {
     let accountID: String
+    /// The right half of the server list around the fold (design 15a): titled in the list, and
+    /// signing out stays here, at the bottom, rather than going back.
+    var besideList = false
 
     private let service = AudiobookShelfService.shared
     @Environment(\.dismiss) private var dismiss
@@ -12,16 +15,35 @@ struct AudiobookShelfServerView: View {
     private var account: AudiobookShelfAccount? { service.account(id: accountID) }
 
     var body: some View {
+        if besideList {
+            list.safeAreaInset(edge: .bottom) {
+                if let account {
+                    signOutButton(account)
+                        .buttonStyle(.glass)
+                        .tint(.red)
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 12)
+                }
+            }
+        } else {
+            list
+                .navigationTitle(account?.displayName ?? "AudiobookShelf")
+                .navigationBarTitleDisplayMode(.inline)
+                .background(TintedBackground(intensity: 0.6))
+        }
+    }
+
+    private var list: some View {
         List {
             if let account {
+                if besideList {
+                    Section {} header: { FoldPaneTitle(account.displayName) }
+                }
                 sections(for: account)
             }
         }
         .task { await loadLibraries() }
-        .navigationTitle(account?.displayName ?? "AudiobookShelf")
-        .navigationBarTitleDisplayMode(.inline)
         .scrollContentBackground(.hidden)
-        .background(TintedBackground(intensity: 0.6))
     }
 
     @ViewBuilder
@@ -70,8 +92,13 @@ struct AudiobookShelfServerView: View {
         }
 
         Section {
-            NavigationLink(NSLocalizedString("Hidden & Shown", comment: "AudiobookShelf settings: hide or show server entries")) {
+            NavigationLink {
                 AudiobookShelfHiddenView(account: account)
+            } label: {
+                LabeledContent(
+                    NSLocalizedString("Hidden & Shown", comment: "AudiobookShelf settings: hide or show server entries"),
+                    value: hiddenCount(on: account)
+                )
             }
         } footer: {
             Text(NSLocalizedString(
@@ -80,15 +107,27 @@ struct AudiobookShelfServerView: View {
             ))
         }
 
-        Section {
-            Button(role: .destructive) {
-                withHapticFeedback { service.signOut(account) }
-                dismiss()
-            } label: {
-                Text(NSLocalizedString("Sign Out", comment: "AudiobookShelf sign-out button"))
-                    .frame(maxWidth: .infinity)
-            }
+        if !besideList {
+            Section { signOutButton(account) }
         }
+    }
+
+    private func signOutButton(_ account: AudiobookShelfAccount) -> some View {
+        Button(role: .destructive) {
+            withHapticFeedback { service.signOut(account) }
+            if !besideList { dismiss() }
+        } label: {
+            Text(NSLocalizedString("Sign Out", comment: "AudiobookShelf sign-out button"))
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: besideList ? 36 : nil)
+        }
+    }
+
+    /// Everything hidden on this server, for the row that leads to it.
+    private func hiddenCount(on account: AudiobookShelfAccount) -> String {
+        let hidden = AudiobookShelfHidden.shared
+        let count = HiddenServerEntryModel.Kind.allCases.reduce(0) { $0 + hidden.hidden($1, on: account.id).count }
+        return count == 0 ? "" : String(format: NSLocalizedString("%d hidden", comment: "AudiobookShelf settings: how many server entries are hidden"), count)
     }
 
     private func loadLibraries() async {

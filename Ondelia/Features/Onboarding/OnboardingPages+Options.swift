@@ -11,18 +11,22 @@ struct OnboardingOptionRow<Control: View>: View {
     let title: String
     let detail: String
     @ViewBuilder let control: Control
+    /// Half the headline's cap height: the middle of a wrapped title's first line.
+    @ScaledMetric(relativeTo: .headline) private var halfCapHeight: CGFloat = 6
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
+        HStack(alignment: .optionTitle, spacing: 14) {
             Image(systemName: systemImage)
                 .font(.system(size: 20, weight: .medium))
                 .foregroundStyle(.tint)
                 .frame(width: 30, height: 28)
+                .alignmentGuide(.optionTitle) { $0[VerticalAlignment.center] }
 
             VStack(alignment: .leading, spacing: 6) {
                 ViewThatFits(in: .horizontal) {
                     HStack(spacing: 12) {
                         Text(title).font(.headline).fixedSize()
+                            .alignmentGuide(.optionTitle) { $0[VerticalAlignment.center] }
                         Spacer(minLength: 0)
                         optionControl
                     }
@@ -30,6 +34,8 @@ struct OnboardingOptionRow<Control: View>: View {
                         Text(title)
                             .font(.headline)
                             .fixedSize(horizontal: false, vertical: true)
+                            // A wrapped title keeps the symbol on its first line.
+                            .alignmentGuide(.optionTitle) { $0[.firstTextBaseline] - halfCapHeight }
                         optionControl
                     }
                 }
@@ -84,12 +90,7 @@ struct OnboardingLookPage: View {
                     title: NSLocalizedString("Accent Color", comment: "Accent color setting label"),
                     detail: NSLocalizedString("Buttons, progress bars and highlights.", comment: "Onboarding: accent detail")
                 ) {
-                    Picker("", selection: $themeManager.accentColor) {
-                        ForEach(AccentColor.allCases, id: \.rawValue) { Text($0.displayName).tag($0) }
-                    }
-                    .labelsHidden()
-                    .pickerStyle(.menu)
-                    .onChange(of: themeManager.accentColor) { _, color in themeManager.setAccentColor(color) }
+                    AccentColorMenu()
                 }
 
                 Divider().padding(.horizontal, 16)
@@ -195,3 +196,12 @@ struct OnboardingPlaybackPage: View {
 
 #Preview("Look") { OnboardingLookPage() }
 #Preview("Playback") { OnboardingPlaybackPage() }
+
+private extension VerticalAlignment {
+    /// The symbol sits level with the title, however tall the control beside the title is.
+    enum OptionTitle: AlignmentID {
+        static func defaultValue(in context: ViewDimensions) -> CGFloat { context[.top] }
+    }
+
+    static let optionTitle = VerticalAlignment(OptionTitle.self)
+}

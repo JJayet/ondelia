@@ -93,3 +93,20 @@ private struct FoldMiniPlayer: View {
         }
     }
 }
+
+/// The heading of a list in the right half, where the navigation bar's title sits on the left.
+struct FoldPaneTitle: View {
+    let text: String
+
+    init(_ text: String) { self.text = text }
+
+    var body: some View {
+        Text(text)
+            .font(.title3.bold())
+            // A section header would grey it otherwise.
+            .foregroundStyle(Color.primaryText)
+            .textCase(nil)
+            .lineLimit(1)
+            .accessibilityAddTraits(.isHeader)
+    }
+}
