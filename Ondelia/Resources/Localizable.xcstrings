@@ -273,6 +273,17 @@
         }
       }
     },
+    "%@. The books stay on the server until you download them." : {
+      "comment" : "Server series: total download size, and what downloading means",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%@. Les livres restent sur le serveur tant que vous ne les téléchargez pas."
+          }
+        }
+      }
+    },
     "%@×" : {
       "comment" : "Speed picker: playback rate multiplier",
       "localizations" : {
@@ -320,10 +331,40 @@
     "%d books" : {
       "comment" : "AudiobookShelf: number of books in a series or by an author\nCarPlay collection row: number of books\nNumber of books in a collection",
       "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d book"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d books"
+                }
+              }
+            }
+          }
+        },
         "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "%d livres"
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d livre"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d livres"
+                }
+              }
+            }
           }
         }
       }
@@ -335,6 +376,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d livres · %d sur cet appareil"
+          }
+        }
+      }
+    },
+    "%d books · %d results" : {
+      "comment" : "Search: books searched and how many matched",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d livres · %d résultats"
           }
         }
       }
@@ -362,7 +414,7 @@
       }
     },
     "%d chapters" : {
-      "comment" : "Chapter count chip\nNumber of chapters",
+      "comment" : "Chapter count chip",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -379,6 +431,47 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%d fichiers du dossier de la bibliothèque qu'aucun livre n'utilise seront supprimés."
+          }
+        }
+      }
+    },
+    "%d hidden" : {
+      "comment" : "AudiobookShelf settings: how many server entries are hidden",
+      "localizations" : {
+        "en" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d hidden"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d hidden"
+                }
+              }
+            }
+          }
+        },
+        "fr" : {
+          "variations" : {
+            "plural" : {
+              "one" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d masqué"
+                }
+              },
+              "other" : {
+                "stringUnit" : {
+                  "state" : "translated",
+                  "value" : "%d masqués"
+                }
+              }
+            }
           }
         }
       }
@@ -650,6 +743,17 @@
         }
       }
     },
+    "A hidden entry stays on the server. It no longer appears in Library, Search or Collections." : {
+      "comment" : "Hidden & Shown footer beside the kinds",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un élément masqué reste sur le serveur. Il n’apparaît plus dans Bibliothèque, Recherche ni Collections."
+          }
+        }
+      }
+    },
     "A light or a dark icon on the Home Screen." : {
       "comment" : "Onboarding: app icon detail",
       "localizations" : {
@@ -662,7 +766,7 @@
       }
     },
     "About" : {
-      "comment" : "Settings section: About",
+      "comment" : "Book detail: summary and details tab\nSettings section: About",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -920,7 +1024,7 @@
       }
     },
     "Author" : {
-      "comment" : "Sort by author",
+      "comment" : "Sort by author\nSort option: by author",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -931,7 +1035,7 @@
       }
     },
     "Authors" : {
-      "comment" : "AudiobookShelf shelf tab: authors",
+      "comment" : "AudiobookShelf shelf tab: authors\nSearch: authors section",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -981,6 +1085,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Session moy."
+          }
+        }
+      }
+    },
+    "Back" : {
+      "comment" : "Onboarding: previous step button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
           }
         }
       }
@@ -1455,7 +1570,7 @@
       }
     },
     "Collection · server" : {
-      "comment" : "Collections screen: a collection from an AudiobookShelf server",
+      "comment" : "Collections screen row: a server collection\nCollections screen: a collection from an AudiobookShelf server",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -1606,6 +1721,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Connectez des AirPods"
+          }
+        }
+      }
+    },
+    "Connect to a Server" : {
+      "comment" : "Onboarding: AudiobookShelf sign-in button",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se connecter à un serveur"
           }
         }
       }
@@ -2009,7 +2135,7 @@
       }
     },
     "Duration" : {
-      "comment" : "Table column: duration",
+      "comment" : "Sort option: by duration\nTable column: duration",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -2095,6 +2221,17 @@
         }
       }
     },
+    "Everything can change later in Settings." : {
+      "comment" : "Onboarding: steps footer",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tout se change plus tard dans Réglages."
+          }
+        }
+      }
+    },
     "Expanded" : {
       "comment" : "Accessibility: folded row is open",
       "extractionState" : "stale",
@@ -2136,6 +2273,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Fichiers"
+          }
+        }
+      }
+    },
+    "Files, AirDrop, series" : {
+      "comment" : "Onboarding step: import detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fichiers, AirDrop, séries"
           }
         }
       }
@@ -2252,6 +2400,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Commencer"
+          }
+        }
+      }
+    },
+    "Getting Started · %1$d of %2$d" : {
+      "comment" : "Onboarding: steps header, current step and count",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Premiers pas · %1$d sur %2$d"
           }
         }
       }
@@ -2399,6 +2558,17 @@
         }
       }
     },
+    "Hidden: %1$d of %2$d" : {
+      "comment" : "Hidden & Shown: hidden entries of the listed kind, out of all",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masqués : %1$d sur %2$d"
+          }
+        }
+      }
+    },
     "Hide" : {
       "comment" : "Hide a server audiobook, series or author",
       "localizations" : {
@@ -2406,6 +2576,28 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Masquer"
+          }
+        }
+      }
+    },
+    "Hide Finished Books" : {
+      "comment" : "AudiobookShelf setting: leave server books finished on the server out of the shelves",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les livres terminés"
+          }
+        }
+      }
+    },
+    "Hide Finished Books leaves out the books your server has as finished." : {
+      "comment" : "AudiobookShelf settings footer: hide finished books",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Masquer les livres terminés écarte les livres que votre serveur indique comme terminés."
           }
         }
       }
@@ -2504,6 +2696,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Synchronisation iCloud"
+          }
+        }
+      }
+    },
+    "iCloud, AudiobookShelf, Hardcover" : {
+      "comment" : "Onboarding step: integrations detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iCloud, AudiobookShelf, Hardcover"
           }
         }
       }
@@ -2642,6 +2845,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "en cours · ch. %d sur %d"
+          }
+        }
+      }
+    },
+    "In the Series" : {
+      "comment" : "Book detail: the other books of its collection",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans la série"
           }
         }
       }
@@ -3708,6 +3922,17 @@
         }
       }
     },
+    "paused · -%@" : {
+      "comment" : "Chapter table: current row while paused, time left in the chapter",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "en pause · -%@"
+          }
+        }
+      }
+    },
     "Pick a book in the library to start listening." : {
       "comment" : "Now Playing pane: hint when no book is loaded",
       "localizations" : {
@@ -3805,6 +4030,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "File d'attente"
+          }
+        }
+      }
+    },
+    "Play the First" : {
+      "comment" : "Server series: play its first book",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écouter le premier"
           }
         }
       }
@@ -4390,6 +4626,17 @@
         }
       }
     },
+    "resume here · %@" : {
+      "comment" : "Book detail: the chapter playback resumes in, and where",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "reprise ici · %@"
+          }
+        }
+      }
+    },
     "Resume Last Book" : {
       "localizations" : {
         "fr" : {
@@ -4642,7 +4889,7 @@
       }
     },
     "Series · server" : {
-      "comment" : "Collections screen: a series from an AudiobookShelf server",
+      "comment" : "Collections screen row: a server series\nCollections screen: a series from an AudiobookShelf server",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -4992,6 +5239,17 @@
         }
       }
     },
+    "Skips, smart rewind" : {
+      "comment" : "Onboarding step: playback detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Sauts, retour intelligent"
+          }
+        }
+      }
+    },
     "Sleep at End of Chapter" : {
       "localizations" : {
         "fr" : {
@@ -5210,8 +5468,20 @@
         }
       }
     },
+    "Stream or download the books on your own server." : {
+      "comment" : "Onboarding: AudiobookShelf detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Écoutez en streaming ou téléchargez les livres de votre propre serveur."
+          }
+        }
+      }
+    },
     "Streaming" : {
       "comment" : "Player: the book plays from the AudiobookShelf server",
+      "extractionState" : "stale",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5486,6 +5756,17 @@
         }
       }
     },
+    "Theme, accent, icon" : {
+      "comment" : "Onboarding step: appearance detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Thème, accent, icône"
+          }
+        }
+      }
+    },
     "This server has no book library." : {
       "comment" : "AudiobookShelf: server has no book library",
       "localizations" : {
@@ -5564,7 +5845,7 @@
       }
     },
     "Title" : {
-      "comment" : "Sort by title",
+      "comment" : "Sort by title\nSort option: by title",
       "localizations" : {
         "fr" : {
           "stringUnit" : {
@@ -5946,6 +6227,17 @@
         }
       }
     },
+    "Welcome" : {
+      "comment" : "Onboarding step: welcome",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bienvenue"
+          }
+        }
+      }
+    },
     "Welcome to %@" : {
       "comment" : "Onboarding: welcome title, %@ is the app name",
       "localizations" : {
@@ -5975,6 +6267,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Ce que fait un toucher sur un livre absent de cet appareil. Un appui long propose l’autre action."
+          }
+        }
+      }
+    },
+    "What's worth knowing" : {
+      "comment" : "Onboarding step: ready detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ce qu’il faut savoir"
           }
         }
       }
@@ -6030,6 +6333,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Vos livres audio, à votre façon. Tout reste sur votre appareil, sauf si vous connectez un service vous-même."
+          }
+        }
+      }
+    },
+    "Your books, on your device" : {
+      "comment" : "Onboarding step: welcome detail",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vos livres, sur votre appareil"
           }
         }
       }

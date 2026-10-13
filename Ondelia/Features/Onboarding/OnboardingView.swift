@@ -13,67 +13,58 @@ struct OnboardingView: View {
 
     let onFinish: () -> Void
 
-    @State private var page = 0
+    @State var page = 0
     @State private var showingImporter = false
     @State private var importedCount = 0
-    private let pageCount = 6
+    @State private var insets = EdgeInsets()
+    let pageCount = 6
 
     var body: some View {
         ZStack {
             TintedBackground(intensity: 0.9).ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                HStack {
-                    Spacer()
-                    Button(NSLocalizedString("Skip", comment: "Onboarding: skip button")) {
-                        withHapticFeedback { onFinish() }
-                    }
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(.primary.opacity(0.75))
-                    .opacity(page == pageCount - 1 ? 0 : 1)
+            FoldSplit(showsMiniPlayer: false) {
+                foldSteps
+            } secondary: {
+                VStack(spacing: 16) {
+                    pages.environment(\.onboardingLeading, true)
+                    continueButton
+                        .padding(.leading, 18)
+                        .padding(.trailing, 24)
                 }
-                .padding(.horizontal, 20)
-                .padding(.top, 8)
-                .frame(maxWidth: 620)
-
-                TabView(selection: $page) {
-                    OnboardingPage { OnboardingWelcomePage() }.tag(0)
-                    OnboardingPage {
-                        OnboardingImportPage(importedCount: importedCount) { showingImporter = true }
-                    }.tag(1)
-                    OnboardingPage { OnboardingLookPage() }.tag(2)
-                    OnboardingPage { OnboardingPlaybackPage() }.tag(3)
-                    OnboardingPage { OnboardingConnectPage() }.tag(4)
-                    OnboardingPage { OnboardingReadyPage() }.tag(5)
-                }
-                .tabViewStyle(.page(indexDisplayMode: .never))
-
-                OnboardingPageControl(page: $page, count: pageCount)
-                    .frame(height: 32)
-                    .padding(.vertical, 4)
-
-                Button {
-                    withHapticFeedback {
-                        if page < pageCount - 1 {
-                            withAnimation { page += 1 }
-                        } else {
-                            onFinish()
-                        }
-                    }
-                } label: {
-                    Text(page == pageCount - 1
-                        ? NSLocalizedString("Get Started", comment: "Onboarding: last page button")
-                        : NSLocalizedString("Continue", comment: "Onboarding: next page button"))
-                        .font(.system(size: 17, weight: .semibold))
-                        .frame(maxWidth: .infinity)
-                        .frame(minHeight: 52)
-                }
-                .buttonStyle(.glassProminent)
-                .padding(.horizontal, 24)
                 .padding(.bottom, 16)
-                .frame(maxWidth: 620)
+            } fallback: {
+                VStack(spacing: 0) {
+                    HStack {
+                        Spacer()
+                        Button(NSLocalizedString("Skip", comment: "Onboarding: skip button")) {
+                            withHapticFeedback { onFinish() }
+                        }
+                        .font(.system(size: 14, weight: .semibold))
+                        .buttonStyle(.glass)
+                        .foregroundStyle(.primary)
+                        .opacity(page == pageCount - 1 ? 0 : 1)
+                    }
+                    .padding(.horizontal, 20)
+                    // iPhone Duo's outer display keeps its status bar in a column beside the
+                    // content, leaving almost no top inset: Skip lines up with its clock instead.
+                    .padding(.top, insets.trailing - insets.leading > 40 ? max(8, 74 - insets.top) : 8)
+                    .frame(maxWidth: 620)
+
+                    pages
+
+                    OnboardingPageControl(page: $page, count: pageCount)
+                        .frame(height: 32)
+                        .padding(.vertical, 4)
+
+                    continueButton
+                        .padding(.horizontal, 24)
+                        .padding(.bottom, 16)
+                        .frame(maxWidth: 620)
+                }
             }
         }
+        .onGeometryChange(for: EdgeInsets.self) { $0.safeAreaInsets } action: { insets = $0 }
         .sheet(isPresented: $showingImporter) {
             DocumentPickerView { urls in
                 showingImporter = false
@@ -84,6 +75,40 @@ struct OnboardingView: View {
             .ignoresSafeArea()
         }
     }
+
+    private var pages: some View {
+        TabView(selection: $page) {
+            OnboardingPage { OnboardingWelcomePage() }.tag(0)
+            OnboardingPage {
+                OnboardingImportPage(importedCount: importedCount) { showingImporter = true }
+            }.tag(1)
+            OnboardingPage { OnboardingLookPage() }.tag(2)
+            OnboardingPage { OnboardingPlaybackPage() }.tag(3)
+            OnboardingPage { OnboardingConnectPage() }.tag(4)
+            OnboardingPage { OnboardingReadyPage() }.tag(5)
+        }
+        .tabViewStyle(.page(indexDisplayMode: .never))
+    }
+
+    private var continueButton: some View {
+        Button {
+            withHapticFeedback {
+                if page < pageCount - 1 {
+                    withAnimation { page += 1 }
+                } else {
+                    onFinish()
+                }
+            }
+        } label: {
+            Text(page == pageCount - 1
+                ? NSLocalizedString("Get Started", comment: "Onboarding: last page button")
+                : NSLocalizedString("Continue", comment: "Onboarding: next page button"))
+                .font(.system(size: 17, weight: .semibold))
+                .frame(maxWidth: .infinity)
+                .frame(minHeight: 52)
+        }
+        .buttonStyle(.glassProminent)
+    }
 }
 
 // MARK: - Shared page pieces
@@ -91,12 +116,13 @@ struct OnboardingView: View {
 /// A big symbol, a title and a line of body, the shape every page starts from.
 struct OnboardingHeader: View {
     @Environment(\.onboardingCompactHeader) private var compactHeader
+    @Environment(\.onboardingLeading) private var leading
     let systemImage: String
     let title: String
     let text: String
 
     var body: some View {
-        VStack(spacing: compactHeader ? 10 : 18) {
+        VStack(alignment: leading ? .leading : .center, spacing: compactHeader ? 10 : 18) {
             Image(systemName: systemImage)
                 .font(.system(size: compactHeader ? 36 : 64, weight: .medium))
                 .foregroundStyle(.tint)
@@ -104,14 +130,15 @@ struct OnboardingHeader: View {
 
             Text(title)
                 .font(.system(.largeTitle, design: .default, weight: .bold))
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(leading ? .leading : .center)
 
             Text(text)
                 .font(.body)
                 .foregroundStyle(.primary.opacity(0.75))
-                .multilineTextAlignment(.center)
+                .multilineTextAlignment(leading ? .leading : .center)
                 .fixedSize(horizontal: false, vertical: true)
         }
+        .frame(maxWidth: .infinity, alignment: leading ? .leading : .center)
         .padding(.horizontal, 28)
     }
 }
@@ -150,6 +177,11 @@ struct OnboardingFeatureRow: View {
 
 private struct OnboardingCompactHeaderKey: EnvironmentKey {
     static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// Beside the fold the page reads from the left edge, under the steps' column (design 14).
+    @Entry var onboardingLeading = false
 }
 
 private extension EnvironmentValues {

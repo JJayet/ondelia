@@ -3,11 +3,16 @@ import SwiftUI
 /// Every Collection, pushed from the Library strip's See All (design 8b): a scope filter,
 /// search, a sort, and the list or grid. Server collections and series with no Collection yet
 /// go last, under their own label: nothing of theirs is in the Library.
-struct CollectionsView<MenuContent: View>: View {
+///
+/// iPhone Duo around its fold (design 10b): list on the left, the picked Collection on the
+/// right; a tap swaps the right half instead of pushing.
+struct CollectionsView<MenuContent: View, Detail: View>: View {
     let groups: [CollectionGroup]
     let serverOnly: [AudiobookShelfAPI.Series]
     let onOpen: (CollectionGroup) -> Void
     @ViewBuilder let menu: (CollectionGroup) -> MenuContent
+    /// The Collection's own screen, shown as the right half.
+    @ViewBuilder let detail: (CollectionGroup) -> Detail
 
     @State private var scope: Scope = .all
     @State private var query = ""
@@ -17,6 +22,9 @@ struct CollectionsView<MenuContent: View>: View {
     /// The Library's grid density, so a collection is the size of a book beside it.
     @AppStorage("library.gridColumns") private var gridColumns = 2
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.isFoldSplit) private var isFoldSplit
+    /// The right half's Collection; the first one listed until a row is tapped.
+    @State private var pickedID: UUID?
 
     enum Scope: CaseIterable {
         case all, mine, series, server
@@ -74,38 +82,47 @@ struct CollectionsView<MenuContent: View>: View {
         }
     }
 
+    private var picked: CollectionGroup? {
+        shownGroups.first { $0.id == pickedID } ?? shownGroups.first
+    }
+
+    private func open(_ group: CollectionGroup) {
+        if isFoldSplit { pickedID = group.id } else { onOpen(group) }
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 0) {
-                Picker(NSLocalizedString("Filter", comment: "Search filter picker label"), selection: $scope) {
-                    ForEach(Scope.allCases, id: \.self) { scope in
-                        Text(verbatim: "\(scope.title) \(count(scope))").tag(scope)
+        FoldSplit {
+            ScrollView {
+                // The navigation bar's search drawer would run across the fold.
+                TextField(NSLocalizedString("Search Collections", comment: "Collections screen: search field prompt"), text: $query)
+                    .textFieldStyle(.plain)
+                    .padding(.leading, 34)
+                    .frame(height: 40)
+                    .overlay(alignment: .leading) {
+                        Image(systemName: "magnifyingglass").foregroundStyle(.secondary).padding(.leading, 13)
                     }
-                }
-                .pickerStyle(.segmented)
-                .padding(.horizontal, 16)
-                .padding(.bottom, 14)
-
-                sortBar.padding(.horizontal, 20).padding(.bottom, 6)
-
-                if shownGroups.isEmpty && shownServerOnly.isEmpty {
-                    ContentUnavailableView.search(text: query).padding(.top, 40)
-                } else if viewMode == .grid {
-                    grid
-                } else {
-                    list
-                }
+                    .glassEffect(.regular, in: Capsule())
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 12)
+                collections
             }
-            .padding(.bottom, 24)
+        } secondary: {
+            if let picked {
+                detail(picked).id(picked.id)
+            } else {
+                ContentUnavailableView.search(text: query)
+            }
+        } fallback: {
+            ScrollView { collections }
+                .searchable(
+                    text: $query,
+                    placement: .navigationBarDrawer(displayMode: .always),
+                    prompt: NSLocalizedString("Search Collections", comment: "Collections screen: search field prompt")
+                )
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
         .navigationTitle(NSLocalizedString("Collections", comment: "Section title for collections"))
         .navigationBarTitleDisplayMode(.large)
-        .searchable(
-            text: $query,
-            placement: .navigationBarDrawer(displayMode: .always),
-            prompt: NSLocalizedString("Search Collections", comment: "Collections screen: search field prompt")
-        )
         // State, not a value link: this screen is a state-driven destination, and a value pushed
         // from it lands under it on the stack, with the state-driven screens pushed again on top.
         .navigationDestination(item: $openedServerSeries) { series in
@@ -113,6 +130,30 @@ struct CollectionsView<MenuContent: View>: View {
             AudiobookShelfSeriesView(series: series, library: library)
                 .environment(\.audiobookShelfLibrary, library)
         }
+    }
+
+    private var collections: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Picker(NSLocalizedString("Filter", comment: "Search filter picker label"), selection: $scope) {
+                ForEach(Scope.allCases, id: \.self) { scope in
+                    Text(verbatim: "\(scope.title) \(count(scope))").tag(scope)
+                }
+            }
+            .pickerStyle(.segmented)
+            .padding(.horizontal, 16)
+            .padding(.bottom, 14)
+
+            sortBar.padding(.horizontal, 20).padding(.bottom, 6)
+
+            if shownGroups.isEmpty && shownServerOnly.isEmpty {
+                ContentUnavailableView.search(text: query).padding(.top, 40)
+            } else if viewMode == .grid {
+                grid
+            } else {
+                list
+            }
+        }
+        .padding(.bottom, 24)
     }
 
     private var sortBar: some View {
@@ -151,11 +192,19 @@ struct CollectionsView<MenuContent: View>: View {
         LazyVStack(alignment: .leading, spacing: 0) {
             ForEach(shownGroups) { group in
                 Button {
-                    withHapticFeedback { onOpen(group) }
+                    withHapticFeedback { open(group) }
                 } label: {
                     CollectionRowView(group: group)
                 }
                 .buttonStyle(.plain)
+                // The row the right half shows.
+                .background {
+                    if isFoldSplit, picked?.id == group.id {
+                        RoundedRectangle(cornerRadius: 16, style: .continuous)
+                            .fill(.tint.opacity(0.12))
+                            .padding(.horizontal, -8)
+                    }
+                }
                 .contextMenu { menu(group) }
                 Divider()
             }
@@ -182,7 +231,7 @@ struct CollectionsView<MenuContent: View>: View {
             spacing: spacing
         ) {
             ForEach(shownGroups) { group in
-                CollectionGridItemView(group: group, columns: gridColumns) { onOpen(group) }
+                CollectionGridItemView(group: group, columns: gridColumns) { open(group) }
                     .contextMenu { menu(group) }
             }
             if !shownServerOnly.isEmpty {

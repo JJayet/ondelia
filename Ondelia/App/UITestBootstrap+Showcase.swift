@@ -72,16 +72,19 @@ extension UITestBootstrap {
                 context.insert(model)
             }
             context.insert(book)
-
-            // A fortnight of listening, heavier on the books in progress.
-            guard entry.progress > 0 else { continue }
-            for day in 0..<14 where (day + index) % 3 != 0 {
-                let started = Calendar.current.date(byAdding: .day, value: -day, to: now)!.addingTimeInterval(-3_600 * 2)
-                context.insert(ListeningSessionModel(book: book, startedAt: started, seconds: Double(35 + (day * 7 + index * 11) % 50) * 60,
-                                                     finishedBook: day == 2 && entry.progress >= 1))
-            }
+            seedListening(to: book, index: index, progress: entry.progress, now: now, context: context)
         }
         try context.save()
+    }
+
+    /// A fortnight of listening, heavier on the books in progress.
+    static func seedListening(to book: AudiobookModel, index: Int, progress: Double, now: Date, context: ModelContext) {
+        guard progress > 0 else { return }
+        for day in 0..<14 where (day + index) % 3 != 0 {
+            let started = Calendar.current.date(byAdding: .day, value: -day, to: now)!.addingTimeInterval(-3_600 * 2)
+            context.insert(ListeningSessionModel(book: book, startedAt: started, seconds: Double(35 + (day * 7 + index * 11) % 50) * 60,
+                                                 finishedBook: day == 2 && progress >= 1))
+        }
     }
 
     /// A flat two-tone cover with the title on it. Real covers are copyrighted; these are not.

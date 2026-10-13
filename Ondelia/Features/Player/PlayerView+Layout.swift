@@ -20,8 +20,15 @@ extension PlayerView {
 
             VStack(spacing: 0) {
                 if horizontalSizeClass == .regular {
-                    // Wide window (iPad, Mac, iPhone Duo open): see PlayerView+Wide.swift.
-                    wideLayout
+                    // Wide window (iPad, Mac, iPhone Duo open): see PlayerView+Wide.swift, and
+                    // PlayerView+Fold.swift for the halves either side of the Duo's fold.
+                    FoldSplit(showsMiniPlayer: false) {
+                        foldControls
+                    } secondary: {
+                        foldChapters
+                    } fallback: {
+                        wideLayout
+                    }
                 } else {
                     headerControls
 

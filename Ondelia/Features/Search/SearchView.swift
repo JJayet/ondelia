@@ -8,30 +8,33 @@ struct SearchView: View {
     /// Redraws the results when server audiobooks are switched on or off.
     @AppStorage(AudiobookShelfCatalog.enabledKey) private var blendsServer = false
     @Environment(\.playerRouter) private var playerRouter
-    @State private var debouncedQuery: String = ""
+    @Environment(\.isFoldSplit) var isFoldSplit
+    @State var debouncedQuery: String = ""
     @State private var searchTask: Task<Void, Never>? = nil
-    @State private var filter: Filter = .all
-    @State private var sort: Sort = .relevance
+    @State var filter: SearchFilter = .all
+    @State var sort: SearchSort = .relevance
+    /// The last searches that led to a book, newest first, one per line.
+    @AppStorage("search.recent") var recentSearches = ""
+    /// An author picked from the results around the fold: only their books are shown.
+    @State var pickedAuthor: String?
 
     /// Library books and, when shown beside them, server audiobooks not in the Library
     /// (ADR 0002). Server audiobooks have never been played, so they count as not started.
-    private var results: [LibraryEntry] {
+    func entries(for filter: SearchFilter) -> [LibraryEntry] {
+        let linked = AudiobookShelfService.shared.libraryBooks
+        let books = catalog.visible(audiobookManager.audiobooks, linked: linked).filter(filter.includes)
+        let server = filter == .all || filter == .notStarted ? catalog.unjoined(linked: linked) : []
+        return books.map(LibraryEntry.book) + server.map(LibraryEntry.server)
+    }
+
+    var results: [LibraryEntry] {
         let q = normalize(debouncedQuery)
         guard !q.isEmpty else { return [] }
 
-        let linked = AudiobookShelfService.shared.libraryBooks
-        let books: [AudiobookModel] = catalog.visible(audiobookManager.audiobooks, linked: linked).filter { book in
-            switch filter {
-            case .all: return true
-            case .inProgress: return book.currentPosition > 0 && !book.isFinished
-            case .completed: return book.isFinished
-            case .notStarted: return book.currentPosition == 0
-            }
-        }
-        let server = filter == .all || filter == .notStarted ? catalog.unjoined(linked: linked) : []
-
-        // Query match
-        var items = (books.map(LibraryEntry.book) + server.map(LibraryEntry.server)).filter { entry in
+        // Query match, narrowed to the picked author's books when there is one
+        var items = entries(for: filter).filter { entry in
+            pickedAuthor.map { Self.authorNames(entry.author).contains($0) } ?? true
+        }.filter { entry in
             normalize(entry.title).contains(q) || normalize(entry.author).contains(q) || normalize(entry.narrator).contains(q)
         }
 
@@ -68,56 +71,48 @@ struct SearchView: View {
     }
 
     // Normalize strings for case- and accent-insensitive comparison
-    private func normalize(_ s: String) -> String {
+    func normalize(_ s: String) -> String {
         s.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
     }
 
     private var filtersActive: Bool { filter != .all || sort != .relevance }
 
     var body: some View {
-        NavigationStack {
-            List {
-                // Persistent header (chips + sort) — always visible
-                header
+        // Around the fold the left half carries its own field: the system's would cross it.
+        if isFoldSplit {
+            stack
+        } else {
+            stack.searchable(text: $query)
+        }
+    }
 
-                if debouncedQuery.isEmpty {
-                    EmptyRowView(
-                        title: NSLocalizedString("Search your audiobooks", comment: "Search empty title"),
-                        message: NSLocalizedString("Type a title or author to find a book in your library.", comment: "Search empty message")
-                    )
-                    .listRowSeparator(.hidden)
-                } else if results.isEmpty {
-                    EmptyRowView(
-                        title: NSLocalizedString("No results", comment: "No results title"),
-                        message: NSLocalizedString("Try a different term or check spelling.", comment: "No results message")
-                    )
-                    .listRowSeparator(.hidden)
-                    if filtersActive {
-                        HStack {
-                            Spacer()
-                            Button {
-                                withHapticFeedback { resetFilters() }
-                            } label: {
-                                Label(NSLocalizedString("Clear Filters", comment: "Clear filters button"), systemImage: "line.3.horizontal.decrease.circle")
-                            }
-                            .buttonStyle(.bordered)
-                            .tint(.accentColor)
-                            Spacer()
-                        }
-                        .listRowSeparator(.hidden)
-                    }
-                } else {
-                    ForEach(results) { entry in
-                        switch entry {
-                        case .book(let book): bookRow(book)
-                        case .server(let item): serverRow(item)
-                        }
+    private var stack: some View {
+        NavigationStack {
+            // iPhone Duo around its fold (design 12): the question on the left, the answer on
+            // the right, so typing never moves the field, the filter or the sort.
+            FoldSplit {
+                foldQuestion
+            } secondary: {
+                foldAnswer
+            } fallback: {
+                List {
+                    // Persistent header (chips + sort) — always visible
+                    header
+
+                    if debouncedQuery.isEmpty {
+                        emptyPrompt.listRowSeparator(.hidden)
+                    } else if results.isEmpty {
+                        noResults
+                    } else {
+                        resultRows
                     }
                 }
+                .listStyle(.plain)
             }
-            .listStyle(.plain)
             .navigationTitle(NSLocalizedString("Search", comment: "Search view title"))
             .navigationBarTitleDisplayMode(.inline)
+            // The left half titles itself; an inline title would sit on the fold.
+            .toolbar(isFoldSplit ? .hidden : .automatic, for: .navigationBar)
             .onAppear {
                 if audiobookManager.audiobooks.isEmpty && !audiobookManager.isLoadingLibrary {
                     audiobookManager.fetchAudiobooks()
@@ -132,7 +127,47 @@ struct SearchView: View {
                 searchTask = Task { @MainActor in
                     try? await Task.sleep(nanoseconds: 250_000_000)
                     self.debouncedQuery = newValue
+                    self.pickedAuthor = nil
                 }
+            }
+        }
+    }
+
+    var emptyPrompt: some View {
+        EmptyRowView(
+            title: NSLocalizedString("Search your audiobooks", comment: "Search empty title"),
+            message: NSLocalizedString("Type a title or author to find a book in your library.", comment: "Search empty message")
+        )
+    }
+
+    @ViewBuilder
+    var noResults: some View {
+        EmptyRowView(
+            title: NSLocalizedString("No results", comment: "No results title"),
+            message: NSLocalizedString("Try a different term or check spelling.", comment: "No results message")
+        )
+        .listRowSeparator(.hidden)
+        if filtersActive {
+            HStack {
+                Spacer()
+                Button {
+                    withHapticFeedback { resetFilters() }
+                } label: {
+                    Label(NSLocalizedString("Clear Filters", comment: "Clear filters button"), systemImage: "line.3.horizontal.decrease.circle")
+                }
+                .buttonStyle(.bordered)
+                .tint(.accentColor)
+                Spacer()
+            }
+            .listRowSeparator(.hidden)
+        }
+    }
+
+    var resultRows: some View {
+        ForEach(results) { entry in
+            switch entry {
+            case .book(let book): bookRow(book)
+            case .server(let item): serverRow(item)
             }
         }
     }
@@ -141,7 +176,10 @@ struct SearchView: View {
         SearchResultRow(entry: .book(book), query: debouncedQuery)
             .contentShape(Rectangle())
             .onTapGesture {
-                withHapticFeedback(.medium) { present(book) }
+                withHapticFeedback(.medium) {
+                    rememberSearch()
+                    present(book)
+                }
             }
             .swipeActions(edge: .leading) {
                 Button(book.isFinished ? NSLocalizedString("Mark Unread", comment: "Mark as unread") : NSLocalizedString("Mark Read", comment: "Mark as read")) {
@@ -164,6 +202,7 @@ struct SearchView: View {
             .contentShape(Rectangle())
             .onTapGesture {
                 withHapticFeedback(.medium) {
+                    rememberSearch()
                     AudiobookShelfService.shared.open(item, local: nil) { present($0) }
                 }
             }
@@ -183,7 +222,7 @@ struct SearchView: View {
     private var header: some View {
         HStack(spacing: 12) {
             Picker(NSLocalizedString("Filter", comment: "Search filter picker label"), selection: $filter) {
-                ForEach(Filter.allCases, id: \.self) { f in Text(f.label).tag(f) }
+                ForEach(SearchFilter.allCases, id: \.self) { f in Text(f.label).tag(f) }
             }
             .pickerStyle(.segmented)
 
@@ -191,7 +230,7 @@ struct SearchView: View {
 
             Menu {
                 Picker(NSLocalizedString("Sort by", comment: "Search sort picker label"), selection: $sort) {
-                    ForEach(Sort.allCases, id: \.self) { s in Text(s.label).tag(s) }
+                    ForEach(SearchSort.allCases, id: \.self) { s in Text(s.label).tag(s) }
                 }
             } label: {
                 Image(systemName: "arrow.up.arrow.down")
@@ -213,14 +252,23 @@ struct SearchView: View {
         .listRowInsets(EdgeInsets(top: 8, leading: 16, bottom: 8, trailing: 16))
     }
 
-    private func resetFilters() {
+    func resetFilters() {
         filter = .all
         sort = .relevance
     }
 }
 
 // MARK: - Facets & Sorts
-private enum Filter: CaseIterable { case all, inProgress, completed, notStarted
+enum SearchFilter: CaseIterable { case all, inProgress, completed, notStarted
+    func includes(_ book: AudiobookModel) -> Bool {
+        switch self {
+        case .all: true
+        case .inProgress: book.currentPosition > 0 && !book.isFinished
+        case .completed: book.isFinished
+        case .notStarted: book.currentPosition == 0
+        }
+    }
+
     var label: String {
         switch self {
         case .all: return NSLocalizedString("All", comment: "Filter: all audiobooks")
@@ -231,7 +279,7 @@ private enum Filter: CaseIterable { case all, inProgress, completed, notStarted
     }
 }
 
-private enum Sort: CaseIterable { case relevance, recent, title, author, progress
+enum SearchSort: CaseIterable { case relevance, recent, title, author, progress
     var label: String {
         switch self {
         case .relevance: return NSLocalizedString("Relevance", comment: "Sort by relevance")

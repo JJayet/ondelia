@@ -5,7 +5,8 @@ import SwiftUI
 struct CollectionTileView: View {
     let group: CollectionGroup
     let onOpen: () -> Void
-    var width: CGFloat = 200
+    /// nil fills a grid cell.
+    var width: CGFloat? = 200
 
     var body: some View {
         Button {
@@ -30,6 +31,7 @@ struct CollectionTileView: View {
             }
             .padding(13)
             .frame(width: width, alignment: .leading)
+            .frame(maxWidth: width == nil ? .infinity : nil, alignment: .leading)
             .contentShape(Rectangle())
             .glassCard(cornerRadius: 17)
         }

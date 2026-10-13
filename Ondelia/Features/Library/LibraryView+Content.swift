@@ -15,12 +15,39 @@ extension LibraryView {
 
     var gridSpacing: CGFloat { gridColumns >= 4 ? 10 : 16 }
 
+    /// The shelf everywhere but either side of the Duo's fold.
+    var fullShelf: some View {
+        VStack(spacing: 0) {
+            // Wide: the title row carries the count and the buttons, and the navigation bar
+            // goes, so nothing hovers as a band above the shelf on the Mac.
+            if isWide { wideHeader }
+            if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
+            if showsServer {
+                AudiobookShelfShelfView()
+            } else {
+                // No search field here: the Search tab is the one place that searches the
+                // library. The table needs the width for its columns; on a phone it reads as
+                // the list.
+                Group {
+                    switch viewMode {
+                    case .list: listModeContent()
+                    case .grid: gridModeContent()
+                    case .table: if isWide { tableModeContent } else { listModeContent() }
+                    }
+                }
+                .serverSeriesDestinations(library: AudiobookShelfService.shared.primary?.library ?? "")
+            }
+        }
+    }
+
     // Extracted to help the type-checker
+    /// `shelfOnly`: the right half on iPhone Duo, where the sections above the shelf sit on the
+    /// left (LibraryView+Fold.swift).
     @ViewBuilder
-    var listModeContent: some View {
+    func listModeContent(shelfOnly: Bool = false) -> some View {
         List {
             // Continue Reading Section
-            if !continueReading.isEmpty {
+            if !shelfOnly, !continueReading.isEmpty {
                 ContinueReadingSection(entries: continueReading, headerPadding: 0, rowPadding: 4, wide: isWide) { playAndPresent($0) }
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -28,7 +55,7 @@ extension LibraryView {
             }
 
             // Play queue
-            if !queuedBooks.isEmpty {
+            if !shelfOnly, !queuedBooks.isEmpty {
                 QueueSectionView(books: queuedBooks, horizontalPadding: 0, onSelect: playQueued)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -36,7 +63,7 @@ extension LibraryView {
             }
 
             // Collections: one strip; See All pushes the rest.
-            if hasCollections {
+            if !shelfOnly, hasCollections {
                 collectionsStrip
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
@@ -97,21 +124,21 @@ extension LibraryView {
 
     // Grid mode - use ScrollView
     @ViewBuilder
-    var gridModeContent: some View {
+    func gridModeContent(shelfOnly: Bool = false) -> some View {
         ScrollView {
             LazyVStack(spacing: 24) {
                 // Continue Reading Section
-                if !continueReading.isEmpty {
+                if !shelfOnly, !continueReading.isEmpty {
                     ContinueReadingSection(entries: continueReading, headerPadding: nil, rowPadding: nil, wide: isWide) { playAndPresent($0) }
                 }
 
                 // Play queue
-                if !queuedBooks.isEmpty {
+                if !shelfOnly, !queuedBooks.isEmpty {
                     QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                 }
 
                 // Collections: one strip; See All pushes the rest.
-                if hasCollections { collectionsStrip }
+                if !shelfOnly, hasCollections { collectionsStrip }
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {

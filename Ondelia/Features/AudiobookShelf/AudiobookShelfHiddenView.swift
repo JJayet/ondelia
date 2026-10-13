@@ -16,49 +16,131 @@ struct AudiobookShelfHiddenView: View {
     @State private var rows: [HiddenServerEntryModel.Kind: [Row]] = [:]
     @State private var error: String?
     private let hidden = AudiobookShelfHidden.shared
+    @Environment(\.isFoldSplit) private var isFoldSplit
 
     private static let kinds: [HiddenServerEntryModel.Kind] = [.series, .collection, .book, .author]
 
     var body: some View {
-        List {
-            Section {
-                Picker(NSLocalizedString("Show", comment: "Hidden & Shown: which kind of entry is listed"), selection: $kind) {
-                    ForEach(Self.kinds, id: \.self) { Text(Self.title(of: $0)).tag($0) }
+        FoldSplit {
+            // iPhone Duo (design 15b): four segments cannot fit half a screen, so the kinds
+            // become a list with their counts, beside the search and the filter.
+            List {
+                searchField
+                    .listRowBackground(Color.clear)
+                    .listRowInsets(EdgeInsets())
+                Section {
+                    ForEach(Self.kinds, id: \.self) { kindRow($0) }
+                } header: {
+                    Text(NSLocalizedString("Show", comment: "Hidden & Shown: which kind of entry is listed"))
                 }
-                .pickerStyle(.segmented)
-                .listRowBackground(Color.clear)
-                Toggle(NSLocalizedString("Hidden Only", comment: "Hidden & Shown: list only what is hidden"), isOn: $hiddenOnly)
-            } footer: {
-                if kind == .author {
-                    Text(NSLocalizedString(
-                        "Hiding an author also hides all of their books.",
-                        comment: "Hidden & Shown footer for authors"
-                    ))
-                } else if let error {
-                    Text(error).foregroundStyle(.red)
+                Section {
+                    hiddenOnlyToggle
+                } footer: {
+                    footer
                 }
             }
+        } secondary: {
+            List {
+                Section {
+                    entries
+                } header: {
+                    VStack(alignment: .leading, spacing: 2) {
+                        FoldPaneTitle(Self.title(of: kind))
+                        if let all = rows[kind] {
+                            Text(String(
+                                format: NSLocalizedString("Hidden: %1$d of %2$d", comment: "Hidden & Shown: hidden entries of the listed kind, out of all"),
+                                hidden.hidden(kind, on: account.id).count, all.count
+                            ))
+                            .textCase(nil)
+                        }
+                    }
+                }
+            }
+            .overlay { status }
+        } fallback: {
+            List {
+                Section {
+                    Picker(NSLocalizedString("Show", comment: "Hidden & Shown: which kind of entry is listed"), selection: $kind) {
+                        ForEach(Self.kinds, id: \.self) { Text(Self.title(of: $0)).tag($0) }
+                    }
+                    .pickerStyle(.segmented)
+                    .listRowBackground(Color.clear)
+                    hiddenOnlyToggle
+                } footer: {
+                    footer
+                }
 
-            Section {
-                ForEach(shown) { row in toggle(for: row) }
+                Section { entries }
             }
+            .overlay { status }
+            .searchable(text: $query)
         }
-        .overlay {
-            if rows[kind] == nil && !hiddenOnly && error == nil {
-                ProgressView()
-            } else if shown.isEmpty {
-                ContentUnavailableView(
-                    NSLocalizedString("Nothing Hidden", comment: "Hidden & Shown: empty list"),
-                    systemImage: "eye"
-                )
-            }
-        }
-        .searchable(text: $query)
         .task { await load() }
         .navigationTitle(NSLocalizedString("Hidden & Shown", comment: "AudiobookShelf settings: hide or show server entries"))
-        .navigationBarTitleDisplayMode(.inline)
+        .navigationBarTitleDisplayMode(isFoldSplit ? .large : .inline)
         .scrollContentBackground(.hidden)
         .background(TintedBackground(intensity: 0.6))
+    }
+
+    private var hiddenOnlyToggle: some View {
+        Toggle(NSLocalizedString("Hidden Only", comment: "Hidden & Shown: list only what is hidden"), isOn: $hiddenOnly)
+    }
+
+    @ViewBuilder private var footer: some View {
+        if let error {
+            Text(error).foregroundStyle(.red)
+        } else if kind == .author {
+            Text(NSLocalizedString(
+                "Hiding an author also hides all of their books.",
+                comment: "Hidden & Shown footer for authors"
+            ))
+        } else if isFoldSplit {
+            Text(NSLocalizedString(
+                "A hidden entry stays on the server. It no longer appears in Library, Search or Collections.",
+                comment: "Hidden & Shown footer beside the kinds"
+            ))
+        }
+    }
+
+    private var entries: some View {
+        ForEach(shown) { row in toggle(for: row) }
+    }
+
+    @ViewBuilder private var status: some View {
+        if rows[kind] == nil && !hiddenOnly && error == nil {
+            ProgressView()
+        } else if shown.isEmpty {
+            ContentUnavailableView(
+                NSLocalizedString("Nothing Hidden", comment: "Hidden & Shown: empty list"),
+                systemImage: "eye"
+            )
+        }
+    }
+
+    /// The navigation bar's search drawer would run across the fold.
+    private var searchField: some View {
+        TextField(NSLocalizedString("Search", comment: "Search view title"), text: $query)
+            .textFieldStyle(.plain)
+            .padding(.leading, 34)
+            .frame(height: 40)
+            .overlay(alignment: .leading) {
+                Image(systemName: "magnifyingglass").foregroundStyle(.secondary).padding(.leading, 13)
+            }
+            .glassEffect(.regular, in: Capsule())
+            .padding(.vertical, 4)
+    }
+
+    private func kindRow(_ rowKind: HiddenServerEntryModel.Kind) -> some View {
+        Button {
+            withHapticFeedback { kind = rowKind }
+        } label: {
+            LabeledContent(Self.title(of: rowKind)) {
+                if let count = rows[rowKind]?.count { Text(count, format: .number) }
+            }
+            .foregroundStyle(Color.primaryText)
+        }
+        .listRowBackground(kind == rowKind ? Color.accentColor.opacity(0.12) : nil)
+        .accessibilityAddTraits(kind == rowKind ? .isSelected : [])
     }
 
     /// The rows of the chosen kind matching the search; only hidden ones come from the records,
@@ -98,6 +180,8 @@ struct AudiobookShelfHiddenView: View {
                     Text(detail).font(.caption).foregroundStyle(.secondary)
                 }
             }
+            // Hidden rows fade, so what still shows reads at a glance.
+            .opacity(byAuthor == nil && !hidden.isHidden(kind, row.id, on: account.id) ? 1 : 0.5)
         }
         .disabled(byAuthor != nil)
     }

@@ -27,8 +27,25 @@ struct SettingsView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(spacing: 22) {
+            // iPhone Duo around its fold (design 10a): two columns starting level, each group
+            // whole on one side.
+            FoldSplit {
+                settingsColumn {
+                    appearanceSection
+                    librarySection
+                    goalsSection
+                    dataSection
+                }
+            } secondary: {
+                settingsColumn {
+                    playbackSection
+                    integrationsSection
+                    WatchSettingsSection()
+                    aboutSection
+                }
+            } fallback: {
+                // One column everywhere else; a wide window centres it instead of stretching rows.
+                settingsColumn(maxWidth: 640) {
                     appearanceSection
                     librarySection
                     playbackSection
@@ -39,11 +56,6 @@ struct SettingsView: View {
                     // TipJarSection() // Hidden until the products exist in App Store Connect.
                     aboutSection
                 }
-                .padding(.horizontal, 16)
-                .padding(.bottom, 24)
-                // One column everywhere; a wide window centres it instead of stretching rows.
-                .frame(maxWidth: 640)
-                .frame(maxWidth: .infinity)
             }
             .navigationTitle(NSLocalizedString("Settings", comment: "Settings view title"))
             .navigationBarTitleDisplayMode(.large)
@@ -77,6 +89,16 @@ struct SettingsView: View {
             }
         } message: {
             Text(NSLocalizedString("This will clear your listening time, streaks, and monthly progress. Your books, goals, and earned Milestones remain.", comment: "Reset stats confirm message"))
+        }
+    }
+
+    private func settingsColumn(maxWidth: CGFloat? = nil, @ViewBuilder _ sections: () -> some View) -> some View {
+        ScrollView {
+            VStack(spacing: 22) { sections() }
+                .padding(.horizontal, 16)
+                .padding(.bottom, 24)
+                .frame(maxWidth: maxWidth)
+                .frame(maxWidth: .infinity)
         }
     }
 }

@@ -36,7 +36,17 @@ struct AudiobookShelfSignInSections: View {
             )
             .accessibilityLabel(NSLocalizedString("Port", comment: "AudiobookShelf server port field"))
             .keyboardType(.numberPad)
+        } header: {
+            Text(NSLocalizedString("Server", comment: "AudiobookShelf settings section: server"))
+        }
+        .onAppear {
+            // The last server signed out of, to sign in again.
+            guard prefill, server.isEmpty else { return }
+            server = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.server) ?? ""
+            username = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.username) ?? ""
+        }
 
+        Section {
             TextField(NSLocalizedString("Username", comment: "AudiobookShelf username field"), text: $username)
                 .textContentType(.username)
                 .textInputAutocapitalization(.never)
@@ -46,7 +56,7 @@ struct AudiobookShelfSignInSections: View {
                 .textContentType(.password)
                 .onSubmit(signIn)
         } header: {
-            Text(NSLocalizedString("Server", comment: "AudiobookShelf settings section: server"))
+            Text(NSLocalizedString("Account", comment: "AudiobookShelf settings section: account"))
         } footer: {
             if let error {
                 Text(error).foregroundStyle(.red)
@@ -56,12 +66,6 @@ struct AudiobookShelfSignInSections: View {
                     comment: "AudiobookShelf sign-in section footer"
                 ))
             }
-        }
-        .onAppear {
-            // The last server signed out of, to sign in again.
-            guard prefill, server.isEmpty else { return }
-            server = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.server) ?? ""
-            username = UserDefaults.standard.string(forKey: AudiobookShelfService.Defaults.username) ?? ""
         }
 
         Section {

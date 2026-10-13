@@ -80,6 +80,19 @@ extension AudiobookShelfAPI {
         }
     }
 
+    /// The items the user has finished, from their progress records.
+    static func finishedItems(server: URL, token: String) async throws -> Set<String> {
+        struct Me: Decodable {
+            struct Progress: Decodable {
+                let libraryItemId: String
+                let isFinished: Bool
+            }
+            let mediaProgress: [Progress]
+        }
+        let me = try await send(authorized(server.appending(path: "api/me"), token: token), as: Me.self)
+        return Set(me.mediaProgress.filter(\.isFinished).map(\.libraryItemId))
+    }
+
     static func updateProgress(
         server: URL,
         token: String,

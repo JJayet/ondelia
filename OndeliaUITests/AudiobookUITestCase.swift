@@ -19,6 +19,9 @@ class AudiobookUITestCase: XCTestCase {
     /// Launch arguments a suite needs on top of the shared ones.
     var extraLaunchArguments: [String] { [] }
 
+    /// Launch environment a suite needs on top of the shared one.
+    var extraLaunchEnvironment: [String: String] { [:] }
+
     /// Language the app runs in. Fixed so tab labels are known, overridable for screenshots.
     var language: String { "en" }
 
@@ -67,6 +70,7 @@ class AudiobookUITestCase: XCTestCase {
             "-library.source", "device",
             "-audiobookshelf.showInLibrary", "NO"
         ] + extraLaunchArguments
+        app.launchEnvironment.merge(extraLaunchEnvironment) { _, new in new }
         app.launch()
 
         // The tree in the message: a bare "did not launch" says nothing about which screen the

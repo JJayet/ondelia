@@ -248,7 +248,7 @@ struct CollectionGroupTests {
         let mine = CollectionGroup(collection: CollectionModel(name: "Road trip"), books: [])
         let series = CollectionGroup(collection: CollectionModel(name: "Mistborn", hardcoverSeriesID: 1), books: [])
 
-        #expect(CollectionsView<EmptyView>.scope(of: mine) == .mine)
-        #expect(CollectionsView<EmptyView>.scope(of: series) == .series)
+        #expect(CollectionsView<EmptyView, EmptyView>.scope(of: mine) == .mine)
+        #expect(CollectionsView<EmptyView, EmptyView>.scope(of: series) == .series)
     }
 }

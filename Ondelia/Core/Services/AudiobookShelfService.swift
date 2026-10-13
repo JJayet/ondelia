@@ -16,6 +16,8 @@ final class AudiobookShelfService {
         static let username = "audiobookshelf.username"
         static let library = "audiobookshelf.library"
         static let tapAction = "audiobookshelf.tapAction"
+        /// Server books the server has as finished are left out of the shelves. On by default.
+        static let hidesFinished = "audiobookshelf.hidesFinished"
     }
 
     /// What tapping a server book not on this device does; a long press offers the other.
@@ -64,6 +66,8 @@ final class AudiobookShelfService {
     /// costs one redundant request after a launch.
     var pushedProgress: [UUID: PushedProgress] = [:]
     var pushingProgress: Set<UUID> = []
+    /// Items each server has as finished, by account id. Refreshed when the app becomes active.
+    var finishedItems: [String: Set<String>] = [:]
     /// Items whose library entry is being made for streaming.
     var preparingStreams: Set<String> = []
 

@@ -60,6 +60,7 @@ struct LibraryView: View {
     @Environment(\.accessibilityReduceMotion) var reduceMotion
     @Environment(\.scenePhase) private var scenePhase
     @Environment(\.horizontalSizeClass) var horizontalSizeClass
+    @Environment(\.isFoldSplit) var isFoldSplit
     // Dependency injection initializer to enable previews/tests to control state
     init(audiobookManager: AudiobookManager, collection: CollectionModel? = nil) {
         self.audiobookManager = audiobookManager
@@ -167,26 +168,13 @@ struct LibraryView: View {
     /// Lifted out of `body`: the search field, the list/grid switch and the navigation
     /// modifiers together were more than the type checker would solve inline.
     private var libraryContent: some View {
-        VStack(spacing: 0) {
-            // Wide: the title row carries the count and the buttons, and the navigation bar
-            // goes, so nothing hovers as a band above the shelf on the Mac.
-            if isWide { wideHeader }
-            if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
-            if showsServer {
-                AudiobookShelfShelfView()
-            } else {
-                // No search field here: the Search tab is the one place that searches the
-                // library. The table needs the width for its columns; on a phone it reads as
-                // the list.
-                Group {
-                    switch viewMode {
-                    case .list: listModeContent
-                    case .grid: gridModeContent
-                    case .table: if isWide { tableModeContent } else { listModeContent }
-                    }
-                }
-                .serverSeriesDestinations(library: AudiobookShelfService.shared.primary?.library ?? "")
-            }
+        // iPhone Duo around its fold (design 9a): see LibraryView+Fold.swift.
+        FoldSplit {
+            foldPicks
+        } secondary: {
+            foldShelf
+        } fallback: {
+            fullShelf
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
         .navigationTitle(screenTitle)

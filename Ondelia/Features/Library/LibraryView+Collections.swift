@@ -15,22 +15,8 @@ extension LibraryView {
         let tileWidth: CGFloat = isWide ? 200 : 150
         let padding: CGFloat = isWide ? 24 : 16
         return VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline, spacing: 9) {
-                Text(NSLocalizedString("Collections", comment: "Section title for collections"))
-                    .font(.system(size: 19, weight: .bold))
-                Text(verbatim: "\(total)")
-                    .font(.system(size: 13))
-                    .foregroundStyle(.secondary)
-                Spacer(minLength: 0)
-                Button(NSLocalizedString("See All", comment: "Library: open the Collections screen")) {
-                    withHapticFeedback { showsAllCollections = true }
-                }
-                .font(.system(size: 14, weight: .medium))
-                .foregroundStyle(.tint)
-                .buttonStyle(.plain)
-                .accessibilityIdentifier(AccessibilityIdentifiers.Library.seeAllCollections)
-            }
-            .padding(.horizontal, padding)
+            collectionsHeader(total: total)
+                .padding(.horizontal, padding)
 
             ScrollView(.horizontal, showsIndicators: false) {
                 // Not lazy: at most nine tiles, and the last one takes the others' height.
@@ -47,6 +33,43 @@ extension LibraryView {
                 .fixedSize(horizontal: false, vertical: true)
                 .padding(.horizontal, padding)
             }
+        }
+    }
+
+    /// iPhone Duo's left half: the strip's first four in a 2 × 2 grid, since a row scrolling
+    /// sideways would run into the fold. See All, as on the strip, opens the rest.
+    var collectionsGrid: some View {
+        let groups = collectionGroups.sorted(by: CollectionGroup.byRecent).prefix(4)
+        let server = displayOnlyServerCollections.prefix(4 - groups.count)
+        return VStack(alignment: .leading, spacing: 12) {
+            collectionsHeader(total: collectionGroups.count + displayOnlyServerCollections.count)
+            LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                ForEach(groups) { group in
+                    CollectionTileView(group: group, onOpen: { collectionForDetail = group.collection }, width: nil)
+                        .contextMenu { collectionMenu(group) }
+                }
+                ForEach(server) { AudiobookShelfSeriesTile(series: $0, width: nil) }
+            }
+        }
+        .padding(.horizontal)
+    }
+
+    /// "Collections 12", and See All to the Collections screen.
+    private func collectionsHeader(total: Int) -> some View {
+        HStack(alignment: .firstTextBaseline, spacing: 9) {
+            Text(NSLocalizedString("Collections", comment: "Section title for collections"))
+                .font(.system(size: 19, weight: .bold))
+            Text(verbatim: "\(total)")
+                .font(.system(size: 13))
+                .foregroundStyle(.secondary)
+            Spacer(minLength: 0)
+            Button(NSLocalizedString("See All", comment: "Library: open the Collections screen")) {
+                withHapticFeedback { showsAllCollections = true }
+            }
+            .font(.system(size: 14, weight: .medium))
+            .foregroundStyle(.tint)
+            .buttonStyle(.plain)
+            .accessibilityIdentifier(AccessibilityIdentifiers.Library.seeAllCollections)
         }
     }
 
@@ -84,7 +107,8 @@ extension LibraryView {
             ),
             serverOnly: serverOnlyCollections,
             onOpen: { collectionFromAll = $0.collection },
-            menu: collectionMenu
+            menu: collectionMenu,
+            detail: { collectionDetail($0.collection, embedded: true) }
         )
         // On the screen, not the shelf: two state-driven destinations on the shelf stack in no
         // set order, so the Collection could land under the Collections screen or replace it.
@@ -133,7 +157,7 @@ extension LibraryView {
         .tint(.red)
     }
 
-    func collectionDetail(_ collection: CollectionModel) -> some View {
+    func collectionDetail(_ collection: CollectionModel, embedded: Bool = false) -> some View {
         CollectionDetailView(
             collection: collection,
             bookActions: bookActions,
@@ -147,7 +171,8 @@ extension LibraryView {
                 collectionForDetail = nil
                 collectionFromAll = nil
                 audiobookManager.deleteCollection(collection)
-            }
+            },
+            embedded: embedded
         )
         // On the collection's screen, like the Collections screen's own: see `allCollections`.
         .navigationDestination(item: $bookFromCollection) { BookDetailView(audiobook: $0, actions: bookActions) }

@@ -5,6 +5,124 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.9.1 (1) — 2026-10-13
+
+### English
+
+Promotional text
+On iPhone Duo, the welcome tour, AudiobookShelf and Hardcover settings now split around the fold too. Plus server sign-in right from the welcome tour.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+iPhone Duo
+
+- Welcome tour: the six steps as a list on the left, tap one to jump to it; each page and its button on the right.
+- AudiobookShelf: your servers on the left, the one you pick on the right. Hidden & Shown lists series, collections, books and authors with their counts.
+- Hardcover: your account on the left, automation and progress on the right.
+- Closed, Skip sits level with the clock.
+
+Improvements
+
+- Connect an AudiobookShelf server right from the welcome tour.
+- Accent Color shows each color in the welcome tour, as in Settings.
+- Hidden & Shown fades what is hidden, and the server's row says how many.
+- Add Server asks for the server, then your account.
+- CarPlay shows the cover of the book playing, streamed books included.
+
+### Français
+
+Texte promotionnel
+Sur iPhone Duo, les premiers pas et les réglages AudiobookShelf et Hardcover se partagent aussi autour du pli. Et la connexion au serveur dès les premiers pas.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+iPhone Duo
+
+- Premiers pas : les six étapes en liste à gauche, touchez-en une pour y aller ; chaque page et son bouton à droite.
+- AudiobookShelf : vos serveurs à gauche, celui que vous choisissez à droite. Masqués et affichés liste séries, collections, livres et auteurs avec leurs nombres.
+- Hardcover : votre compte à gauche, l'automatisation et la progression à droite.
+- Fermé, Passer s'aligne sur l'heure.
+
+Améliorations
+
+- Connectez un serveur AudiobookShelf dès les premiers pas.
+- Couleur d'accent montre chaque couleur dans les premiers pas, comme dans les Réglages.
+- Masqués et affichés estompe ce qui est masqué, et la ligne du serveur indique combien.
+- Ajouter un serveur demande le serveur, puis votre compte.
+- CarPlay affiche la pochette du livre en cours, y compris en streaming.
+
+## 1.9 (1) — 2026-10-12
+
+### English
+
+Promotional text
+New on iPhone Duo: every screen splits around the fold, nothing on the crease. Plus a two-column Settings, list and detail Collections, and a clearer Search.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+iPhone Duo
+
+- Half open, every screen becomes two halves either side of the fold, and nothing sits on the crease. The layout stays put when you open it flat.
+- The mini player moves to the bottom of the left half.
+- Library: resume, your queue and four Collections on the left, your books on the right.
+- Player: the controls on the left, the chapters on the right.
+- Book details: the cover and Resume on the left; Chapters, Bookmarks and About as tabs on the right.
+- Collections: the list on the left, the Collection you pick on the right.
+- Search: the field, filters and recent searches on the left, the results on the right, authors first.
+- Settings, Statistics and server collections share the screen the same way.
+
+Improvements
+
+- The chapter you're on now says "paused" while playback is paused.
+- "1 book" instead of "1 books".
+
+### Français
+
+Texte promotionnel
+Nouveau sur iPhone Duo : chaque écran se partage autour du pli, rien sur la charnière. Et des Réglages sur deux colonnes, des Collections en liste et détail.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+iPhone Duo
+
+- À demi ouvert, chaque écran se partage en deux moitiés de part et d'autre du pli, et rien ne se trouve sur la charnière. La disposition reste la même une fois l'appareil ouvert à plat.
+- Le mini-lecteur passe en bas de la moitié gauche.
+- Bibliothèque : la reprise, votre file d'attente et quatre Collections à gauche, vos livres à droite.
+- Lecteur : les commandes à gauche, les chapitres à droite.
+- Fiche du livre : la pochette et Reprendre à gauche ; Chapitres, Signets et À propos en onglets à droite.
+- Collections : la liste à gauche, la Collection choisie à droite.
+- Recherche : le champ, les filtres et les recherches récentes à gauche, les résultats à droite, les auteurs en premier.
+- Réglages, Statistiques et collections du serveur se partagent l'écran de la même façon.
+
+Améliorations
+
+- Le chapitre en cours indique désormais « en pause » quand la lecture est en pause.
+- « 1 livre » au lieu de « 1 livres ».
+
 ## 1.8.1 (1) — 2026-10-12
 
 ### English
