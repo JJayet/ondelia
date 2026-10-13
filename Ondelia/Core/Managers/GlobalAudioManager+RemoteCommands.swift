@@ -111,9 +111,17 @@ extension GlobalAudioManager {
     /// `MPMediaItemArtwork` keeps the request handler and calls it later on MediaPlayer's own
     /// queue. Declared inside a main-actor member the closure inherits that isolation, and the
     /// first call from MediaPlayer trips Swift's executor check and traps. Nothing here needs
-    /// the main actor: it reads an image and hands it back.
+    /// the main actor: it draws an image and hands it back.
+    ///
+    /// Drawn at the size asked for: CarPlay's dashboard tile asks for a small one and showed the
+    /// placeholder note when handed the full cover.
     private nonisolated static func artwork(for image: UIImage) -> MPMediaItemArtwork {
-        MPMediaItemArtwork(boundsSize: image.size) { _ in image }
+        MPMediaItemArtwork(boundsSize: image.size) { size in
+            guard size.width > 0, size.height > 0, size != image.size else { return image }
+            return UIGraphicsImageRenderer(size: size).image { _ in
+                image.draw(in: CGRect(origin: .zero, size: size))
+            }
+        }
     }
 
     /// Wipes the system's Now Playing entry, for when the book it described is gone.
@@ -124,6 +132,11 @@ extension GlobalAudioManager {
     /// Publishes position and rate. Cheap enough to call on every state change.
     func updateNowPlayingInfo() {
         var info = MPNowPlayingInfoCenter.default().nowPlayingInfo ?? [:]
+        // A streamed book's cover can land after the load published the book without one.
+        if info[MPMediaItemPropertyArtwork] == nil, let book = currentAudiobook,
+           let image = CoverImageCache.image(for: book) {
+            info[MPMediaItemPropertyArtwork] = Self.artwork(for: image)
+        }
         info[MPNowPlayingInfoPropertyElapsedPlaybackTime] = getCurrentTime()
         info[MPMediaItemPropertyPlaybackDuration] = getDuration()
         info[MPNowPlayingInfoPropertyPlaybackRate] = playbackState == .playing ? getPlaybackRate() : 0
