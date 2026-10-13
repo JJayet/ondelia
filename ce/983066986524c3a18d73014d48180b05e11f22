@@ -1,0 +1,21 @@
+CHANGELOG.md
+  s_238c0df483ad9f::t_eafa46e22e4d56 8-65
+Ondelia.xcodeproj/project.pbxproj
+  s_238c0df483ad9f::t_eafa46e22e4d56 840,881,1027,1046,1063,1080,1110,1144,1167,1191,1214,1237,1272,1307,1342,1378
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "ce983066986524c3a18d73014d48180b05e11f22",
+  "prompts": {},
+  "sessions": {
+    "s_238c0df483ad9f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09d460a1-8af5-4929-8768-38ac8655b72e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
