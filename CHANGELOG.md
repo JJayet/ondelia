@@ -5,6 +5,44 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.9.2 (1) — 2026-10-13
+
+### English
+
+Promotional text
+Listening time on your AudiobookShelf server now counts what you hear in Ondelia, past listening included. And finished books step aside on your shelves.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+AudiobookShelf
+
+- Your server's listening stats now include the time you spend in Ondelia, streamed or downloaded, past listening included.
+- Hide Finished Books, on by default: books your server has as finished leave the shelves, Search and Collections. Turn it off in Settings › AudiobookShelf.
+
+### Français
+
+Texte promotionnel
+Le temps d'écoute de votre serveur AudiobookShelf compte désormais ce que vous écoutez dans Ondelia, y compris le passé. Et les livres terminés s'effacent.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+AudiobookShelf
+
+- Les statistiques d'écoute de votre serveur incluent désormais le temps passé dans Ondelia, en streaming ou téléchargé, y compris le passé.
+- Masquer les livres terminés, activé par défaut : les livres que votre serveur indique comme terminés quittent les rayons, la recherche et les collections. Désactivez-le dans Réglages › AudiobookShelf.
+
 ## 1.9.1 (1) — 2026-10-13
 
 ### English
