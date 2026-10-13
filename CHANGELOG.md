@@ -5,6 +5,64 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.9.1 (1) — 2026-10-13
+
+### English
+
+Promotional text
+On iPhone Duo, the welcome tour, AudiobookShelf and Hardcover settings now split around the fold too. Plus server sign-in right from the welcome tour.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+iPhone Duo
+
+- Welcome tour: the six steps as a list on the left, tap one to jump to it; each page and its button on the right.
+- AudiobookShelf: your servers on the left, the one you pick on the right. Hidden & Shown lists series, collections, books and authors with their counts.
+- Hardcover: your account on the left, automation and progress on the right.
+- Closed, Skip sits level with the clock.
+
+Improvements
+
+- Connect an AudiobookShelf server right from the welcome tour.
+- Accent Color shows each color in the welcome tour, as in Settings.
+- Hidden & Shown fades what is hidden, and the server's row says how many.
+- Add Server asks for the server, then your account.
+- CarPlay shows the cover of the book playing, streamed books included.
+
+### Français
+
+Texte promotionnel
+Sur iPhone Duo, les premiers pas et les réglages AudiobookShelf et Hardcover se partagent aussi autour du pli. Et la connexion au serveur dès les premiers pas.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+iPhone Duo
+
+- Premiers pas : les six étapes en liste à gauche, touchez-en une pour y aller ; chaque page et son bouton à droite.
+- AudiobookShelf : vos serveurs à gauche, celui que vous choisissez à droite. Masqués et affichés liste séries, collections, livres et auteurs avec leurs nombres.
+- Hardcover : votre compte à gauche, l'automatisation et la progression à droite.
+- Fermé, Passer s'aligne sur l'heure.
+
+Améliorations
+
+- Connectez un serveur AudiobookShelf dès les premiers pas.
+- Couleur d'accent montre chaque couleur dans les premiers pas, comme dans les Réglages.
+- Masqués et affichés estompe ce qui est masqué, et la ligne du serveur indique combien.
+- Ajouter un serveur demande le serveur, puis votre compte.
+- CarPlay affiche la pochette du livre en cours, y compris en streaming.
+
 ## 1.9 (1) — 2026-10-12
 
 ### English
