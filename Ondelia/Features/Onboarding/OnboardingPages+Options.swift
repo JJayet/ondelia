@@ -35,7 +35,8 @@ struct OnboardingOptionRow<Control: View>: View {
                             .font(.headline)
                             .fixedSize(horizontal: false, vertical: true)
                             // A wrapped title keeps the symbol on its first line.
-                            .alignmentGuide(.optionTitle) { $0[.firstTextBaseline] - halfCapHeight }
+                            // The value, not `self`: the guide closure is Sendable.
+                            .alignmentGuide(.optionTitle) { [halfCapHeight] in $0[.firstTextBaseline] - halfCapHeight }
                         optionControl
                     }
                 }
