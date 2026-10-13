@@ -1,0 +1,73 @@
+Ondelia/Features/Onboarding/OnboardingView+Fold.swift
+  s_238c0df483ad9f::t_10b697a93ff44b 19
+  s_238c0df483ad9f::t_d861ba7951a455 1-18,20-46,48-55,57-150
+  s_238c0df483ad9f::t_f72e468ba84b5a 47,56
+Ondelia/Features/AudiobookShelf/AudiobookShelfSettingsView.swift
+  s_238c0df483ad9f::t_db0e1b71ab2562 11-12,15-21,32-33,35,64,74-75
+  s_238c0df483ad9f::t_738bcc40e41bf1 113-114
+  s_238c0df483ad9f::t_6023944884e963 9,13-14,24-27,29-31,34,36-50,54,62-63,65-69,73,76-81,88-105
+  s_238c0df483ad9f::t_9cd6c99497d4ac 10,106
+Ondelia/Features/Onboarding/OnboardingPages.swift
+  s_238c0df483ad9f::t_3069769d079d06 4,12
+  s_238c0df483ad9f::t_5d10b9f55d99da 112-113,145-146
+  s_238c0df483ad9f::t_fb12fe13e0cc25 125
+  s_238c0df483ad9f::t_5e83ce10e6d584 148-151
+  s_238c0df483ad9f::t_10b697a93ff44b 73,75,99-111,114-117,122-124,126-131,174-186
+  s_238c0df483ad9f::t_826bbfd000a914 118-121
+  s_238c0df483ad9f::t_ee5ef9a7c15809 152-153
+  s_238c0df483ad9f::t_ff3425cbfe9a73 154-156
+  s_238c0df483ad9f::t_16f86cf2def45d 187
+Ondelia/Features/Hardcover/HardcoverSettingsView.swift
+  s_238c0df483ad9f::t_218aba9d9f5ed6 16,19-22,24-25,27-40,43-49,51-58,64,67-116,119-145,147-148,151-152,155-170,172-173,176-177,179-185,187-189
+  s_238c0df483ad9f::t_5e83ce10e6d584 61-63
+  s_238c0df483ad9f::t_f1887e27d347b7 59-60,65
+Ondelia/Features/AudiobookShelf/AudiobookShelfHiddenView.swift
+  s_238c0df483ad9f::t_78493f7e75cd9a 19,24-34,36-39,42-57,59-73,75-76,80,85-145,183-184
+Ondelia/Shared/FoldSplit.swift
+  s_238c0df483ad9f::t_738bcc40e41bf1 96-105,108-112
+  s_238c0df483ad9f::t_410404c29f4fe2 106-107
+Ondelia/Features/AudiobookShelf/AudiobookShelfServerView.swift
+  s_238c0df483ad9f::t_738bcc40e41bf1 7-9,18-36,39-41,95,97-101,110-122,126-131
+  s_238c0df483ad9f::t_505724035801a5 132
+Ondelia/Features/Hardcover/HardcoverSignInButton.swift
+  s_238c0df483ad9f::t_5e83ce10e6d584 11-12,26
+  s_238c0df483ad9f::t_ee5ef9a7c15809 9-10,25
+Ondelia/Features/AudiobookShelf/AudiobookShelfSignInSections.swift
+  s_238c0df483ad9f::t_8aaee4cb6b4101 39-47,49,59
+Ondelia/Features/Onboarding/OnboardingPages+Options.swift
+  s_238c0df483ad9f::t_5f2210be1c8dc2 18,23,29,37,199-207
+  s_238c0df483ad9f::t_d3c611b535cbeb 14-15,38
+  s_238c0df483ad9f::t_4fcf2464e85b30 93
+Ondelia/Resources/Localizable.xcstrings
+  s_238c0df483ad9f::t_5f69683b29cb28 1092-1098,2224-2234,2280-2290,2407-2413,2682-2686,5220-5226,5737-5747,6208-6218,6252-6262,6318-6324
+  s_238c0df483ad9f::t_f1887e27d347b7 438-478,746-756,1099-1102,1735-1738,2414-2417,2561-2571,2688-2691,5227-5230,5456-5459,6325-6328
+  s_238c0df483ad9f::t_10b697a93ff44b 1728-1734,2681,2687,5449-5455
+  s_238c0df483ad9f::t_27026f0394e77e 6375
+Ondelia/Features/Settings/AccentColorMenu.swift
+  s_238c0df483ad9f::t_4fcf2464e85b30 1-45
+Ondelia/Features/Settings/SettingsView+Sections.swift
+  s_238c0df483ad9f::t_4fcf2464e85b30 26
+Ondelia/Features/Onboarding/OnboardingView.swift
+  s_238c0df483ad9f::t_78b64f7acea6a3 19,49-50,67
+  s_238c0df483ad9f::t_2b5ba5bf8e83f1 43-45
+  s_238c0df483ad9f::t_3069769d079d06 31-33
+  s_238c0df483ad9f::t_a44552f51e408a 51
+  s_238c0df483ad9f::t_6250275ac00808 16,20,26-30,35-41,46,48,52-63,78-111,119,125,133,138,141,182-184
+  s_238c0df483ad9f::t_63d9b7b1972c68 185-186
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "d13bd84e5e1e72f385491dd2da2749a1a20fb5c5",
+  "prompts": {},
+  "sessions": {
+    "s_238c0df483ad9f": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "09d460a1-8af5-4929-8768-38ac8655b72e",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
