@@ -1,0 +1,210 @@
+OndeliaTests/Core/Services/TranscriptSentenceTests.swift
+  s_303d59a99d4dba::t_046bea7239e85f 57-58,62,65-76
+  s_303d59a99d4dba::t_a69eea75a94c98 59-61,63-64,77-78
+Ondelia/Core/Services/HardcoverService.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 74-75,91-96,105-108
+  s_303d59a99d4dba::t_b54072fbbcd207 109-110
+OndeliaTests/Core/Services/HardcoverTests.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 8-18
+Ondelia/Core/Services/AudiobookShelfService+Progress.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 19-20,24-25,27,55-56,85,88,96,99-103
+Ondelia/Features/Library/LibraryView+Collections.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 11,41
+Ondelia/Core/Services/CarPlay/CarPlayNowPlaying.swift
+  s_f630354041b07d::t_92e3f153d3d192 6-7,22-23,56
+  s_f630354041b07d::t_447f58922b32a0 26,71,75,95
+  s_f630354041b07d::t_705c45bb728cfe 21,24,41-42,45-55,57-59
+  s_f630354041b07d::t_f691698e9aed6c 27,62-67,69-70,72-74,76-78,83-90,93-94
+  s_f630354041b07d::t_065bd28b6c2a2a 68,91-92
+  s_303d59a99d4dba::t_431abaa66b5426 79-82
+OndeliaTests/Core/Services/AudiobookShelfStreamingTests.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 19-21,23,25,27-35
+Ondelia/Core/Managers/GlobalAudioManager+Playback.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 25,33,53,65,155
+  s_350fb62bfee800::t_996b1b85f5ad9b 26-32
+Ondelia/Core/Services/Watch/WatchSyncService+Progress.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 104
+Ondelia/Core/Services/SpotlightIndex.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 12-22,24-54,56-61,63-75,77-78,82-92
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Events.swift"
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 36-44,46-48,50-52
+Ondelia/Features/Library/LibraryView+Wide.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 12,39,83,111-112,124-126
+Ondelia/Features/Library/ContinueReadingHeroView.swift
+  s_303d59a99d4dba::t_92dad4cf7e8408 26
+  s_303d59a99d4dba::t_51fc037cce8a94 34
+Ondelia/Features/Library/LibraryView.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 96-112,182,184-185,187,189,195,197
+Ondelia/Features/Library/LibraryView+Fold.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 8,10,22,31,37-38
+Ondelia/Core/Managers/AudiobookManager+ImportSingleFile.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 12,14,103-104,106,169-178
+  s_303d59a99d4dba::t_39fa4db57be848 179-180
+OndeliaTests/Core/Managers/AudiobookManagerTests.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 29,38
+Ondelia/Core/Services/AudiobookShelfService.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 69-70
+"OndeliaWatch Watch App/Sync/PhoneSyncService.swift"
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 110-111,118
+Ondelia/Core/Services/CUEParser.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 25-28,47-51,202-203,205-207,209,211-215,220,224-232
+  s_303d59a99d4dba::t_af76b897318b17 233
+Ondelia/Core/Managers/GlobalAudioManager.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 83-84,166-167,176-180
+OndeliaTests/Core/Services/CollectionGroupTests.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 192-207
+Ondelia.xcodeproj/project.pbxproj
+  s_350fb62bfee800::t_bbd0e3070fb2bf 819,840,860,881,1024,1027,1043,1046,1061,1063,1078,1080,1098,1110,1132,1144,1164,1167,1188,1191,1211,1214,1234,1237,1260,1272,1295,1307,1331,1342,1367,1378
+Ondelia/Core/Managers/AudiobookManager+ServerSeries.swift
+  s_350fb62bfee800::t_c50f1b1580792e 92-102
+Ondelia/Core/Managers/AudiobookManager+ImportFolder.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 37,39,47,49,52
+Ondelia/Features/Search/SearchView.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 240
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 20-21,32,37-40,44-45,52,55,58,63,65,70,90-91,97,108,134-151,185,210-212,214,216
+Ondelia/Core/Services/HardcoverService+Progress.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 16-17,20
+Ondelia/Core/Managers/ListenerState+Outbound.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 41-43
+Ondelia/Core/Managers/ListenerState.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 16-18,86,94-95,104-105
+Ondelia/Core/Managers/AudiobookManager+FileCopy.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 143-146
+Ondelia/Core/Managers/AudiobookManager+ImportBatch.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 47
+Ondelia/Features/Settings/StorageView.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 10-12,43-61,105-124,159-165
+Ondelia/Features/Library/ContinueReadingCardView.swift
+  s_303d59a99d4dba::t_ac2ac70147a3a6 27,33
+OndeliaTests/Core/Models/TranscriptionStoreTests.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 111-139
+Ondelia/Features/Player/TranscriptionSubviews.swift
+  s_303d59a99d4dba::t_d105e6bef2c03c 8-12
+  s_303d59a99d4dba::t_0b0e59b12a8efc 13
+  s_303d59a99d4dba::t_203fb713e208ca 24,26-45
+Ondelia/Features/Library/ContinueReadingSection.swift
+  s_303d59a99d4dba::t_9a2fe92f49621e 24-30
+  s_303d59a99d4dba::t_d5a1315e1fccf0 130
+Ondelia/Core/Services/Watch/WatchSyncService.swift
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 20-28,48-54,136-140,149
+"OndeliaWatch Watch App/Sync/PhoneSyncService+Snapshot.swift"
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 81
+OndeliaTests/Core/Managers/GlobalAudioManagerTests.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 139
+Ondelia/App/AppShortcuts.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 29,132
+Ondelia/Core/Services/AudiobookShelfService+Sessions.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 59
+Ondelia/App/MainTabView.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 236
+OndeliaTests/Core/Services/ZIPImporterValidationTests.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 8,48-94
+  s_303d59a99d4dba::t_7ea1beacfdb333 95
+CHANGELOG.md
+  s_303d59a99d4dba::t_a7b431d73d5477 9-48,51-54,56-90,93
+  s_303d59a99d4dba::t_8d99e2a0d2f8d9 55
+  s_350fb62bfee800::t_bbd0e3070fb2bf 8,49-50,91-92
+Ondelia/Core/Services/FolderImporter.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 117,119,121,139-140,224
+Ondelia/Features/AudiobookShelf/AudiobookShelfHiddenView.swift
+  s_350fb62bfee800::t_20eb4eb7e99479 163-165
+Ondelia/Core/Managers/GlobalAudioManager+SleepTimer.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 44-46
+OndeliaTests/Core/Services/CUEParserTests.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 58-118
+OndeliaTests/Core/Managers/ImportMergePromptTests.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 10-13,31,34,42-43,47-48,64,69,87,91,101,112,117,132
+Ondelia/Core/Services/Watch/WatchTransferQueue.swift
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 47-66,94-95,105-107
+  s_303d59a99d4dba::t_c66808308da277 108
+Ondelia/Features/Player/PlayerView.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 85
+Ondelia/Features/Library/LibraryView+Server.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 18,38
+OndeliaTests/Core/Managers/ListenerStateTests.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 106-115,227-239
+OndeliaTests/Core/Services/Watch/WatchTransferQueueTests.swift
+  s_303d59a99d4dba::t_e79fa4dcc55e1a 122,128-132,137,140-141,145,148-177
+Ondelia/Core/Models/SwiftData/TranscriptionStore.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 33,35-37,73-106
+  s_303d59a99d4dba::t_660962464c91fd 107
+Ondelia/Features/Search/SearchFilter.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 1-34
+Ondelia/Resources/Localizable.xcstrings
+  s_303d59a99d4dba::t_6074f66caa5fdc 3379-3389,4157-4163
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 4164-4167,6416-6448
+Ondelia/Features/Library/LibraryView+Content.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 14-15,19,29-31,43,62-63,114,123,137,182
+Ondelia/Features/Player/TranscriptSyncView.swift
+  s_303d59a99d4dba::t_07d927bfbba5dc 153-154,165-167,176,178
+  s_303d59a99d4dba::t_ee1b3ed3e44a87 66-92,164
+  s_303d59a99d4dba::t_14a8a79c707895 65,93
+  s_303d59a99d4dba::t_50f336a1e40069 159-162,168-175
+  s_303d59a99d4dba::t_8a6acb0afad213 186
+  s_303d59a99d4dba::t_6a130c511b593a 127
+  s_303d59a99d4dba::t_2febf325f476f1 103-104,110-117
+  s_303d59a99d4dba::t_7b8797fc1140c1 105
+  s_303d59a99d4dba::t_0086d808a3bf92 126,133
+  s_303d59a99d4dba::t_ad01b42a10042b 163
+Ondelia/Features/Search/SearchView+Fold.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 134,139,164,166,170,187
+OndeliaTests/Core/Managers/GlobalAudioManagerProgressTests.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 72-93,95-118
+  s_350fb62bfee800::t_716d760643c00f 94
+Ondelia/Features/Library/CollectionGroup.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 26-32,239
+Ondelia/Features/Library/LibraryView+Selection.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 58,67,94
+OndeliaTests/Core/Services/SpotlightIndexTests.swift
+  s_303d59a99d4dba::t_e7c8086d9fc1e4 1-36
+Ondelia/Features/Player/PlayerView+Wide.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 198
+Ondelia/Core/Services/ZIPImporter.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 117,124-139
+  s_303d59a99d4dba::t_52fa563afbd783 140
+OndeliaTests/Core/Services/FolderImportStyleTests.swift
+  s_303d59a99d4dba::t_305d5c48b2210b 46-52,57-88
+Ondelia/Features/Player/TranscriptionView.swift
+  s_303d59a99d4dba::t_f51038541de326 93
+  s_303d59a99d4dba::t_f62f585c8165f1 94-97
+  s_303d59a99d4dba::t_f215398d2c007b 121
+  s_303d59a99d4dba::t_7fa3595526e137 144-146
+  s_303d59a99d4dba::t_7f4b12498599f4 196-213
+  s_303d59a99d4dba::t_f52d286f55c073 36-37
+Ondelia/Core/Managers/GlobalAudioManager+Progress.swift
+  s_303d59a99d4dba::t_823a37292f5f6b 47-48,52-53
+Ondelia/App/IsoraApp.swift
+  s_303d59a99d4dba::t_24915ed225ac7e 127-128,130
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.7.5",
+  "base_commit_sha": "6b52b304bc3c901ad8e7c7fedde86bb7dea41bbe",
+  "prompts": {},
+  "sessions": {
+    "s_303d59a99d4dba": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "1362ea6c-347f-4735-9303-2864d8a974d1",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_350fb62bfee800": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "375355f2-226c-4c3f-88cf-b70181b32d54",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    },
+    "s_f630354041b07d": {
+      "agent_id": {
+        "tool": "claude",
+        "id": "08477dbc-eed3-40bf-8ba6-46eded83a041",
+        "model": "claude-opus-5-5"
+      },
+      "human_author": "Jonathan Jayet <github@jayet.io>"
+    }
+  }
+}
