@@ -16,12 +16,15 @@ extension AudiobookShelfService {
     /// Whether a local position write is worth a request.
     ///
     /// Always when it is the last word — a pause, a seek while paused, a finish — since nothing
-    /// follows it; otherwise once the book has moved `progressPushInterval` on.
+    /// follows it; otherwise once the book has moved `progressPushInterval` on. Never while a
+    /// pull is pending or failed: the server may hold a newer position this one would overwrite.
     nonisolated static func shouldPush(
         _ next: PushedProgress,
         lastPushed: PushedProgress?,
-        isPlaying: Bool
+        isPlaying: Bool,
+        awaitingPull: Bool
     ) -> Bool {
+        guard !awaitingPull else { return false }
         guard let lastPushed else { return true }
         // Marked read or unread: news even when the position did not move.
         if next.isFinished != lastPushed.isFinished { return true }
@@ -49,7 +52,8 @@ extension AudiobookShelfService {
         guard position.isFinite, Self.shouldPush(
             next,
             lastPushed: pushedProgress[book.id],
-            isPlaying: GlobalAudioManager.shared.isPlaying()
+            isPlaying: GlobalAudioManager.shared.isPlaying(),
+            awaitingPull: awaitingPull.contains(book.id)
         ) else { return }
 
         pushingProgress.insert(book.id)
@@ -78,8 +82,10 @@ extension AudiobookShelfService {
 
     /// Takes the server's position before the book opens, when it is the newer one. Bounded by
     /// a short timeout: an unreachable server must not hold up playback of a downloaded book.
+    /// Pushes wait until a pull succeeds, so a failed one keeps them waiting for the next.
     func pullProgress(for book: AudiobookModel) async {
         guard Self.syncsListening, let item = itemID(for: book), let (server, token) = session(forItem: item) else { return }
+        awaitingPull.insert(book.id)
         let remote: AudiobookShelfAPI.MediaProgress?
         do {
             remote = try await AudiobookShelfAPI.progress(server: server, token: token, item: item, timeout: 4)
@@ -87,9 +93,14 @@ extension AudiobookShelfService {
             Log.library.error("AudiobookShelf: progress pull failed: \(error.localizedDescription)")
             return
         }
+        awaitingPull.remove(book.id)
         guard let remote,
               ListenerState.shared.apply(.position(remote.currentTime), to: book, from: .server, at: remote.updatedAt)
-        else { return }
+        else {
+            // Ours is the newer one, and a write turned away while the pull was out may have been the last.
+            pushProgress(for: book)
+            return
+        }
         // ListenerState does not push a server change back to the server; this is what the
         // server holds now, so the next local write is throttled against it.
         pushedProgress[book.id] = PushedProgress(position: remote.currentTime, isFinished: remote.isFinished)

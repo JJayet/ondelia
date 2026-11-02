@@ -23,7 +23,7 @@ struct ContinueReadingHeroView: View {
     private var context: String {
         let remaining = String(
             format: NSLocalizedString("%@ left", comment: "Remaining listening time"),
-            (group?.remaining ?? max(book.duration - book.currentPosition, 0)).hoursMinutesFormatted
+            (entry.playingGroup?.remaining ?? max(book.duration - book.currentPosition, 0)).hoursMinutesFormatted
         )
         let lead = group == nil ? book.author : book.title
         guard let lead else { return remaining }
@@ -31,7 +31,7 @@ struct ContinueReadingHeroView: View {
     }
 
     private var progress: Double {
-        if let group { return group.progressFraction }
+        if let group = entry.playingGroup { return group.progressFraction }
         return book.progressFraction
     }
 

@@ -108,6 +108,35 @@ struct TranscriptionStoreTests {
         #expect(rowCount == 1)
     }
 
+    @Test("Transcribing a window in another language replaces the first language's transcript")
+    func otherLanguageReplaces() async throws {
+        let (store, container) = try makeStore()
+        let bookID = UUID()
+        try await insertBook(container, id: bookID)
+
+        await store.save(
+            TranscriptionResult(text: "bonjour", segments: [], language: "fr"),
+            for: request(bookID), engine: "SpeechAnalyzer"
+        )
+        await store.save(
+            TranscriptionResult(text: "hello", segments: [], language: "en"),
+            for: request(bookID), engine: "SpeechAnalyzer"
+        )
+        // Another window of the same track keeps its own transcript.
+        await store.save(
+            TranscriptionResult(text: "plus tard", segments: [], language: "fr"),
+            for: request(bookID, start: 600, end: 1200), engine: "SpeechAnalyzer"
+        )
+
+        #expect(await store.cachedResult(for: request(bookID), language: "en")?.text == "hello")
+        #expect(await store.cachedResult(for: request(bookID), language: "fr") == nil)
+        #expect(await store.cachedResult(for: request(bookID, start: 600, end: 1200), language: "fr")?.text == "plus tard")
+        #expect(await store.count() == 2)
+
+        await store.deleteAll()
+        #expect(await store.count() == 0)
+    }
+
     @Test("A transcript for a book that is not in the store is dropped, not orphaned")
     func unknownBookIsRejected() async throws {
         let (store, _) = try makeStore()

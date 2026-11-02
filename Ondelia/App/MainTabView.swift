@@ -233,7 +233,7 @@ struct MainTabView: View {
                 selectedTab = "library"
                 Task { @MainActor in
                     guard let book = await PlaybackCommands.loadedBook() else { return }
-                    globalAudioManager.startPlayback()
+                    globalAudioManager.resumePlayback()
                     playerRouter.present(book)
                 }
             default:

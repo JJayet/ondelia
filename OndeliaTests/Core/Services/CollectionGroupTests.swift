@@ -189,6 +189,22 @@ struct CollectionGroupTests {
         #expect(group.currentBook?.title == "Two")
     }
 
+    @Test("A finished book counts in full, wherever its position stopped")
+    func finishedBooksCountInFull() {
+        let nearEnd = book("One", duration: 1000, at: 980)
+        nearEnd.isFinished = true
+        let onServer = book("Two", duration: 3000, at: 0)
+        onServer.isFinished = true
+        let group = CollectionGroup(
+            collection: CollectionModel(name: "Saga", bookIDs: [nearEnd.id, onServer.id]),
+            books: [nearEnd, onServer]
+        )
+
+        #expect(group.progressFraction == 1)
+        #expect(!group.isInProgress)
+        #expect(group.remaining == 0)
+    }
+
     @Test("The catalogue fills in missing volumes only when asked")
     func catalogueMarksMissingVolumes() throws {
         let seriesID = 9_001

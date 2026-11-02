@@ -114,26 +114,11 @@ enum FolderImporter {
     
     // MARK: - Import from audio files (fallback)
     private static func importFromAudioFiles(folderURL: URL) async -> FolderAudiobook? {
-        // Look for CUE files first
-        let cueFiles = CUEParser.findCUEFiles(in: folderURL)
-        var cueFile: CUEFile?
-        var associatedAudioFile: URL?
-        
-        if let firstCueFile = cueFiles.first {
-            Log.library.debug("🎵 FolderImporter: Found CUE file: \(firstCueFile.lastPathComponent)")
-            cueFile = CUEParser.parseCUEFile(at: firstCueFile)
-            
-            if let parsedCue = cueFile {
-                associatedAudioFile = CUEParser.matchCUEWithAudioFile(cueFile: parsedCue, in: folderURL)
-            }
-        }
-        
-        // If we have a valid CUE file with associated audio, this is a single-file audiobook
+        // A lone CUE sheet describing one audio file is a single-file audiobook
         // We should return nil here so the AudiobookManager can import it as a single file instead
-        if let _ = cueFile, let audioFile = associatedAudioFile {
+        if let match = CUEParser.singleFileCUE(in: folderURL) {
             Log.library.debug("📖 FolderImporter: CUE file detected - this should be imported as a single-file audiobook")
-            Log.library.debug("   Audio file: \(audioFile.lastPathComponent)")
-            Log.library.debug("   ⚠️ Returning nil to trigger single-file import workflow")
+            Log.library.debug("   Audio file: \(match.audioFile.lastPathComponent)")
             return nil
         }
         
@@ -151,15 +136,8 @@ enum FolderImporter {
     }
 
     /// Builds a single audiobook whose chapters are `audioFiles`, in the order given.
-    /// `folderURL` only supplies the title, author and cover art, so the caller may pass a folder
-    /// it can name but not enumerate, such as the parent of a hand-picked file selection.
-    /// - Parameter onFileAnalyzed: reports each file as its duration is read, so a caller driving a
-    ///   long selection can show progress. Called off the main actor.
-    static func makeFolderAudiobook(
-        from audioFiles: [URL],
-        folderURL: URL,
-        onFileAnalyzed: ((Int, String) -> Void)? = nil
-    ) async -> FolderAudiobook? {
+    /// `folderURL` supplies the title, author and cover art.
+    private static func makeFolderAudiobook(from audioFiles: [URL], folderURL: URL) async -> FolderAudiobook? {
         guard !audioFiles.isEmpty else { return nil }
 
         let folderName = folderURL.lastPathComponent
@@ -220,7 +198,6 @@ enum FolderImporter {
             
             // Create chapters from batch results
             for result in batchResults {
-                onFileAnalyzed?(result.index, result.fileName)
                 let chapterTitle = generateChapterTitle(from: result.fileName, index: result.index + 1)
                 
                 let chapter = FolderChapter(
@@ -244,8 +221,7 @@ enum FolderImporter {
             }
         }
         
-        // Prefer the folder artwork. A hand-picked file selection carries no access to its folder,
-        // so fall back to the artwork embedded in the first file.
+        // Prefer the folder artwork, then the artwork embedded in the first file.
         let embedded = await MetadataExtractor.extractMetadata(from: audioFiles[0])
         let coverImage = await findCoverImage(in: folderURL) ?? embedded?.coverImage
         

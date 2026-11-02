@@ -74,13 +74,10 @@ extension AudiobookManager {
         }
     }
     
-    /// - Parameter sourceFiles: the files to copy, keyed by chapter file name. Pass them when the
-    ///   user picked files rather than their folder, since only those URLs are readable then.
     /// - Parameter onFileCopied: reports each copied file, off the main actor.
     nonisolated func copyFolderToDocuments(
         from sourceFolderURL: URL,
         folderAudiobook: FolderAudiobook,
-        sourceFiles: [String: URL]? = nil,
         onFileCopied: (@Sendable (Int, String) -> Void)? = nil
     ) async -> URL? {
         let fileManager = FileManager.default
@@ -143,13 +140,10 @@ extension AudiobookManager {
             var copiedFiles = 0
             
             for (fileIndex, folderChapter) in folderAudiobook.chapters.enumerated() {
-                let sourceFileURL = try sourceFiles?[folderChapter.fileName]
-                    ?? SafeImportPath.containedFileURL(
-                        for: folderChapter.fileName,
-                        inside: sourceFolderURL
-                    )
-                let fileAccess = sourceFiles == nil ? false : sourceFileURL.startAccessingSecurityScopedResource()
-                defer { if fileAccess { sourceFileURL.stopAccessingSecurityScopedResource() } }
+                let sourceFileURL = try SafeImportPath.containedFileURL(
+                    for: folderChapter.fileName,
+                    inside: sourceFolderURL
+                )
                 let destinationFileURL = try SafeImportPath.resolvedURL(
                     for: folderChapter.fileName,
                     inside: destinationFolderURL

@@ -9,9 +9,9 @@ extension AudiobookManager {
         Log.library.debug("🎵 AudiobookManager: Starting CUE-based audiobook import")
         
         // Extract metadata from the audio file
-        guard let metadata = await MetadataExtractor.extractMetadata(from: audioFile) else {
+        guard let metadata = await MetadataExtractor.extractMetadata(from: audioFile), metadata.duration > 0 else {
             Log.library.error("❌ AudiobookManager: Failed to extract metadata from audio file")
-            // Early exit: mark progress handled by outer defer
+            await reportUnreadableAudio(audioFile)
             return
         }
         
@@ -100,9 +100,10 @@ extension AudiobookManager {
 
         Log.library.debug("🎵 AudiobookManager: Extracting metadata...")
         // Extract metadata
-        guard let metadata = await MetadataExtractor.extractMetadata(from: url) else {
+        // Extraction always returns something; a zero duration is what an unreadable file looks like.
+        guard let metadata = await MetadataExtractor.extractMetadata(from: url), metadata.duration > 0 else {
             Log.library.error("❌ AudiobookManager: Failed to extract metadata from file")
-            await MainActor.run { }
+            await reportUnreadableAudio(url)
             return
         }
         
@@ -163,6 +164,18 @@ extension AudiobookManager {
             try? FileManager.default.removeItem(at: localURL)
             await reportImportFailure(error)
         }
+    }
+
+    /// Said out loud: a corrupt file otherwise imports as a zero-second book, or as nothing.
+    @MainActor
+    func reportUnreadableAudio(_ url: URL) {
+        importErrorMessage = String(
+            format: NSLocalizedString(
+                "\"%@\" contains no audio that can be imported.",
+                comment: "ZIP import failure: the archive has no usable audio, %@ is its name"
+            ),
+            url.deletingPathExtension().lastPathComponent
+        )
     }
 
     /// Called whenever persisting an import failed and its copied audio has been deleted.

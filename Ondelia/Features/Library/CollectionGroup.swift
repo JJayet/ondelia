@@ -23,7 +23,13 @@ struct CollectionGroup: Identifiable {
     var progressFraction: Double {
         let total = totalDuration
         guard total > 0 else { return 0 }
-        return books.reduce(0) { $0 + $1.currentPosition } / total
+        return books.reduce(0) { $0 + Self.listened($1) } / total
+    }
+
+    /// A finished book counts in full: auto-finish fires short of the end, and a book finished
+    /// on the server can sit at position 0.
+    static func listened(_ book: AudiobookModel) -> TimeInterval {
+        book.isFinished ? book.duration : book.currentPosition
     }
 
     /// Started and not finished: the strip and the "Recent" sort put these first.
@@ -230,6 +236,6 @@ extension CollectionGroup {
     }
 
     var remaining: TimeInterval {
-        books.reduce(0) { $0 + max($1.duration - $1.currentPosition, 0) }
+        books.reduce(0) { $0 + max($1.duration - Self.listened($1), 0) }
     }
 }

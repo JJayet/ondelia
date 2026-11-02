@@ -69,4 +69,51 @@ struct GlobalAudioManagerProgressTests {
         #expect(book.currentPosition == 1.5)
         manager.isLoading = false
     }
+
+    @Test("Opening another book stops the last one's save timer")
+    func loadingAnotherBookStopsSaveTimer() async throws {
+        _ = try await playingBook()
+        defer { manager.unload() }
+        #expect(manager.progressTimer != nil)
+
+        manager.loadAudiobook(AudiobookModel(title: "Next", duration: 3600))
+
+        #expect(manager.progressTimer == nil)
+    }
+
+    @Test("Playing a finished book again starts it from the beginning")
+    func finishedBookReplaysFromStart() async throws {
+        let book = try await loadFixtureBook(into: manager)
+        defer { manager.unload() }
+        book.isFinished = true
+        manager.player?.seek(to: manager.getDuration() - 0.5)
+
+        manager.resumePlayback()
+
+        #expect(manager.getCurrentTime() < 0.5)
+        #expect(!book.isFinished)
+    }
+
+    @Test("An end-of-chapter sleep timer reaching the end of the book stops there, queue or not")
+    func endOfChapterSleepStopsAtBookEnd() async throws {
+        let book = try await loadFixtureBook(into: manager)
+        // Already finished, so the end logs no Finish and leaves the library as it is.
+        book.isFinished = true
+        let next = AudiobookModel(title: "Queued", duration: 3600)
+        let library = AudiobookManager.shared
+        library.audiobooks.append(next)
+        PlayQueue.shared.append(next)
+        defer {
+            PlayQueue.shared.remove(next)
+            library.audiobooks.removeAll { $0.id == next.id }
+            manager.unload()
+        }
+        manager.sleepChapterEnd = manager.getDuration()
+
+        manager.player?.onPlaybackEnded?()
+
+        #expect(manager.sleepChapterEnd == nil)
+        #expect(manager.currentAudiobook?.id == book.id)
+        #expect(PlayQueue.shared.contains(next))
+    }
 }

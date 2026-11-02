@@ -136,7 +136,7 @@ struct GlobalAudioManagerTests {
 
         // Test play state
         // ponytail: isPlaying() reads AVPlayer.rate, which stays 0 for the empty fixture; add a real audio file to assert it.
-        manager.startPlayback()
+        manager.resumePlayback()
         #expect(manager.playbackState == .playing)
         #expect(manager.showMiniPlayer == true)
 

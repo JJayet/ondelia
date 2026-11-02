@@ -816,7 +816,7 @@
 				CODE_SIGN_ENTITLEMENTS = Ondelia/Resources/Isora.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
@@ -837,7 +837,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora;
 				PRODUCT_MODULE_NAME = Isora;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -857,7 +857,7 @@
 				CODE_SIGN_ENTITLEMENTS = Ondelia/Resources/Isora.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_APP_SANDBOX = YES;
 				ENABLE_PREVIEWS = YES;
@@ -878,7 +878,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora;
 				PRODUCT_MODULE_NAME = Isora;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1021,10 +1021,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraTests;
 				PRODUCT_MODULE_NAME = IsoraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1040,10 +1040,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 26.0;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraTests;
 				PRODUCT_MODULE_NAME = IsoraTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1058,9 +1058,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraUITests;
 				PRODUCT_MODULE_NAME = IsoraUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1075,9 +1075,9 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.IsoraUITests;
 				PRODUCT_MODULE_NAME = IsoraUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1095,7 +1095,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "OndeliaWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1107,7 +1107,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp;
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1129,7 +1129,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = "OndeliaWatch Watch App/IsoraWatch.entitlements";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1141,7 +1141,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp;
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_App;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1161,10 +1161,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppTests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1185,10 +1185,10 @@
 			buildSettings = {
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppTests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1208,10 +1208,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppUITests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1231,10 +1231,10 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = "io.jayet.IsoraWatch-Watch-AppUITests";
 				PRODUCT_MODULE_NAME = IsoraWatch_Watch_AppUITests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1257,7 +1257,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = OndeliaWatchWidget/IsoraWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OndeliaWatchWidget/Info.plist;
@@ -1269,7 +1269,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp.IsoraWatchWidget;
 				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1292,7 +1292,7 @@
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
 				CODE_SIGN_ENTITLEMENTS = OndeliaWatchWidget/IsoraWatchWidget.entitlements;
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OndeliaWatchWidget/Info.plist;
@@ -1304,7 +1304,7 @@
 					"@executable_path/../../Frameworks",
 					"@executable_path/../../../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.watchkitapp.IsoraWatchWidget;
 				PRODUCT_MODULE_NAME = IsoraWatchWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1328,7 +1328,7 @@
 				CODE_SIGN_ENTITLEMENTS = OndeliaWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OndeliaWidget/Info.plist;
@@ -1339,7 +1339,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.IsoraWidget;
 				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1364,7 +1364,7 @@
 				CODE_SIGN_ENTITLEMENTS = OndeliaWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEVELOPMENT_TEAM = 9A2R42N433;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = OndeliaWidget/Info.plist;
@@ -1375,7 +1375,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.9.2;
+				MARKETING_VERSION = 1.9.3;
 				PRODUCT_BUNDLE_IDENTIFIER = io.jayet.Isora.IsoraWidget;
 				PRODUCT_MODULE_NAME = IsoraWidgetExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";

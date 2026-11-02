@@ -16,15 +16,23 @@ struct AudiobookShelfStreamingTests {
     @Test("Progress is pushed on the first write, every 30 s while playing, and on the last word")
     func pushThrottle() {
         let push = AudiobookShelfService.shouldPush
-        #expect(push(Pushed(position: 10, isFinished: false), nil, true))
-        #expect(!push(Pushed(position: 20, isFinished: false), Pushed(position: 10, isFinished: false), true))
-        #expect(push(Pushed(position: 41, isFinished: false), Pushed(position: 10, isFinished: false), true))
+        #expect(push(Pushed(position: 10, isFinished: false), nil, true, false))
+        #expect(!push(Pushed(position: 20, isFinished: false), Pushed(position: 10, isFinished: false), true, false))
+        #expect(push(Pushed(position: 41, isFinished: false), Pushed(position: 10, isFinished: false), true, false))
         // Paused: whatever moved is the last word, so it goes.
-        #expect(push(Pushed(position: 12, isFinished: false), Pushed(position: 10, isFinished: false), false))
+        #expect(push(Pushed(position: 12, isFinished: false), Pushed(position: 10, isFinished: false), false, false))
         // Nothing moved: nothing to say.
-        #expect(!push(Pushed(position: 10.4, isFinished: false), Pushed(position: 10, isFinished: false), false))
+        #expect(!push(Pushed(position: 10.4, isFinished: false), Pushed(position: 10, isFinished: false), false, false))
         // Marked unread at the same position still counts.
-        #expect(push(Pushed(position: 10, isFinished: false), Pushed(position: 10, isFinished: true), false))
+        #expect(push(Pushed(position: 10, isFinished: false), Pushed(position: 10, isFinished: true), false, false))
+    }
+
+    @Test("Progress waits for a successful pull: the server may hold a newer position")
+    func pushWaitsForPull() {
+        let push = AudiobookShelfService.shouldPush
+        #expect(!push(Pushed(position: 10, isFinished: false), nil, false, true))
+        #expect(!push(Pushed(position: 7200, isFinished: false), Pushed(position: 10, isFinished: false), false, true))
+        #expect(!push(Pushed(position: 10, isFinished: true), Pushed(position: 10, isFinished: false), false, true))
     }
 
     @Test("Stream addresses sit under the server's own path")

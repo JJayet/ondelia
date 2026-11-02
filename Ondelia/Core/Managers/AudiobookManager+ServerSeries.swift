@@ -89,6 +89,17 @@ extension AudiobookManager {
         }
     }
 
+    /// Shows a hidden server audiobook, and the hidden series holding it: once the book has left
+    /// the Library, its series is the way back to it.
+    func showServerBook(_ item: String, on serverID: String) {
+        let hidden = AudiobookShelfHidden.shared
+        hidden.show(.book, item, on: serverID)
+        for series in AudiobookShelfCatalog.shared.series
+        where series.books?.contains(where: { $0.id == item }) == true && hidden.isHidden(.series, series.id, on: serverID) {
+            hidden.show(.series, series.id, on: serverID)
+        }
+    }
+
     /// What plays after `book` ends in a server series Collection that chains its books: the
     /// next member in series order that is unfinished and can play, whether or not it has
     /// joined the Library. Nil when `collection` is not one, or nothing is left.

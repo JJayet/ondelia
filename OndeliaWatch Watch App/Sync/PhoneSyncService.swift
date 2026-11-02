@@ -19,7 +19,6 @@ final class PhoneSyncService: NSObject, WCSessionDelegate {
     var skipBackSeconds: TimeInterval = 15
     var skipForwardSeconds: TimeInterval = 15
     var isReachable = false
-    var isPhoneAppInstalled = false
 
     private override init() { super.init() }
 
@@ -102,32 +101,21 @@ final class PhoneSyncService: NSObject, WCSessionDelegate {
             Log.sync.error("❌ PhoneSyncService: activation failed: \(error.localizedDescription)")
         }
         let reachable = session.isReachable
-        let installed = session.isCompanionAppInstalled
         let context = session.receivedApplicationContext[SyncKeys.snapshot] as? Data
         Task { @MainActor in
             let service = PhoneSyncService.shared
             service.isReachable = reachable
-            service.isPhoneAppInstalled = installed
             WatchTransferState.shared.refreshAll()
             if let context { service.applySnapshot(data: context) }
-            // The phone keeps its picture of what the watch holds in memory only, so it starts
-            // every launch believing the watch is empty. This is what corrects it.
+            // The phone's picture of what the watch holds can be stale (a file deleted or lost
+            // while it was not listening). This is what corrects it.
             for bookID in WatchLibraryDisk.bookIDsWithContent() { service.sendInventory(bookID: bookID) }
         }
     }
 
     nonisolated func sessionReachabilityDidChange(_ session: WCSession) {
         let reachable = session.isReachable
-        let installed = session.isCompanionAppInstalled
-        Task { @MainActor in
-            PhoneSyncService.shared.isReachable = reachable
-            PhoneSyncService.shared.isPhoneAppInstalled = installed
-        }
-    }
-
-    nonisolated func sessionCompanionAppInstalledDidChange(_ session: WCSession) {
-        let installed = session.isCompanionAppInstalled
-        Task { @MainActor in PhoneSyncService.shared.isPhoneAppInstalled = installed }
+        Task { @MainActor in PhoneSyncService.shared.isReachable = reachable }
     }
 
     nonisolated func session(_ session: WCSession, didReceiveApplicationContext applicationContext: [String: Any]) {

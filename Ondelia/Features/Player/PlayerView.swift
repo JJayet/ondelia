@@ -82,7 +82,7 @@ struct PlayerView: View {
                 currentChapter: currentChapter,
                 onChapterTap: { chapter in
                     audioManager.seek(to: chapter.startTime)
-                    audioManager.startPlayback()
+                    audioManager.resumePlayback()
                     showingChapterList = false
                 }
             )

@@ -56,7 +56,7 @@ extension AudiobookShelfService {
             let bookID = link.audiobookID
             var descriptor = FetchDescriptor<AudiobookModel>(predicate: #Predicate { $0.id == bookID })
             descriptor.fetchLimit = 1
-            guard let book = (try? context.fetch(descriptor))?.first,
+            guard let book = (try? context.fetch(descriptor))?.first, !awaitingPull.contains(bookID),
                   let (server, token) = session(forItem: link.itemID),
                   await sendSessions(for: book, item: link.itemID, server: server, token: token)
             else { continue }

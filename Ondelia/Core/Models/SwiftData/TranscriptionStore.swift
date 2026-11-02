@@ -30,11 +30,11 @@ actor TranscriptionStore {
         )
     }
 
-    /// Replaces whatever was cached for this window in the result's language.
+    /// Replaces whatever was cached for this window, in any language.
     func save(_ result: TranscriptionResult, for request: TranscriptionRequest, engine: String) {
-        // One transcript per window and language, so an earlier attempt is dropped rather
-        // than duplicated.
-        if let existing = try? fetchRow(for: request, language: result.language) {
+        // One transcript per window: an earlier attempt, or the same window in another
+        // language, is dropped rather than kept forever beside it.
+        for existing in (try? fetchRows(for: request)) ?? [] {
             modelContext.delete(existing)
         }
         sweepLegacyRows(for: request)
@@ -68,6 +68,41 @@ actor TranscriptionStore {
         } catch {
             Log.transcription.error("❌ TranscriptionStore: Could not save the transcript: \(error)")
         }
+    }
+
+    /// How many windows are cached.
+    func count() -> Int {
+        (try? modelContext.fetchCount(FetchDescriptor<TranscriptWindowModel>())) ?? 0
+    }
+
+    /// Drops every cached transcript, windows and legacy whole-track rows alike.
+    func deleteAll() {
+        for row in (try? modelContext.fetch(FetchDescriptor<TranscriptWindowModel>())) ?? [] {
+            modelContext.delete(row)
+        }
+        for legacy in (try? modelContext.fetch(FetchDescriptor<ChapterTranscriptionModel>())) ?? [] {
+            modelContext.delete(legacy)
+        }
+        do {
+            try modelContext.save()
+        } catch {
+            Log.transcription.error("❌ TranscriptionStore: Could not delete the transcripts: \(error)")
+        }
+    }
+
+    private func fetchRows(for request: TranscriptionRequest) throws -> [TranscriptWindowModel] {
+        let audiobookID = request.audiobookID
+        let trackIndex = Int16(request.trackIndex)
+        let start = request.start
+        let end = request.end
+        return try modelContext.fetch(FetchDescriptor<TranscriptWindowModel>(
+            predicate: #Predicate { row in
+                row.audiobookID == audiobookID
+                    && row.trackIndex == trackIndex
+                    && row.windowStart == start
+                    && row.windowEnd == end
+            }
+        ))
     }
 
     private func fetchRow(for request: TranscriptionRequest, language: String) throws -> TranscriptWindowModel? {

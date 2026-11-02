@@ -101,7 +101,7 @@ extension WatchSyncService {
         let audio = GlobalAudioManager.shared
         audio.loadAudiobook(book)
         audio.seek(to: chapter.startTime)
-        audio.startPlayback()
+        audio.resumePlayback()
     }
 
     // MARK: - Hooks the managers call

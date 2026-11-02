@@ -3376,6 +3376,17 @@
         }
       }
     },
+    "Next result" : {
+      "comment" : "Transcription search: go to the next occurrence",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résultat suivant"
+          }
+        }
+      }
+    },
     "Next Chapter" : {
       "comment" : "Next chapter accessibility label",
       "localizations" : {
@@ -4139,6 +4150,17 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Maintenez un livre appuyé"
+          }
+        }
+      }
+    },
+    "Previous result" : {
+      "comment" : "Transcription search: go to the previous occurrence",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Résultat précédent"
           }
         }
       }
@@ -6388,6 +6410,39 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "Les livres de votre serveur sont dans Bibliothèque, sous AudiobookShelf. Touchez-en un pour le télécharger ; les livres téléchargés s’écoutent hors ligne."
+          }
+        }
+      }
+    },
+    "Transcripts" : {
+      "comment" : "Storage row: cached transcripts",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Transcriptions"
+          }
+        }
+      }
+    },
+    "Delete transcripts" : {
+      "comment" : "Remove every cached transcript",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimer les transcriptions"
+          }
+        }
+      }
+    },
+    "%d transcripts will be removed. They are made again the next time they are opened." : {
+      "comment" : "Transcript cleanup confirmation",
+      "localizations" : {
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%d transcriptions seront supprimées. Elles seront refaites à leur prochaine ouverture."
           }
         }
       }

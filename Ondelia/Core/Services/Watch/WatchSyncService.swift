@@ -17,7 +17,15 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
     private(set) var isReachable = false
     /// Chapter numbers the watch reports holding, per book. Drives the snapshot order, the
     /// "on the watch" lines in the UI and the transfer-queue pruning.
-    private(set) var chaptersOnWatch: [UUID: Set<Int>] = [:]
+    /// Persisted: the watch only re-reports it when its own app starts, and until then "Clear
+    /// Apple Watch" would see nothing to clear.
+    private(set) var chaptersOnWatch: [UUID: Set<Int>] = [:] {
+        didSet {
+            guard let data = try? SyncCodec.encode(chaptersOnWatch) else { return }
+            UserDefaults.standard.set(data, forKey: Self.inventoryKey)
+        }
+    }
+    private static let inventoryKey = "watchChaptersOnWatch"
 
     /// Nil until `activate()`, and on a device with no WatchConnectivity at all — every send
     /// goes through it, so nothing else has to check twice.
@@ -37,7 +45,13 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
     /// The sign-in last handed to the watch this launch; `.some(nil)` is a sign-out.
     var sentServerAccounts: [ServerAccount]?
 
-    private override init() { super.init() }
+    private override init() {
+        if let data = UserDefaults.standard.data(forKey: Self.inventoryKey),
+           let stored = try? SyncCodec.decode([UUID: Set<Int>].self, from: data) {
+            chaptersOnWatch = stored
+        }
+        super.init()
+    }
 
     /// Called once at launch. Safe on a device with no watch: `isSupported` is false there and
     /// the service stays inert.
@@ -119,6 +133,11 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
         let state = watchState(of: session)
         let activated = activationState == .activated
         let failure = error?.localizedDescription
+        let outstanding = Set(session.outstandingFileTransfers.compactMap { transfer -> String? in
+            guard let metadata = TransferMetadata(dictionary: transfer.file.metadata ?? [:]),
+                  let number = metadata.chapterNumber else { return nil }
+            return WatchTransferQueue.PendingChapter(bookID: metadata.bookID, chapterNumber: number).id
+        })
         Task { @MainActor in
             self.applyState(paired: state.paired, installed: state.installed, reachable: state.reachable)
             if let failure {
@@ -127,6 +146,7 @@ final class WatchSyncService: NSObject, WCSessionDelegate {
             guard activated else { return }
             self.sendServerAccount()
             self.pushSnapshot(immediate: true)
+            WatchTransferQueue.shared.requeueLostTransfers(outstanding: outstanding)
             self.drainQueue()
         }
     }

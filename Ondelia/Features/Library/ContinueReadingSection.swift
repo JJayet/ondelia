@@ -21,6 +21,13 @@ enum ContinueReadingEntry: Identifiable {
         }
     }
 
+    /// The collection whose totals the card shows: only when its books play back to back.
+    /// Otherwise only the current book will play, so its own time left is what matters.
+    var playingGroup: CollectionGroup? {
+        guard case .collection(let group, _) = self, group.collection.autoContinue else { return nil }
+        return group
+    }
+
     /// Books in progress, most recent first, each folded into its collection when it has one.
     /// A collection appears once, for the volume most recently played.
     static func build(
@@ -120,7 +127,7 @@ private struct ContinueReadingCompactRow: View {
     }
 
     private var remaining: TimeInterval {
-        if case .collection(let group, _) = entry { return group.remaining }
+        if let group = entry.playingGroup { return group.remaining }
         return max(entry.book.duration - entry.book.currentPosition, 0)
     }
 

@@ -8,7 +8,7 @@ extension LibraryView {
     /// One row of Collection tiles, in progress first, then recently played, and See All to the
     /// Collections screen. Server collections and series with no Collection yet fill what room
     /// is left: they have never been played.
-    var collectionsStrip: some View {
+    func collectionsStrip(_ collectionGroups: [CollectionGroup]) -> some View {
         let groups = collectionGroups.sorted(by: CollectionGroup.byRecent).prefix(Self.stripLimit)
         let server = displayOnlyServerCollections.prefix(Self.stripLimit - groups.count)
         let total = collectionGroups.count + displayOnlyServerCollections.count
@@ -38,7 +38,7 @@ extension LibraryView {
 
     /// iPhone Duo's left half: the strip's first four in a 2 × 2 grid, since a row scrolling
     /// sideways would run into the fold. See All, as on the strip, opens the rest.
-    var collectionsGrid: some View {
+    func collectionsGrid(_ collectionGroups: [CollectionGroup]) -> some View {
         let groups = collectionGroups.sorted(by: CollectionGroup.byRecent).prefix(4)
         let server = displayOnlyServerCollections.prefix(4 - groups.count)
         return VStack(alignment: .leading, spacing: 12) {

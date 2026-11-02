@@ -66,6 +66,8 @@ final class AudiobookShelfService {
     /// costs one redundant request after a launch.
     var pushedProgress: [UUID: PushedProgress] = [:]
     var pushingProgress: Set<UUID> = []
+    /// Books whose pull is in flight or failed; their pushes wait for a successful one.
+    var awaitingPull: Set<UUID> = []
     /// Items each server has as finished, by account id. Refreshed when the app becomes active.
     var finishedItems: [String: Set<String>] = [:]
     /// Items whose library entry is being made for streaming.

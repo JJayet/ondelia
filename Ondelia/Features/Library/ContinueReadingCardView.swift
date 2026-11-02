@@ -24,13 +24,13 @@ struct ContinueReadingCardView: View {
     }
 
     private var progressPercentage: Double {
-        if let group { return group.progressFraction }
+        if let group = entry.playingGroup { return group.progressFraction }
         guard audiobook.duration > 0 else { return 0 }
         return audiobook.currentPosition / audiobook.duration
     }
 
     private var remaining: TimeInterval {
-        group?.remaining ?? max(audiobook.duration - audiobook.currentPosition, 0)
+        entry.playingGroup?.remaining ?? max(audiobook.duration - audiobook.currentPosition, 0)
     }
 
     /// The chapter the position falls in, so the card says where the book was left rather than

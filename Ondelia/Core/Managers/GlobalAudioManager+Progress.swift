@@ -44,11 +44,13 @@ extension GlobalAudioManager {
     /// Writes the current position. `isReady && !isLoading` already excludes what a zero check
     /// was guarding — a book still loading reads back as time zero until its seek lands — so a
     /// zero reaching here means the listener seeked to the start, and has to be persisted.
-    func persistProgress() {
+    /// `seek` marks a position jumped to, which is never a Finish: see `ListenerState.Change.seek`.
+    func persistProgress(seek: Bool = false) {
         guard let audiobook = currentAudiobook, isReady, !isLoading else { return }
         // Playback can start before the store finishes loading (an App Shortcut on a cold launch).
         guard AudiobookManager.shared.swiftDataController.isLoaded else { return }
-        ListenerState.shared.apply(.position(getCurrentTime()), to: audiobook, from: .player)
+        let time = getCurrentTime()
+        ListenerState.shared.apply(seek ? .seek(time) : .position(time), to: audiobook, from: .player)
     }
 
     /// One place for "playback state changed": persist, keep the timer honest, and refresh the

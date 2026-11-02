@@ -80,6 +80,8 @@ final class GlobalAudioManager {
         // request-ID comparison inside the completion.
         cancelDelayedStart()
         loadTask?.cancel()
+        // Else the old book's save timer ticks on over this one, loaded but paused.
+        stopProgressPersistence()
         teardownPlayer()
         clearUndoSeek()
 
@@ -161,6 +163,8 @@ final class GlobalAudioManager {
         // A collection that chains its books names the next one; the play queue is the fallback.
         // Decided before the book can be deleted below, which would take it out of its collections.
         let chained = currentAudiobook.flatMap { library.nextEntry(after: $0) }
+        // Read before the delete below, whose unload cancels the timer.
+        let sleepsHere = sleepChapterEnd != nil
         if let audiobook = currentAudiobook {
             ListenerState.shared.apply(.finish, to: audiobook, from: .player)
             // Deleting unloads this player; the next book below still starts.
@@ -169,6 +173,11 @@ final class GlobalAudioManager {
             }
         }
         playbackStateDidChange()
+        // An end-of-chapter sleep timer in the last chapter counted to this very end.
+        if sleepsHere {
+            cancelSleepTimer()
+            return
+        }
 
         // Roll into the next book, the way a playlist does. `startPlaybackAfterOpeningBook`
         // plays as soon as the load finishes, via `pendingAutoplay`.
@@ -231,16 +240,5 @@ final class GlobalAudioManager {
         guard let player else { return }
         player.tearDown()
         self.player = nil
-    }
-
-    // MARK: - Chapters
-
-    /// Index of the chapter now playing, for the player screen and the chapter list.
-    var currentChapterIndex: Int { player?.currentChapterIndex ?? 0 }
-
-    func playChapter(at index: Int) {
-        player?.playChapter(at: index)
-        persistProgress()
-        playbackStateDidChange()
     }
 }

@@ -5,6 +5,17 @@ import Testing
 @Suite("Hardcover")
 struct HardcoverTests {
 
+    // MARK: - Token refresh
+
+    @Test("Only a refresh Hardcover turns down signs out; a network error keeps the tokens")
+    func rejectedRefresh() {
+        #expect(HardcoverService.isRejected(HardcoverAuth.Failure.http(400)))
+        #expect(HardcoverService.isRejected(HardcoverAuth.Failure.http(401)))
+        #expect(!HardcoverService.isRejected(HardcoverAuth.Failure.http(500)))
+        #expect(!HardcoverService.isRejected(URLError(.notConnectedToInternet)))
+        #expect(!HardcoverService.isRejected(URLError(.timedOut)))
+    }
+
     // MARK: - Search query
 
     @MainActor

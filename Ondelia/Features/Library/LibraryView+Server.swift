@@ -15,7 +15,7 @@ extension LibraryView {
     }
 
     /// The shelf: the Library's books with the server audiobooks woven in.
-    var shelfEntries: [LibraryEntry] {
+    func shelfEntries(_ shelfBooks: [AudiobookModel]) -> [LibraryEntry] {
         LibraryEntry.merged(shelfBooks, shelfServerItems, by: sortOption)
     }
 
@@ -35,7 +35,7 @@ extension LibraryView {
         return serverOnlyCollections
     }
 
-    var hasCollections: Bool {
+    func hasCollections(_ collectionGroups: [CollectionGroup]) -> Bool {
         !collectionGroups.isEmpty || !displayOnlyServerCollections.isEmpty
     }
 

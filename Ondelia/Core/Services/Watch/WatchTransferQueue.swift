@@ -44,7 +44,26 @@ final class WatchTransferQueue {
               let stored = try? SyncCodec.decode([PendingChapter].self, from: data) else {
             return
         }
-        pending = stored
+        // An export never outlives the process, so one reloaded mid-way is dead and must restart.
+        pending = stored.map { item in
+            var item = item
+            if item.state == .exporting { item.state = .queued }
+            return item
+        }
+    }
+
+    /// `.sending` is not reset at launch: WatchConnectivity keeps a file transfer going across
+    /// relaunches and reports its end later. Only once the session is up can it say which
+    /// transfers it still holds; any other `.sending` row lost its transfer and goes back in line.
+    func requeueLostTransfers(outstanding: Set<PendingChapter.ID>) {
+        var changed = false
+        for index in pending.indices where !outstanding.contains(pending[index].id) {
+            guard case .sending = pending[index].state else { continue }
+            pending[index].state = .queued
+            changed = true
+        }
+        guard changed else { return }
+        save()
     }
 
     /// The chapters that should be on the watch when the listener is at `currentChapter`:
@@ -72,7 +91,8 @@ final class WatchTransferQueue {
 
     /// Appends the chapters that are not already tracked, keeping request order. A chapter that
     /// failed before is put back in line rather than skipped, or one bad export would retire it
-    /// for good — the "Send to Apple Watch" button included.
+    /// for good — the "Send to Apple Watch" button included. So is one marked sent: being asked
+    /// for it again means the watch did not keep it.
     func enqueue(bookID: UUID, chapters: [Int]) {
         var changed = false
         for number in chapters {
@@ -82,7 +102,10 @@ final class WatchTransferQueue {
                 changed = true
                 continue
             }
-            guard case .failed = pending[index].state else { continue }
+            switch pending[index].state {
+            case .failed, .sent: break
+            case .queued, .exporting, .sending: continue
+            }
             pending[index].state = .queued
             changed = true
         }

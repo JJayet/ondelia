@@ -71,7 +71,8 @@ final class HardcoverService {
 
     /// The access token, refreshed first when it is about to expire. Nil when signed out, or
     /// when the refresh fails — a sync then quietly skips its turn rather than sending a
-    /// request Hardcover will reject.
+    /// request Hardcover will reject. A refresh Hardcover rejects signs out; a network error
+    /// keeps the tokens for the next try.
     func validToken() async -> String? {
         guard let token else { return nil }
         guard let refresh = Keychain.get(Self.refreshTokenKey),
@@ -87,12 +88,24 @@ final class HardcoverService {
                 return tokens.accessToken
             } catch {
                 Log.hardcover.error("Failed to refresh the Hardcover token: \(error.localizedDescription)")
+                // Kept, the dead tokens would show the account as linked while nothing syncs.
+                if Self.isRejected(error) {
+                    self.token = nil
+                    Keychain.set(nil, for: Self.refreshTokenKey)
+                    Keychain.set(nil, for: Self.expiryKey)
+                }
                 return nil
             }
         }
         refreshing = task
         defer { refreshing = nil }
         return await task.value
+    }
+
+    /// Hardcover turned the refresh token down, as opposed to not being reached: signed out.
+    nonisolated static func isRejected(_ error: Error) -> Bool {
+        guard case .http(let code) = error as? HardcoverAuth.Failure else { return false }
+        return code == 400 || code == 401
     }
 
     private func store(_ tokens: HardcoverAuth.Tokens) {

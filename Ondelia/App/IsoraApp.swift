@@ -124,7 +124,10 @@ struct IsoraApp: App {
         AudiobookManager.shared.importInboxFiles()
         // Another device may have signed in to AudiobookShelf, or out, meanwhile.
         AudiobookShelfService.shared.reload()
+        // The book stayed loaded, so nothing pulled it: another client may have moved it on.
+        let paused = globalAudioManager.isPlaying() ? nil : globalAudioManager.currentAudiobook
         Task {
+            if let paused { await AudiobookShelfService.shared.pullProgress(for: paused) }
             await AudiobookShelfService.shared.sendAllSessions()
             await AudiobookShelfService.shared.refreshFinishedItems()
         }
