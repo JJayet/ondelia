@@ -26,7 +26,7 @@ struct AudiobookManagerTests {
         let book = insertBook(title: "Dune")
         manager.createBookmark(for: book, at: 42, title: "Spice", note: "Fear is the mind-killer")
 
-        let bookmarks = manager.getBookmarks(for: book)
+        let bookmarks = book.bookmarks
         #expect(bookmarks.count == 1)
         #expect(bookmarks[0].timestamp == 42)
         #expect(bookmarks[0].title == "Spice")
@@ -35,7 +35,7 @@ struct AudiobookManagerTests {
 
         manager.deleteBookmark(bookmarks[0])
         #expect(try controller.context.fetch(FetchDescriptor<BookmarkModel>()).isEmpty)
-        #expect(manager.getBookmarks(for: book).isEmpty)
+        #expect(book.bookmarks.isEmpty)
     }
 
     @Test("fetchAudiobooks returns inserted models sorted by lastPlayed desc")

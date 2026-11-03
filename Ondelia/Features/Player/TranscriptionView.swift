@@ -33,6 +33,8 @@ struct TranscriptionView: View {
     @State private var errorMessage = ""
     @State private var searchText = ""
     @State private var highlightedRange: Range<String.Index>?
+    @State private var searchMatches: [TranscriptMatch] = []
+    @State private var searchIndex: Int?
     @State private var showingLanguagePicker = false
     /// The chapter under the playhead, refreshed with the window: a window is not a chapter, so
     /// a long chapter two would otherwise be titled from the track (chapter one).
@@ -88,7 +90,11 @@ struct TranscriptionView: View {
                 TranscriptionHeaderView(
                     searchText: $searchText,
                     transcriptionText: .constant(displayText),
-                    highlightedRange: $highlightedRange
+                    highlightedRange: $highlightedRange,
+                    matchCount: sentences.isEmpty ? nil : searchMatches.count,
+                    matchIndex: searchIndex,
+                    onPrevious: { stepMatch(-1) },
+                    onNext: { stepMatch(1) }
                 )
 
                 if !isLoaded, !displayText.isEmpty {
@@ -112,7 +118,7 @@ struct TranscriptionView: View {
                         Spacer()
                     }
                 } else if !sentences.isEmpty {
-                    TranscriptSyncView(sentences: sentences) { time in
+                    TranscriptSyncView(sentences: sentences, searchText: searchText, searchFocus: searchFocus) { time in
                         audio.seek(to: time)
                     }
                 } else {
@@ -135,6 +141,9 @@ struct TranscriptionView: View {
                     }
                 }
             }
+            // Typing restarts at the first match; a growing or new window keeps the place.
+            .onChange(of: searchText) { refreshMatches(restart: true) }
+            .onChange(of: sentences) { refreshMatches(restart: false) }
             .navigationTitle(chapterTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -182,6 +191,24 @@ struct TranscriptionView: View {
         // into a newer window; cancelled with the sheet, so nothing runs on for nobody.
         .task(id: loadKey) { await load(loadKey) }
         .task { await followPlayhead() }
+    }
+
+    // MARK: - Search
+
+    private var searchFocus: TranscriptMatch? {
+        searchIndex.flatMap { searchMatches.indices.contains($0) ? searchMatches[$0] : nil }
+    }
+
+    private func refreshMatches(restart: Bool) {
+        searchMatches = sentences.matches(of: searchText)
+        searchIndex = searchMatches.isEmpty ? nil : restart ? 0 : min(searchIndex ?? 0, searchMatches.count - 1)
+    }
+
+    /// Moves to the next (1) or previous (-1) occurrence, wrapping at either end.
+    private func stepMatch(_ delta: Int) {
+        let count = searchMatches.count
+        guard count > 0 else { return }
+        searchIndex = ((searchIndex ?? 0) + delta + count) % count
     }
 
     // MARK: - Windows

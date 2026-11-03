@@ -103,6 +103,16 @@ struct ListenerStateTests {
         #expect(heard.log["none"]?.map(\.finishedChanged) == [false, true, false])
     }
 
+    @Test("A seek into the last 30 s moves the position but is not a Finish")
+    func seekNearEndIsNotFinish() {
+        let book = book(duration: 3600)
+        state.apply(.seek(3590), to: book, from: .player)
+        #expect(book.currentPosition == 3590)
+        #expect(book.lastPlayed == now)
+        #expect(book.isFinished == false)
+        #expect(finishCount == 0)
+    }
+
     @Test("The server's position near the end is not a Finish; its own flag is")
     func serverNearEndIsNotFinish() {
         let book = book(duration: 3600)
@@ -213,5 +223,18 @@ struct ListenerStateTests {
         state.apply(.unfinish, to: book, from: .listener)
         #expect(book.isFinished == false)
         #expect(heard.log["none"]?.map(\.finishedChanged) == [true, true])
+    }
+
+    @Test("Unmarking by hand rewinds to the start; the server unmarking leaves the position")
+    func unfinishByHandRewinds() {
+        let byHand = book()
+        state.apply(.finish, to: byHand, from: .listener)
+        state.apply(.unfinish, to: byHand, from: .listener)
+        #expect(byHand.currentPosition == 0)
+
+        let remote = book()
+        state.apply(.finish, to: remote, from: .listener)
+        state.apply(.unfinish, to: remote, from: .server, at: now.addingTimeInterval(60))
+        #expect(remote.currentPosition == 3600)
     }
 }

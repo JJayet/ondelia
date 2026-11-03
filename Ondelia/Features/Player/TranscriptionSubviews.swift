@@ -5,7 +5,12 @@ struct TranscriptionHeaderView: View {
     @Binding var searchText: String
     @Binding var transcriptionText: String
     @Binding var highlightedRange: Range<String.Index>?
-    
+    /// Occurrences in the timed transcript; nil hides the count and arrows.
+    var matchCount: Int?
+    var matchIndex: Int?
+    var onPrevious: () -> Void = {}
+    var onNext: () -> Void = {}
+
     @State private var showingSearch = false
     
     var body: some View {
@@ -16,8 +21,28 @@ struct TranscriptionHeaderView: View {
                         .textFieldStyle(.roundedBorder)
                         .onSubmit {
                             searchInTranscription()
+                            onNext()
                         }
-                    
+
+                    if let matchCount, !searchText.isEmpty {
+                        Text(matchCount == 0
+                            ? NSLocalizedString("No results", comment: "No results title")
+                            : String(
+                                format: NSLocalizedString("%d of %d", comment: "Owned volumes out of the whole series"),
+                                (matchIndex ?? 0) + 1,
+                                matchCount
+                            ))
+                            .font(.caption.monospacedDigit())
+                            .foregroundStyle(.secondary)
+
+                        Button { withHapticFeedback { onPrevious() } } label: { Image(systemName: "chevron.up") }
+                            .disabled(matchCount == 0)
+                            .accessibilityLabel(NSLocalizedString("Previous result", comment: "Transcription search: go to the previous occurrence"))
+                        Button { withHapticFeedback { onNext() } } label: { Image(systemName: "chevron.down") }
+                            .disabled(matchCount == 0)
+                            .accessibilityLabel(NSLocalizedString("Next result", comment: "Transcription search: go to the next occurrence"))
+                    }
+
                     Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
                         withHapticFeedback {
                             searchText = ""

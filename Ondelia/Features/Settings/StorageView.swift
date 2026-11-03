@@ -7,6 +7,9 @@ struct StorageView: View {
     @State private var report: StorageReport?
     @State private var pendingDelete: AudiobookModel?
     @State private var confirmingOrphanDelete = false
+    /// Cached transcript windows; nil until counted.
+    @State private var transcriptCount: Int?
+    @State private var confirmingTranscriptDelete = false
 
     var body: some View {
         NavigationStack {
@@ -33,6 +36,25 @@ struct StorageView: View {
                                     confirmingOrphanDelete = true
                                 }
                                 .disabled(manager.isImporting)
+                            }
+                        }
+                    }
+
+                    if let transcriptCount, transcriptCount > 0 {
+                        Section {
+                            HStack {
+                                Text(NSLocalizedString("Transcripts", comment: "Storage row: cached transcripts"))
+                                Spacer()
+                                Text(transcriptCount, format: .number)
+                                    .foregroundStyle(.secondary)
+                                    .monospacedDigit()
+                            }
+                        } footer: {
+                            Button(
+                                NSLocalizedString("Delete transcripts", comment: "Remove every cached transcript"),
+                                role: .destructive
+                            ) {
+                                confirmingTranscriptDelete = true
                             }
                         }
                     }
@@ -81,6 +103,26 @@ struct StorageView: View {
                 ))
             }
             .alert(
+                NSLocalizedString("Delete transcripts", comment: "Remove every cached transcript"),
+                isPresented: $confirmingTranscriptDelete
+            ) {
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                    Task {
+                        await transcriptStore()?.deleteAll()
+                        await refresh()
+                    }
+                }
+            } message: {
+                Text(String(
+                    format: NSLocalizedString(
+                        "%d transcripts will be removed. They are made again the next time they are opened.",
+                        comment: "Transcript cleanup confirmation"
+                    ),
+                    transcriptCount ?? 0
+                ))
+            }
+            .alert(
                 NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title"),
                 isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
                 presenting: pendingDelete
@@ -114,6 +156,13 @@ struct StorageView: View {
 
     private func refresh() async {
         report = await StorageReport.build(for: manager.audiobooks)
+        transcriptCount = await transcriptStore()?.count()
+    }
+
+    /// Its own context, off the main actor; reading `container` before the store loads traps.
+    private func transcriptStore() -> TranscriptionStore? {
+        let controller = SwiftDataController.shared
+        return controller.isLoaded ? TranscriptionStore(modelContainer: controller.container) : nil
     }
 }
 

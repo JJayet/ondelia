@@ -114,13 +114,29 @@ enum ZIPImporter {
                 continue
             }
 
-            // Extract the file
-            _ = try archive.extract(entry, to: entryDestinationURL)
+            try extractFile(entry, from: archive, to: entryDestinationURL)
             extractedCount += 1
             Log.library.debug("   ✅ Extracted: \(entry.path)")
         }
 
         Log.library.debug("✅ ZIPImporter: Successfully extracted \(extractedCount) files")
+    }
+
+    /// Writes one entry, stopping at its declared size. The limits above only see declared sizes,
+    /// and inflating does not stop there: a lying header would otherwise expand without bound.
+    /// Capping each entry at its declared size also keeps the total under `maximumExpandedSize`.
+    private static func extractFile(_ entry: Entry, from archive: Archive, to url: URL) throws {
+        guard FileManager.default.createFile(atPath: url.path, contents: nil) else {
+            throw CocoaError(.fileWriteUnknown, userInfo: [NSFilePathErrorKey: url.path])
+        }
+        let handle = try FileHandle(forWritingTo: url)
+        defer { try? handle.close() }
+        var written: UInt64 = 0
+        _ = try archive.extract(entry) { chunk in
+            written += UInt64(chunk.count)
+            guard written <= entry.uncompressedSize else { throw ZIPImportError.entryTooLarge(entry.path) }
+            try handle.write(contentsOf: chunk)
+        }
     }
     
     static func validateAudiobookContent(in directory: URL) -> URL? {

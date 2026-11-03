@@ -17,6 +17,8 @@ struct SearchView: View {
     @AppStorage("search.recent") var recentSearches = ""
     /// An author picked from the results around the fold: only their books are shown.
     @State var pickedAuthor: String?
+    /// The book a swipe asked to delete, waiting on the confirmation.
+    @State private var pendingDelete: AudiobookModel?
 
     /// Library books and, when shown beside them, server audiobooks not in the Library
     /// (ADR 0002). Server audiobooks have never been played, so they count as not started.
@@ -27,47 +29,45 @@ struct SearchView: View {
         return books.map(LibraryEntry.book) + server.map(LibraryEntry.server)
     }
 
+    /// Read once per render and handed down: each read filters and sorts again.
     var results: [LibraryEntry] {
         let q = normalize(debouncedQuery)
         guard !q.isEmpty else { return [] }
 
-        // Query match, narrowed to the picked author's books when there is one
-        var items = entries(for: filter).filter { entry in
-            pickedAuthor.map { Self.authorNames(entry.author).contains($0) } ?? true
-        }.filter { entry in
-            normalize(entry.title).contains(q) || normalize(entry.author).contains(q) || normalize(entry.narrator).contains(q)
-        }
-
-        // Relevance weight
-        func weight(for entry: LibraryEntry) -> Int {
+        // Query match, narrowed to the picked author's books when there is one, each entry
+        // normalized once rather than on every comparison.
+        var items: [(entry: LibraryEntry, weight: Int)] = entries(for: filter).compactMap { entry in
+            if let pickedAuthor, !Self.authorNames(entry.author).contains(pickedAuthor) { return nil }
             let t = normalize(entry.title)
             let a = normalize(entry.author)
             let n = normalize(entry.narrator)
+            guard t.contains(q) || a.contains(q) || n.contains(q) else { return nil }
+            // Relevance weight
             var w = 0
             if t == q { w += 100 }
             if a == q { w += 80 }
             if t.contains(q) { w += 40 }
             if a.contains(q) { w += 30 }
             if n.contains(q) { w += 10 }
-            return w
+            return (entry, w)
         }
 
-        func book(_ entry: LibraryEntry) -> AudiobookModel? { entry.book }
+        func book(_ item: (entry: LibraryEntry, weight: Int)) -> AudiobookModel? { item.entry.book }
         switch sort {
         case .relevance:
-            items.sort { weight(for: $0) > weight(for: $1) }
+            items.sort { $0.weight > $1.weight }
         case .recent:
             // Never played: server audiobooks last.
             items.sort { (book($0)?.lastPlayed ?? .distantPast) > (book($1)?.lastPlayed ?? .distantPast) }
         case .title:
-            items.sort { $0.title < $1.title }
+            items.sort { $0.entry.title.localizedStandardCompare($1.entry.title) == .orderedAscending }
         case .author:
-            items.sort { $0.author < $1.author }
+            items.sort { $0.entry.author.localizedStandardCompare($1.entry.author) == .orderedAscending }
         case .progress:
             items.sort { (book($0)?.progressFraction ?? 0) > (book($1)?.progressFraction ?? 0) }
         }
 
-        return items
+        return items.map(\.entry)
     }
 
     // Normalize strings for case- and accent-insensitive comparison
@@ -87,13 +87,14 @@ struct SearchView: View {
     }
 
     private var stack: some View {
-        NavigationStack {
+        let results = results
+        return NavigationStack {
             // iPhone Duo around its fold (design 12): the question on the left, the answer on
             // the right, so typing never moves the field, the filter or the sort.
             FoldSplit {
                 foldQuestion
             } secondary: {
-                foldAnswer
+                foldAnswer(results)
             } fallback: {
                 List {
                     // Persistent header (chips + sort) — always visible
@@ -104,7 +105,7 @@ struct SearchView: View {
                     } else if results.isEmpty {
                         noResults
                     } else {
-                        resultRows
+                        resultRows(results)
                     }
                 }
                 .listStyle(.plain)
@@ -129,6 +130,24 @@ struct SearchView: View {
                     self.debouncedQuery = newValue
                     self.pickedAuthor = nil
                 }
+            }
+            .alert(
+                NSLocalizedString("Delete Audiobook", comment: "Delete confirmation alert title"),
+                isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
+                presenting: pendingDelete
+            ) { audiobook in
+                Button(NSLocalizedString("Cancel", comment: "Cancel button"), role: .cancel) {}
+                Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
+                    audiobookManager.deleteAudiobook(audiobook)
+                }
+            } message: { audiobook in
+                Text(String(
+                    format: NSLocalizedString(
+                        "'%@', its progress and its bookmarks will be removed. This cannot be undone.",
+                        comment: "Delete confirmation alert message"
+                    ),
+                    audiobook.title ?? AudiobookModel.unknownTitle
+                ))
             }
         }
     }
@@ -163,7 +182,7 @@ struct SearchView: View {
         }
     }
 
-    var resultRows: some View {
+    func resultRows(_ results: [LibraryEntry]) -> some View {
         ForEach(results) { entry in
             switch entry {
             case .book(let book): bookRow(book)
@@ -188,10 +207,13 @@ struct SearchView: View {
                     }
                 }.tint(book.isFinished ? .orange : .green)
             }
-            .swipeActions(edge: .trailing) {
+            // No full swipe, and a confirmation: as on the Library, deleting drops the book, its
+            // progress and its bookmarks with nothing to undo.
+            .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                 Button(NSLocalizedString("Delete", comment: "Delete button"), role: .destructive) {
-                    withHapticFeedback { audiobookManager.deleteAudiobook(book) }
+                    withHapticFeedback { pendingDelete = book }
                 }
+                .tint(.red)
             }
     }
 
@@ -215,7 +237,7 @@ struct SearchView: View {
     private func present(_ book: AudiobookModel) {
         let audio = GlobalAudioManager.shared
         audio.loadAudiobook(book)
-        audio.startPlayback()
+        audio.resumePlayback()
         playerRouter?.present(book)
     }
 
@@ -255,38 +277,5 @@ struct SearchView: View {
     func resetFilters() {
         filter = .all
         sort = .relevance
-    }
-}
-
-// MARK: - Facets & Sorts
-enum SearchFilter: CaseIterable { case all, inProgress, completed, notStarted
-    func includes(_ book: AudiobookModel) -> Bool {
-        switch self {
-        case .all: true
-        case .inProgress: book.currentPosition > 0 && !book.isFinished
-        case .completed: book.isFinished
-        case .notStarted: book.currentPosition == 0
-        }
-    }
-
-    var label: String {
-        switch self {
-        case .all: return NSLocalizedString("All", comment: "Filter: all audiobooks")
-        case .inProgress: return NSLocalizedString("In Progress", comment: "Filter: books in progress")
-        case .completed: return NSLocalizedString("Completed", comment: "Filter: completed books")
-        case .notStarted: return NSLocalizedString("Not Started", comment: "Filter: books not started")
-        }
-    }
-}
-
-enum SearchSort: CaseIterable { case relevance, recent, title, author, progress
-    var label: String {
-        switch self {
-        case .relevance: return NSLocalizedString("Relevance", comment: "Sort by relevance")
-        case .recent: return NSLocalizedString("Recently Played", comment: "Sort by recently played")
-        case .title: return NSLocalizedString("Title", comment: "Sort by title")
-        case .author: return NSLocalizedString("Author", comment: "Sort by author")
-        case .progress: return NSLocalizedString("Progress", comment: "Sort by progress")
-        }
     }
 }

@@ -119,25 +119,60 @@ struct WatchTransferQueueTests {
         #expect(queue.pending.first?.bookID == second)
     }
 
-    @Test("The queue and its states survive a relaunch")
+    @Test("The queue and its states survive a relaunch, but a dead export restarts")
     func persistenceRoundTrip() throws {
         let defaults = try makeDefaults()
         let bookID = UUID()
 
         let queue = WatchTransferQueue(defaults: defaults)
-        queue.enqueue(bookID: bookID, chapters: [4, 5, 6])
-        let exporting = try #require(queue.next())
-        queue.update(exporting, state: .sending(fraction: 0.42))
+        queue.enqueue(bookID: bookID, chapters: [4, 5, 6, 7])
+        queue.update(
+            WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 4),
+            state: .sending(fraction: 0.42)
+        )
         queue.update(
             WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 5),
             state: .failed("no space")
         )
+        queue.update(WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 7), state: .exporting)
 
         let reloaded = WatchTransferQueue(defaults: defaults)
-        #expect(reloaded.pending.count == 3)
+        #expect(reloaded.pending.count == 4)
+        // WatchConnectivity may still hold that transfer; only the session can tell.
         #expect(reloaded.pending[0].state == .sending(fraction: 0.42))
         #expect(reloaded.pending[1].state == .failed("no space"))
         #expect(reloaded.pending[2].state == .queued)
+        #expect(reloaded.pending[3].state == .queued)
         #expect(reloaded.next()?.chapterNumber == 6)
+    }
+
+    @Test("A send the session no longer holds goes back in line; one it holds is left alone")
+    func requeueLostTransfers() throws {
+        let queue = WatchTransferQueue(defaults: try makeDefaults())
+        let bookID = UUID()
+        queue.enqueue(bookID: bookID, chapters: [1, 2, 3])
+        let lost = WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 1)
+        let alive = WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 2)
+        let done = WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 3)
+        queue.update(lost, state: .sending(fraction: 0.5))
+        queue.update(alive, state: .sending(fraction: 0.1))
+        queue.update(done, state: .sent)
+
+        queue.requeueLostTransfers(outstanding: [alive.id])
+
+        #expect(queue.pending.map(\.state) == [.queued, .sending(fraction: 0.1), .sent])
+    }
+
+    @Test("Asking again for a chapter marked sent queues it again")
+    func enqueueRevivesSent() throws {
+        let queue = WatchTransferQueue(defaults: try makeDefaults())
+        let bookID = UUID()
+        queue.enqueue(bookID: bookID, chapters: [1, 2])
+        queue.update(WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 1), state: .sent)
+        queue.update(WatchTransferQueue.PendingChapter(bookID: bookID, chapterNumber: 2), state: .exporting)
+
+        queue.enqueue(bookID: bookID, chapters: [1, 2])
+
+        #expect(queue.pending.map(\.state) == [.queued, .exporting])
     }
 }

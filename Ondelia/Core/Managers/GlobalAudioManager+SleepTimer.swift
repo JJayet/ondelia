@@ -41,9 +41,9 @@ extension GlobalAudioManager {
                 }
                 // Fade over the last 10 seconds: waking up to a mid-sentence cut is worse
                 // than losing the last few words to a fade.
-                if self.sleepTimeRemaining <= Self.sleepFadeDuration {
-                    self.player?.setVolume(Float(max(self.sleepTimeRemaining, 0) / Self.sleepFadeDuration))
-                }
+                // Every tick, so a skip back out of the fade brings the volume back up.
+                let fade = min(1, max(self.sleepTimeRemaining, 0) / Self.sleepFadeDuration)
+                self.player?.setVolume(Float(fade))
                 guard self.sleepTimeRemaining <= 0 else { return }
                 self.pausePlayback()
                 self.cancelSleepTimer()

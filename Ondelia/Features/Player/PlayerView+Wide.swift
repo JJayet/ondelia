@@ -195,7 +195,7 @@ extension PlayerView {
                                 isPlaying: isPlaying
                             ) {
                                 audioManager.seek(to: chapter.startTime)
-                                audioManager.startPlayback()
+                                audioManager.resumePlayback()
                             }
                             .id(chapter.id)
                         }

@@ -78,6 +78,7 @@ extension PhoneSyncService {
             book.currentPosition = summary.currentPosition
             book.positionUpdatedAt = summary.positionUpdatedAt
         }
+        alignPausedPlayer(with: book)
         replaceChapters(summary.chapters, on: book, context: context)
         upsertBookmarks(summary.bookmarks, on: book, context: context)
     }

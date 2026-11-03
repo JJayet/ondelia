@@ -3,11 +3,6 @@ import TipKit
 
 // MARK: - List / Grid content
 extension LibraryView {
-    /// The shelf lists every book, whether or not a collection card also shows it.
-    var shelfBooks: [AudiobookModel] {
-        filteredAudiobooks
-    }
-
     /// Books stacked to play next, in queue order.
     var queuedBooks: [AudiobookModel] {
         PlayQueue.shared.books(in: visibleAudiobooks)
@@ -16,11 +11,12 @@ extension LibraryView {
     var gridSpacing: CGFloat { gridColumns >= 4 ? 10 : 16 }
 
     /// The shelf everywhere but either side of the Duo's fold.
-    var fullShelf: some View {
+    /// The shelf lists every book, whether or not a collection card also shows it.
+    func fullShelf(_ shelf: Shelf) -> some View {
         VStack(spacing: 0) {
             // Wide: the title row carries the count and the buttons, and the navigation bar
             // goes, so nothing hovers as a band above the shelf on the Mac.
-            if isWide { wideHeader }
+            if isWide { wideHeader(shelf.books) }
             if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
             if showsServer {
                 AudiobookShelfShelfView()
@@ -30,9 +26,9 @@ extension LibraryView {
                 // the list.
                 Group {
                     switch viewMode {
-                    case .list: listModeContent()
-                    case .grid: gridModeContent()
-                    case .table: if isWide { tableModeContent } else { listModeContent() }
+                    case .list: listModeContent(shelf)
+                    case .grid: gridModeContent(shelf)
+                    case .table: if isWide { tableModeContent(shelf) } else { listModeContent(shelf) }
                     }
                 }
                 .serverSeriesDestinations(library: AudiobookShelfService.shared.primary?.library ?? "")
@@ -44,7 +40,7 @@ extension LibraryView {
     /// `shelfOnly`: the right half on iPhone Duo, where the sections above the shelf sit on the
     /// left (LibraryView+Fold.swift).
     @ViewBuilder
-    func listModeContent(shelfOnly: Bool = false) -> some View {
+    func listModeContent(_ shelf: Shelf, shelfOnly: Bool = false) -> some View {
         List {
             // Continue Reading Section
             if !shelfOnly, !continueReading.isEmpty {
@@ -63,8 +59,8 @@ extension LibraryView {
             }
 
             // Collections: one strip; See All pushes the rest.
-            if !shelfOnly, hasCollections {
-                collectionsStrip
+            if !shelfOnly, hasCollections(shelf.groups) {
+                collectionsStrip(shelf.groups)
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
@@ -115,7 +111,7 @@ extension LibraryView {
                         .listRowInsets(EdgeInsets(top: 4, leading: 16, bottom: 4, trailing: 16))
                 }
 
-                ForEach(shelfEntries, content: listRow)
+                ForEach(shelfEntries(shelf.books), content: listRow)
             }
         }
         .listStyle(PlainListStyle())
@@ -124,7 +120,7 @@ extension LibraryView {
 
     // Grid mode - use ScrollView
     @ViewBuilder
-    func gridModeContent(shelfOnly: Bool = false) -> some View {
+    func gridModeContent(_ shelf: Shelf, shelfOnly: Bool = false) -> some View {
         ScrollView {
             LazyVStack(spacing: 24) {
                 // Continue Reading Section
@@ -138,7 +134,7 @@ extension LibraryView {
                 }
 
                 // Collections: one strip; See All pushes the rest.
-                if !shelfOnly, hasCollections { collectionsStrip }
+                if !shelfOnly, hasCollections(shelf.groups) { collectionsStrip(shelf.groups) }
 
                 // Main Library Section
                 VStack(alignment: .leading, spacing: 16) {
@@ -183,7 +179,7 @@ extension LibraryView {
                                 columns: [GridItem(.adaptive(minimum: 300 / CGFloat(gridColumns)), spacing: gridSpacing)],
                                 spacing: gridSpacing
                             ) {
-                                ForEach(shelfEntries, content: gridCell)
+                                ForEach(shelfEntries(shelf.books), content: gridCell)
                             }
                             .padding(.horizontal)
                         }

@@ -5,6 +5,126 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
+## 1.9.4 (1) — 2026-11-03
+
+### English
+
+Promotional text
+Listen to a finished book again and it is back in Continue Reading. Show a hidden book and its series comes back too, ready to download.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+Fixes
+
+- Listening to a finished book again puts it back In Progress and in Continue Reading.
+- In Hidden & Shown, showing a book again also shows its series, so you can download it again.
+
+### Français
+
+Texte promotionnel
+Réécoutez un livre terminé : il revient dans Continuer l'écoute. Affichez un livre masqué : sa série revient aussi, prête à télécharger.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+Corrections
+
+- Réécouter un livre terminé le remet En cours et dans Continuer l'écoute.
+- Dans Masqués et affichés, afficher à nouveau un livre affiche aussi sa série, pour pouvoir le retélécharger.
+
+## 1.9.3 (1) — 2026-10-21
+
+### English
+
+Promotional text
+Search a transcript and step through every match. Speed and bookmark lists in CarPlay. And your place stays right across AudiobookShelf, iPhone and Apple Watch.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+Transcription
+
+- Search highlights every match, says how many there are, and steps through them with the up and down arrows.
+
+CarPlay
+
+- Speed opens the list of speeds, with the current one marked.
+- Bookmarks lists the book's bookmarks, with Add Bookmark on top.
+
+Improvements
+
+- Continue Reading shows the time left in the book you are listening to. With Play back to back on, it counts the whole series.
+- Settings › Storage › Transcripts: see how many there are and delete them.
+- A folder or ZIP holding a single audio file keeps that file's chapters, title and author.
+- CUE sheets saved in Windows encoding now import with their chapters.
+
+Fixes
+
+- An older position from iPhone or Apple Watch no longer overwrites a newer one on AudiobookShelf.
+- The End of chapter sleep timer stops at the end of a book instead of starting the next one.
+- Playing a finished book starts it over, and Mark as Unread takes it back to the start.
+- Jumping into the last seconds of a book no longer marks it finished.
+- A finished series reaches 100 %.
+- Hardcover asks you to sign in again when your sign-in has expired.
+- Chapters held up on their way to Apple Watch are sent again, and Clear Watch works after a restart.
+- In Search, deleting a book asks first.
+
+### Français
+
+Texte promotionnel
+Recherchez dans une transcription et passez d'un résultat à l'autre. Vitesse et signets en listes dans CarPlay. Et votre position reste juste sur serveur, iPhone, montre.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+Transcription
+
+- La recherche surligne chaque résultat, indique leur nombre et passe de l'un à l'autre avec les flèches haut et bas.
+
+CarPlay
+
+- Vitesse ouvre la liste des vitesses, celle en cours cochée.
+- Signets liste les signets du livre, avec Ajouter un signet en tête.
+
+Améliorations
+
+- Continuer l'écoute affiche le temps restant du livre en cours. Avec Enchaîner les tomes activé, il compte toute la série.
+- Réglages › Stockage › Transcriptions : voyez combien il y en a et supprimez-les.
+- Un dossier ou un ZIP contenant un seul fichier audio garde les chapitres, le titre et l'auteur de ce fichier.
+- Les fichiers CUE enregistrés en encodage Windows s'importent désormais avec leurs chapitres.
+
+Corrections
+
+- Une position plus ancienne venue de l'iPhone ou de l'Apple Watch n'écrase plus une position plus récente sur AudiobookShelf.
+- Le minuteur de sommeil Fin du chapitre s'arrête à la fin d'un livre au lieu de lancer le suivant.
+- Lire un livre terminé le reprend au début, et Marquer comme non lu le ramène au début.
+- Aller dans les dernières secondes d'un livre ne le marque plus comme terminé.
+- Une série terminée atteint 100 %.
+- Hardcover vous demande de vous reconnecter quand votre connexion a expiré.
+- Les chapitres bloqués en route vers l'Apple Watch sont renvoyés, et Vider la montre fonctionne après un redémarrage.
+- Dans Rechercher, supprimer un livre demande d'abord confirmation.
+
 ## 1.9.2 (1) — 2026-10-13
 
 ### English

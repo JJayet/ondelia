@@ -26,7 +26,7 @@ struct ResumeLastBookIntent: AudioPlaybackIntent {
     @MainActor
     func perform() async throws -> some IntentResult {
         guard await PlaybackCommands.loadedBook() != nil else { throw PlaybackIntentError.emptyLibrary }
-        GlobalAudioManager.shared.startPlayback() // queued via pendingAutoplay until ready
+        GlobalAudioManager.shared.resumePlayback() // queued via pendingAutoplay until ready
         return .result()
     }
 }
@@ -129,7 +129,7 @@ struct PlayAudiobookIntent: AudioPlaybackIntent {
         guard let book = try? store.context.fetch(descriptor).first else { throw PlaybackIntentError.bookMissing }
         let manager = GlobalAudioManager.shared
         manager.loadAudiobook(book)
-        manager.startPlayback() // queued via pendingAutoplay until the engine is ready
+        manager.resumePlayback() // queued via pendingAutoplay until the engine is ready
         return .result()
     }
 }

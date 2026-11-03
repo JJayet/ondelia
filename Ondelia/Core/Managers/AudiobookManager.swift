@@ -60,10 +60,6 @@ final class AudiobookManager {
         observeRemoteChanges()
     }
 
-    func getBookmarks(for audiobook: AudiobookModel) -> [BookmarkModel] {
-        return audiobook.bookmarks
-    }
-    
     @MainActor
     /// `id` and `dateCreated` are the watch's, for a bookmark made there: the id is how a
     /// replayed event is recognised as one already applied.
@@ -147,17 +143,5 @@ final class AudiobookManager {
         fetchAudiobooks()
         
         Log.library.debug("✏️ AudiobookManager: Renamed audiobook to: \(newTitle)")
-    }
-    
-    func searchAudiobooks(query: String) -> [AudiobookModel] {
-        guard !query.isEmpty else { return audiobooks }
-        
-        return audiobooks.filter { audiobook in
-            let title = audiobook.title?.lowercased() ?? ""
-            let author = audiobook.author?.lowercased() ?? ""
-            let searchQuery = query.lowercased()
-            
-            return title.contains(searchQuery) || author.contains(searchQuery)
-        }
     }
 }

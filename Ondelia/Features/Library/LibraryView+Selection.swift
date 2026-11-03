@@ -55,7 +55,7 @@ extension LibraryView {
     }
 
     @ToolbarContentBuilder
-    var libraryToolbar: some ToolbarContent {
+    func libraryToolbar(_ shelfBooks: [AudiobookModel]) -> some ToolbarContent {
         if selecting {
             ToolbarItem(placement: .topBarLeading) {
                 Button(NSLocalizedString("Cancel", comment: "Cancel button")) {
@@ -64,7 +64,7 @@ extension LibraryView {
             }
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
-                    bulkMenuItems
+                    bulkMenuItems(shelfBooks)
                 } label: {
                     Text(String(
                         format: NSLocalizedString("%d selected", comment: "Selection count in the library toolbar"),
@@ -91,7 +91,7 @@ extension LibraryView {
     }
 
     @ViewBuilder
-    var bulkMenuItems: some View {
+    func bulkMenuItems(_ shelfBooks: [AudiobookModel]) -> some View {
         Button {
             selectedIDs = Set(shelfBooks.map(\.id))
         } label: {

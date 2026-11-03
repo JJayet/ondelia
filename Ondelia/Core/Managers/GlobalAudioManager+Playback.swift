@@ -22,6 +22,15 @@ extension GlobalAudioManager {
             if isLoading { pendingAutoplay = true }
             return
         }
+        // A finished book sits at its end: playing it again means from the start.
+        if let book = currentAudiobook, book.isFinished {
+            if player.currentTime >= player.duration - ListenerState.finishThreshold {
+                player.seek(to: 0)
+            }
+            // Playing it again is a re-listen: it is In Progress again. The earlier Finish
+            // stays in the listening log (only the listener's own unmarking retracts it).
+            ListenerState.shared.apply(.unfinish, to: book, from: .player)
+        }
         // Before the play, so the seek lands while the book is still silent.
         applySmartRewind()
         player.play()
@@ -41,7 +50,7 @@ extension GlobalAudioManager {
         let stored = UserDefaults.standard.object(forKey: "playback.bookOpeningDelayMS") as? Int ?? 200
         let milliseconds = [0, 100, 200, 500].contains(stored) ? stored : 200
         guard milliseconds > 0 else {
-            startPlayback()
+            resumePlayback()
             return
         }
         let bookID = currentAudiobook?.id
@@ -53,17 +62,13 @@ extension GlobalAudioManager {
             }
             guard let self, self.currentAudiobook?.id == bookID else { return }
             self.delayedStartTask = nil
-            self.startPlayback()
+            self.resumePlayback()
         }
     }
 
     func cancelDelayedStart() {
         delayedStartTask?.cancel()
         delayedStartTask = nil
-    }
-
-    func startPlayback() {
-        resumePlayback()
     }
 
     func stopPlayback() {
@@ -147,7 +152,7 @@ extension GlobalAudioManager {
         guard let player else { return }
         player.seek(to: time)
         // A deliberate jump is worth writing straight away rather than waiting for the save timer.
-        persistProgress()
+        persistProgress(seek: true)
         playbackStateDidChange()
     }
 

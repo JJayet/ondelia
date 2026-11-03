@@ -5,9 +5,9 @@ import SwiftUI
 // iPhone Duo: what to pick up on the left — resume, the queue, four collections — and the
 // shelf on the right, each half a screen of its own.
 extension LibraryView {
-    var foldPicks: some View {
+    func foldPicks(_ shelf: Shelf) -> some View {
         VStack(spacing: 0) {
-            wideHeader
+            wideHeader(shelf.books)
             if AudiobookShelfService.shared.isSignedIn, !blendsServer { sourcePicker }
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -19,7 +19,7 @@ extension LibraryView {
                     if !queuedBooks.isEmpty {
                         QueueSectionView(books: queuedBooks, horizontalPadding: nil, onSelect: playQueued)
                     }
-                    if hasCollections { collectionsGrid }
+                    if hasCollections(shelf.groups) { collectionsGrid(shelf.groups) }
                 }
                 .padding(.vertical)
             }
@@ -28,14 +28,14 @@ extension LibraryView {
 
     /// The table needs the whole width for its columns; half a screen reads it as the list.
     @ViewBuilder
-    var foldShelf: some View {
+    func foldShelf(_ shelf: Shelf) -> some View {
         if showsServer {
             AudiobookShelfShelfView()
         } else {
             Group {
                 switch viewMode {
-                case .grid: gridModeContent(shelfOnly: true)
-                case .list, .table: listModeContent(shelfOnly: true)
+                case .grid: gridModeContent(shelf, shelfOnly: true)
+                case .list, .table: listModeContent(shelf, shelfOnly: true)
                 }
             }
             .serverSeriesDestinations(library: AudiobookShelfService.shared.primary?.library ?? "")

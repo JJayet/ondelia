@@ -3,7 +3,8 @@ import UIKit
 
 /// Dresses the system Now Playing screen. Transport, artwork and title come from
 /// `MPRemoteCommandCenter` and `MPNowPlayingInfoCenter`, which `GlobalAudioManager` already
-/// feeds; this adds the speed and bookmark buttons and the chapter list behind "Up Next".
+/// feeds; this adds the speed and bookmark lists behind their buttons, and the chapter list
+/// behind "Up Next".
 @MainActor
 final class CarPlayNowPlaying: NSObject, @preconcurrency CPNowPlayingTemplateObserver {
     private weak var interfaceController: CPInterfaceController?
@@ -17,11 +18,13 @@ final class CarPlayNowPlaying: NSObject, @preconcurrency CPNowPlayingTemplateObs
         template.isUpNextButtonEnabled = true
         template.upNextTitle = NSLocalizedString("Chapters", comment: "Chapter list sheet title")
 
-        let rate = CPNowPlayingPlaybackRateButton { _ in
-            MainActor.assumeIsolated { Self.cycleSpeed() }
+        // Not `CPNowPlayingPlaybackRateButton`: its label stayed at "0x" whatever the app published.
+        let speedImage = UIImage(systemName: "gauge.with.dots.needle.67percent") ?? UIImage()
+        let rate = CPNowPlayingImageButton(image: speedImage) { [weak self] _ in
+            MainActor.assumeIsolated { self?.showSpeeds() }
         }
-        let bookmark = CPNowPlayingImageButton(image: UIImage(systemName: "bookmark") ?? UIImage()) { _ in
-            MainActor.assumeIsolated { Self.addBookmark() }
+        let bookmark = CPNowPlayingImageButton(image: UIImage(systemName: "bookmark") ?? UIImage()) { [weak self] _ in
+            MainActor.assumeIsolated { self?.showBookmarks() }
         }
         template.updateNowPlayingButtons([rate, bookmark])
     }
@@ -35,15 +38,61 @@ final class CarPlayNowPlaying: NSObject, @preconcurrency CPNowPlayingTemplateObs
 
     // MARK: - Buttons
 
-    /// Next speed in the player's list, wrapping to the slowest after the fastest.
-    private static func cycleSpeed() {
+    /// The player's speed list, with the current one marked.
+    private func showSpeeds() {
         let audio = GlobalAudioManager.shared
         let current = audio.getPlaybackRate()
-        let next = PlaybackSpeed.choices.first { $0 > current + 0.01 } ?? PlaybackSpeed.choices[0]
-        audio.setPlaybackRate(next)
+        let items = PlaybackSpeed.choices.map { speed in
+            let item = CPListItem(text: PlaybackSpeed.displayName(speed), detailText: nil)
+            item.isPlaying = abs(speed - current) < 0.01
+            item.playingIndicatorLocation = .trailing
+            item.handler = { [weak self] _, completion in
+                GlobalAudioManager.shared.setPlaybackRate(speed)
+                self?.interfaceController?.popTemplate(animated: true) { _, _ in completion() }
+            }
+            return item
+        }
+        let template = CPListTemplate(
+            title: NSLocalizedString("Speed", comment: "Playback speed picker label"),
+            sections: [CPListSection(items: items)]
+        )
+        interfaceController?.pushTemplate(template, animated: true, completion: nil)
     }
 
-    private static func addBookmark() { PlaybackCommands.addBookmark() }
+    // MARK: - Bookmarks
+
+    /// "Add Bookmark" on top, then the book's bookmarks in the order the phone lists them.
+    private func showBookmarks() {
+        guard let book = GlobalAudioManager.shared.currentAudiobook else { return }
+        let add = CPListItem(
+            text: NSLocalizedString("Add Bookmark", comment: "Add bookmark button title"),
+            detailText: nil,
+            image: UIImage(systemName: "bookmark")
+        )
+        add.handler = { [weak self] _, completion in
+            PlaybackCommands.addBookmark()
+            self?.interfaceController?.popTemplate(animated: true) { _, _ in completion() }
+        }
+        let bookmarks = book.bookmarks.sorted { $0.timestamp < $1.timestamp }
+            .prefix(CPListTemplate.maximumItemCount - 1)
+            .map { bookmark in
+                let item = CPListItem(
+                    text: bookmark.title ?? NSLocalizedString("Bookmark", comment: "Default bookmark title"),
+                    detailText: bookmark.timestamp.clockFormatted
+                )
+                let time = bookmark.timestamp
+                item.handler = { [weak self] _, completion in
+                    GlobalAudioManager.shared.seek(to: time)
+                    self?.interfaceController?.popTemplate(animated: true) { _, _ in completion() }
+                }
+                return item
+            }
+        let template = CPListTemplate(
+            title: NSLocalizedString("Bookmarks", comment: "Bookmarks view title"),
+            sections: [CPListSection(items: [add] + bookmarks)]
+        )
+        interfaceController?.pushTemplate(template, animated: true, completion: nil)
+    }
 
     // MARK: - Chapters
 

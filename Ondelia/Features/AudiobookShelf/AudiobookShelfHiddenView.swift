@@ -160,7 +160,9 @@ struct AudiobookShelfHiddenView: View {
             get: { byAuthor == nil && !hidden.isHidden(kind, row.id, on: account.id) },
             set: { isShown in
                 withHapticFeedback {
-                    if isShown {
+                    if isShown, kind == .book {
+                        AudiobookManager.shared.showServerBook(row.id, on: account.id)
+                    } else if isShown {
                         hidden.show(kind, row.id, on: account.id)
                     } else if kind == .series || kind == .collection {
                         let group = AudiobookShelfAPI.Series(id: row.id, name: row.name, isCollection: kind == .collection)

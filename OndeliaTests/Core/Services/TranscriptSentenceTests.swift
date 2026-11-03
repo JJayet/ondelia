@@ -54,6 +54,28 @@ struct TranscriptSentenceTests {
         #expect(!sentences[0].contains(1))
     }
 
+    @Test("Search lists every occurrence in reading order, several per sentence")
+    func matchesEveryOccurrence() {
+        let sentences = TranscriptSentence.group(words([
+            ("The ", 0, 1), ("cat.", 1, 2),
+            ("A ", 2, 3), ("dog.", 3, 4),
+            ("Cats ", 4, 5), ("and ", 5, 6), ("cats.", 6, 7)
+        ]))
+
+        #expect(sentences.matches(of: "CAT") == [
+            TranscriptMatch(sentenceID: 0, occurrence: 0),
+            TranscriptMatch(sentenceID: 4, occurrence: 0),
+            TranscriptMatch(sentenceID: 4, occurrence: 1)
+        ])
+        #expect(sentences.matches(of: "horse").isEmpty)
+        #expect(sentences.matches(of: "").isEmpty)
+    }
+
+    @Test("Occurrences do not overlap")
+    func rangesDoNotOverlap() {
+        #expect("aaaa".ranges(ofCaseInsensitive: "aa").count == 2)
+    }
+
     @Test("Segments without timings produce no sentences")
     func emptyInput() {
         #expect(TranscriptSentence.group([]).isEmpty)

@@ -93,12 +93,23 @@ struct LibraryView: View {
         return filtered.sorted { sortOption.isOrderedBefore($0, $1) }
     }
 
-    /// The collections, resolved against the filtered library.
-    var collectionGroups: [CollectionGroup] {
-        CollectionGroup.build(
-            collections: audiobookManager.collections,
-            audiobooks: filteredAudiobooks,
-            keepEmpty: filterOption == .all
+    /// The filtered shelf and its collections, worked out once per render and handed down: the
+    /// body redraws every few seconds during playback, and each read used to filter and sort again.
+    struct Shelf {
+        let books: [AudiobookModel]
+        /// The collections, resolved against the filtered library.
+        let groups: [CollectionGroup]
+    }
+
+    var shelf: Shelf {
+        let books = filteredAudiobooks
+        return Shelf(
+            books: books,
+            groups: CollectionGroup.build(
+                collections: audiobookManager.collections,
+                audiobooks: books,
+                keepEmpty: filterOption == .all
+            )
         )
     }
 
@@ -168,21 +179,22 @@ struct LibraryView: View {
     /// Lifted out of `body`: the search field, the list/grid switch and the navigation
     /// modifiers together were more than the type checker would solve inline.
     private var libraryContent: some View {
+        let shelf = shelf
         // iPhone Duo around its fold (design 9a): see LibraryView+Fold.swift.
-        FoldSplit {
-            foldPicks
+        return FoldSplit {
+            foldPicks(shelf)
         } secondary: {
-            foldShelf
+            foldShelf(shelf)
         } fallback: {
-            fullShelf
+            fullShelf(shelf)
         }
         .background(TintedBackground(tint: CoverTintCache.tint(for: GlobalAudioManager.shared.currentAudiobook), intensity: 0.85))
         .navigationTitle(screenTitle)
         .navigationBarTitleDisplayMode(.large)
         .toolbar(isWide ? .hidden : .visible, for: .navigationBar)
-        .toolbar { libraryToolbar }
+        .toolbar { libraryToolbar(shelf.books) }
         // A swipe can delete the last book while selecting; nothing is left to select.
-        .onChange(of: shelfBooks.isEmpty) { _, empty in
+        .onChange(of: shelf.books.isEmpty) { _, empty in
             if empty { endSelecting() }
         }
         .navigationDestination(item: $audiobookForDetail) { BookDetailView(audiobook: $0, actions: bookActions) }

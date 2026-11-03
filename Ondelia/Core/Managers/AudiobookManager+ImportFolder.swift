@@ -34,8 +34,9 @@ extension AudiobookManager {
         // A folder of loose audio files is ambiguous: it can be one book split into chapters,
         // or several separate books. Import them separately — that is the reversible answer —
         // and offer the merge afterwards, once nothing can be lost by ignoring the question.
+        // A lone file goes the same way, so its own tags and chapters are read, not the folder's name.
         let audioFiles = FolderImporter.audioFiles(in: folderURL)
-        if audioFiles.count > 1, !hasStructuredLayout(folderURL) {
+        if !audioFiles.isEmpty, !hasStructuredLayout(folderURL) {
             await importFilesAsSeparateAudiobooks(audioFiles, from: folderURL)
             return
         }
@@ -43,18 +44,12 @@ extension AudiobookManager {
         guard let folderAudiobook = await FolderImporter.importAudiobookFolder(from: folderURL) else {
             Log.library.debug("🔍 AudiobookManager: Folder import failed, checking for single audio file with CUE")
 
-            // Check if this folder contains a CUE file with a single audio file
-            let cueFiles = CUEParser.findCUEFiles(in: folderURL)
-            if let firstCueFile = cueFiles.first,
-               let parsedCue = CUEParser.parseCUEFile(at: firstCueFile),
-               let audioFile = CUEParser.matchCUEWithAudioFile(cueFile: parsedCue, in: folderURL) {
-
+            if let match = CUEParser.singleFileCUE(in: folderURL) {
                 Log.library.debug("🎵 AudiobookManager: Found CUE + audio file, importing as single file audiobook")
-                Log.library.debug("   CUE file: \(firstCueFile.lastPathComponent)")
-                Log.library.debug("   Audio file: \(audioFile.lastPathComponent)")
+                Log.library.debug("   Audio file: \(match.audioFile.lastPathComponent)")
 
                 // Import as single file but use CUE metadata for chapters
-                await importCUEBasedAudiobook(audioFile: audioFile, cueFile: parsedCue)
+                await importCUEBasedAudiobook(audioFile: match.audioFile, cueFile: match.cue)
                 return
             }
 

@@ -22,7 +22,10 @@ enum CUEParser {
     static func parseCUEFile(at url: URL) -> CUEFile? {
         Log.library.debug("🎵 CUEParser: Starting to parse CUE file: \(url.lastPathComponent)")
         
-        guard let content = try? String(contentsOf: url, encoding: .utf8) else {
+        // Sheets ripped on Windows are usually Windows-1252, not UTF-8. Latin-1 decodes any bytes.
+        guard let data = try? Data(contentsOf: url),
+              let content = [String.Encoding.utf8, .windowsCP1252, .isoLatin1].lazy
+                .compactMap({ String(data: data, encoding: $0) }).first else {
             Log.library.error("❌ CUEParser: Failed to read CUE file content")
             return nil
         }
@@ -41,6 +44,11 @@ enum CUEParser {
         for line in lines {
             // Parse FILE line
             if line.hasPrefix("FILE") {
+                // Track times restart with each file, so one chapter list cannot describe several.
+                guard fileName.isEmpty else {
+                    Log.library.warning("⚠️ CUEParser: CUE file references several audio files, ignoring it")
+                    return nil
+                }
                 let components = parseQuotedLine(line)
                 if components.count >= 2 {
                     fileName = components[1]
@@ -191,29 +199,37 @@ enum CUEParser {
     }
     
     static func matchCUEWithAudioFile(cueFile: CUEFile, in directoryURL: URL) -> URL? {
-        // Look for the audio file referenced in the CUE file
+        // Look for the audio file referenced in the CUE file, then the same name with another
+        // audio extension. Contained paths only, so a `../` in the sheet cannot reach outside.
         let referencedFileName = cueFile.fileName
-        let referencedFileURL = directoryURL.appendingPathComponent(referencedFileName)
-        
-        if FileManager.default.fileExists(atPath: referencedFileURL.path) {
-            Log.library.debug("✅ CUEParser: Found referenced audio file: \(referencedFileName)")
-            return referencedFileURL
+        guard let relativePath = try? SafeImportPath.normalizedRelativePath(referencedFileName) else {
+            Log.library.warning("⚠️ CUEParser: Rejected unsafe audio path in CUE: \(referencedFileName)")
+            return nil
         }
-        
-        // If not found, look for similar files (case insensitive, different extensions)
-        let baseName = (referencedFileName as NSString).deletingPathExtension
+        let baseName = (relativePath as NSString).deletingPathExtension
         let audioExtensions = ["m4b", "m4a", "mp3", "aac", "wav", "flac"]
-        
-        for ext in audioExtensions {
-            let candidateURL = directoryURL.appendingPathComponent("\(baseName).\(ext)")
-            if FileManager.default.fileExists(atPath: candidateURL.path) {
+        let candidates = [relativePath] + audioExtensions.map { "\(baseName).\($0)" }
+
+        for candidate in candidates {
+            if let candidateURL = try? SafeImportPath.containedFileURL(for: candidate, inside: directoryURL),
+               FileManager.default.fileExists(atPath: candidateURL.path) {
                 Log.library.debug("✅ CUEParser: Found matching audio file: \(candidateURL.lastPathComponent)")
                 return candidateURL
             }
         }
-        
+
         Log.library.warning("⚠️ CUEParser: No matching audio file found for CUE: \(referencedFileName)")
         return nil
+    }
+
+    /// The folder's lone CUE sheet and the one audio file it describes. Several sheets, or one
+    /// naming several files, are several books' worth of audio, left to the loose-file import.
+    static func singleFileCUE(in directoryURL: URL) -> (cue: CUEFile, audioFile: URL)? {
+        let cueFiles = findCUEFiles(in: directoryURL)
+        guard cueFiles.count == 1,
+              let cue = parseCUEFile(at: cueFiles[0]),
+              let audioFile = matchCUEWithAudioFile(cueFile: cue, in: directoryURL) else { return nil }
+        return (cue, audioFile)
     }
     
 }

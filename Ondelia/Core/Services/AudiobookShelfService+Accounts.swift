@@ -46,18 +46,11 @@ extension AudiobookShelfService {
 
     /// The first server, which the screens built for one server still read.
     var primary: AudiobookShelfAccount? { accounts.first }
-    var server: URL? { primary?.server }
-    var username: String? { primary?.username }
     var token: String? { primary.flatMap { tokens[$0.id] } }
     /// Signed in to some server.
     var isSignedIn: Bool { !tokens.isEmpty }
 
     func token(for account: AudiobookShelfAccount) -> String? { tokens[account.id] }
-
-    var selectedLibrary: String? {
-        get { primary?.library }
-        set { if let primary { setLibrary(newValue, for: primary.id) } }
-    }
 
     func setLibrary(_ library: String?, for accountID: String) {
         guard let index = accounts.firstIndex(where: { $0.id == accountID }), accounts[index].library != library else { return }

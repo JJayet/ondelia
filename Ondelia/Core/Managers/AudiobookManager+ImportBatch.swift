@@ -44,7 +44,7 @@ extension AudiobookManager {
     /// True when the folder already declares how it is meant to be read, leaving nothing to ask.
     nonisolated func hasStructuredLayout(_ folderURL: URL) -> Bool {
         FileManager.default.fileExists(atPath: folderURL.appendingPathComponent("complete.json").path)
-            || !CUEParser.findCUEFiles(in: folderURL).isEmpty
+            || CUEParser.singleFileCUE(in: folderURL) != nil
     }
 
     /// Closes out an import: the books are already saved, so this only decides which single

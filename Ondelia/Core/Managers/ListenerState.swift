@@ -13,6 +13,9 @@ import Foundation
 final class ListenerState {
     enum Change: Equatable {
         case position(TimeInterval)
+        /// A position jumped to. Never a Finish: only playing into the end is, and the player
+        /// reports reaching it as `.finish`.
+        case seek(TimeInterval)
         case finish
         case unfinish
         /// Back to the start. Leaves Finished alone: starting over is not retracting a Finish.
@@ -80,7 +83,7 @@ final class ListenerState {
         let wasFinished = audiobook.isFinished
 
         switch change {
-        case let .position(time):
+        case let .position(time), let .seek(time):
             if source.isRemote, !Self.isNewer(at, than: audiobook.positionUpdatedAt) { return false }
             setPosition(time, of: audiobook, at: at)
             // Smart rewind measures the pause from `lastPlayed`. A remote listen that stopped
@@ -88,7 +91,8 @@ final class ListenerState {
             audiobook.lastPlayed = source.isRemote ? max(audiobook.lastPlayed, at) : at
             // AudiobookShelf says outright whether it is finished; its position near the end
             // may just be a listener who stopped before the credits.
-            if source != .server, audiobook.duration > 0, audiobook.duration - time <= Self.finishThreshold {
+            if case .position = change, source != .server, audiobook.duration > 0,
+               audiobook.duration - time <= Self.finishThreshold {
                 recordFinish(audiobook, from: source, at: at)
             }
         case .finish:
@@ -97,6 +101,8 @@ final class ListenerState {
             if source == .listener { setPosition(audiobook.duration, of: audiobook, at: at) }
         case .unfinish:
             retractFinish(audiobook, from: source)
+            // Unmarked by hand: back to the start, or the next save at the end finishes it again.
+            if source == .listener { setPosition(0, of: audiobook, at: at) }
         case .reset:
             setPosition(0, of: audiobook, at: at)
         }

@@ -9,7 +9,7 @@ extension LibraryView {
 
     /// Title, count and the toolbar's buttons on one row, in place of the navigation bar.
     @ViewBuilder
-    var wideHeader: some View {
+    func wideHeader(_ shelfBooks: [AudiobookModel]) -> some View {
         HStack(alignment: .center, spacing: 14) {
             HStack(alignment: .firstTextBaseline, spacing: 14) {
                 Text(screenTitle)
@@ -36,7 +36,7 @@ extension LibraryView {
                 .buttonStyle(.plain)
                 .glassPill(height: 34)
 
-                Menu { bulkMenuItems } label: {
+                Menu { bulkMenuItems(shelfBooks) } label: {
                     Text(String(
                         format: NSLocalizedString("%d selected", comment: "Selection count in the library toolbar"),
                         selectedIDs.count
@@ -80,7 +80,7 @@ extension LibraryView {
     }
 
     @ViewBuilder
-    var tableModeContent: some View {
+    func tableModeContent(_ shelf: Shelf) -> some View {
         VStack(spacing: 12) {
             LibraryHeaderView(
                 viewMode: $viewMode,
@@ -108,8 +108,8 @@ extension LibraryView {
                 }
 
                 LibraryTableView(
-                    groups: collectionGroups,
-                    uncollected: uncollectedBooks,
+                    groups: shelf.groups,
+                    uncollected: uncollectedBooks(shelf),
                     server: shelfServerItems,
                     serverSeries: displayOnlyServerCollections,
                     onOpenBook: tapBook,
@@ -121,8 +121,8 @@ extension LibraryView {
     }
 
     /// The shelf minus every book a collection already lists.
-    var uncollectedBooks: [AudiobookModel] {
-        let inCollections = Set(collectionGroups.flatMap { $0.books.map(\.id) })
-        return shelfBooks.filter { !inCollections.contains($0.id) }
+    func uncollectedBooks(_ shelf: Shelf) -> [AudiobookModel] {
+        let inCollections = Set(shelf.groups.flatMap { $0.books.map(\.id) })
+        return shelf.books.filter { !inCollections.contains($0.id) }
     }
 }

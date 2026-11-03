@@ -62,6 +62,35 @@ extension Array where Element == TranscriptSentence {
         }
         return low > 0 ? self[low - 1].id : nil
     }
+
+    /// Every occurrence of `query`, in reading order.
+    func matches(of query: String) -> [TranscriptMatch] {
+        flatMap { sentence in
+            sentence.text.ranges(ofCaseInsensitive: query).indices.map {
+                TranscriptMatch(sentenceID: sentence.id, occurrence: $0)
+            }
+        }
+    }
+}
+
+/// One occurrence of a search: its sentence, and which occurrence in that sentence (from 0).
+struct TranscriptMatch: Equatable {
+    let sentenceID: TranscriptSentence.ID
+    let occurrence: Int
+}
+
+extension String {
+    /// Every case-insensitive occurrence of `query`, without overlaps.
+    func ranges(ofCaseInsensitive query: String) -> [Range<String.Index>] {
+        guard !query.isEmpty else { return [] }
+        var ranges: [Range<String.Index>] = []
+        var start = startIndex
+        while let range = range(of: query, options: .caseInsensitive, range: start..<endIndex) {
+            ranges.append(range)
+            start = range.upperBound
+        }
+        return ranges
+    }
 }
 
 /// The transcript lined up against playback: the sentence being spoken is highlighted, and
@@ -71,12 +100,21 @@ extension Array where Element == TranscriptSentence {
 /// sentence id, and the rows below only rebuild when that id changes.
 struct TranscriptSyncView: View {
     let sentences: [TranscriptSentence]
+    var searchText = ""
+    /// The search match to scroll to.
+    var searchFocus: TranscriptMatch?
     let onSeek: (TimeInterval) -> Void
     private let audio = GlobalAudioManager.shared
 
     var body: some View {
-        TranscriptRows(sentences: sentences, activeID: sentences.sentenceID(at: audio.getCurrentTime()), onSeek: onSeek)
-            .equatable()
+        TranscriptRows(
+            sentences: sentences,
+            activeID: sentences.sentenceID(at: audio.getCurrentTime()),
+            searchText: searchText,
+            searchFocus: searchFocus,
+            onSeek: onSeek
+        )
+        .equatable()
     }
 }
 
@@ -85,11 +123,14 @@ struct TranscriptSyncView: View {
 private struct TranscriptRows: View, Equatable {
     let sentences: [TranscriptSentence]
     let activeID: TranscriptSentence.ID?
+    let searchText: String
+    let searchFocus: TranscriptMatch?
     let onSeek: (TimeInterval) -> Void
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     nonisolated static func == (lhs: Self, rhs: Self) -> Bool {
         lhs.activeID == rhs.activeID && lhs.sentences == rhs.sentences
+            && lhs.searchText == rhs.searchText && lhs.searchFocus == rhs.searchFocus
     }
 
     var body: some View {
@@ -109,12 +150,32 @@ private struct TranscriptRows: View, Equatable {
                 proxy.scrollTo(activeID, anchor: .center)
             }
             .onChange(of: activeID) { _, id in
-                guard let id else { return }
+                // While searching, following playback would drag the list away from the match.
+                guard let id, searchText.isEmpty else { return }
                 withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
                     proxy.scrollTo(id, anchor: .center)
                 }
             }
+            .onChange(of: searchFocus) { _, match in
+                guard let match else { return }
+                withAnimation(reduceMotion ? nil : .easeInOut(duration: 0.3)) {
+                    proxy.scrollTo(match.sentenceID, anchor: .center)
+                }
+            }
         }
+    }
+
+    /// The sentence with every occurrence of the search highlighted, the focused one in orange.
+    private func highlighted(_ sentence: TranscriptSentence) -> AttributedString {
+        var attributed = AttributedString(sentence.text)
+        let focused = searchFocus?.sentenceID == sentence.id ? searchFocus?.occurrence : nil
+        for (index, range) in sentence.text.ranges(ofCaseInsensitive: searchText).enumerated() {
+            // No highlight rather than a crash if the range does not map across.
+            guard let range = Range(range, in: attributed) else { continue }
+            attributed[range].backgroundColor = index == focused ? .orange : .yellow
+            attributed[range].foregroundColor = .black
+        }
+        return attributed
     }
 
     private func row(_ sentence: TranscriptSentence, isActive: Bool) -> some View {
@@ -122,7 +183,7 @@ private struct TranscriptRows: View, Equatable {
             Text(sentence.start.clockFormatted)
                 .font(.caption.monospacedDigit())
                 .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.secondary))
-            Text(sentence.text)
+            Text(highlighted(sentence))
                 .font(.body)
                 .lineSpacing(4)
                 .foregroundStyle(isActive ? AnyShapeStyle(.tint) : AnyShapeStyle(.primary))

@@ -38,7 +38,9 @@ extension ListenerState.Outbound {
     /// of drift. Otherwise the next tick would write the player's stale time back over it.
     static let player = Self(source: .player) { accepted in
         switch accepted.change {
-        case .position, .reset: break
+        case .position, .seek, .reset: break
+        // Unmarking by hand rewinds to the start, which the player has to follow.
+        case .unfinish where accepted.source == .listener: break
         case .finish, .unfinish: return
         }
         let audio = GlobalAudioManager.shared

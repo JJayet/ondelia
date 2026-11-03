@@ -131,11 +131,12 @@ extension SearchView {
     // MARK: Answer
 
     @ViewBuilder
-    var foldAnswer: some View {
+    func foldAnswer(_ results: [LibraryEntry]) -> some View {
         if debouncedQuery.isEmpty {
             // Centred in its half, not on the whole screen.
             emptyPrompt.frame(maxHeight: .infinity)
         } else {
+            let authors = matchedAuthors(in: results)
             List {
                 if results.isEmpty {
                     noResults
@@ -160,13 +161,13 @@ extension SearchView {
                         .accessibilityLabel(String(format: NSLocalizedString("Written by %@", comment: "Book detail: author credit"), pickedAuthor))
                         .accessibilityHint(NSLocalizedString("Clear", comment: "Clear filters short label"))
                         .listRowSeparator(.hidden)
-                    } else if !matchedAuthors.isEmpty {
+                    } else if !authors.isEmpty {
                         Section(NSLocalizedString("Authors", comment: "Search: authors section")) {
-                            ForEach(matchedAuthors, id: \.name) { author in authorRow(author.name, books: author.books) }
+                            ForEach(authors, id: \.name) { author in authorRow(author.name, books: author.books) }
                         }
                     }
                     Section(NSLocalizedString("Books", comment: "Collection detail: books section")) {
-                        resultRows
+                        resultRows(results)
                     }
                 }
             }
@@ -183,7 +184,7 @@ extension SearchView {
     }
 
     /// Authors whose name holds the query, with how many results are theirs: they come first.
-    private var matchedAuthors: [(name: String, books: Int)] {
+    private func matchedAuthors(in results: [LibraryEntry]) -> [(name: String, books: Int)] {
         let q = normalize(debouncedQuery)
         let names = results.flatMap { Self.authorNames($0.author) }.filter { normalize($0).contains(q) }
         return Dictionary(grouping: names, by: { $0 })
