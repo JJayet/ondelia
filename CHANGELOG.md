@@ -5,7 +5,45 @@ ready to paste into App Store Connect, in English and French: promotional text (
 subtitle (max 30), keywords (max 100, comma-separated, no spaces, no words already in the name
 or subtitle) and "What's New".
 
-## 1.9.3 (2) — 2026-11-02
+## 1.9.4 (1) — 2026-11-03
+
+### English
+
+Promotional text
+Listen to a finished book again and it is back in Continue Reading. Show a hidden book and its series comes back too, ready to download.
+
+Subtitle
+Audiobooks & AudiobookShelf
+
+Keywords
+m4b,mp3,flac,player,chapters,offline,sleep,bookmarks,carplay,watch,selfhosted,hardcover,foldable,duo
+
+What's New
+
+Fixes
+
+- Listening to a finished book again puts it back In Progress and in Continue Reading.
+- In Hidden & Shown, showing a book again also shows its series, so you can download it again.
+
+### Français
+
+Texte promotionnel
+Réécoutez un livre terminé : il revient dans Continuer l'écoute. Affichez un livre masqué : sa série revient aussi, prête à télécharger.
+
+Sous-titre
+Livre audio & AudiobookShelf
+
+Mots-clés
+m4b,mp3,lecteur,chapitres,hors,ligne,sommeil,signets,montre,carplay,hardcover,streaming,pliable,duo
+
+Nouveautés
+
+Corrections
+
+- Réécouter un livre terminé le remet En cours et dans Continuer l'écoute.
+- Dans Masqués et affichés, afficher à nouveau un livre affiche aussi sa série, pour pouvoir le retélécharger.
+
+## 1.9.3 (1) — 2026-10-21
 
 ### English
 
@@ -46,8 +84,6 @@ Fixes
 - Hardcover asks you to sign in again when your sign-in has expired.
 - Chapters held up on their way to Apple Watch are sent again, and Clear Watch works after a restart.
 - In Search, deleting a book asks first.
-- Listening to a finished book again puts it back In Progress and in Continue Reading.
-- In Hidden & Shown, showing a book again also shows its series, so you can download it again.
 
 ### Français
 
@@ -88,8 +124,6 @@ Corrections
 - Hardcover vous demande de vous reconnecter quand votre connexion a expiré.
 - Les chapitres bloqués en route vers l'Apple Watch sont renvoyés, et Vider la montre fonctionne après un redémarrage.
 - Dans Rechercher, supprimer un livre demande d'abord confirmation.
-- Réécouter un livre terminé le remet En cours et dans Continuer l'écoute.
-- Dans Masqués et affichés, afficher à nouveau un livre affiche aussi sa série, pour pouvoir le retélécharger.
 
 ## 1.9.2 (1) — 2026-10-13
 
